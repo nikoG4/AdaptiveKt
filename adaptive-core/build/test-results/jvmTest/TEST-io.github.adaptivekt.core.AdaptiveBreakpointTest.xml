@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.adaptivekt.core.AdaptiveBreakpointTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-05-22T14:26:49.078Z" hostname="DESKTOP-JLJPILJ" time="0.023">
+  <properties/>
+  <testcase name="breakpointForWidth returns Expanded for widths from 840 to 1199 dp[jvm]" classname="io.github.adaptivekt.core.AdaptiveBreakpointTest" time="0.022"/>
+  <testcase name="breakpointForWidth returns Large for widths of 1200 dp or more[jvm]" classname="io.github.adaptivekt.core.AdaptiveBreakpointTest" time="0.0"/>
+  <testcase name="breakpointForWidth returns Medium for widths from 600 to 839 dp[jvm]" classname="io.github.adaptivekt.core.AdaptiveBreakpointTest" time="0.0"/>
+  <testcase name="breakpointForWidth returns Compact for widths below 600 dp[jvm]" classname="io.github.adaptivekt.core.AdaptiveBreakpointTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.adaptivekt.core.AdaptiveVisibilityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-05-22T14:26:49.120Z" hostname="DESKTOP-JLJPILJ" time="0.025">
+  <properties/>
+  <testcase name="from creates visibility from the requested breakpoint including larger sizes[jvm]" classname="io.github.adaptivekt.core.AdaptiveVisibilityTest" time="0.007"/>
+  <testcase name="until creates visibility until the requested breakpoint including smaller sizes[jvm]" classname="io.github.adaptivekt.core.AdaptiveVisibilityTest" time="0.001"/>
+  <testcase name="only creates visibility for exact breakpoint values[jvm]" classname="io.github.adaptivekt.core.AdaptiveVisibilityTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

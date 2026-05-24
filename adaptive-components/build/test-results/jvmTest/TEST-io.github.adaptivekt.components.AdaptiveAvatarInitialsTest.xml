@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-05-24T01:28:04.076Z" hostname="DESKTOP-JLJPILJ" time="0.024">
+  <properties/>
+  <testcase name="initials_for_names_with_hyphens_or_symbols_do_not_crash[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.022"/>
+  <testcase name="initials_for_empty_name_returns_question_mark[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.001"/>
+  <testcase name="initials_for_name_with_leading_trailing_spaces_returns_correct_initials[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.0"/>
+  <testcase name="initials_for_name_with_multiple_spaces_returns_correct_initials[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.0"/>
+  <testcase name="initials_for_two_name_parts_returns_two_letters[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.0"/>
+  <testcase name="initials_for_single_name_returns_first_letter[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.0"/>
+  <testcase name="initials_for_single_letter_name_returns_that_letter[jvm]" classname="io.github.adaptivekt.components.AdaptiveAvatarInitialsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
