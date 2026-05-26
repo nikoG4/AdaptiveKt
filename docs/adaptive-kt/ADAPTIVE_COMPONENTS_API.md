@@ -192,6 +192,35 @@ Kept local for now:
 
 No DataView public API changed in PR C2.
 
+## PR C2.2 Functional Embedded Icons
+
+`adaptive-components` now includes `io.github.adaptivekt.components.icons.AdaptiveIcons`, a minimal embedded icon set for shared component affordances.
+
+AdaptiveIcons provides minimal functional icons required by AdaptiveKt components. It is not a general-purpose icon pack.
+
+Available icons:
+
+- `Close`
+- `ChevronDown`
+- `ChevronRight`
+- `ChevronLeft`
+- `Plus`
+- `MoreVertical`
+- `Search`
+- `Check`
+
+Implementation notes:
+
+- Icons are drawn with Compose `Canvas` in `commonMain`.
+- No external dependencies, icon packs, Material 3 icons, SVG files, or resources were added.
+- Component icon slots remain open for app/domain icons supplied by developers.
+
+Adopted in this PR:
+
+- `AdaptiveSearchField` uses `Search` and `Close`.
+- `adaptive-data` overflow actions use `MoreVertical`.
+- `admin-demo` and `ComponentsShowcaseScreen` replace obvious raw affordance glyphs with `AdaptiveIcons`.
+
 ## Limitations
 
 - Colors are local component defaults for now; a full theme/color-token system is future work.

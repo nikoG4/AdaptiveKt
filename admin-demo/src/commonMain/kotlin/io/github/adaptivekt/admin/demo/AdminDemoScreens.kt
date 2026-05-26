@@ -13,20 +13,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.admin.demo.ui.DemoCard
 import io.github.adaptivekt.admin.demo.ui.DemoPanel
+import io.github.adaptivekt.admin.demo.ui.DemoRemoteAvatar
+import io.github.adaptivekt.admin.demo.ui.DemoRemoteThumbnail
 import io.github.adaptivekt.admin.demo.ui.DemoStatusText
 import io.github.adaptivekt.admin.demo.ui.DemoText
-import io.github.adaptivekt.admin.demo.ui.DemoThumbnail
 import io.github.adaptivekt.admin.demo.ui.DemoToggleChip
 import io.github.adaptivekt.admin.demo.ui.Emphasis
-import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.data.AdaptiveActionPriority
@@ -171,7 +173,7 @@ internal fun EmployeesScreen() {
                     weight = 0.5f,
                     mobileRole = AdaptiveDataMobileRole.Media,
                     mobilePriority = 0,
-                ) { AdaptiveAvatar(name = it.name, size = 36.dp) },
+                ) { DemoRemoteAvatar(name = it.name, avatarUrl = it.avatarUrl, size = 36.dp) },
                 AdaptiveDataColumn(
                     id = "name",
                     header = "Name",
@@ -211,7 +213,11 @@ internal fun EmployeesScreen() {
                 )
             },
             actions = {
-                AdaptiveButton(text = "New Employee", onClick = { /* no-op demo action */ })
+                AdaptiveButton(
+                    text = "New Employee",
+                    leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = Color.White) },
+                    onClick = { /* no-op demo action */ },
+                )
             },
             rowActions = employeeActions,
             onItemClick = { selectedEmployeeId = it.id },
@@ -270,7 +276,7 @@ internal fun ProductsScreen() {
                     weight = 0.5f,
                     mobileRole = AdaptiveDataMobileRole.Media,
                     mobilePriority = 0,
-                ) { DemoThumbnail(label = it.name, tone = it.thumbnailColor) },
+                ) { DemoRemoteThumbnail(label = it.name, imageUrl = it.thumbnailUrl, fallbackTone = it.thumbnailColor) },
                 AdaptiveDataColumn(
                     id = "name",
                     header = "Name",
@@ -305,7 +311,11 @@ internal fun ProductsScreen() {
                 DemoText(text = "Product catalog preview", emphasis = Emphasis.Subtle)
             },
             actions = {
-                AdaptiveButton(text = "Add product", onClick = { /* no-op demo action */ })
+                AdaptiveButton(
+                    text = "Add product",
+                    leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = Color.White) },
+                    onClick = { /* no-op demo action */ },
+                )
             },
             rowActions = productActions,
             onItemClick = { /* item clicked */ },
@@ -408,7 +418,11 @@ internal fun InvoicesScreen() {
                 DemoText(text = "Invoice status preview", emphasis = Emphasis.Subtle)
             },
             actions = {
-                AdaptiveButton(text = "Refresh", onClick = { invoiceState = AdaptiveDataContent(AdminDemoData.invoices) })
+                AdaptiveButton(
+                    text = "Refresh",
+                    trailingIcon = { AdaptiveIcons.Check(size = 16.dp, tint = Color.White) },
+                    onClick = { invoiceState = AdaptiveDataContent(AdminDemoData.invoices) },
+                )
             },
             rowActions = invoiceActions,
             onItemClick = { /* optional invoice selection */ },
@@ -461,7 +475,11 @@ internal fun SettingsScreen() {
 
             actions {
                 primary {
-                    AdaptiveButton(text = "Save changes", onClick = { /* no-op save */ })
+                    AdaptiveButton(
+                        text = "Save changes",
+                        leadingIcon = { AdaptiveIcons.Check(size = 16.dp, tint = Color.White) },
+                        onClick = { /* no-op save */ },
+                    )
                 }
                 secondary {
                     AdaptiveButton(text = "Reset", variant = AdaptiveButtonVariant.Secondary, onClick = {

@@ -45,6 +45,7 @@ import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.layout.AdaptiveGrid
@@ -131,8 +132,8 @@ private fun ButtonsSection() {
             AdaptiveButton("Disabled", enabled = false, onClick = {})
             AdaptiveButton(
                 text = "Create",
-                leadingIcon = { Glyph("+") },
-                trailingIcon = { Glyph(">") },
+                leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = Color.White) },
+                trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = Color.White) },
                 onClick = {},
             )
         }
@@ -143,10 +144,11 @@ private fun ButtonsSection() {
 private fun IconButtonsSection() {
     ShowcaseCard(title = "Icon buttons", description = "Shape-safe icon actions for overflow, clear, close, and disabled states.") {
         ShowcaseRow {
-            AdaptiveIconButton(onClick = {}) { Glyph("...") }
-            AdaptiveIconButton(onClick = {}) { Glyph("x") }
-            AdaptiveIconButton(onClick = {}) { Glyph("/") }
-            AdaptiveIconButton(onClick = {}, enabled = false) { Glyph("-") }
+            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }
+            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Close() }
+            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
+            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.ChevronDown() }
+            AdaptiveIconButton(onClick = {}, enabled = false) { AdaptiveIcons.Plus(tint = Color(0xFF94A3B8)) }
         }
     }
 }
@@ -235,7 +237,7 @@ private fun DropdownSection(initialExpanded: Boolean = false) {
         AdaptiveButton(
             text = if (expanded) "Close menu" else "Open menu",
             variant = AdaptiveButtonVariant.Secondary,
-            trailingIcon = { Glyph("v") },
+            trailingIcon = { AdaptiveIcons.ChevronDown(size = 16.dp) },
             onClick = { expanded = !expanded },
         )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
@@ -283,8 +285,8 @@ private fun TextFieldsSection() {
             label = "Required field",
             placeholder = "Required value",
             validationMessage = "This field is required.",
-            leadingIcon = { Glyph("!") },
-            trailingIcon = { Glyph("?") },
+            leadingIcon = { AdaptiveIcons.Search(size = 16.dp, tint = Color(0xFF64748B)) },
+            trailingIcon = { AdaptiveIcons.Check(size = 16.dp, tint = Color(0xFF047857)) },
         )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveSearchField(

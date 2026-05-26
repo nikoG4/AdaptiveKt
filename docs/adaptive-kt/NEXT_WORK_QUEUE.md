@@ -93,6 +93,10 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 - [x] Documentar helpers migrados y helpers mantenidos en `ADMIN_DEMO_COMPONENT_MIGRATION.md`
 - [x] Migrar primitives internos de adaptive-data hacia :adaptive-components en PR C2
 - [x] Documentar migración de adaptive-data en `ADAPTIVE_DATA_COMPONENT_MIGRATION.md`
+- [x] Agregar `AdaptiveIcons` funcionales embebidos en PR C2.2
+- [x] Reemplazar glyphs obvios en components showcase, SearchField, data overflow y demo
+- [x] Rescatar PR D1 y agregar remote images demo-only para employees/products
+- [x] Documentar D1 en `ADMIN_DEMO_REMOTE_IMAGES.md`
 
 ### PR C3 recomendado
 

@@ -10,6 +10,7 @@ public data class Employee(
     val department: String,
     val status: String,
     val email: String,
+    val avatarUrl: String? = null,
 )
 
 public data class Product(
@@ -20,6 +21,7 @@ public data class Product(
     val stock: Int,
     val price: String,
     val status: String,
+    val thumbnailUrl: String? = null,
 )
 
 public data class Invoice(
@@ -32,17 +34,17 @@ public data class Invoice(
 
 public object AdminDemoData {
     public val employees: List<Employee> = listOf(
-        Employee("e1", Color(0xFFE8F1FF), "Alicia Romero", "Product Manager", "Strategy", "Active", "alicia@adaptivekt.io"),
-        Employee("e2", Color(0xFFEFF6FF), "David Chen", "Software Engineer", "Platform", "Active", "david@adaptivekt.io"),
-        Employee("e3", Color(0xFFFFF7ED), "Marta Silva", "QA Lead", "Quality", "On leave", "marta@adaptivekt.io"),
-        Employee("e4", Color(0xFFECFDF5), "Noah Kim", "UX Designer", "Design", "Active", "noah@adaptivekt.io"),
+        Employee("e1", Color(0xFFE8F1FF), "Alicia Romero", "Product Manager", "Strategy", "Active", "alicia@adaptivekt.io", "https://randomuser.me/api/portraits/women/44.jpg"),
+        Employee("e2", Color(0xFFEFF6FF), "David Chen", "Software Engineer", "Platform", "Active", "david@adaptivekt.io", "https://randomuser.me/api/portraits/men/32.jpg"),
+        Employee("e3", Color(0xFFFFF7ED), "Marta Silva", "QA Lead", "Quality", "On leave", "marta@adaptivekt.io", "https://randomuser.me/api/portraits/women/68.jpg"),
+        Employee("e4", Color(0xFFECFDF5), "Noah Kim", "UX Designer", "Design", "Active", "noah@adaptivekt.io", "https://randomuser.me/api/portraits/men/75.jpg"),
     )
 
     public val products: List<Product> = listOf(
-        Product("p1", Color(0xFFE8F1FF), "Adaptive Panel", "APT-210", 84, "$129", "In stock"),
-        Product("p2", Color(0xFFFFF7ED), "Responsive Grid Kit", "RGK-430", 34, "$249", "Low stock"),
-        Product("p3", Color(0xFFECFDF5), "Form Builder", "FB-105", 16, "$99", "In stock"),
-        Product("p4", Color(0xFFFEF2F2), "Data Table Pro", "DTP-670", 0, "$179", "Out of stock"),
+        Product("p1", Color(0xFFE8F1FF), "Adaptive Panel", "APT-210", 84, "$129", "In stock", "https://picsum.photos/seed/adaptive-product-1/128/128"),
+        Product("p2", Color(0xFFFFF7ED), "Responsive Grid Kit", "RGK-430", 34, "$249", "Low stock", "https://picsum.photos/seed/adaptive-product-2/128/128"),
+        Product("p3", Color(0xFFECFDF5), "Form Builder", "FB-105", 16, "$99", "In stock", "https://picsum.photos/seed/adaptive-product-3/128/128"),
+        Product("p4", Color(0xFFFEF2F2), "Data Table Pro", "DTP-670", 0, "$179", "Out of stock", "https://picsum.photos/seed/adaptive-product-4/128/128"),
     )
 
     public val invoices: List<Invoice> = listOf(

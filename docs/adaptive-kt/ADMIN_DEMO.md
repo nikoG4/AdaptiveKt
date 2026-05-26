@@ -11,7 +11,8 @@
 - `adaptive-data`
 - `adaptive-feedback`
 
-The demo is a responsive admin dashboard for Compose Multiplatform without backend, persistence, external network calls, or Material 3.
+The demo is a responsive admin dashboard for Compose Multiplatform without backend, persistence, or Material 3.
+PR D1 intentionally adds remote image loading to `:admin-demo` only for visual demo data. There is still no backend or persistence.
 
 ## Screens
 
@@ -108,6 +109,25 @@ The demo now exercises richer professional defaults:
 - The topbar includes a user avatar and account dropdown with profile, account settings, and sign out actions.
 - Capture mode supports `--accountMenuOpen` for reviewing the dropdown open state.
 
+## PR D1 - Demo-Only Remote Images
+
+Remote image loading is demo-only in PR D1. AdaptiveKt core/components remain independent from image loading libraries.
+
+Employees and Products now demonstrate real remote media:
+
+- Employees load avatar URLs through demo-only `DemoRemoteAvatar`.
+- Products load thumbnail URLs through demo-only `DemoRemoteThumbnail`.
+- Avatars are circular and use `ContentScale.Crop`.
+- Product thumbnails are rounded, bordered, and cropped.
+- Null, loading, and failure states fall back to local generated placeholders.
+
+The dependency is scoped to `:admin-demo`:
+
+- `media.kamel:kamel-image:0.7.3`
+- `io.ktor:ktor-client-cio:2.3.4`
+
+Details are documented in `docs/adaptive-kt/ADMIN_DEMO_REMOTE_IMAGES.md`.
+
 Account menu capture example:
 
 ```powershell
@@ -121,7 +141,7 @@ Account menu capture example:
 - Navigation is local state.
 - No sorting or pagination yet.
 - Overflow menus are simple Foundation-only popovers.
-- Demo avatars and thumbnails are generated placeholders, not external image files.
+- Demo avatars and product thumbnails load public remote images when available and fall back to generated placeholders.
 - The capture matrix records the initial Invoices content state; empty/loading/error are available through manual toggles.
 
 ## Main Files

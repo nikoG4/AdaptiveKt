@@ -46,6 +46,7 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMenuItem
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveBreakpoint
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveTokens
@@ -59,7 +60,6 @@ private val DataBorder = Color(0xFFE2E8F0)
 private val DataHeaderBackground = Color(0xFFF1F5F9)
 private val DataText = Color(0xFF0F172A)
 private val DataMutedText = Color(0xFF64748B)
-private val DataPrimaryDark = Color(0xFF1E40AF)
 
 /**
  * Displays adaptive data using a responsive table or card layout depending on the current breakpoint.
@@ -588,11 +588,7 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
                     setButtonSize(coordinates.size)
                 },
         ) {
-            BasicText(
-                text = "\u22EE",
-                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DataPrimaryDark),
-                maxLines = 1,
-            )
+            AdaptiveIcons.MoreVertical(size = 18.dp, tint = Color(0xFF1E40AF))
         }
         if (expanded) {
             Popup(

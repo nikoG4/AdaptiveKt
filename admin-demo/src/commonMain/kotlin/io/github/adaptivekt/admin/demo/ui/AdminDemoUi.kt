@@ -42,6 +42,7 @@ import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveMenuItem
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 
 @Composable
@@ -148,6 +149,7 @@ private fun AccountMenu(
         ) {
             AdaptiveAvatar(name = "Lina Torres", size = 32.dp)
             DemoText(text = "Lina", emphasis = Emphasis.Default)
+            AdaptiveIcons.ChevronDown(size = 14.dp, tint = Color(0xFF64748B))
         }
 
         if (expanded) {
