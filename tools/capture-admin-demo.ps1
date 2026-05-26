@@ -46,6 +46,9 @@ $standardScreens = @(
     "employees",
     "products",
     "invoices",
+    "invoices-empty",
+    "invoices-loading",
+    "invoices-error",
     "settings",
     "components"
 )

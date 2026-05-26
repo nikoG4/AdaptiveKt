@@ -1,6 +1,6 @@
 ﻿{
-    "generatedAt":  "2026-05-26T09:25:26.1884514-03:00",
-    "total":  48,
+    "generatedAt":  "2026-05-26T13:01:15.9021343-03:00",
+    "total":  60,
     "captures":  [
                      {
                          "screen":  "dashboard",
@@ -8,8 +8,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/dashboard-compact-420x900.png",
-                         "fileSizeBytes":  27961,
-                         "capturedAt":  "2026-05-26T09:21:54.3693488-03:00",
+                         "fileSizeBytes":  26951,
+                         "capturedAt":  "2026-05-26T12:57:02.4354163-03:00",
                          "command":  "--capture --screen dashboard --width 420 --height 900 --output build\\visual-captures\\compact\\dashboard-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -18,8 +18,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/employees-compact-420x900.png",
-                         "fileSizeBytes":  42073,
-                         "capturedAt":  "2026-05-26T09:21:58.8757027-03:00",
+                         "fileSizeBytes":  41137,
+                         "capturedAt":  "2026-05-26T12:57:06.5209454-03:00",
                          "command":  "--capture --screen employees --width 420 --height 900 --output build\\visual-captures\\compact\\employees-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -28,8 +28,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/products-compact-420x900.png",
-                         "fileSizeBytes":  47692,
-                         "capturedAt":  "2026-05-26T09:22:03.7042008-03:00",
+                         "fileSizeBytes":  46847,
+                         "capturedAt":  "2026-05-26T12:57:10.8121404-03:00",
                          "command":  "--capture --screen products --width 420 --height 900 --output build\\visual-captures\\compact\\products-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -38,9 +38,39 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/invoices-compact-420x900.png",
-                         "fileSizeBytes":  32488,
-                         "capturedAt":  "2026-05-26T09:22:08.4592555-03:00",
+                         "fileSizeBytes":  31469,
+                         "capturedAt":  "2026-05-26T12:57:14.8459724-03:00",
                          "command":  "--capture --screen invoices --width 420 --height 900 --output build\\visual-captures\\compact\\invoices-compact-420x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-empty",
+                         "breakpoint":  "compact",
+                         "width":  420,
+                         "height":  900,
+                         "file":  "compact/invoices-empty-compact-420x900.png",
+                         "fileSizeBytes":  22128,
+                         "capturedAt":  "2026-05-26T12:57:19.3532798-03:00",
+                         "command":  "--capture --screen invoices-empty --width 420 --height 900 --output build\\visual-captures\\compact\\invoices-empty-compact-420x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-loading",
+                         "breakpoint":  "compact",
+                         "width":  420,
+                         "height":  900,
+                         "file":  "compact/invoices-loading-compact-420x900.png",
+                         "fileSizeBytes":  20651,
+                         "capturedAt":  "2026-05-26T12:57:23.3821743-03:00",
+                         "command":  "--capture --screen invoices-loading --width 420 --height 900 --output build\\visual-captures\\compact\\invoices-loading-compact-420x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-error",
+                         "breakpoint":  "compact",
+                         "width":  420,
+                         "height":  900,
+                         "file":  "compact/invoices-error-compact-420x900.png",
+                         "fileSizeBytes":  22118,
+                         "capturedAt":  "2026-05-26T12:57:27.8960345-03:00",
+                         "command":  "--capture --screen invoices-error --width 420 --height 900 --output build\\visual-captures\\compact\\invoices-error-compact-420x900.png --delayMs 1500"
                      },
                      {
                          "screen":  "settings",
@@ -48,8 +78,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/settings-compact-420x900.png",
-                         "fileSizeBytes":  26105,
-                         "capturedAt":  "2026-05-26T09:22:13.1628756-03:00",
+                         "fileSizeBytes":  25238,
+                         "capturedAt":  "2026-05-26T12:57:32.4477574-03:00",
                          "command":  "--capture --screen settings --width 420 --height 900 --output build\\visual-captures\\compact\\settings-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -58,8 +88,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-compact-420x900.png",
-                         "fileSizeBytes":  36586,
-                         "capturedAt":  "2026-05-26T09:22:18.0144847-03:00",
+                         "fileSizeBytes":  35576,
+                         "capturedAt":  "2026-05-26T12:57:36.9681760-03:00",
                          "command":  "--capture --screen components --width 420 --height 900 --output build\\visual-captures\\compact\\components-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -68,8 +98,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-buttons-compact-420x900.png",
-                         "fileSizeBytes":  30588,
-                         "capturedAt":  "2026-05-26T09:22:22.8858036-03:00",
+                         "fileSizeBytes":  29357,
+                         "capturedAt":  "2026-05-26T12:57:40.9594695-03:00",
                          "command":  "--capture --screen components-buttons --width 420 --height 900 --output build\\visual-captures\\compact\\components-buttons-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -78,8 +108,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-badges-compact-420x900.png",
-                         "fileSizeBytes":  22105,
-                         "capturedAt":  "2026-05-26T09:22:27.1470803-03:00",
+                         "fileSizeBytes":  20962,
+                         "capturedAt":  "2026-05-26T12:57:45.0018126-03:00",
                          "command":  "--capture --screen components-badges --width 420 --height 900 --output build\\visual-captures\\compact\\components-badges-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -88,8 +118,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-avatars-compact-420x900.png",
-                         "fileSizeBytes":  22194,
-                         "capturedAt":  "2026-05-26T09:22:32.1241682-03:00",
+                         "fileSizeBytes":  21031,
+                         "capturedAt":  "2026-05-26T12:57:49.4911499-03:00",
                          "command":  "--capture --screen components-avatars --width 420 --height 900 --output build\\visual-captures\\compact\\components-avatars-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -98,8 +128,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-cards-compact-420x900.png",
-                         "fileSizeBytes":  32973,
-                         "capturedAt":  "2026-05-26T09:22:36.8906883-03:00",
+                         "fileSizeBytes":  31621,
+                         "capturedAt":  "2026-05-26T12:57:53.4664268-03:00",
                          "command":  "--capture --screen components-cards --width 420 --height 900 --output build\\visual-captures\\compact\\components-cards-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -108,8 +138,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-dropdowns-compact-420x900.png",
-                         "fileSizeBytes":  24947,
-                         "capturedAt":  "2026-05-26T09:22:41.1073024-03:00",
+                         "fileSizeBytes":  23708,
+                         "capturedAt":  "2026-05-26T12:57:57.9251441-03:00",
                          "command":  "--capture --screen components-dropdowns --width 420 --height 900 --output build\\visual-captures\\compact\\components-dropdowns-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -118,8 +148,8 @@
                          "width":  420,
                          "height":  900,
                          "file":  "compact/components-fields-compact-420x900.png",
-                         "fileSizeBytes":  28013,
-                         "capturedAt":  "2026-05-26T09:22:45.8498064-03:00",
+                         "fileSizeBytes":  26977,
+                         "capturedAt":  "2026-05-26T12:58:02.4289894-03:00",
                          "command":  "--capture --screen components-fields --width 420 --height 900 --output build\\visual-captures\\compact\\components-fields-compact-420x900.png --delayMs 1500"
                      },
                      {
@@ -128,8 +158,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/dashboard-medium-720x900.png",
-                         "fileSizeBytes":  65934,
-                         "capturedAt":  "2026-05-26T09:22:50.5040987-03:00",
+                         "fileSizeBytes":  51021,
+                         "capturedAt":  "2026-05-26T12:58:06.8829364-03:00",
                          "command":  "--capture --screen dashboard --width 720 --height 900 --output build\\visual-captures\\medium\\dashboard-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -138,8 +168,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/employees-medium-720x900.png",
-                         "fileSizeBytes":  69126,
-                         "capturedAt":  "2026-05-26T09:22:54.7747255-03:00",
+                         "fileSizeBytes":  50735,
+                         "capturedAt":  "2026-05-26T12:58:11.3804433-03:00",
                          "command":  "--capture --screen employees --width 720 --height 900 --output build\\visual-captures\\medium\\employees-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -148,8 +178,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/products-medium-720x900.png",
-                         "fileSizeBytes":  75066,
-                         "capturedAt":  "2026-05-26T09:22:59.2794526-03:00",
+                         "fileSizeBytes":  59746,
+                         "capturedAt":  "2026-05-26T12:58:15.9283042-03:00",
                          "command":  "--capture --screen products --width 720 --height 900 --output build\\visual-captures\\medium\\products-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -158,9 +188,39 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/invoices-medium-720x900.png",
-                         "fileSizeBytes":  59397,
-                         "capturedAt":  "2026-05-26T09:23:03.9944700-03:00",
+                         "fileSizeBytes":  43863,
+                         "capturedAt":  "2026-05-26T12:58:20.4496933-03:00",
                          "command":  "--capture --screen invoices --width 720 --height 900 --output build\\visual-captures\\medium\\invoices-medium-720x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-empty",
+                         "breakpoint":  "medium",
+                         "width":  720,
+                         "height":  900,
+                         "file":  "medium/invoices-empty-medium-720x900.png",
+                         "fileSizeBytes":  32372,
+                         "capturedAt":  "2026-05-26T12:58:25.0025619-03:00",
+                         "command":  "--capture --screen invoices-empty --width 720 --height 900 --output build\\visual-captures\\medium\\invoices-empty-medium-720x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-loading",
+                         "breakpoint":  "medium",
+                         "width":  720,
+                         "height":  900,
+                         "file":  "medium/invoices-loading-medium-720x900.png",
+                         "fileSizeBytes":  30822,
+                         "capturedAt":  "2026-05-26T12:58:28.9979652-03:00",
+                         "command":  "--capture --screen invoices-loading --width 720 --height 900 --output build\\visual-captures\\medium\\invoices-loading-medium-720x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-error",
+                         "breakpoint":  "medium",
+                         "width":  720,
+                         "height":  900,
+                         "file":  "medium/invoices-error-medium-720x900.png",
+                         "fileSizeBytes":  32351,
+                         "capturedAt":  "2026-05-26T12:58:33.4553393-03:00",
+                         "command":  "--capture --screen invoices-error --width 720 --height 900 --output build\\visual-captures\\medium\\invoices-error-medium-720x900.png --delayMs 1500"
                      },
                      {
                          "screen":  "settings",
@@ -168,8 +228,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/settings-medium-720x900.png",
-                         "fileSizeBytes":  53733,
-                         "capturedAt":  "2026-05-26T09:23:08.7175366-03:00",
+                         "fileSizeBytes":  36170,
+                         "capturedAt":  "2026-05-26T12:58:37.4217312-03:00",
                          "command":  "--capture --screen settings --width 720 --height 900 --output build\\visual-captures\\medium\\settings-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -178,8 +238,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-medium-720x900.png",
-                         "fileSizeBytes":  80956,
-                         "capturedAt":  "2026-05-26T09:23:12.9696215-03:00",
+                         "fileSizeBytes":  63205,
+                         "capturedAt":  "2026-05-26T12:58:41.9054995-03:00",
                          "command":  "--capture --screen components --width 720 --height 900 --output build\\visual-captures\\medium\\components-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -188,8 +248,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-buttons-medium-720x900.png",
-                         "fileSizeBytes":  57211,
-                         "capturedAt":  "2026-05-26T09:23:17.6445904-03:00",
+                         "fileSizeBytes":  40913,
+                         "capturedAt":  "2026-05-26T12:58:45.8998280-03:00",
                          "command":  "--capture --screen components-buttons --width 720 --height 900 --output build\\visual-captures\\medium\\components-buttons-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -198,8 +258,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-badges-medium-720x900.png",
-                         "fileSizeBytes":  47839,
-                         "capturedAt":  "2026-05-26T09:23:21.8433522-03:00",
+                         "fileSizeBytes":  31397,
+                         "capturedAt":  "2026-05-26T12:58:49.9439601-03:00",
                          "command":  "--capture --screen components-badges --width 720 --height 900 --output build\\visual-captures\\medium\\components-badges-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -208,8 +268,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-avatars-medium-720x900.png",
-                         "fileSizeBytes":  43746,
-                         "capturedAt":  "2026-05-26T09:23:26.5571381-03:00",
+                         "fileSizeBytes":  31380,
+                         "capturedAt":  "2026-05-26T12:58:53.9040606-03:00",
                          "command":  "--capture --screen components-avatars --width 720 --height 900 --output build\\visual-captures\\medium\\components-avatars-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -218,8 +278,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-cards-medium-720x900.png",
-                         "fileSizeBytes":  58770,
-                         "capturedAt":  "2026-05-26T09:23:31.2204089-03:00",
+                         "fileSizeBytes":  43918,
+                         "capturedAt":  "2026-05-26T12:58:57.8879700-03:00",
                          "command":  "--capture --screen components-cards --width 720 --height 900 --output build\\visual-captures\\medium\\components-cards-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -228,8 +288,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-dropdowns-medium-720x900.png",
-                         "fileSizeBytes":  47635,
-                         "capturedAt":  "2026-05-26T09:23:35.8265525-03:00",
+                         "fileSizeBytes":  34186,
+                         "capturedAt":  "2026-05-26T12:59:02.3856135-03:00",
                          "command":  "--capture --screen components-dropdowns --width 720 --height 900 --output build\\visual-captures\\medium\\components-dropdowns-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -238,8 +298,8 @@
                          "width":  720,
                          "height":  900,
                          "file":  "medium/components-fields-medium-720x900.png",
-                         "fileSizeBytes":  52271,
-                         "capturedAt":  "2026-05-26T09:23:40.4348533-03:00",
+                         "fileSizeBytes":  38268,
+                         "capturedAt":  "2026-05-26T12:59:06.3904585-03:00",
                          "command":  "--capture --screen components-fields --width 720 --height 900 --output build\\visual-captures\\medium\\components-fields-medium-720x900.png --delayMs 1500"
                      },
                      {
@@ -248,8 +308,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/dashboard-expanded-1000x900.png",
-                         "fileSizeBytes":  79027,
-                         "capturedAt":  "2026-05-26T09:23:44.5939149-03:00",
+                         "fileSizeBytes":  57458,
+                         "capturedAt":  "2026-05-26T12:59:10.8685156-03:00",
                          "command":  "--capture --screen dashboard --width 1000 --height 900 --output build\\visual-captures\\expanded\\dashboard-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -258,8 +318,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/employees-expanded-1000x900.png",
-                         "fileSizeBytes":  71997,
-                         "capturedAt":  "2026-05-26T09:23:48.9111549-03:00",
+                         "fileSizeBytes":  60932,
+                         "capturedAt":  "2026-05-26T12:59:15.3742997-03:00",
                          "command":  "--capture --screen employees --width 1000 --height 900 --output build\\visual-captures\\expanded\\employees-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -268,8 +328,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/products-expanded-1000x900.png",
-                         "fileSizeBytes":  72836,
-                         "capturedAt":  "2026-05-26T09:23:53.3761489-03:00",
+                         "fileSizeBytes":  66873,
+                         "capturedAt":  "2026-05-26T12:59:19.6573162-03:00",
                          "command":  "--capture --screen products --width 1000 --height 900 --output build\\visual-captures\\expanded\\products-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -278,9 +338,39 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/invoices-expanded-1000x900.png",
-                         "fileSizeBytes":  59132,
-                         "capturedAt":  "2026-05-26T09:23:57.9922988-03:00",
+                         "fileSizeBytes":  50645,
+                         "capturedAt":  "2026-05-26T12:59:24.1120897-03:00",
                          "command":  "--capture --screen invoices --width 1000 --height 900 --output build\\visual-captures\\expanded\\invoices-expanded-1000x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-empty",
+                         "breakpoint":  "expanded",
+                         "width":  1000,
+                         "height":  900,
+                         "file":  "expanded/invoices-empty-expanded-1000x900.png",
+                         "fileSizeBytes":  38453,
+                         "capturedAt":  "2026-05-26T12:59:28.5957080-03:00",
+                         "command":  "--capture --screen invoices-empty --width 1000 --height 900 --output build\\visual-captures\\expanded\\invoices-empty-expanded-1000x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-loading",
+                         "breakpoint":  "expanded",
+                         "width":  1000,
+                         "height":  900,
+                         "file":  "expanded/invoices-loading-expanded-1000x900.png",
+                         "fileSizeBytes":  36858,
+                         "capturedAt":  "2026-05-26T12:59:33.0708864-03:00",
+                         "command":  "--capture --screen invoices-loading --width 1000 --height 900 --output build\\visual-captures\\expanded\\invoices-loading-expanded-1000x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-error",
+                         "breakpoint":  "expanded",
+                         "width":  1000,
+                         "height":  900,
+                         "file":  "expanded/invoices-error-expanded-1000x900.png",
+                         "fileSizeBytes":  38567,
+                         "capturedAt":  "2026-05-26T12:59:37.5554081-03:00",
+                         "command":  "--capture --screen invoices-error --width 1000 --height 900 --output build\\visual-captures\\expanded\\invoices-error-expanded-1000x900.png --delayMs 1500"
                      },
                      {
                          "screen":  "settings",
@@ -288,8 +378,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/settings-expanded-1000x900.png",
-                         "fileSizeBytes":  48212,
-                         "capturedAt":  "2026-05-26T09:24:02.6957404-03:00",
+                         "fileSizeBytes":  40921,
+                         "capturedAt":  "2026-05-26T12:59:42.0387310-03:00",
                          "command":  "--capture --screen settings --width 1000 --height 900 --output build\\visual-captures\\expanded\\settings-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -298,8 +388,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-expanded-1000x900.png",
-                         "fileSizeBytes":  84899,
-                         "capturedAt":  "2026-05-26T09:24:06.8814424-03:00",
+                         "fileSizeBytes":  72215,
+                         "capturedAt":  "2026-05-26T12:59:46.5556119-03:00",
                          "command":  "--capture --screen components --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -308,8 +398,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-buttons-expanded-1000x900.png",
-                         "fileSizeBytes":  61567,
-                         "capturedAt":  "2026-05-26T09:24:11.0574182-03:00",
+                         "fileSizeBytes":  48013,
+                         "capturedAt":  "2026-05-26T12:59:50.5325307-03:00",
                          "command":  "--capture --screen components-buttons --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-buttons-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -318,8 +408,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-badges-expanded-1000x900.png",
-                         "fileSizeBytes":  54075,
-                         "capturedAt":  "2026-05-26T09:24:15.7362207-03:00",
+                         "fileSizeBytes":  37418,
+                         "capturedAt":  "2026-05-26T12:59:54.5436673-03:00",
                          "command":  "--capture --screen components-badges --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-badges-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -328,8 +418,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-avatars-expanded-1000x900.png",
-                         "fileSizeBytes":  51455,
-                         "capturedAt":  "2026-05-26T09:24:20.3960527-03:00",
+                         "fileSizeBytes":  37159,
+                         "capturedAt":  "2026-05-26T12:59:59.0711274-03:00",
                          "command":  "--capture --screen components-avatars --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-avatars-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -338,8 +428,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-cards-expanded-1000x900.png",
-                         "fileSizeBytes":  70920,
-                         "capturedAt":  "2026-05-26T09:24:24.5343480-03:00",
+                         "fileSizeBytes":  50800,
+                         "capturedAt":  "2026-05-26T13:00:03.5773296-03:00",
                          "command":  "--capture --screen components-cards --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-cards-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -348,8 +438,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-dropdowns-expanded-1000x900.png",
-                         "fileSizeBytes":  59169,
-                         "capturedAt":  "2026-05-26T09:24:29.2619805-03:00",
+                         "fileSizeBytes":  40720,
+                         "capturedAt":  "2026-05-26T13:00:07.6652259-03:00",
                          "command":  "--capture --screen components-dropdowns --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-dropdowns-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -358,8 +448,8 @@
                          "width":  1000,
                          "height":  900,
                          "file":  "expanded/components-fields-expanded-1000x900.png",
-                         "fileSizeBytes":  63949,
-                         "capturedAt":  "2026-05-26T09:24:33.4349031-03:00",
+                         "fileSizeBytes":  45001,
+                         "capturedAt":  "2026-05-26T13:00:11.6780400-03:00",
                          "command":  "--capture --screen components-fields --width 1000 --height 900 --output build\\visual-captures\\expanded\\components-fields-expanded-1000x900.png --delayMs 1500"
                      },
                      {
@@ -368,8 +458,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/dashboard-large-1440x900.png",
-                         "fileSizeBytes":  67150,
-                         "capturedAt":  "2026-05-26T09:24:38.1202206-03:00",
+                         "fileSizeBytes":  62066,
+                         "capturedAt":  "2026-05-26T13:00:15.7524411-03:00",
                          "command":  "--capture --screen dashboard --width 1440 --height 900 --output build\\visual-captures\\large\\dashboard-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -378,8 +468,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/employees-large-1440x900.png",
-                         "fileSizeBytes":  80292,
-                         "capturedAt":  "2026-05-26T09:24:42.4137964-03:00",
+                         "fileSizeBytes":  73075,
+                         "capturedAt":  "2026-05-26T13:00:20.0484077-03:00",
                          "command":  "--capture --screen employees --width 1440 --height 900 --output build\\visual-captures\\large\\employees-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -388,8 +478,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/products-large-1440x900.png",
-                         "fileSizeBytes":  87944,
-                         "capturedAt":  "2026-05-26T09:24:47.0979285-03:00",
+                         "fileSizeBytes":  67793,
+                         "capturedAt":  "2026-05-26T13:00:24.5696286-03:00",
                          "command":  "--capture --screen products --width 1440 --height 900 --output build\\visual-captures\\large\\products-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -398,9 +488,39 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/invoices-large-1440x900.png",
-                         "fileSizeBytes":  59937,
-                         "capturedAt":  "2026-05-26T09:24:51.2793903-03:00",
+                         "fileSizeBytes":  61297,
+                         "capturedAt":  "2026-05-26T13:00:29.1034728-03:00",
                          "command":  "--capture --screen invoices --width 1440 --height 900 --output build\\visual-captures\\large\\invoices-large-1440x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-empty",
+                         "breakpoint":  "large",
+                         "width":  1440,
+                         "height":  900,
+                         "file":  "large/invoices-empty-large-1440x900.png",
+                         "fileSizeBytes":  43884,
+                         "capturedAt":  "2026-05-26T13:00:33.0969124-03:00",
+                         "command":  "--capture --screen invoices-empty --width 1440 --height 900 --output build\\visual-captures\\large\\invoices-empty-large-1440x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-loading",
+                         "breakpoint":  "large",
+                         "width":  1440,
+                         "height":  900,
+                         "file":  "large/invoices-loading-large-1440x900.png",
+                         "fileSizeBytes":  42283,
+                         "capturedAt":  "2026-05-26T13:00:37.0934810-03:00",
+                         "command":  "--capture --screen invoices-loading --width 1440 --height 900 --output build\\visual-captures\\large\\invoices-loading-large-1440x900.png --delayMs 1500"
+                     },
+                     {
+                         "screen":  "invoices-error",
+                         "breakpoint":  "large",
+                         "width":  1440,
+                         "height":  900,
+                         "file":  "large/invoices-error-large-1440x900.png",
+                         "fileSizeBytes":  44046,
+                         "capturedAt":  "2026-05-26T13:00:41.1575055-03:00",
+                         "command":  "--capture --screen invoices-error --width 1440 --height 900 --output build\\visual-captures\\large\\invoices-error-large-1440x900.png --delayMs 1500"
                      },
                      {
                          "screen":  "settings",
@@ -408,8 +528,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/settings-large-1440x900.png",
-                         "fileSizeBytes":  51997,
-                         "capturedAt":  "2026-05-26T09:24:55.4803049-03:00",
+                         "fileSizeBytes":  46593,
+                         "capturedAt":  "2026-05-26T13:00:45.7465211-03:00",
                          "command":  "--capture --screen settings --width 1440 --height 900 --output build\\visual-captures\\large\\settings-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -418,8 +538,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-large-1440x900.png",
-                         "fileSizeBytes":  80625,
-                         "capturedAt":  "2026-05-26T09:25:00.1832903-03:00",
+                         "fileSizeBytes":  82384,
+                         "capturedAt":  "2026-05-26T13:00:50.3599091-03:00",
                          "command":  "--capture --screen components --width 1440 --height 900 --output build\\visual-captures\\large\\components-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -428,8 +548,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-buttons-large-1440x900.png",
-                         "fileSizeBytes":  51791,
-                         "capturedAt":  "2026-05-26T09:25:04.3457744-03:00",
+                         "fileSizeBytes":  53551,
+                         "capturedAt":  "2026-05-26T13:00:54.3857353-03:00",
                          "command":  "--capture --screen components-buttons --width 1440 --height 900 --output build\\visual-captures\\large\\components-buttons-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -438,8 +558,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-badges-large-1440x900.png",
-                         "fileSizeBytes":  41526,
-                         "capturedAt":  "2026-05-26T09:25:08.9654744-03:00",
+                         "fileSizeBytes":  43289,
+                         "capturedAt":  "2026-05-26T13:00:58.8612091-03:00",
                          "command":  "--capture --screen components-badges --width 1440 --height 900 --output build\\visual-captures\\large\\components-badges-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -448,8 +568,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-avatars-large-1440x900.png",
-                         "fileSizeBytes":  41200,
-                         "capturedAt":  "2026-05-26T09:25:13.6423103-03:00",
+                         "fileSizeBytes":  42939,
+                         "capturedAt":  "2026-05-26T13:01:03.3177323-03:00",
                          "command":  "--capture --screen components-avatars --width 1440 --height 900 --output build\\visual-captures\\large\\components-avatars-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -458,8 +578,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-cards-large-1440x900.png",
-                         "fileSizeBytes":  54905,
-                         "capturedAt":  "2026-05-26T09:25:17.8196829-03:00",
+                         "fileSizeBytes":  56690,
+                         "capturedAt":  "2026-05-26T13:01:07.3356209-03:00",
                          "command":  "--capture --screen components-cards --width 1440 --height 900 --output build\\visual-captures\\large\\components-cards-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -468,8 +588,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-dropdowns-large-1440x900.png",
-                         "fileSizeBytes":  50155,
-                         "capturedAt":  "2026-05-26T09:25:22.0580915-03:00",
+                         "fileSizeBytes":  46457,
+                         "capturedAt":  "2026-05-26T13:01:11.8808230-03:00",
                          "command":  "--capture --screen components-dropdowns --width 1440 --height 900 --output build\\visual-captures\\large\\components-dropdowns-large-1440x900.png --delayMs 1500"
                      },
                      {
@@ -478,8 +598,8 @@
                          "width":  1440,
                          "height":  900,
                          "file":  "large/components-fields-large-1440x900.png",
-                         "fileSizeBytes":  58392,
-                         "capturedAt":  "2026-05-26T09:25:26.1878882-03:00",
+                         "fileSizeBytes":  50269,
+                         "capturedAt":  "2026-05-26T13:01:15.9021343-03:00",
                          "command":  "--capture --screen components-fields --width 1440 --height 900 --output build\\visual-captures\\large\\components-fields-large-1440x900.png --delayMs 1500"
                      }
                  ]

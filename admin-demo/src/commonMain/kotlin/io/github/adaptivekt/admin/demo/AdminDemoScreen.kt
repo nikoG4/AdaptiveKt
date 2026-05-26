@@ -5,6 +5,9 @@ public enum class AdminDemoScreen(public val id: String) {
     Employees("employees"),
     Products("products"),
     Invoices("invoices"),
+    InvoicesEmpty("invoices-empty"),
+    InvoicesLoading("invoices-loading"),
+    InvoicesError("invoices-error"),
     Settings("settings"),
     Components("components"),
     ComponentsButtons("components-buttons"),
@@ -20,6 +23,9 @@ public enum class AdminDemoScreen(public val id: String) {
             Employees.id -> Employees
             Products.id -> Products
             Invoices.id -> Invoices
+            InvoicesEmpty.id -> InvoicesEmpty
+            InvoicesLoading.id -> InvoicesLoading
+            InvoicesError.id -> InvoicesError
             Settings.id -> Settings
             Components.id -> Components
             ComponentsButtons.id -> ComponentsButtons

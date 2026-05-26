@@ -323,9 +323,29 @@ internal fun ProductsScreen() {
     }
 }
 
+internal enum class InvoiceDemoState {
+    Content,
+    Empty,
+    Loading,
+    Error,
+}
+
+private fun InvoiceDemoState.toAdaptiveDataState(): AdaptiveDataState<Invoice> = when (this) {
+    InvoiceDemoState.Content -> AdaptiveDataContent(AdminDemoData.invoices)
+    InvoiceDemoState.Empty -> io.github.adaptivekt.data.AdaptiveDataEmpty(
+        title = "No invoices found",
+        description = "Your invoice feed is currently empty.",
+    )
+    InvoiceDemoState.Loading -> io.github.adaptivekt.data.AdaptiveDataLoading
+    InvoiceDemoState.Error -> io.github.adaptivekt.data.AdaptiveDataError(
+        title = "Unable to load invoices",
+        description = "There was a problem fetching invoice details.",
+    )
+}
+
 @Composable
-internal fun InvoicesScreen() {
-    var invoiceState by remember { mutableStateOf<AdaptiveDataState<Invoice>>(AdaptiveDataContent(AdminDemoData.invoices)) }
+internal fun InvoicesScreen(initialState: InvoiceDemoState = InvoiceDemoState.Content) {
+    var invoiceState by remember(initialState) { mutableStateOf(initialState.toAdaptiveDataState()) }
     val options = listOf("Content", "Empty", "Loading", "Error")
     val invoiceActions = listOf(
         AdaptiveDataAction<Invoice>(
@@ -371,17 +391,11 @@ internal fun InvoicesScreen() {
                     },
                     onClick = {
                         invoiceState = when (label) {
-                            "Content" -> AdaptiveDataContent(AdminDemoData.invoices)
-                            "Empty" -> io.github.adaptivekt.data.AdaptiveDataEmpty(
-                                title = "No invoices found",
-                                description = "Your invoice feed is currently empty.",
-                            )
-                            "Loading" -> io.github.adaptivekt.data.AdaptiveDataLoading
-                            "Error" -> io.github.adaptivekt.data.AdaptiveDataError(
-                                title = "Unable to load invoices",
-                                description = "There was a problem fetching invoice details.",
-                            )
-                            else -> AdaptiveDataContent(AdminDemoData.invoices)
+                            "Content" -> InvoiceDemoState.Content.toAdaptiveDataState()
+                            "Empty" -> InvoiceDemoState.Empty.toAdaptiveDataState()
+                            "Loading" -> InvoiceDemoState.Loading.toAdaptiveDataState()
+                            "Error" -> InvoiceDemoState.Error.toAdaptiveDataState()
+                            else -> InvoiceDemoState.Content.toAdaptiveDataState()
                         }
                     },
                 )

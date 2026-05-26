@@ -20,7 +20,15 @@ public fun AdminDemoApp(
     initialScreen: AdminDemoScreen = AdminDemoScreen.Dashboard,
     initialAccountMenuOpen: Boolean = false,
 ) {
-    var selectedItemId by remember { mutableStateOf(if (initialScreen.id.startsWith("components")) "components" else initialScreen.id) }
+    var selectedItemId by remember {
+        mutableStateOf(
+            when {
+                initialScreen.id.startsWith("components") -> "components"
+                initialScreen.id.startsWith("invoices") -> "invoices"
+                else -> initialScreen.id
+            },
+        )
+    }
 
     val navItems = listOf(
         AdaptiveNavItem(id = "dashboard", label = "Dashboard"),
@@ -49,7 +57,7 @@ public fun AdminDemoApp(
                     "dashboard" -> DashboardScreen()
                     "employees" -> EmployeesScreen()
                     "products" -> ProductsScreen()
-                    "invoices" -> InvoicesScreen()
+                    "invoices" -> InvoicesScreen(initialState = initialScreen.invoiceState)
                     "settings" -> SettingsScreen()
                     "components" -> ComponentsShowcaseScreen(focusSection = initialScreen.componentsShowcaseSection)
                     else -> DashboardScreen()
@@ -68,4 +76,12 @@ private val AdminDemoScreen.componentsShowcaseSection: ComponentsShowcaseSection
         AdminDemoScreen.ComponentsDropdowns -> ComponentsShowcaseSection.Dropdowns
         AdminDemoScreen.ComponentsFields -> ComponentsShowcaseSection.Fields
         else -> null
+    }
+
+private val AdminDemoScreen.invoiceState: InvoiceDemoState
+    get() = when (this) {
+        AdminDemoScreen.InvoicesEmpty -> InvoiceDemoState.Empty
+        AdminDemoScreen.InvoicesLoading -> InvoiceDemoState.Loading
+        AdminDemoScreen.InvoicesError -> InvoiceDemoState.Error
+        else -> InvoiceDemoState.Content
     }

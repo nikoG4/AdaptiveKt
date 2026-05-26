@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-05-26T12:21:33.739Z" hostname="DESKTOP-JLJPILJ" time="0.021">
+<testsuite name="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-05-26T12:50:03.561Z" hostname="DESKTOP-JLJPILJ" time="0.022">
   <properties/>
-  <testcase name="large returns large columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.016"/>
-  <testcase name="resolve third span returns one on three columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.001"/>
+  <testcase name="large returns large columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.017"/>
+  <testcase name="resolve third span returns one on three columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.002"/>
   <testcase name="medium returns medium columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.0"/>
-  <testcase name="resolve columns count above bounds becomes max[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.0"/>
+  <testcase name="resolve columns count above bounds becomes max[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.001"/>
   <testcase name="resolve full span returns all columns[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.0"/>
   <testcase name="columns forced to at least one[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.0"/>
   <testcase name="resolve columns count within bounds[jvm]" classname="io.github.adaptivekt.forms.AdaptiveFormHelpersTest" time="0.0"/>

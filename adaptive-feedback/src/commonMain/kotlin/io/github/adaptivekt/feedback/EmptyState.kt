@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 
 @Composable
@@ -60,9 +61,13 @@ fun EmptyState(
         } else {
             DefaultFeedbackIcon(
                 background = Color(0xFFEFF6FF),
-                foreground = Color(0xFF1D4ED8),
-                symbol = "\u2315",
-            )
+            ) {
+                AdaptiveIcons.Search(
+                    size = 32.dp,
+                    tint = Color(0xFF1D4ED8),
+                    contentDescription = "Empty state",
+                )
+            }
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
 
@@ -91,21 +96,16 @@ fun EmptyState(
 }
 
 @Composable
-internal fun DefaultFeedbackIcon(background: Color, foreground: Color, symbol: String) {
+internal fun DefaultFeedbackIcon(
+    background: Color,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier = Modifier
             .size(72.dp)
             .background(background, RoundedCornerShape(AdaptiveTokens.Radius.Large)),
         contentAlignment = Alignment.Center,
     ) {
-        androidx.compose.foundation.text.BasicText(
-            text = symbol,
-            style = androidx.compose.ui.text.TextStyle(
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = foreground,
-            ),
-        )
+        content()
     }
 }

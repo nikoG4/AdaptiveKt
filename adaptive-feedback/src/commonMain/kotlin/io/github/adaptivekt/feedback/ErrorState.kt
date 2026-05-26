@@ -7,7 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -33,9 +35,13 @@ fun ErrorState(
         } else {
             DefaultFeedbackIcon(
                 background = Color(0xFFFEF2F2),
-                foreground = Color(0xFFB91C1C),
-                symbol = "!",
-            )
+            ) {
+                AdaptiveIcons.Close(
+                    size = 32.dp,
+                    tint = Color(0xFFB91C1C),
+                    contentDescription = "Error state",
+                )
+            }
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
 

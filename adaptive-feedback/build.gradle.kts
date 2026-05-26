@@ -10,6 +10,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":adaptive-core"))
+                implementation(project(":adaptive-components"))
                 implementation(compose.foundation)
             }
         }

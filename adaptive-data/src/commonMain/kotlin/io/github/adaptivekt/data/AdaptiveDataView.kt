@@ -26,15 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -568,31 +565,21 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
     val density = LocalDensity.current
     val menuWidth = 148.dp
-    val menuWidthPx = with(density) { menuWidth.roundToPx() }
-    val gapPx = with(density) { AdaptiveTokens.Spacing.Small.roundToPx() }
-    val (buttonPosition, setButtonPosition) = remember { mutableStateOf(IntOffset.Zero) }
-    val (buttonSize, setButtonSize) = remember { mutableStateOf(IntSize.Zero) }
     val popupOffset = IntOffset(
-        x = buttonPosition.x + buttonSize.width - menuWidthPx,
-        y = buttonPosition.y + buttonSize.height + gapPx,
+        x = 0,
+        y = with(density) { (AdaptiveTokens.Sizes.ButtonHeight + AdaptiveTokens.Spacing.Small).roundToPx() },
     )
 
     Box {
         AdaptiveIconButton(
             onClick = { setExpanded(!expanded) },
             size = AdaptiveTokens.Sizes.ButtonHeight,
-            modifier = Modifier
-                .onGloballyPositioned { coordinates ->
-                    val position = coordinates.positionInWindow()
-                    setButtonPosition(IntOffset(position.x.toInt(), position.y.toInt()))
-                    setButtonSize(coordinates.size)
-                },
         ) {
             AdaptiveIcons.MoreVertical(size = 18.dp, tint = Color(0xFF1E40AF))
         }
         if (expanded) {
             Popup(
-                alignment = Alignment.TopStart,
+                alignment = Alignment.TopEnd,
                 offset = popupOffset,
                 onDismissRequest = { setExpanded(false) },
                 properties = PopupProperties(focusable = true),

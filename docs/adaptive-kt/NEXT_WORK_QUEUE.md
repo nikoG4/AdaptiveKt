@@ -100,11 +100,30 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 
 ### PR C3 recomendado
 
-- [ ] Migrar botones de acciones de `adaptive-forms` a `AdaptiveButton`
-- [ ] Evaluar uso de `AdaptiveTextField` en defaults/documentación de forms sin romper slots existentes
-- [ ] Mantener `AdaptiveFormLayout` API estable
-- [ ] No migrar navigation/feedback en el mismo PR
-- [ ] No implementar Select todavía
+- [x] Agregar dependencia controlada `adaptive-forms -> adaptive-components`
+- [x] Migrar divider interno de secciones a `AdaptiveDivider`
+- [x] Mantener `AdaptiveFormLayout` API estable
+- [x] Documentar por que acciones y fields se mantienen como slots del usuario
+- [x] No migrar navigation/feedback en el mismo PR
+- [x] No implementar Select todavia
+
+### PR C4 recomendado
+
+- [x] Migrar primitives visuales seguros de `adaptive-feedback` a `adaptive-components`
+- [x] Usar `AdaptiveSurface` para Empty/Loading/Error sin cambiar API
+- [x] Usar `AdaptiveIcons` para glyphs default de Empty/Error
+- [x] Mantener acciones como slots del usuario
+- [x] Mantener API publica de feedback
+- [x] Agregar capturas `invoices-empty`, `invoices-loading`, `invoices-error`
+- [x] No tocar navigation/forms/data en el mismo PR
+
+### PR C5 recomendado
+
+- [ ] Migrar primitives visuales seguros de `adaptive-navigation` a `adaptive-components`
+- [ ] Evaluar `AdaptiveSurface`/`AdaptiveDivider` para paneles de navigation sin cambiar API
+- [ ] Evaluar `AdaptiveIcons` para affordances internas de navigation
+- [ ] Mantener API publica de navigation
+- [ ] No tocar data/forms/feedback en el mismo PR
 
 ### Data follow-ups futuros
 

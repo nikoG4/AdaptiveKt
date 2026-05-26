@@ -221,6 +221,41 @@ Adopted in this PR:
 - `adaptive-data` overflow actions use `MoreVertical`.
 - `admin-demo` and `ComponentsShowcaseScreen` replace obvious raw affordance glyphs with `AdaptiveIcons`.
 
+## PR C3 Adaptive Forms Adoption
+
+`adaptive-forms` now depends on `:adaptive-components` and adopts the safest shared primitive while preserving its public API.
+
+Adopted:
+
+- `AdaptiveDivider` for form section dividers.
+
+Kept local intentionally:
+
+- Form action slots, because `AdaptiveFormLayout` does not generate buttons internally.
+- Field content slots, because replacing user-provided content with `AdaptiveTextField` would change composition behavior.
+- Section containers, because wrapping sections in cards/surfaces would alter the current responsive form layout.
+- Validation message text, because there is no shared validation-message primitive yet.
+
+No forms public API changed in PR C3.
+
+## PR C4 Adaptive Feedback Adoption
+
+`adaptive-feedback` now depends on `:adaptive-components` and adopts shared primitives while preserving its public API.
+
+Adopted:
+
+- `AdaptiveSurface` for the shared feedback state panel.
+- `AdaptiveIcons.Search` for the default empty-state glyph.
+- `AdaptiveIcons.Close` for the default error-state glyph.
+
+Kept local intentionally:
+
+- Loading indicator, because it is already Foundation-only and does not need Material or coroutine-driven animation.
+- `action` and `retryAction`, because they are caller-owned composable slots.
+- Text rendering, because there is no shared typography/text primitive yet.
+
+No feedback public API changed in PR C4.
+
 ## Limitations
 
 - Colors are local component defaults for now; a full theme/color-token system is future work.

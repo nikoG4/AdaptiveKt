@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveInfo
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.layout.AdaptiveGrid
 
 public interface AdaptiveFormScope {
@@ -177,12 +178,7 @@ private fun FormSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = AdaptiveTokens.Spacing.Medium)) {
         if (showDivider) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color(0xFFE2E8F0)),
-            )
+            AdaptiveDivider()
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
         }
 
