@@ -24,7 +24,7 @@ internal fun SimpleText(
     fontSize: androidx.compose.ui.unit.TextUnit = 14.sp,
     color: Color = Color(0xFF0F172A),
     fontWeight: FontWeight = FontWeight.Normal,
-    textAlign: TextAlign? = null,
+    textAlign: TextAlign = TextAlign.Start,
 ) {
     androidx.compose.foundation.text.BasicText(
         text = text,

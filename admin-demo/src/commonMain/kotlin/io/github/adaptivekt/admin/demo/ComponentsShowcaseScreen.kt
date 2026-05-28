@@ -42,6 +42,7 @@ import io.github.adaptivekt.components.AdaptiveDropdownMenu
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.AdaptiveSearchField
+import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
@@ -106,6 +107,8 @@ internal fun ComponentsShowcaseScreen(
             if (focusSection == null || focusSection == ComponentsShowcaseSection.Fields) {
                 item(span = sectionSpan(focusSection, cardSpan)) { TextFieldsSection() }
             }
+            // Selects section is always shown when focusSection == null
+            item(span = sectionSpan(focusSection, cardSpan)) { SelectsSection() }
         }
     }
 }
@@ -293,6 +296,27 @@ private fun TextFieldsSection() {
             value = query,
             onValueChange = { query = it },
             onClear = { query = "" },
+        )
+    }
+}
+
+@Composable
+private fun SelectsSection() {
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+
+    ShowcaseCard(
+        title = "Selects",
+        description = "Single-select dropdown with clear and search states.",
+    ) {
+        AdaptiveSelect(
+            options = listOf("Option A", "Option B", "Option C"),
+            selectedOption = selectedOption,
+            onOptionSelected = { selectedOption = it },
+            optionLabel = { it },
+            label = "Choose an option",
+            placeholder = "Pick one",
+            searchable = true,
+            clearable = true,
         )
     }
 }

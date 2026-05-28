@@ -1,0 +1,9 @@
+{
+  "name": "adaptivekt-web-capture",
+  "version": "1.0.0",
+  "description": "Playwright-based smoke screenshots for AdaptiveKt Admin Demo Wasm",
+  "main": "capture-admin-demo-web.js",
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

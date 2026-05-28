@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AdaptiveKt - Compose Multiplatform Admin UI Toolkit for building adaptive dashboards and forms.">
+    <title>AdaptiveKt — Compose Multiplatform Admin UI Toolkit</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>AdaptiveKt</h1>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#components">Components</a></li>
+                <li><a href="#platforms">Platforms</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="https://github.com/adaptivekt/adaptive-kt" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>Compose Multiplatform Admin UI Toolkit</h2>
+            <p>Build adaptive, professional admin dashboards, forms, and data views for desktop and web.</p>
+            <div class="hero-actions">
+                <a href="./demo/" class="btn btn-primary">View Live Demo →</a>
+                <a href="./docs/" class="btn btn-secondary">Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h3>Features</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🎯 Adaptive Layout System</h4>
+                    <p>Breakpoint-aware components that respond to screen size. Automatically adapts layouts for Compact (phone), Medium (tablet), Expanded (tablet landscape), and Large (desktop) screens.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Enterprise Data Views</h4>
+                    <p>Responsive table/card hybrid that switches layouts based on available space. Built-in filtering, sorting, row selection, and custom actions.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📋 Professional Forms</h4>
+                    <p>Adaptive form layouts with intelligent label positioning. Validation states, multi-column support, and responsive field organization.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🧭 Smart Navigation</h4>
+                    <p>Navigation scaffold that adapts surfaces by breakpoint. Drawer on phones, Bottom Navigation on tablets, Rails on landscape, and Sidebar on desktop.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎨 Rich Component Library</h4>
+                    <p>Button variants, badges, avatars, cards, menus, text fields, search inputs, and more. All with consistent styling and adaptive sizing.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🌐 Multiplatform Ready</h4>
+                    <p>Works on JVM/Desktop (Compose), Android, iOS, and Web/Wasm. One codebase for all platforms.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms Section -->
+    <section id="platforms" class="platforms">
+        <div class="container">
+            <h3>Platform Support</h3>
+            <table class="platforms-table">
+                <tr>
+                    <th>Platform</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td><strong>JVM/Desktop</strong></td>
+                    <td class="status-stable">✅ Stable</td>
+                    <td>Full support via Compose Desktop. Resize window to test adaptive layouts.</td>
+                </tr>
+                <tr>
+                    <td><strong>Android</strong></td>
+                    <td class="status-ready">🔄 Ready</td>
+                    <td>Build target enabled. Responsive to device rotation. Validation in progress.</td>
+                </tr>
+                <tr>
+                    <td><strong>iOS</strong></td>
+                    <td class="status-experimental">⚠️ Declared</td>
+                    <td>Target declared in Gradle. Requires macOS for validation.</td>
+                </tr>
+                <tr>
+                    <td><strong>Web/Wasm</strong></td>
+                    <td class="status-stable">✅ Stable</td>
+                    <td>Production builds work. Live demo available in the browser.</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- Components Section -->
+    <section id="components" class="components">
+        <div class="container">
+            <h3>Component Library</h3>
+            <div class="components-grid">
+                <div class="component-item">
+                    <h4>Buttons</h4>
+                    <p>Primary, Secondary, Ghost, Danger variants with icon support</p>
+                </div>
+                <div class="component-item">
+                    <h4>Data Views</h4>
+                    <p>Responsive tables/cards with filtering and actions</p>
+                </div>
+                <div class="component-item">
+                    <h4>Forms</h4>
+                    <p>Layout with responsive label positioning</p>
+                </div>
+                <div class="component-item">
+                    <h4>Navigation</h4>
+                    <p>Adaptive scaffold with Drawer/Rail/Sidebar</p>
+                </div>
+                <div class="component-item">
+                    <h4>Cards & Surfaces</h4>
+                    <p>Container components for content grouping</p>
+                </div>
+                <div class="component-item">
+                    <h4>Badges & Avatars</h4>
+                    <p>Status indicators and user images with initials</p>
+                </div>
+                <div class="component-item">
+                    <h4>Text Fields</h4>
+                    <p>Search inputs, validation states, icon support</p>
+                </div>
+                <div class="component-item">
+                    <h4>Menus & Dropdowns</h4>
+                    <p>Inline menus, menu items, selection components</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo">
+        <div class="container">
+            <h3>Try the Demo</h3>
+            <p>Responsive admin UI built entirely with AdaptiveKt components.</p>
+            <div class="demo-preview">
+                <div class="demo-browser">
+                    <div class="demo-browser-header">
+                        <span>localhost:8080</span>
+                    </div>
+                    <div class="demo-browser-content">
+                        <p>📱 Desktop Demo: Try different breakpoints by resizing your browser window</p>
+                        <p>Screens: Dashboard, Users, Products, Invoices, Settings, Component Showcase</p>
+                    </div>
+                </div>
+            </div>
+            <div class="demo-actions">
+                <a href="./demo/" class="btn btn-large">Open Live Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="quick-start">
+        <div class="container">
+            <h3>Quick Start</h3>
+            <div class="quick-start-content">
+                <div class="code-block">
+                    <p><strong>Add to your Gradle project:</strong></p>
+                    <pre><code>// settings.gradle.kts
+include(":adaptive-kt:adaptive-core")
+include(":adaptive-kt:adaptive-components")
+
+// build.gradle.kts
+dependencies {
+    implementation(project(":adaptive-core"))
+    implementation(project(":adaptive-components"))
+    implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <p><strong>Use in your UI:</strong></p>
+                    <pre><code>@Composable
+fun MyApp() {
+    val adaptiveInfo = rememberAdaptiveInfo()
+    
+    AdaptiveContent(adaptiveInfo) {
+        AdaptiveButton("Save", onClick = { })
+        AdaptiveDataView(items, columns)
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section class="roadmap">
+        <div class="container">
+            <h3>Roadmap</h3>
+            <div class="roadmap-items">
+                <div class="roadmap-item complete">
+                    <h4>1.0 Initial Release</h4>
+                    <p>✅ Core layout system, navigation scaffold, component library, forms, data views</p>
+                </div>
+                <div class="roadmap-item in-progress">
+                    <h4>1.1 Documentation & Deployment</h4>
+                    <p>🔄 GitHub Pages, component docs, Wasm integration, GitHub Actions</p>
+                </div>
+                <div class="roadmap-item planned">
+                    <h4>1.2 Maven Publishing</h4>
+                    <p>📋 Maven Central publishing for easy dependency management</p>
+                </div>
+                <div class="roadmap-item planned">
+                    <h4>Future</h4>
+                    <p>📋 Dark mode, theme system, platform presets, MultiSelect, iOS validation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h3>Ready to get started?</h3>
+            <p>Build your next admin UI with AdaptiveKt.</p>
+            <div class="cta-actions">
+                <a href="./docs/" class="btn btn-primary">Read Documentation</a>
+                <a href="https://github.com/adaptivekt/adaptive-kt" class="btn btn-secondary" target="_blank">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AdaptiveKt. Licensed under Apache 2.0.</p>
+            <p><a href="https://github.com/adaptivekt/adaptive-kt">GitHub</a> • <a href="./docs/">Documentation</a> • <a href="./demo/">Demo</a></p>
+        </div>
+    </footer>
+</body>
+</html>

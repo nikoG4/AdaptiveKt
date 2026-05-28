@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.adaptivekt.data.AdaptiveDataHelpersTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-05-26T16:03:13.754Z" hostname="DESKTOP-JLJPILJ" time="0.06">
-  <properties/>
-  <testcase name="visible columns respects min breakpoint and falls back when none visible[jvm]" classname="io.github.adaptivekt.data.AdaptiveDataHelpersTest" time="0.027"/>
-  <testcase name="mobile column heuristics infer title subtitle status and limited metadata[jvm]" classname="io.github.adaptivekt.data.AdaptiveDataHelpersTest" time="0.032"/>
-  <testcase name="should use table layout for expanded and large breakpoints[jvm]" classname="io.github.adaptivekt.data.AdaptiveDataHelpersTest" time="0.001"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

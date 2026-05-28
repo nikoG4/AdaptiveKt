@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - AdaptiveKt</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .docs-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .docs-sidebar {
+            background-color: var(--color-background-light);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            height: fit-content;
+            position: sticky;
+            top: 80px;
+        }
+
+        .docs-sidebar h4 {
+            font-size: 14px;
+            color: var(--color-text);
+            margin: var(--spacing-md) 0 var(--spacing-sm) 0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .docs-sidebar ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .docs-sidebar ul li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .docs-sidebar a {
+            font-size: 14px;
+            color: var(--color-text-light);
+        }
+
+        .docs-sidebar a:hover {
+            color: var(--color-primary);
+        }
+
+        .docs-content {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .docs-content h2 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-lg);
+            font-size: 32px;
+            color: var(--color-text);
+        }
+
+        .docs-content h3 {
+            margin-top: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+            font-size: 24px;
+            color: var(--color-text);
+            text-align: left;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        .docs-content p {
+            margin-bottom: var(--spacing-md);
+            line-height: 1.8;
+            color: var(--color-text-light);
+        }
+
+        .docs-content code {
+            background-color: var(--color-background-light);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            color: #d73a49;
+        }
+
+        .docs-content pre {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin-bottom: var(--spacing-lg);
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .docs-content ul, .docs-content ol {
+            margin-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .docs-content li {
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1><a href="/" style="color: var(--color-primary); text-decoration: none;">AdaptiveKt</a></h1>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="/#features">Features</a></li>
+                <li><a href="/#components">Components</a></li>
+                <li><a href="/#platforms">Platforms</a></li>
+                <li><a href="/#demo">Demo</a></li>
+                <li><a href="https://github.com/adaptivekt/adaptive-kt" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="docs-container">
+            <aside class="docs-sidebar">
+                <h4>Getting Started</h4>
+                <ul>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#quick-start">Quick Start</a></li>
+                </ul>
+
+                <h4>Core Concepts</h4>
+                <ul>
+                    <li><a href="#breakpoints">Breakpoints</a></li>
+                    <li><a href="#adaptive-info">Adaptive Info</a></li>
+                    <li><a href="#tokens">Design Tokens</a></li>
+                </ul>
+
+                <h4>Components</h4>
+                <ul>
+                    <li><a href="#buttons">Buttons</a></li>
+                    <li><a href="#cards">Cards</a></li>
+                    <li><a href="#forms">Forms</a></li>
+                    <li><a href="#data">Data Views</a></li>
+                    <li><a href="#navigation">Navigation</a></li>
+                </ul>
+
+                <h4>Guides</h4>
+                <ul>
+                    <li><a href="#responsive">Responsive Layouts</a></li>
+                    <li><a href="#theming">Theming</a></li>
+                    <li><a href="#platforms">Multiplatform</a></li>
+                </ul>
+            </aside>
+
+            <main class="docs-content">
+                <h2>Documentation</h2>
+
+                <h3 id="installation">Installation</h3>
+                <p>AdaptiveKt is not yet published to Maven Central. For now, use it as a source dependency.</p>
+                <pre><code>// settings.gradle.kts
+include(":adaptive-kt:adaptive-core")
+include(":adaptive-kt:adaptive-components")
+include(":adaptive-kt:adaptive-layout")
+include(":adaptive-kt:adaptive-navigation")
+include(":adaptive-kt:adaptive-forms")
+include(":adaptive-kt:adaptive-data")
+include(":adaptive-kt:adaptive-feedback")</code></pre>
+
+                <h3 id="quick-start">Quick Start</h3>
+                <p>Create a responsive admin layout in minutes:</p>
+                <pre><code>@Composable
+fun AdminApp() {
+    val adaptiveInfo = rememberAdaptiveInfo()
+    
+    AdaptiveNavigationScaffold(
+        adaptiveInfo = adaptiveInfo,
+        navigationItems = listOf(
+            AdaptiveNavItem("home", "Dashboard", Icons.Filled.Dashboard),
+            AdaptiveNavItem("users", "Users", Icons.Filled.People),
+        ),
+        selectedId = "home",
+        onNavigate = { /* handle nav */ },
+    ) { navHeight ->
+        Box(modifier = Modifier.padding(bottom = navHeight)) {
+            AdaptiveContent(adaptiveInfo) {
+                Text("Your content here")
+            }
+        }
+    }
+}</code></pre>
+
+                <h3 id="breakpoints">Breakpoints</h3>
+                <p>AdaptiveKt uses four standard breakpoints to adapt layouts:</p>
+                <ul>
+                    <li><strong>Compact</strong> — < 600 dp (phone portrait)</li>
+                    <li><strong>Medium</strong> — 600–840 dp (tablet portrait)</li>
+                    <li><strong>Expanded</strong> — 840–1200 dp (tablet landscape)</li>
+                    <li><strong>Large</strong> — ≥ 1200 dp (desktop)</li>
+                </ul>
+
+                <h3 id="adaptive-info">Adaptive Info</h3>
+                <p>Get current breakpoint and window information:</p>
+                <pre><code>val adaptiveInfo = rememberAdaptiveInfo()
+println(adaptiveInfo.breakpoint)  // Current breakpoint
+println(adaptiveInfo.windowWidth) // Window width in dp</code></pre>
+
+                <h3 id="responsive">Responsive Layouts</h3>
+                <p>Use breakpoints to build responsive UIs:</p>
+                <pre><code>@Composable
+fun ResponsiveGrid() {
+    val adaptiveInfo = rememberAdaptiveInfo()
+    
+    val columnCount = when (adaptiveInfo.breakpoint) {
+        Compact -> 1
+        Medium -> 2
+        Expanded -> 3
+        Large -> 4
+    }
+    
+    AdaptiveGrid(columnCount = columnCount) {
+        // Grid items
+    }
+}</code></pre>
+
+                <h3 id="navigation">Navigation</h3>
+                <p><code>AdaptiveNavigationScaffold</code> automatically selects the best navigation UI for each breakpoint:</p>
+                <ul>
+                    <li><strong>Compact:</strong> Drawer</li>
+                    <li><strong>Medium:</strong> Bottom Navigation</li>
+                    <li><strong>Expanded:</strong> Navigation Rail</li>
+                    <li><strong>Large:</strong> Sidebar</li>
+                </ul>
+
+                <h3 id="buttons">Buttons</h3>
+                <p>Multiple button variants for different contexts:</p>
+                <pre><code>AdaptiveButton("Save", onClick = {}, variant = Primary)
+AdaptiveButton("Cancel", onClick = {}, variant = Secondary)
+AdaptiveButton("Delete", onClick = {}, variant = Danger)</code></pre>
+
+                <h3 id="forms">Forms</h3>
+                <p>Build responsive forms with <code>AdaptiveFormLayout</code>:</p>
+                <pre><code>AdaptiveFormLayout(columnCount = 2) {
+    AdaptiveFormField(label = "Name") {
+        AdaptiveTextField(value = name, onValueChange = { name = it })
+    }
+    AdaptiveFormField(label = "Email") {
+        AdaptiveTextField(value = email, onValueChange = { email = it })
+    }
+}</code></pre>
+
+                <h3 id="data">Data Views</h3>
+                <p>Display tabular data with automatic table/card switching:</p>
+                <pre><code>AdaptiveDataView(
+    items = users,
+    columns = listOf(
+        DataColumn("Name") { it.name },
+        DataColumn("Email") { it.email },
+    ),
+    state = DataState.Content(users),
+)</code></pre>
+
+                <h3 id="theming">Theming</h3>
+                <p>Dark mode and custom themes are planned for a future release. Currently, components use adaptive light colors.</p>
+
+                <h3 id="platforms">Multiplatform</h3>
+                <p>AdaptiveKt works on:</p>
+                <ul>
+                    <li><strong>JVM/Desktop</strong> — Full support via Compose Desktop</li>
+                    <li><strong>Android</strong> — Full support (test with device rotation)</li>
+                    <li><strong>iOS</strong> — Target declared (macOS validation pending)</li>
+                    <li><strong>Web/Wasm</strong> — Full support (try the demo in your browser)</li>
+                </ul>
+
+                <h3>Next Steps</h3>
+                <ul>
+                    <li>Explore the <a href="/demo/">live demo</a></li>
+                    <li>Check the <a href="https://github.com/adaptivekt/adaptive-kt">source code</a></li>
+                    <li>Read the <a href="https://github.com/adaptivekt/adaptive-kt/blob/main/README.md">README</a></li>
+                </ul>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AdaptiveKt. Licensed under Apache 2.0.</p>
+        </div>
+    </footer>
+</body>
+</html>
