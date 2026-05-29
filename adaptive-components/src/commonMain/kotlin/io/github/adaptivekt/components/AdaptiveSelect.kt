@@ -63,6 +63,7 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
  * @param isError If true, the field shows an error border.
  * @param supportingText Optional supporting or error text below the field.
  * @param maxMenuHeight Maximum height of the dropdown menu.
+ * @param initialExpanded Whether the dropdown starts open, useful for deterministic visual capture.
  * @param optionContent Optional custom composable for each option row.
  * @param selectedContent Optional custom composable for the selected value display.
  * @param emptyContent Optional composable shown when no options/search results are available.
@@ -82,11 +83,12 @@ public fun <T> AdaptiveSelect(
     isError: Boolean = false,
     supportingText: String? = null,
     maxMenuHeight: Dp = 320.dp,
+    initialExpanded: Boolean = false,
     optionContent: (@Composable (option: T, selected: Boolean) -> Unit)? = null,
     selectedContent: (@Composable (option: T) -> Unit)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember(initialExpanded) { mutableStateOf(initialExpanded) }
     var searchQuery by remember { mutableStateOf("") }
 
     val shape = AdaptiveComponentDefaults.MediumShape

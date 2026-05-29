@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -29,28 +29,26 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
     
-    - name: Build Wasm distribution
-      run: |
-        chmod +x ./gradlew
-        ./gradlew :admin-demo:wasmJsBrowserDistribution --console=plain --stacktrace
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
     
-    - name: Prepare site content
-      run: |
-        mkdir -p public
-        cp -r site/* public/
-        
-    - name: Integrate Wasm demo
-      run: |
-        mkdir -p public/demo/app
-        cp -r admin-demo/build/dist/wasmJs/productionExecutable/* public/demo/app/
-        echo "Wasm demo integrated at public/demo/app/"
+    - name: Build Gradle
+      shell: pwsh
+      run: .\gradlew.bat build --console=plain --stacktrace
+    
+    - name: Prepare Pages site
+      shell: pwsh
+      run: .\tools\prepare-pages-site.ps1
     
     - name: List public directory
+      shell: pwsh
       run: |
-        echo "=== Public directory structure ==="
-        find public -type f -name "*.html" -o -name "*.js" | head -20
+        Write-Host "=== site-dist directory structure ==="
+        Get-ChildItem site-dist -Recurse -File | Select-Object -First 30 FullName
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -58,7 +56,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: 'public'
+        path: 'site-dist'
     
     - name: Deploy to GitHub Pages
       id: deployment

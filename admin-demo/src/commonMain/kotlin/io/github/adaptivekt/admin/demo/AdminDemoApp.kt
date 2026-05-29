@@ -59,7 +59,10 @@ public fun AdminDemoApp(
                     "products" -> ProductsScreen()
                     "invoices" -> InvoicesScreen(initialState = initialScreen.invoiceState)
                     "settings" -> SettingsScreen()
-                    "components" -> ComponentsShowcaseScreen(focusSection = initialScreen.componentsShowcaseSection)
+                    "components" -> ComponentsShowcaseScreen(
+                        focusSection = initialScreen.componentsShowcaseSection,
+                        initialSelectExpanded = initialScreen == AdminDemoScreen.ComponentsSelectsOpen,
+                    )
                     else -> DashboardScreen()
                 }
             }
@@ -75,6 +78,8 @@ private val AdminDemoScreen.componentsShowcaseSection: ComponentsShowcaseSection
         AdminDemoScreen.ComponentsCards -> ComponentsShowcaseSection.Cards
         AdminDemoScreen.ComponentsDropdowns -> ComponentsShowcaseSection.Dropdowns
         AdminDemoScreen.ComponentsFields -> ComponentsShowcaseSection.Fields
+        AdminDemoScreen.ComponentsSelects -> ComponentsShowcaseSection.Selects
+        AdminDemoScreen.ComponentsSelectsOpen -> ComponentsShowcaseSection.Selects
         else -> null
     }
 

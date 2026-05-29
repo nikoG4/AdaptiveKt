@@ -1,5 +1,14 @@
 # Next Work Queue (Cola de Tareas)
 
+## Post SITE-3
+
+- [ ] Add optional docs-site visual diff baselines after the first Pages deployment.
+- [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
+- [ ] Validate iOS targets on macOS.
+- [ ] Reduce docs-site Wasm bundle size only if it becomes a practical hosting/performance issue.
+- [ ] Consider a small responsive navigation refinement for very narrow docs-site widths.
+- [ ] Add Maven publishing setup in a dedicated publishing PR.
+
 **Fecha:** 2026-05-22
 
 ## Propósito
@@ -227,3 +236,9 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 - **Solo documentación y auditoría**
 - **Mantener simple**
 - **Priorizar tareas seguras**
+## Docs Site Follow-Ups
+
+- Add Playwright smoke screenshots for `:docs-site`.
+- Add link checking for generated Pages artifacts.
+- Add visual diff coverage for the docs landing and component catalog.
+- Consider a lightweight Markdown rendering path for selected `docs/components/*.md` files.

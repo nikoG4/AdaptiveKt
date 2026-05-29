@@ -1,0 +1,9 @@
+{
+  "name": "adaptivekt-docs-site-capture",
+  "version": "1.0.0",
+  "description": "Playwright-based smoke screenshots for the AdaptiveKt docs-site Wasm app",
+  "main": "capture-docs-site-web.js",
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

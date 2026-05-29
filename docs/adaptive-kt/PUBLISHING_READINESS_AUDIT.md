@@ -1,5 +1,7 @@
 # AdaptiveKt Publishing Readiness Audit
 
+> SITE-3 update (2026-05-28): this historical audit has been superseded by `PRE_PUSH_PUBLICATION_AUDIT.md` for current publication readiness. GitHub workflows, `:docs-site`, Pages packaging, docs-site screenshots, and link checking now exist.
+
 **Date:** May 28, 2026  
 **Status:** Initial Assessment  
 **Project:** AdaptiveKt — Compose Multiplatform Admin UI Toolkit

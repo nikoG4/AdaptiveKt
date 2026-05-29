@@ -61,11 +61,13 @@ internal enum class ComponentsShowcaseSection(
     Cards("Cards", "Cards, surfaces, section headers, and dividers."),
     Dropdowns("Dropdowns", "Dropdown/menu panel and menu item states."),
     Fields("Fields", "TextField, SearchField, validation, disabled, and clear states."),
+    Selects("Selects", "Single-select dropdown states, search, and clearing."),
 }
 
 @Composable
 internal fun ComponentsShowcaseScreen(
     focusSection: ComponentsShowcaseSection? = null,
+    initialSelectExpanded: Boolean = false,
 ) {
     val adaptiveInfo = rememberAdaptiveInfo()
     val cardSpan = if (adaptiveInfo.isCompact) 12 else 6
@@ -107,8 +109,11 @@ internal fun ComponentsShowcaseScreen(
             if (focusSection == null || focusSection == ComponentsShowcaseSection.Fields) {
                 item(span = sectionSpan(focusSection, cardSpan)) { TextFieldsSection() }
             }
-            // Selects section is always shown when focusSection == null
-            item(span = sectionSpan(focusSection, cardSpan)) { SelectsSection() }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Selects) {
+                item(span = sectionSpan(focusSection, cardSpan)) {
+                    SelectsSection(initialExpanded = initialSelectExpanded)
+                }
+            }
         }
     }
 }
@@ -301,7 +306,7 @@ private fun TextFieldsSection() {
 }
 
 @Composable
-private fun SelectsSection() {
+private fun SelectsSection(initialExpanded: Boolean = false) {
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
     ShowcaseCard(
@@ -317,6 +322,27 @@ private fun SelectsSection() {
             placeholder = "Pick one",
             searchable = true,
             clearable = true,
+            initialExpanded = initialExpanded,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveSelect(
+            options = listOf("USD", "EUR", "PYG"),
+            selectedOption = "USD",
+            onOptionSelected = {},
+            optionLabel = { it },
+            label = "Disabled select",
+            enabled = false,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveSelect(
+            options = listOf("Operations", "Finance", "Support"),
+            selectedOption = null,
+            onOptionSelected = {},
+            optionLabel = { it },
+            label = "Team",
+            placeholder = "Required team",
+            isError = true,
+            supportingText = "Choose a team before saving.",
         )
     }
 }

@@ -8,6 +8,10 @@ kotlin {
     jvm {
         withJava()
     }
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -22,7 +26,6 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.runtime)
                 implementation(compose.ui)
-                implementation("media.kamel:kamel-image:0.7.3")
             }
         }
         val commonTest by getting {
@@ -33,6 +36,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation("media.kamel:kamel-image:0.7.3")
                 implementation("io.ktor:ktor-client-cio:2.3.4")
             }
         }

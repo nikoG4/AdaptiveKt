@@ -7,6 +7,7 @@ include(":adaptive-forms")
 include(":adaptive-data")
 include(":adaptive-components")
 include(":admin-demo")
+include(":docs-site")
 
 pluginManagement {
     repositories {

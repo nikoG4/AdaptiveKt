@@ -1,3 +1,38 @@
+R0/SITE-3 - Publication Audit, Docs-Site Captures, Link Check, Pages Hardening
+=============================================================================
+
+Status: Completed
+
+Date: 2026-05-28
+
+Summary:
+- Added Playwright smoke screenshots for the Compose/Wasm docs-site.
+- Added generated-site link checking for `site-dist/`.
+- Added `tools/serve-site-dist.ps1` for local Pages preview.
+- Hardened docs-site route handling for `/components/`, `/docs/`, and `/demo/`.
+- Fixed docs-site Wasm viewport HTML so content renders correctly inside the Compose canvas.
+- Hardened admin-demo web capture script to choose an available local port and fail on capture errors.
+- Updated GitHub Pages and CI workflows with explicit Android SDK setup.
+- Added pre-push publication audit documentation.
+
+Verification:
+- `:docs-site:wasmJsBrowserDistribution` passes.
+- `:admin-demo:wasmJsBrowserDistribution` passes.
+- `:adaptive-components:build` passes.
+- `:adaptive-components:compileKotlinWasmJs` passes.
+- `:admin-demo:build` passes.
+- Full `build` passes.
+- Docs-site Playwright captures pass.
+- Admin-demo Playwright captures pass.
+- `tools/check-site-links.ps1` passes.
+
+Constraints preserved:
+- No push, release, or Maven publication.
+- No MultiSelect, dark mode, or theme foundation.
+- No public API changes to AdaptiveKt components.
+- Kamel/Ktor remain demo-only JVM dependencies.
+- Robot/AWT and Playwright remain tooling/platform-specific.
+
 PR C2.3 - Accessibility Semantics for AdaptiveIcons
 ============================================
 
@@ -277,3 +312,10 @@ Constraints preserved:
 - No image-loading changes.
 - No Material 3.
 - No external dependencies.
+## SITE-2 - KMP/Wasm documentation site
+
+- Added `:docs-site` as a Compose Multiplatform/Wasm module.
+- Implemented the landing, component catalog, docs page, and demo page with real AdaptiveKt components.
+- Kept `:admin-demo` as a separate Wasm application and linked it from the docs site.
+- Updated `tools/prepare-pages-site.ps1` so `site-dist/` is rooted at the docs-site distribution and `admin-demo` is copied to `site-dist/demo/app/`.
+- Updated GitHub Pages deployment to use the generated `site-dist` artifact.

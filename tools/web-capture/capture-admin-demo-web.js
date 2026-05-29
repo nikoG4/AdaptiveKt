@@ -10,15 +10,19 @@ const screens = [
     'employees',
     'products',
     'invoices',
-    'settings',
-    'components',
-    'components-thumbnails',
-    'components-chips',
-    'components-dropdowns-open',
-    'components-dropdowns-edge',
     'invoices-empty',
     'invoices-loading',
-    'invoices-error'
+    'invoices-error',
+    'settings',
+    'components',
+    'components-buttons',
+    'components-badges',
+    'components-avatars',
+    'components-cards',
+    'components-dropdowns',
+    'components-fields',
+    'components-selects',
+    'components-selects-open'
 ];
 
 const viewports = [
@@ -76,7 +80,7 @@ function generateReport(results) {
     report += '| --- | --- | --- | --- |\n';
 
     results.forEach(res => {
-        const status = res.success ? '✅' : `❌ ${res.error}`;
+        const status = res.success ? 'OK' : `FAILED ${res.error}`;
         const link = res.success ? `[${res.file}](${res.file})` : '-';
         report += `| ${res.screen} | ${res.viewport} | ${res.size} | ${status} ${link} |\n`;
     });
@@ -99,6 +103,10 @@ function generateReport(results) {
 
     fs.writeFileSync(path.join(outputDir, 'web-visual-capture-report.md'), report);
     console.log(`Report generated at ${path.join(outputDir, 'web-visual-capture-report.md')}`);
+
+    if (results.some(res => !res.success)) {
+        process.exit(1);
+    }
 }
 
 capture().catch(err => {

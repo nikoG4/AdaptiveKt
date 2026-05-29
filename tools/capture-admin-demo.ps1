@@ -59,7 +59,9 @@ $componentScreens = @(
     "components-avatars",
     "components-cards",
     "components-dropdowns",
-    "components-fields"
+    "components-fields",
+    "components-selects",
+    "components-selects-open"
 )
 
 $screens = if ($ComponentsOnly) {

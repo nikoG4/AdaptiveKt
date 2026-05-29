@@ -21,6 +21,7 @@ Verification depends on the target platform:
 
 - **Desktop (JVM)**: Uses AWT `Robot` via `tools/capture-admin-demo.ps1`.
 - **Web (Wasm)**: Uses `Playwright` via `tools/capture-admin-demo-web.ps1`.
+- **Docs Site (Wasm)**: Uses `Playwright` via `tools/capture-docs-site-web.ps1` against `site-dist/`.
 
 ## Source Set Policy
 
@@ -39,3 +40,13 @@ Expected source-set shape:
 - **Android**: Requires a local Android SDK configured in `local.properties`.
 - **Wasm**: Uses local image fallbacks; remote image loading via Kamel is currently JVM-only.
 - **Visual Regression**: Tooling currently captures smoke screenshots for manual review; automated pixel-perfect diffing is not yet implemented.
+
+## Docs Site
+
+`:docs-site` is a Compose Multiplatform/Wasm application used for the public landing and live component catalog.
+
+- It depends on AdaptiveKt library modules.
+- It does not depend on `:admin-demo`.
+- It does not use Kamel, Robot, AWT, Playwright, or Material 3.
+- The GitHub Pages artifact places docs-site at the root and the admin demo at `/demo/app/`.
+- Direct Pages routes are generated for `/components/`, `/docs/`, and `/demo/`.
