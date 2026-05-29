@@ -31,6 +31,8 @@ This places docs-site at the root of `site-dist/` and keeps the admin demo as a 
 ## Notes
 
 - The site uses real AdaptiveKt components.
+- The site has a light/dark toggle backed by `AdaptiveColorSchemes.defaultLight()` and `AdaptiveColorSchemes.defaultDark()`.
+- The Wasm entry point accepts `theme=dark`, for example `/?theme=dark` and `/components/?theme=dark`.
 - It does not depend on `:admin-demo`.
 - It does not use Kamel, Robot, AWT, Playwright, or Material 3 in app code.
 - The older `site/` static landing remains as a fallback for now.

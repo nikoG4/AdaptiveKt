@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -34,11 +34,11 @@ fun ErrorState(
             icon()
         } else {
             DefaultFeedbackIcon(
-                background = Color(0xFFFEF2F2),
+                background = AdaptiveTheme.colors.dangerSubtle,
             ) {
                 AdaptiveIcons.Close(
                     size = 32.dp,
-                    tint = Color(0xFFB91C1C),
+                    tint = AdaptiveTheme.colors.danger,
                     contentDescription = "Error state",
                 )
             }
@@ -57,7 +57,7 @@ fun ErrorState(
             SimpleText(
                 text = description,
                 fontSize = 14.sp,
-                color = Color(0xFF64748B),
+                color = AdaptiveTheme.colors.textMuted,
                 textAlign = TextAlign.Center,
             )
         }

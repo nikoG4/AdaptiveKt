@@ -12,6 +12,11 @@ const pages = [
   { name: 'demo', path: '/demo/' }
 ];
 
+const darkPages = [
+  { name: 'home-dark', path: '/?theme=dark' },
+  { name: 'components-dark', path: '/components/?theme=dark' }
+];
+
 const viewports = [
   { name: 'compact', width: 420, height: 900 },
   { name: 'medium', width: 720, height: 900 },
@@ -29,7 +34,12 @@ async function captureDocsSite() {
       viewport: { width: viewport.width, height: viewport.height }
     });
 
-    for (const sitePage of pages) {
+    const pagesForViewport = [
+      ...pages,
+      ...(viewport.name === 'compact' || viewport.name === 'large' ? darkPages : [])
+    ];
+
+    for (const sitePage of pagesForViewport) {
       const page = await context.newPage();
       const url = `${baseUrl}${sitePage.path}`;
       const filename = `${sitePage.name}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
@@ -79,6 +89,29 @@ async function captureDocsSite() {
   } finally {
     await page.close();
     await context.close();
+  }
+
+  const darkSmokeContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const darkSmokePage = await darkSmokeContext.newPage();
+  const darkSmokeUrl = `${baseUrl}/demo/app/?theme=dark`;
+  const darkSmokeFile = 'admin-demo-dark-link-smoke-large-1440x900.png';
+
+  console.log(`Checking dark admin demo target ${darkSmokeUrl}...`);
+  try {
+    const response = await darkSmokePage.goto(darkSmokeUrl, { waitUntil: 'networkidle' });
+    if (!response || !response.ok()) {
+      throw new Error(`HTTP status ${response ? response.status() : 'unknown'}`);
+    }
+    await darkSmokePage.waitForSelector('#webApp canvas', { timeout: 30000 });
+    await darkSmokePage.waitForTimeout(1500);
+    await darkSmokePage.screenshot({ path: path.join(outputDir, darkSmokeFile), fullPage: true });
+    results.push({ page: 'admin-demo-dark-link-smoke', viewport: 'large', size: '1440x900', file: darkSmokeFile, success: true });
+  } catch (error) {
+    console.error(`Dark admin demo target failed: ${error.message}`);
+    results.push({ page: 'admin-demo-dark-link-smoke', viewport: 'large', size: '1440x900', success: false, error: error.message });
+  } finally {
+    await darkSmokePage.close();
+    await darkSmokeContext.close();
     await browser.close();
   }
 

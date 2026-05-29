@@ -1,5 +1,6 @@
 package io.github.adaptivekt.admin.demo
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.core.AdaptiveColorSchemes
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.layout.AdaptiveContainer
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
@@ -19,6 +22,27 @@ import io.github.adaptivekt.admin.demo.ui.AdminDemoTopBar
 public fun AdminDemoApp(
     initialScreen: AdminDemoScreen = AdminDemoScreen.Dashboard,
     initialAccountMenuOpen: Boolean = false,
+    initialDarkTheme: Boolean = false,
+) {
+    var darkTheme by remember { mutableStateOf(initialDarkTheme) }
+    AdaptiveTheme(
+        colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
+    ) {
+        AdminDemoThemedApp(
+            initialScreen = initialScreen,
+            initialAccountMenuOpen = initialAccountMenuOpen,
+            darkTheme = darkTheme,
+            onThemeToggle = { darkTheme = !darkTheme },
+        )
+    }
+}
+
+@Composable
+private fun AdminDemoThemedApp(
+    initialScreen: AdminDemoScreen,
+    initialAccountMenuOpen: Boolean,
+    darkTheme: Boolean,
+    onThemeToggle: () -> Unit,
 ) {
     var selectedItemId by remember {
         mutableStateOf(
@@ -44,12 +68,17 @@ public fun AdminDemoApp(
         selectedItemId = selectedItemId,
         onItemSelected = { selectedItemId = it },
         topBar = {
-            AdminDemoTopBar(initialAccountMenuOpen = initialAccountMenuOpen)
+            AdminDemoTopBar(
+                initialAccountMenuOpen = initialAccountMenuOpen,
+                darkTheme = darkTheme,
+                onThemeToggle = onThemeToggle,
+            )
         },
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(AdaptiveTheme.colors.background)
                 .padding(padding),
         ) {
             AdaptiveContainer {
@@ -62,6 +91,7 @@ public fun AdminDemoApp(
                     "components" -> ComponentsShowcaseScreen(
                         focusSection = initialScreen.componentsShowcaseSection,
                         initialSelectExpanded = initialScreen == AdminDemoScreen.ComponentsSelectsOpen,
+                        initialMultiSelectExpanded = initialScreen == AdminDemoScreen.ComponentsMultiSelectsOpen,
                     )
                     else -> DashboardScreen()
                 }
@@ -80,6 +110,8 @@ private val AdminDemoScreen.componentsShowcaseSection: ComponentsShowcaseSection
         AdminDemoScreen.ComponentsFields -> ComponentsShowcaseSection.Fields
         AdminDemoScreen.ComponentsSelects -> ComponentsShowcaseSection.Selects
         AdminDemoScreen.ComponentsSelectsOpen -> ComponentsShowcaseSection.Selects
+        AdminDemoScreen.ComponentsMultiSelects -> ComponentsShowcaseSection.MultiSelects
+        AdminDemoScreen.ComponentsMultiSelectsOpen -> ComponentsShowcaseSection.MultiSelects
         else -> null
     }
 

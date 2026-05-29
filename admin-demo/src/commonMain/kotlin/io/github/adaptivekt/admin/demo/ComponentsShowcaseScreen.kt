@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -41,6 +42,7 @@ import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveDropdownMenu
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMenuItem
+import io.github.adaptivekt.components.AdaptiveMultiSelect
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSectionHeader
@@ -62,12 +64,14 @@ internal enum class ComponentsShowcaseSection(
     Dropdowns("Dropdowns", "Dropdown/menu panel and menu item states."),
     Fields("Fields", "TextField, SearchField, validation, disabled, and clear states."),
     Selects("Selects", "Single-select dropdown states, search, and clearing."),
+    MultiSelects("MultiSelects", "Multi-select dropdowns with chips, search, and custom content."),
 }
 
 @Composable
 internal fun ComponentsShowcaseScreen(
     focusSection: ComponentsShowcaseSection? = null,
     initialSelectExpanded: Boolean = false,
+    initialMultiSelectExpanded: Boolean = false,
 ) {
     val adaptiveInfo = rememberAdaptiveInfo()
     val cardSpan = if (adaptiveInfo.isCompact) 12 else 6
@@ -112,6 +116,11 @@ internal fun ComponentsShowcaseScreen(
             if (focusSection == null || focusSection == ComponentsShowcaseSection.Selects) {
                 item(span = sectionSpan(focusSection, cardSpan)) {
                     SelectsSection(initialExpanded = initialSelectExpanded)
+                }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.MultiSelects) {
+                item(span = sectionSpan(focusSection, cardSpan)) {
+                    MultiSelectsSection(initialExpanded = initialMultiSelectExpanded)
                 }
             }
         }
@@ -346,6 +355,139 @@ private fun SelectsSection(initialExpanded: Boolean = false) {
         )
     }
 }
+
+@Composable
+private fun MultiSelectsSection(initialExpanded: Boolean = false) {
+    val departments = listOf("Operations", "Finance", "Support", "Sales", "Security")
+    val people = listOf(
+        DemoPerson("Alicia Romero", "Operations"),
+        DemoPerson("Noah Kim", "Finance"),
+        DemoPerson("Marta Silva", "Support"),
+        DemoPerson("Dina Patel", "Security"),
+    )
+    var selectedSimple by remember { mutableStateOf(listOf("Operations", "Finance")) }
+    var selectedSearchable by remember { mutableStateOf(listOf("Support")) }
+    var selectedOverflow by remember { mutableStateOf(departments.take(4)) }
+    var selectedPeople by remember { mutableStateOf(people.take(2)) }
+    var selectedCustomChips by remember { mutableStateOf(listOf("High priority", "Needs review")) }
+
+    ShowcaseCard(
+        title = "MultiSelects",
+        description = "Multi-select dropdowns with removable chips, search, overflow, and custom rows.",
+    ) {
+        AdaptiveMultiSelect(
+            options = departments,
+            selectedOptions = selectedSimple,
+            onSelectedOptionsChange = { selectedSimple = it },
+            optionLabel = { it },
+            label = "Departments",
+            placeholder = "Choose departments",
+            initialExpanded = initialExpanded,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = departments,
+            selectedOptions = selectedSearchable,
+            onSelectedOptionsChange = { selectedSearchable = it },
+            optionLabel = { it },
+            label = "Searchable teams",
+            searchable = true,
+            clearable = true,
+            maxVisibleChips = 2,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = departments,
+            selectedOptions = selectedOverflow,
+            onSelectedOptionsChange = { selectedOverflow = it },
+            optionLabel = { it },
+            label = "Overflow chips",
+            maxVisibleChips = 1,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = departments,
+            selectedOptions = listOf("Finance", "Security"),
+            onSelectedOptionsChange = {},
+            optionLabel = { it },
+            label = "Disabled multi-select",
+            enabled = false,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = people,
+            selectedOptions = selectedPeople,
+            onSelectedOptionsChange = { selectedPeople = it },
+            optionLabel = { it.name },
+            label = "Assignees",
+            maxVisibleChips = 2,
+            optionContent = { person, selected ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AdaptiveAvatar(name = person.name, size = 28.dp)
+                        Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
+                        Column {
+                            Label(person.name)
+                            Body(person.team)
+                        }
+                    }
+                    if (selected) {
+                        AdaptiveBadge("Selected")
+                    }
+                }
+            },
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = listOf("High priority", "Needs review", "Escalated", "Customer visible"),
+            selectedOptions = selectedCustomChips,
+            onSelectedOptionsChange = { selectedCustomChips = it },
+            optionLabel = { it },
+            label = "Custom chip content",
+            chipContent = { option ->
+                BasicText(
+                    text = option,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1D4ED8),
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = departments,
+            selectedOptions = emptyList(),
+            onSelectedOptionsChange = {},
+            optionLabel = { it },
+            label = "Required teams",
+            placeholder = "Pick at least one",
+            isError = true,
+            supportingText = "Select at least one team before saving.",
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveMultiSelect(
+            options = emptyList<String>(),
+            selectedOptions = emptyList(),
+            onSelectedOptionsChange = {},
+            optionLabel = { it },
+            label = "Empty options",
+            emptyContent = { Body("No teams available.") },
+        )
+    }
+}
+
+private data class DemoPerson(
+    val name: String,
+    val team: String,
+)
 
 @Composable
 private fun SectionHeaderDividerSection() {

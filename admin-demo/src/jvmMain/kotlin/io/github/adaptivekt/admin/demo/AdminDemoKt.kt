@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
                 title = "AdaptiveKt Admin Demo",
                 state = windowState,
             ) {
-                AdminDemoApp(initialScreen = config.screen)
+                AdminDemoApp(initialScreen = config.screen, initialDarkTheme = config.darkTheme)
             }
         }
     }

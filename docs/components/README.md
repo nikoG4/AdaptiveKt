@@ -15,6 +15,7 @@ Complete reference for all AdaptiveKt components, organized by module.
 
 ## Components
 
+- [**Adaptive Theme**](components/adaptive-theme.md) — Colors, shapes, typography, and state tokens
 - [**Adaptive Button**](components/adaptive-button.md) — Primary, secondary, ghost, danger variants
 - [**Adaptive Icon Button**](components/adaptive-icon-button.md) — Icon-only buttons
 - [**Adaptive Badge**](components/adaptive-badge.md) — Status indicators
@@ -25,6 +26,7 @@ Complete reference for all AdaptiveKt components, organized by module.
 - [**Adaptive Dropdown Menu**](components/adaptive-dropdown-menu.md) — Inline menus
 - [**Adaptive Menu Item**](components/adaptive-menu-item.md) — Menu items
 - [**Adaptive Select**](components/adaptive-select.md) — Dropdown selection
+- [**Adaptive Multi Select**](adaptive-multi-select.md) — Multi-value dropdown selection
 - [**Adaptive Icons**](components/adaptive-icons.md) — Icon library
 
 ## Navigation

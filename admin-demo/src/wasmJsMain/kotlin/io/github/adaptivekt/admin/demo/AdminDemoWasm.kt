@@ -8,9 +8,10 @@ import kotlinx.browser.window
 public fun main() {
     val params = window.location.search.removePrefix("?").split("&")
     val screenParam = params.find { it.startsWith("screen=") }?.substringAfter("=")
+    val darkTheme = params.any { it == "theme=dark" }
     val initialScreen = AdminDemoScreen.fromId(screenParam)
 
     ComposeViewport(viewportContainerId = "webApp") {
-        AdminDemoApp(initialScreen = initialScreen)
+        AdminDemoApp(initialScreen = initialScreen, initialDarkTheme = darkTheme)
     }
 }

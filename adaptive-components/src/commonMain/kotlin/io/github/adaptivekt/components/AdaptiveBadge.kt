@@ -15,6 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveColorScheme
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 public enum class AdaptiveBadgeTone {
@@ -31,7 +33,7 @@ public fun AdaptiveBadge(
     modifier: Modifier = Modifier,
     tone: AdaptiveBadgeTone = AdaptiveBadgeTone.Neutral,
 ) {
-    val colors = badgeColors(tone)
+    val colors = badgeColors(tone, AdaptiveTheme.colors)
     val shape = AdaptiveComponentDefaults.PillShape
 
     Box(
@@ -61,10 +63,10 @@ private data class BadgeColors(
     val content: Color,
 )
 
-private fun badgeColors(tone: AdaptiveBadgeTone): BadgeColors = when (tone) {
-    AdaptiveBadgeTone.Neutral -> BadgeColors(Color(0xFFF8FAFC), Color(0xFFE2E8F0), Color(0xFF334155))
-    AdaptiveBadgeTone.Success -> BadgeColors(Color(0xFFECFDF5), Color(0xFFA7F3D0), Color(0xFF047857))
-    AdaptiveBadgeTone.Warning -> BadgeColors(Color(0xFFFFF7ED), Color(0xFFFED7AA), Color(0xFFB45309))
-    AdaptiveBadgeTone.Danger -> BadgeColors(Color(0xFFFEF2F2), Color(0xFFFECACA), Color(0xFFB91C1C))
-    AdaptiveBadgeTone.Info -> BadgeColors(Color(0xFFEFF6FF), Color(0xFFBFDBFE), Color(0xFF1D4ED8))
+private fun badgeColors(tone: AdaptiveBadgeTone, colorScheme: AdaptiveColorScheme): BadgeColors = when (tone) {
+    AdaptiveBadgeTone.Neutral -> BadgeColors(colorScheme.surfaceMuted, colorScheme.border, colorScheme.textSecondary)
+    AdaptiveBadgeTone.Success -> BadgeColors(colorScheme.successSubtle, colorScheme.success, colorScheme.successText)
+    AdaptiveBadgeTone.Warning -> BadgeColors(colorScheme.warningSubtle, colorScheme.warning, colorScheme.warningText)
+    AdaptiveBadgeTone.Danger -> BadgeColors(colorScheme.dangerSubtle, colorScheme.danger, colorScheme.dangerText)
+    AdaptiveBadgeTone.Info -> BadgeColors(colorScheme.infoSubtle, colorScheme.info, colorScheme.infoText)
 }

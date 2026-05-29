@@ -40,12 +40,15 @@ import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMenuItem
+import io.github.adaptivekt.components.AdaptiveMultiSelect
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveColorSchemes
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.data.AdaptiveDataColumn
 import io.github.adaptivekt.data.AdaptiveDataContent
@@ -106,6 +109,28 @@ internal fun SiteComponentDetailPage(example: LiveExample) {
 }
 
 private fun componentExamples(): List<LiveExample> = listOf(
+    LiveExample(
+        title = "AdaptiveTheme",
+        description = "Shared colors, shapes, typography, and state tokens for AdaptiveKt primitives.",
+        code = """AdaptiveTheme(
+    colorScheme = AdaptiveColorSchemes.defaultLight().copy(
+        primary = Color(0xFF0F766E),
+    ),
+) { App() }""",
+    ) {
+        val teal = AdaptiveColorSchemes.defaultLight().copy(
+            primary = Color(0xFF0F766E),
+            primarySubtle = Color(0xFFCCFBF1),
+            primaryText = Color(0xFF134E4A),
+        )
+        AdaptiveTheme(colorScheme = teal) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                AdaptiveButton("Themed", onClick = {})
+                AdaptiveChip("Token", tone = AdaptiveChipTone.Primary, selected = true)
+                AdaptiveBadge("Light")
+            }
+        }
+    },
     LiveExample(
         title = "AdaptiveButton",
         description = "Button variants, sizes, and icon slots.",
@@ -240,6 +265,56 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
             searchable = true,
             clearable = true,
         )
+    },
+    LiveExample(
+        title = "AdaptiveMultiSelect",
+        description = "Multi-select dropdown with selected chips, local search, overflow, and custom option rows.",
+        code = """AdaptiveMultiSelect(
+    options = teams,
+    selectedOptions = selected,
+    onSelectedOptionsChange = { selected = it },
+    optionLabel = { it },
+    maxVisibleChips = 2,
+)""",
+    ) {
+        val teams = listOf("Operations", "Finance", "Support", "Security", "Sales")
+        var selected by remember { mutableStateOf(listOf("Operations", "Finance", "Support")) }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AdaptiveMultiSelect(
+                options = teams,
+                selectedOptions = selected,
+                onSelectedOptionsChange = { selected = it },
+                optionLabel = { it },
+                label = "Teams",
+                placeholder = "Choose teams",
+                searchable = true,
+                clearable = true,
+                maxVisibleChips = 2,
+            )
+            AdaptiveMultiSelect(
+                options = listOf("Alicia Romero", "Noah Kim", "Marta Silva"),
+                selectedOptions = listOf("Alicia Romero"),
+                onSelectedOptionsChange = {},
+                optionLabel = { it },
+                label = "Custom options",
+                optionContent = { name, selectedOption ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AdaptiveAvatar(name = name, size = 28.dp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            SiteText(name, fontWeight = FontWeight.Bold)
+                        }
+                        if (selectedOption) {
+                            AdaptiveBadge("Selected")
+                        }
+                    }
+                },
+            )
+        }
     },
     LiveExample(
         title = "AdaptiveNavigationScaffold",

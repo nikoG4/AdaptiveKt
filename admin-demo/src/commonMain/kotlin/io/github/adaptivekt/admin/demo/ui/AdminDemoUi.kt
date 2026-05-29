@@ -43,6 +43,7 @@ import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 @Composable
@@ -66,9 +67,9 @@ public fun DemoText(
                 else -> FontWeight.Normal
             },
             color = when (emphasis) {
-                Emphasis.Strong -> Color(0xFF0F172A)
-                Emphasis.Subtle -> Color(0xFF64748B)
-                else -> Color(0xFF0F172A)
+                Emphasis.Strong -> AdaptiveTheme.colors.textPrimary
+                Emphasis.Subtle -> AdaptiveTheme.colors.textMuted
+                else -> AdaptiveTheme.colors.textPrimary
             },
         ),
         maxLines = maxLines,
@@ -93,12 +94,12 @@ public fun DemoThumbnail(
             .size(44.dp)
             .clip(RoundedCornerShape(AdaptiveTokens.Radius.Medium))
             .background(tone, RoundedCornerShape(AdaptiveTokens.Radius.Medium))
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(AdaptiveTokens.Radius.Medium)),
+            .border(1.dp, AdaptiveTheme.colors.border, RoundedCornerShape(AdaptiveTokens.Radius.Medium)),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
             text = initialsFor(label).take(2),
-            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)),
+            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary),
             maxLines = 1,
         )
     }
@@ -107,6 +108,8 @@ public fun DemoThumbnail(
 @Composable
 public fun AdminDemoTopBar(
     initialAccountMenuOpen: Boolean = false,
+    darkTheme: Boolean = false,
+    onThemeToggle: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -119,7 +122,17 @@ public fun AdminDemoTopBar(
             text = "AdaptiveKt Admin Demo",
             emphasis = Emphasis.Strong,
         )
-        AccountMenu(initialExpanded = initialAccountMenuOpen)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+        ) {
+            DemoToggleChip(
+                text = if (darkTheme) "Dark" else "Light",
+                selected = darkTheme,
+                onClick = onThemeToggle,
+            )
+            AccountMenu(initialExpanded = initialAccountMenuOpen)
+        }
     }
 }
 
@@ -130,14 +143,14 @@ private fun AccountMenu(
     val (expanded, setExpanded) = remember { mutableStateOf(initialExpanded) }
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = RoundedCornerShape(AdaptiveTokens.Radius.Pill)
+    val shape = AdaptiveTheme.shapes.pill
 
     Box {
         Row(
             modifier = Modifier
                 .clip(shape)
-                .background(if (hovered || expanded) Color(0xFFF1F5F9) else Color(0xFFFFFFFF), shape)
-                .border(1.dp, Color(0xFFE2E8F0), shape)
+                .background(if (hovered || expanded) AdaptiveTheme.colors.disabledBackground else AdaptiveTheme.colors.surface, shape)
+                .border(1.dp, AdaptiveTheme.colors.border, shape)
                 .hoverable(interactionSource)
                 .clickable(
                     interactionSource = interactionSource,
@@ -149,7 +162,7 @@ private fun AccountMenu(
         ) {
             AdaptiveAvatar(name = "Lina Torres", size = 32.dp)
             DemoText(text = "Lina", emphasis = Emphasis.Default)
-            AdaptiveIcons.ChevronDown(size = 14.dp, tint = Color(0xFF64748B))
+            AdaptiveIcons.ChevronDown(size = 14.dp, tint = AdaptiveTheme.colors.textMuted)
         }
 
         if (expanded) {
@@ -162,9 +175,9 @@ private fun AccountMenu(
                 Column(
                     modifier = Modifier
                         .width(220.dp)
-                        .clip(RoundedCornerShape(AdaptiveTokens.Radius.Large))
-                        .background(Color.White, RoundedCornerShape(AdaptiveTokens.Radius.Large))
-                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(AdaptiveTokens.Radius.Large))
+                        .clip(AdaptiveTheme.shapes.large)
+                        .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.large)
+                        .border(1.dp, AdaptiveTheme.colors.border, AdaptiveTheme.shapes.large)
                         .padding(AdaptiveTokens.Spacing.Small),
                 ) {
                     Row(
@@ -209,7 +222,7 @@ public fun DemoCard(
         ) {
             BasicText(
                 text = title,
-                style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B)),
+                style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = AdaptiveTheme.colors.textMuted),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -220,14 +233,14 @@ public fun DemoCard(
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         BasicText(
             text = value,
-            style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)),
+            style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
         BasicText(
             text = subtitle,
-            style = TextStyle(fontSize = 12.sp, color = Color(0xFF64748B)),
+            style = TextStyle(fontSize = 12.sp, color = AdaptiveTheme.colors.textMuted),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
@@ -264,11 +277,11 @@ public fun DemoBadge(text: String) {
 public fun DemoStatusText(text: String) {
     val tone = badgeToneFor(text)
     val foreground = when (tone) {
-        AdaptiveBadgeTone.Success -> Color(0xFF047857)
-        AdaptiveBadgeTone.Warning -> Color(0xFFB45309)
-        AdaptiveBadgeTone.Danger -> Color(0xFFB91C1C)
-        AdaptiveBadgeTone.Info -> Color(0xFF1D4ED8)
-        AdaptiveBadgeTone.Neutral -> Color(0xFF334155)
+        AdaptiveBadgeTone.Success -> AdaptiveTheme.colors.success
+        AdaptiveBadgeTone.Warning -> AdaptiveTheme.colors.warning
+        AdaptiveBadgeTone.Danger -> AdaptiveTheme.colors.danger
+        AdaptiveBadgeTone.Info -> AdaptiveTheme.colors.info
+        AdaptiveBadgeTone.Neutral -> AdaptiveTheme.colors.textSecondary
     }
 
     BasicText(
@@ -289,12 +302,12 @@ public fun DemoToggleChip(
         modifier = Modifier
             .clickable(onClick = onClick)
             .background(
-                if (selected) Color(0xFF2563EB) else Color(0xFFF8FAFC),
+                if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.surfaceMuted,
                 RoundedCornerShape(AdaptiveTokens.Radius.Pill),
             )
             .border(
                 1.dp,
-                if (selected) Color(0xFF2563EB) else Color(0xFFD7E0EA),
+                if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.borderStrong,
                 RoundedCornerShape(AdaptiveTokens.Radius.Pill),
             )
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
@@ -304,7 +317,7 @@ public fun DemoToggleChip(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = if (selected) Color.White else Color(0xFF334155),
+                color = if (selected) AdaptiveTheme.colors.textInverse else AdaptiveTheme.colors.textSecondary,
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

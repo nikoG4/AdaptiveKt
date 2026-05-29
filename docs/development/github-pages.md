@@ -62,6 +62,12 @@ The workflow configures Java 17, Gradle, and the Android SDK, then runs:
 .\tools\prepare-pages-site.ps1
 ```
 
+Local Pages builds should also use JDK 17. If a local shell points `JAVA_HOME` at a newer JDK, Kotlin/Gradle can fail before compilation starts. See `docs/development/setup.md` and run:
+
+```powershell
+.\tools\check-dev-environment.ps1
+```
+
 ## Notes
 
 - `site/` is retained as the old static fallback for now.

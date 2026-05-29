@@ -32,60 +32,53 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
-import io.github.adaptivekt.components.AdaptiveComponentDefaults
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 
-/**
- * Returns true if [label] contains [query] (case-insensitive). Empty [query] always matches.
- */
-public fun selectMatchesQuery(label: String, query: String): Boolean {
-    if (query.isEmpty()) return true
-    return label.contains(query, ignoreCase = true)
+public fun <T> filterMultiSelectOptions(
+    options: List<T>,
+    query: String,
+    optionLabel: (T) -> String,
+): List<T> = if (query.isEmpty()) {
+    options
+} else {
+    options.filter { selectMatchesQuery(optionLabel(it), query) }
 }
 
+public fun <T> visibleMultiSelectChips(
+    selectedOptions: List<T>,
+    maxVisibleChips: Int,
+): List<T> = selectedOptions.take(maxVisibleChips.coerceAtLeast(0))
+
+public fun hiddenMultiSelectChipCount(
+    selectedCount: Int,
+    maxVisibleChips: Int,
+): Int = (selectedCount - maxVisibleChips.coerceAtLeast(0)).coerceAtLeast(0)
+
 /**
- * A single-selection dropdown component styled like [AdaptiveTextField].
+ * Multi-selection dropdown with local search and removable selected chips.
  *
- * Internally uses [AdaptiveAnchoredDropdownMenu] for popup positioning.
- *
- * @param options The list of options to display.
- * @param selectedOption The currently selected option, or null for no selection.
- * @param onOptionSelected Called when an option is selected (null when cleared).
- * @param optionLabel Returns the display label for an option.
- * @param modifier Optional modifier.
- * @param label Optional label above the select field.
- * @param placeholder Placeholder text when nothing is selected.
- * @param enabled Whether the select is interactive.
- * @param searchable If true, a search field appears inside the dropdown.
- * @param clearable If true, a clear button appears when an option is selected.
- * @param isError If true, the field shows an error border.
- * @param supportingText Optional supporting or error text below the field.
- * @param maxMenuHeight Maximum height of the dropdown menu.
- * @param initialExpanded Whether the dropdown starts open, useful for deterministic visual capture.
- * @param optionContent Optional custom composable for each option row.
- * @param selectedContent Optional custom composable for the selected value display.
- * @param emptyContent Optional composable shown when no options/search results are available.
+ * Internally uses [AdaptiveAnchoredDropdownMenu] and keeps the dropdown open while options are toggled.
  */
 @Composable
-public fun <T> AdaptiveSelect(
+public fun <T> AdaptiveMultiSelect(
     options: List<T>,
-    selectedOption: T?,
-    onOptionSelected: (T?) -> Unit,
+    selectedOptions: List<T>,
+    onSelectedOptionsChange: (List<T>) -> Unit,
     optionLabel: (T) -> String,
     modifier: Modifier = Modifier,
     label: String? = null,
-    placeholder: String = "Select an option",
+    placeholder: String = "Select options",
     enabled: Boolean = true,
-    searchable: Boolean = false,
+    searchable: Boolean = true,
     clearable: Boolean = true,
     isError: Boolean = false,
     supportingText: String? = null,
     maxMenuHeight: Dp = 320.dp,
+    maxVisibleChips: Int = 3,
     initialExpanded: Boolean = false,
     optionContent: (@Composable (option: T, selected: Boolean) -> Unit)? = null,
-    selectedContent: (@Composable (option: T) -> Unit)? = null,
+    chipContent: (@Composable (option: T) -> Unit)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
 ) {
     var expanded by remember(initialExpanded) { mutableStateOf(initialExpanded) }
@@ -99,13 +92,11 @@ public fun <T> AdaptiveSelect(
     }
     val bgColor = if (enabled) AdaptiveComponentDefaults.Surface else AdaptiveComponentDefaults.DisabledSurface
 
-    // When closed, reset search query
     if (!expanded && searchQuery.isNotEmpty()) {
         searchQuery = ""
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Label
         if (label != null) {
             BasicText(
                 text = label,
@@ -120,7 +111,6 @@ public fun <T> AdaptiveSelect(
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
         }
 
-        // The anchor trigger + dropdown wrapper
         AdaptiveAnchoredDropdownMenu(
             expanded = expanded,
             onExpandedChange = { if (enabled) expanded = it },
@@ -128,27 +118,29 @@ public fun <T> AdaptiveSelect(
             matchAnchorWidth = true,
             maxHeight = maxMenuHeight,
             anchor = { _, toggle ->
-                SelectTrigger(
-                    selectedOption = selectedOption,
+                MultiSelectTrigger(
+                    selectedOptions = selectedOptions,
                     optionLabel = optionLabel,
                     placeholder = placeholder,
                     enabled = enabled,
                     expanded = expanded,
                     clearable = clearable,
-                    isError = isError,
                     bgColor = bgColor,
                     borderColor = borderColor,
                     shape = shape,
-                    selectedContent = selectedContent,
-                    onClear = {
-                        onOptionSelected(null)
+                    maxVisibleChips = maxVisibleChips,
+                    chipContent = chipContent,
+                    onRemove = { option ->
+                        onSelectedOptionsChange(selectedOptions.filterNot { it == option })
+                    },
+                    onClearAll = {
+                        onSelectedOptionsChange(emptyList())
                         expanded = false
                     },
                     onClick = toggle,
                 )
             },
         ) {
-            // Search field at top of menu
             if (searchable) {
                 AdaptiveSearchField(
                     value = searchQuery,
@@ -160,9 +152,8 @@ public fun <T> AdaptiveSelect(
                 Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
             }
 
-            // Filtered options
-            val visibleOptions = if (searchable && searchQuery.isNotEmpty()) {
-                options.filter { selectMatchesQuery(optionLabel(it), searchQuery) }
+            val visibleOptions = if (searchable) {
+                filterMultiSelectOptions(options, searchQuery, optionLabel)
             } else {
                 options
             }
@@ -185,34 +176,33 @@ public fun <T> AdaptiveSelect(
                 }
             } else {
                 visibleOptions.forEach { option ->
-                    val isSelected = option == selectedOption
+                    val isSelected = selectedOptions.any { it == option }
+                    val nextSelection = {
+                        if (isSelected) {
+                            selectedOptions.filterNot { it == option }
+                        } else {
+                            selectedOptions + option
+                        }
+                    }
+
                     if (optionContent != null) {
-                        SelectOptionWrapper(
+                        MultiSelectOptionWrapper(
                             selected = isSelected,
-                            onClick = {
-                                onOptionSelected(option)
-                                expanded = false
-                                searchQuery = ""
-                            },
+                            onClick = { onSelectedOptionsChange(nextSelection()) },
                         ) {
                             optionContent(option, isSelected)
                         }
                     } else {
-                        SelectMenuItem(
+                        MultiSelectMenuItem(
                             text = optionLabel(option),
                             selected = isSelected,
-                            onClick = {
-                                onOptionSelected(option)
-                                expanded = false
-                                searchQuery = ""
-                            },
+                            onClick = { onSelectedOptionsChange(nextSelection()) },
                         )
                     }
                 }
             }
         }
 
-        // Supporting / error text
         if (!supportingText.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
             BasicText(
@@ -229,25 +219,28 @@ public fun <T> AdaptiveSelect(
 }
 
 @Composable
-private fun <T> SelectTrigger(
-    selectedOption: T?,
+private fun <T> MultiSelectTrigger(
+    selectedOptions: List<T>,
     optionLabel: (T) -> String,
     placeholder: String,
     enabled: Boolean,
     expanded: Boolean,
     clearable: Boolean,
-    isError: Boolean,
     bgColor: Color,
     borderColor: Color,
     shape: androidx.compose.ui.graphics.Shape,
-    selectedContent: (@Composable (T) -> Unit)?,
-    onClear: () -> Unit,
+    maxVisibleChips: Int,
+    chipContent: (@Composable (T) -> Unit)?,
+    onRemove: (T) -> Unit,
+    onClearAll: () -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val actualBg = if (hovered && enabled && !expanded) AdaptiveComponentDefaults.SurfaceSubtle else bgColor
-    val showClear = clearable && selectedOption != null && enabled
+    val showClear = clearable && selectedOptions.isNotEmpty() && enabled
+    val visibleChips = visibleMultiSelectChips(selectedOptions, maxVisibleChips)
+    val hiddenCount = hiddenMultiSelectChipCount(selectedOptions.size, maxVisibleChips)
 
     Row(
         modifier = Modifier
@@ -267,20 +260,7 @@ private fun <T> SelectTrigger(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Selected value or placeholder
-        if (selectedOption != null) {
-            if (selectedContent != null) {
-                selectedContent(selectedOption)
-            } else {
-                BasicText(
-                    text = optionLabel(selectedOption),
-                    style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        } else {
+        if (selectedOptions.isEmpty()) {
             BasicText(
                 text = placeholder,
                 style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
@@ -288,46 +268,107 @@ private fun <T> SelectTrigger(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+        } else {
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.XSmall),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                visibleChips.forEach { option ->
+                    if (chipContent != null) {
+                        MultiSelectCustomChip(enabled = enabled, onRemove = { onRemove(option) }) {
+                            chipContent(option)
+                        }
+                    } else {
+                        AdaptiveChip(
+                            text = optionLabel(option),
+                            enabled = enabled,
+                            selected = true,
+                            tone = AdaptiveChipTone.Primary,
+                            trailingIcon = if (enabled) {
+                                {
+                                    AdaptiveIcons.Close(
+                                        size = 12.dp,
+                                        tint = Color.White,
+                                        contentDescription = "Remove ${optionLabel(option)}",
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                            onClick = if (enabled) {
+                                { onRemove(option) }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+                }
+                if (hiddenCount > 0) {
+                    AdaptiveChip(text = "+$hiddenCount", enabled = enabled, tone = AdaptiveChipTone.Neutral)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
 
-        // Clear button
         if (showClear) {
             AdaptiveIconButton(
-                onClick = onClear,
+                onClick = onClearAll,
                 size = 28.dp,
             ) {
                 AdaptiveIcons.Close(
                     size = 16.dp,
                     tint = AdaptiveComponentDefaults.MutedText,
+                    contentDescription = "Clear selection",
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
         }
 
-        // Chevron icon
-        val chevronTint = if (enabled) AdaptiveComponentDefaults.MutedText else AdaptiveComponentDefaults.DisabledText
-        if (expanded) {
-            AdaptiveIcons.ChevronDown(
-                size = 16.dp,
-                tint = AdaptiveComponentDefaults.Primary,
-            )
-        } else {
-            AdaptiveIcons.ChevronDown(
-                size = 16.dp,
-                tint = chevronTint,
-            )
+        AdaptiveIcons.ChevronDown(
+            size = 16.dp,
+            tint = if (expanded) AdaptiveComponentDefaults.Primary else if (enabled) AdaptiveComponentDefaults.MutedText else AdaptiveComponentDefaults.DisabledText,
+        )
+    }
+}
+
+@Composable
+private fun MultiSelectCustomChip(
+    enabled: Boolean,
+    onRemove: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(AdaptiveTokens.Radius.Pill)
+    Row(
+        modifier = Modifier
+            .heightIn(min = 32.dp)
+            .clip(shape)
+            .background(if (enabled) AdaptiveComponentDefaults.PrimarySubtle else AdaptiveComponentDefaults.DisabledSurface, shape)
+            .border(1.dp, if (enabled) AdaptiveComponentDefaults.Primary else AdaptiveComponentDefaults.Border, shape)
+            .clickable(enabled = enabled, onClick = onRemove)
+            .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        content()
+        if (enabled) {
+            Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.XSmall))
+            AdaptiveIcons.Close(size = 12.dp, tint = AdaptiveComponentDefaults.Primary)
         }
     }
 }
 
 @Composable
-private fun SelectMenuItem(
+private fun MultiSelectMenuItem(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    if (!selected) {
+        AdaptiveMenuItem(text = text, onClick = onClick)
+        return
+    }
+
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
@@ -373,7 +414,7 @@ private fun SelectMenuItem(
 }
 
 @Composable
-private fun SelectOptionWrapper(
+private fun MultiSelectOptionWrapper(
     selected: Boolean,
     onClick: () -> Unit,
     content: @Composable () -> Unit,

@@ -19,6 +19,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveColorScheme
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -58,9 +60,10 @@ public fun AdaptiveChip(
     trailingIcon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val chipColor = chipBackgroundColor(selected, enabled, tone)
-    val chipBorderColor = chipBorderColor(selected, enabled, tone)
-    val chipTextColor = chipTextColor(selected, enabled, tone)
+    val colorScheme = AdaptiveTheme.colors
+    val chipColor = chipBackgroundColor(selected, enabled, tone, colorScheme)
+    val chipBorderColor = chipBorderColor(selected, enabled, tone, colorScheme)
+    val chipTextColor = chipTextColor(selected, enabled, tone, colorScheme)
     val shape = RoundedCornerShape(AdaptiveTokens.Radius.Pill)
 
     Row(
@@ -99,50 +102,65 @@ public fun AdaptiveChip(
     }
 }
 
-private fun chipBackgroundColor(selected: Boolean, enabled: Boolean, tone: AdaptiveChipTone): Color {
+private fun chipBackgroundColor(
+    selected: Boolean,
+    enabled: Boolean,
+    tone: AdaptiveChipTone,
+    colorScheme: AdaptiveColorScheme,
+): Color {
     return when (tone) {
-        AdaptiveChipTone.Primary -> if (selected && enabled) Color(0xFF2563EB) else if (enabled) Color(0xFFEBF4FF) else Color(0xFFE5E7EB)
-        AdaptiveChipTone.Success -> if (selected && enabled) Color(0xFF047857) else if (enabled) Color(0xFFF0FDF4) else Color(0xFFE5E7EB)
-        AdaptiveChipTone.Warning -> if (selected && enabled) Color(0xFFB45309) else if (enabled) Color(0xFFFDF6E7) else Color(0xFFE5E7EB)
-        AdaptiveChipTone.Danger -> if (selected && enabled) Color(0xFFB91C1C) else if (enabled) Color(0xFFFFF5F5) else Color(0xFFE5E7EB)
-        AdaptiveChipTone.Info -> if (selected && enabled) Color(0xFF1D4ED8) else if (enabled) Color(0xFFEEF2FF) else Color(0xFFE5E7EB)
-        AdaptiveChipTone.Neutral -> if (selected && enabled) Color(0xFF334155) else if (enabled) Color(0xFFF8FAFC) else Color(0xFFE5E7EB)
+        AdaptiveChipTone.Primary -> if (selected && enabled) colorScheme.primary else if (enabled) colorScheme.primarySubtle else colorScheme.disabledBackground
+        AdaptiveChipTone.Success -> if (selected && enabled) colorScheme.success else if (enabled) colorScheme.successSubtle else colorScheme.disabledBackground
+        AdaptiveChipTone.Warning -> if (selected && enabled) colorScheme.warning else if (enabled) colorScheme.warningSubtle else colorScheme.disabledBackground
+        AdaptiveChipTone.Danger -> if (selected && enabled) colorScheme.danger else if (enabled) colorScheme.dangerSubtle else colorScheme.disabledBackground
+        AdaptiveChipTone.Info -> if (selected && enabled) colorScheme.info else if (enabled) colorScheme.infoSubtle else colorScheme.disabledBackground
+        AdaptiveChipTone.Neutral -> if (selected && enabled) colorScheme.textSecondary else if (enabled) colorScheme.surfaceMuted else colorScheme.disabledBackground
     }
 }
 
-private fun chipBorderColor(selected: Boolean, enabled: Boolean, tone: AdaptiveChipTone): Color {
+private fun chipBorderColor(
+    selected: Boolean,
+    enabled: Boolean,
+    tone: AdaptiveChipTone,
+    colorScheme: AdaptiveColorScheme,
+): Color {
     return when {
-        !enabled -> Color(0xFFE5E7EB)
+        !enabled -> colorScheme.border
         selected -> when (tone) {
-            AdaptiveChipTone.Primary -> Color(0xFF2563EB)
-            AdaptiveChipTone.Success -> Color(0xFF047857)
-            AdaptiveChipTone.Warning -> Color(0xFFB45309)
-            AdaptiveChipTone.Danger -> Color(0xFFB91C1C)
-            AdaptiveChipTone.Info -> Color(0xFF1D4ED8)
-            AdaptiveChipTone.Neutral -> Color(0xFF334155)
+            AdaptiveChipTone.Primary -> colorScheme.primary
+            AdaptiveChipTone.Success -> colorScheme.success
+            AdaptiveChipTone.Warning -> colorScheme.warning
+            AdaptiveChipTone.Danger -> colorScheme.danger
+            AdaptiveChipTone.Info -> colorScheme.info
+            AdaptiveChipTone.Neutral -> colorScheme.textSecondary
         }
         else -> when (tone) {
-            AdaptiveChipTone.Primary -> Color(0xFF315FDC)
-            AdaptiveChipTone.Success -> Color(0xFF059669)
-            AdaptiveChipTone.Warning -> Color(0xFFF59E0B)
-            AdaptiveChipTone.Danger -> Color(0xFFF87171)
-            AdaptiveChipTone.Info -> Color(0xFF6366F1)
-            AdaptiveChipTone.Neutral -> Color(0xFF94A3B8)
+            AdaptiveChipTone.Primary -> colorScheme.primary
+            AdaptiveChipTone.Success -> colorScheme.success
+            AdaptiveChipTone.Warning -> colorScheme.warning
+            AdaptiveChipTone.Danger -> colorScheme.danger
+            AdaptiveChipTone.Info -> colorScheme.info
+            AdaptiveChipTone.Neutral -> colorScheme.disabledText
         }
     }
 }
 
-private fun chipTextColor(selected: Boolean, enabled: Boolean, tone: AdaptiveChipTone): Color {
+private fun chipTextColor(
+    selected: Boolean,
+    enabled: Boolean,
+    tone: AdaptiveChipTone,
+    colorScheme: AdaptiveColorScheme,
+): Color {
     return when {
-        !enabled -> Color(0xFF9CA3AF)
-        selected -> Color.White
+        !enabled -> colorScheme.disabledText
+        selected -> colorScheme.textInverse
         else -> when (tone) {
-            AdaptiveChipTone.Primary -> Color(0xFF1E3A8A)
-            AdaptiveChipTone.Success -> Color(0xFF065F46)
-            AdaptiveChipTone.Warning -> Color(0xFF92400E)
-            AdaptiveChipTone.Danger -> Color(0xFF991B1B)
-            AdaptiveChipTone.Info -> Color(0xFF3730A3)
-            AdaptiveChipTone.Neutral -> Color(0xFF334155)
+            AdaptiveChipTone.Primary -> colorScheme.primaryText
+            AdaptiveChipTone.Success -> colorScheme.successText
+            AdaptiveChipTone.Warning -> colorScheme.warningText
+            AdaptiveChipTone.Danger -> colorScheme.dangerText
+            AdaptiveChipTone.Info -> colorScheme.infoText
+            AdaptiveChipTone.Neutral -> colorScheme.textSecondary
         }
     }
 }

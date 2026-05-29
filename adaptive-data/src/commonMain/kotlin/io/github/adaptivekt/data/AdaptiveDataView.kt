@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -46,17 +45,12 @@ import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveBreakpoint
 import io.github.adaptivekt.core.AdaptiveContent
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.feedback.EmptyState
 import io.github.adaptivekt.feedback.ErrorState
 import io.github.adaptivekt.feedback.LoadingState
-
-private val DataSurface = Color(0xFFFFFFFF)
-private val DataBorder = Color(0xFFE2E8F0)
-private val DataHeaderBackground = Color(0xFFF1F5F9)
-private val DataText = Color(0xFF0F172A)
-private val DataMutedText = Color(0xFF64748B)
 
 /**
  * Displays adaptive data using a responsive table or card layout depending on the current breakpoint.
@@ -193,7 +187,7 @@ private fun <T> AdaptiveDataTableRow(
     onItemClick: ((T) -> Unit)? = null,
     rowActions: List<AdaptiveDataAction<T>> = emptyList(),
 ) {
-    val rowBackground = if (isHeader) DataHeaderBackground else DataSurface
+    val rowBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
     val rowInteractionSource = remember { MutableInteractionSource() }
     val rowModifier = Modifier
         .fillMaxWidth()
@@ -313,7 +307,7 @@ private fun HeaderText(text: String) {
         style = TextStyle(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF475569),
+            color = AdaptiveTheme.colors.textSecondary,
         ),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -448,7 +442,7 @@ private fun <T> MetadataRow(column: AdaptiveDataColumn<T>, item: T) {
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = DataMutedText,
+                color = AdaptiveTheme.colors.textMuted,
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -525,10 +519,11 @@ private fun <T> MobileActions(
 
 @Composable
 private fun DefaultStatusBadge(content: @Composable () -> Unit) {
+    val shape = AdaptiveTheme.shapes.pill
     Box(
         modifier = Modifier
-            .background(Color(0xFFEFF6FF), RoundedCornerShape(AdaptiveTokens.Radius.Pill))
-            .border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(AdaptiveTokens.Radius.Pill))
+            .background(AdaptiveTheme.colors.infoSubtle, shape)
+            .border(1.dp, AdaptiveTheme.colors.borderStrong, shape)
             .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.XSmall),
         contentAlignment = Alignment.Center,
     ) {
@@ -575,9 +570,10 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
             onClick = { setExpanded(!expanded) },
             size = AdaptiveTokens.Sizes.ButtonHeight,
         ) {
-            AdaptiveIcons.MoreVertical(size = 18.dp, tint = Color(0xFF1E40AF))
+            AdaptiveIcons.MoreVertical(size = 18.dp, tint = AdaptiveTheme.colors.primaryText)
         }
         if (expanded) {
+            val shape = AdaptiveTheme.shapes.medium
             Popup(
                 alignment = Alignment.TopEnd,
                 offset = popupOffset,
@@ -587,8 +583,8 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
                 Column(
                     modifier = Modifier
                         .width(menuWidth)
-                        .background(Color.White, RoundedCornerShape(AdaptiveTokens.Radius.Medium))
-                        .border(1.dp, DataBorder, RoundedCornerShape(AdaptiveTokens.Radius.Medium))
+                        .background(AdaptiveTheme.colors.surface, shape)
+                        .border(1.dp, AdaptiveTheme.colors.border, shape)
                         .padding(AdaptiveTokens.Spacing.Small),
                 ) {
                     actions.forEach { action ->

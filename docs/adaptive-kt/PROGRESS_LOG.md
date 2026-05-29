@@ -1,3 +1,115 @@
+T3 - Dark Mode
+==============
+
+Status: Completed
+
+Date: 2026-05-29
+
+Summary:
+- Added `AdaptiveColorSchemes.defaultDark()` to `:adaptive-core`.
+- Kept `AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark())` as the public opt-in API.
+- Added light/dark toggles to `:docs-site` and `:admin-demo`.
+- Added Wasm query parameter support for deterministic dark captures.
+- Extended Web capture tooling with docs-site and admin-demo dark smoke screenshots.
+
+Constraints preserved:
+- No platform presets.
+- No Material 3 or external dependencies.
+- No public API changes beyond adding the dark scheme.
+- No broad visual redesign.
+
+T2 - Module Theme Token Migration
+=================================
+
+Status: Completed
+
+Date: 2026-05-29
+
+Summary:
+- Migrated `:adaptive-feedback` internals to `AdaptiveTheme` colors/shapes.
+- Migrated `:adaptive-forms` section, label, validation, and compact action colors/typography to theme tokens.
+- Migrated `:adaptive-data` table, mobile-card metadata, status badge shell, overflow menu shell, and affordance colors to theme tokens.
+- Migrated `:adaptive-navigation` shell, selected state, top bar, drawer overlay, border, glyph, and text colors to theme tokens.
+
+Constraints preserved:
+- No public API changes.
+- No dark mode or platform presets.
+- No external dependencies or Material 3.
+- No DataView/navigation behavior changes.
+
+T1 - AdaptiveTheme Foundation
+=============================
+
+Status: Completed
+
+Date: 2026-05-29
+
+Summary:
+- Added `AdaptiveTheme` to `:adaptive-core`.
+- Added `AdaptiveColorScheme`, `AdaptiveColorSchemes.defaultLight()`, `AdaptiveShapeScheme`, `AdaptiveTypography`, and `AdaptiveStateScheme`.
+- Migrated safe `:adaptive-components` base primitives to read theme colors/shapes while keeping the default light look close to the previous design.
+- Wrapped `:admin-demo` and `:docs-site` roots with `AdaptiveTheme`.
+- Documented the T2/T3 theme migration path.
+
+Constraints preserved:
+- No dark mode.
+- No platform presets.
+- No external dependencies or Material 3.
+- No public component API changes beyond adding the theme API.
+
+ENV-1 - Java/JDK Environment Guardrails
+=======================================
+
+Status: Completed
+
+Date: 2026-05-29
+
+Summary:
+- Documented that AdaptiveKt local and CI builds are validated with JDK 17.
+- Added `tools/check-dev-environment.ps1` to diagnose `JAVA_HOME`, `java -version`, local `local.properties` presence, and Android SDK configuration.
+- Added `docs/development/setup.md` with Windows PowerShell JDK 17 setup guidance.
+- Linked setup guidance from README, development docs, and GitHub Pages docs.
+
+Notes:
+- No local JDK path was committed as Gradle configuration.
+- `org.gradle.java.home` was not added to `gradle.properties`.
+- The script only reports environment state and does not modify the system.
+
+PR C10 - AdaptiveMultiSelect
+============================
+
+Status: Completed
+
+Date: 2026-05-29
+
+Summary:
+- Added `AdaptiveMultiSelect<T>` to `:adaptive-components`.
+- Reused `AdaptiveAnchoredDropdownMenu`, `AdaptiveChip`, `AdaptiveSearchField`, `AdaptiveMenuItem`-style rows, and `AdaptiveIcons`.
+- Added local filtering, selected chip overflow, clear-all, disabled state, validation text, custom option rows, and custom chip content.
+- Added focused admin-demo routes `components-multiselects` and `components-multiselects-open`.
+- Added a live `AdaptiveMultiSelect` example to `:docs-site`.
+- Added component docs and API notes.
+
+Verification:
+- `:adaptive-components:build` passes locally with JDK 17.
+- `:adaptive-components:compileKotlinWasmJs` passes.
+- `:admin-demo:build` passes.
+- `:admin-demo:wasmJsBrowserDistribution` passes.
+- `:docs-site:wasmJsBrowserDistribution` passes.
+- Full `build` passes.
+- `tools/prepare-pages-site.ps1` passes.
+- `tools/check-site-links.ps1` passes.
+- Desktop component captures pass, including `components-multiselects` and `components-multiselects-open`.
+- Admin-demo Web/Wasm captures pass, including `components-multiselects` and `components-multiselects-open`.
+- Docs-site Web captures pass.
+
+Constraints preserved:
+- No external dependencies.
+- No Material 3.
+- No dark mode or theme foundation.
+- No existing `AdaptiveSelect` API changes.
+- No Maven publication or release.
+
 R0/SITE-3 - Publication Audit, Docs-Site Captures, Link Check, Pages Hardening
 =============================================================================
 

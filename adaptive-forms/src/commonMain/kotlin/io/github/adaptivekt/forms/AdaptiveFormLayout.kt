@@ -20,8 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -29,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveInfo
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.layout.AdaptiveGrid
@@ -158,7 +157,7 @@ private fun CompactStickyForm(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(Color(0xFFF7F7F7))
+                .background(AdaptiveTheme.colors.surfaceMuted)
                 .padding(AdaptiveTokens.Spacing.Medium),
         ) {
             FormActions(
@@ -185,7 +184,11 @@ private fun FormSection(
         section.title?.let {
             BasicText(
                 text = it,
-                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)),
+                style = AdaptiveTheme.typography.subtitle.copy(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AdaptiveTheme.colors.textPrimary,
+                ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -195,7 +198,7 @@ private fun FormSection(
         section.description?.let {
             BasicText(
                 text = it,
-                style = TextStyle(fontSize = 14.sp, color = Color(0xFF64748B)),
+                style = AdaptiveTheme.typography.body.copy(color = AdaptiveTheme.colors.textMuted),
             )
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         }
@@ -257,7 +260,11 @@ private fun FieldLabel(field: FormFieldModel) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         BasicText(
             text = field.label,
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A)),
+            style = AdaptiveTheme.typography.label.copy(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AdaptiveTheme.colors.textPrimary,
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -265,7 +272,11 @@ private fun FieldLabel(field: FormFieldModel) {
             Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
             BasicText(
                 text = "*",
-                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDC2626)),
+                style = AdaptiveTheme.typography.label.copy(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AdaptiveTheme.colors.danger,
+                ),
             )
         }
     }
@@ -274,14 +285,14 @@ private fun FieldLabel(field: FormFieldModel) {
 @Composable
 private fun ValidationMessageView(message: ValidationMessage) {
     val color = when (message.type) {
-        ValidationMessageType.Error -> Color(0xFFB91C1C)
-        ValidationMessageType.Warning -> Color(0xFFB45309)
-        ValidationMessageType.Info -> Color(0xFF1D4ED8)
+        ValidationMessageType.Error -> AdaptiveTheme.colors.danger
+        ValidationMessageType.Warning -> AdaptiveTheme.colors.warning
+        ValidationMessageType.Info -> AdaptiveTheme.colors.info
     }
 
     BasicText(
         text = message.message,
-        style = TextStyle(fontSize = 12.sp, color = color),
+        style = AdaptiveTheme.typography.caption.copy(color = color),
     )
 }
 

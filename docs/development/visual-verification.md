@@ -21,7 +21,10 @@ Captured routes:
 - `/components/`
 - `/docs/`
 - `/demo/`
+- `/?theme=dark` on compact and large
+- `/components/?theme=dark` on compact and large
 - `/demo/app/` smoke target
+- `/demo/app/?theme=dark` smoke target
 
 Viewports:
 
@@ -42,6 +45,13 @@ build/web-visual-captures/
 build/adaptivekt-admin-demo-web-visual-captures.zip
 ```
 
+The Web capture matrix includes light screenshots for the main admin-demo screens and dark screenshots on compact and large for:
+
+- `dashboard`
+- `invoices-error`
+- `components-selects`
+- `components-multiselects`
+
 ## Admin Demo Desktop
 
 ```powershell
@@ -49,6 +59,8 @@ build/adaptivekt-admin-demo-web-visual-captures.zip
 ```
 
 Desktop capture uses AWT `Robot` and requires an active graphical session.
+
+The desktop capture entry point accepts `--theme dark` for individual dark screenshots. The batch PowerShell matrix remains light-only for now.
 
 ## Link Check
 

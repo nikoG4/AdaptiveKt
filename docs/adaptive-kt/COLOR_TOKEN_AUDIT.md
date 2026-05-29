@@ -1,12 +1,18 @@
 # Color Token Audit
 
-PR C6 records hardcoded color usage as preparation for a future theme/dark-mode foundation. No colors were changed in this PR.
+PR C6 records hardcoded color usage as preparation for a future theme/dark-mode foundation.
+
+T1 update: `AdaptiveTheme` and `AdaptiveColorScheme` now exist in `:adaptive-core`, and base `:adaptive-components` primitives read shared theme tokens where the migration is low risk. Dark mode is still not implemented.
+
+T2 update: `adaptive-feedback`, `adaptive-forms`, `adaptive-data`, and `adaptive-navigation` now consume `AdaptiveTheme` for their internal surfaces, borders, semantic tones, selected states, and text colors.
+
+T3 update: `AdaptiveColorSchemes.defaultDark()` now maps the full shared color scheme. Docs-site and admin-demo can be switched to dark mode through UI toggles and web query parameters for capture automation.
 
 ## Summary By Module
 
 ### `:adaptive-components`
 
-Primary color ownership currently lives in `AdaptiveComponentDefaults` and component-local state functions.
+Primary color ownership now lives in `AdaptiveColorScheme`, with `AdaptiveComponentDefaults` acting as an internal bridge for component defaults.
 
 Categories found:
 
@@ -21,8 +27,9 @@ Categories found:
 
 Risk:
 
-- This is the closest thing to a color scheme, but it is not yet a theme API.
-- Button, badge, avatar, text field, and icon colors should eventually read from a shared `AdaptiveColorScheme`.
+- T1 covers the safest shared primitives.
+- Avatar/thumbnail placeholder palettes still retain local generated tones.
+- Remaining work is mostly module-level migration and specialized component-family tokens.
 
 ### `:adaptive-data`
 
@@ -38,8 +45,8 @@ Categories found:
 
 Risk:
 
-- DataView still owns table-specific colors because there are no table tokens yet.
-- Status badges are local and should eventually align with shared tone tokens.
+- DataView now uses shared surface, border, text, info, and primary tokens for its internal shells.
+- Dedicated table tokens may still be useful later for richer table density/hover/selection variants.
 
 ### `:adaptive-navigation`
 
@@ -56,8 +63,8 @@ Categories found:
 
 Risk:
 
-- Navigation colors are strongly tied to admin-shell identity.
-- Future dark mode needs dedicated navigation tokens rather than generic card colors.
+- Navigation now uses shared surface, border, primary, muted, inverse, and overlay tokens.
+- Future dark mode may still need dedicated navigation tokens if generic surface tokens are not expressive enough.
 
 ### `:adaptive-forms`
 
@@ -70,8 +77,8 @@ Categories found:
 
 Risk:
 
-- Validation colors should become shared semantic tokens.
-- Form label/description text should use typography/color tokens.
+- Validation colors, label text, description text, and compact sticky background now use shared theme tokens.
+- More specialized form density/field-group tokens can wait until a future form polish PR.
 
 ### `:adaptive-feedback`
 
@@ -84,7 +91,7 @@ Categories found:
 
 Risk:
 
-- Feedback visual variants need semantic status colors.
+- Feedback visual variants now use shared info/danger/text tokens.
 - Error currently uses the Close icon because the minimal icon set has no warning/error icon.
 
 ### `:admin-demo`
@@ -105,7 +112,16 @@ Risk:
 
 ## Future Token Groups
 
-Recommended color-token groups for a later theme PR:
+Implemented in T1:
+
+- Surface/background: app, panel, subtle, raised.
+- Border: default, strong, focus ring.
+- Text: primary, secondary, muted, disabled, inverse.
+- Accent: primary plus subtle/text.
+- Semantic: success, warning, danger, info.
+- State: hover/pressed/selected/disabled alpha, focus border width.
+
+Implemented token groups through T3:
 
 - Surface/background: app, panel, subtle, raised
 - Border: default, strong, focus
@@ -117,4 +133,4 @@ Recommended color-token groups for a later theme PR:
 
 ## Scope Note
 
-This audit is intentionally descriptive. PR C6 does not introduce `AdaptiveTheme`, `AdaptiveColorScheme`, dark mode, or any visual color migration.
+T1 introduced theme foundation, T2 migrated shared modules, and T3 introduced the default dark scheme. Platform presets and broad redesign remain out of scope.

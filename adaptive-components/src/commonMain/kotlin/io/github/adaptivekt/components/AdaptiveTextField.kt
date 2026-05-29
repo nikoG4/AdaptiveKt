@@ -72,7 +72,7 @@ public fun AdaptiveTextField(
                 .fillMaxWidth()
                 .heightIn(min = AdaptiveTokens.Sizes.ButtonHeight)
                 .clip(shape)
-                .background(if (enabled) AdaptiveComponentDefaults.Surface else Color(0xFFF1F5F9), shape)
+                .background(if (enabled) AdaptiveComponentDefaults.Surface else AdaptiveComponentDefaults.DisabledSurface, shape)
                 .border(1.dp, border, shape)
                 .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
             horizontalArrangement = Arrangement.Start,
@@ -88,7 +88,10 @@ public fun AdaptiveTextField(
                 onValueChange = onValueChange,
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
-                textStyle = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    color = if (enabled) AdaptiveComponentDefaults.Text else AdaptiveComponentDefaults.DisabledText,
+                ),
                 cursorBrush = SolidColor(AdaptiveComponentDefaults.Primary),
                 interactionSource = interactionSource,
                 decorationBox = { innerTextField ->

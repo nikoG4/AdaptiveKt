@@ -1,6 +1,12 @@
 # Tokens Inventory
 
-PR C6 records the current `AdaptiveTokens` surface and likely gaps for future theming work. No tokens were added or changed in this PR.
+PR C6 records the current `AdaptiveTokens` surface and likely gaps for future theming work.
+
+T1 update: `AdaptiveTheme` now adds color, shape, typography, and state token families in `:adaptive-core`.
+
+T2 update: feedback, forms, data, and navigation internals now consume the shared theme token families.
+
+T3 update: `AdaptiveColorSchemes.defaultDark()` now maps the same color token family for dark mode.
 
 ## Current Tokens
 
@@ -60,18 +66,24 @@ TableRowMinHeight = 48.dp
 TopBarHeight = 56.dp
 ```
 
-## Missing Token Families
+## Theme Token Families Added In T1
+
+- `AdaptiveColorScheme`
+  - surfaces, borders, text, primary, semantic tones, disabled/focus/overlay.
+  - Built-in schemes: `defaultLight()` and `defaultDark()`.
+- `AdaptiveShapeScheme`
+  - small, medium, large, pill, circle.
+- `AdaptiveTypography`
+  - title, subtitle, body, bodySmall, label, caption.
+- `AdaptiveStateScheme`
+  - hover, pressed, selected, disabled, focus border width.
+
+## Remaining Token Gaps
 
 Recommended future additions:
 
-- `AdaptiveColorScheme`
-  - surface, surface subtle, border, text, muted text, primary, semantic tones
-- `AdaptiveTypography`
-  - title, section title, body, caption, label, table header, button
 - `AdaptiveElevation`
   - flat, raised, floating/overlay if needed
-- Component state tokens
-  - hover, pressed, selected, disabled, focus
 - Table tokens
   - header background, row border, row hover, numeric alignment guidance, density
 - Form tokens
@@ -85,4 +97,4 @@ Recommended future additions:
 
 ## Guidance
 
-Keep future token work separate from migration PRs. The current hardcoded colors are stable enough for v0.1 demos, but dark mode and branding require a real color-scheme API before broad replacement.
+Keep future token work incremental. Light and dark schemes are now in place, and shared modules consume them through `AdaptiveTheme`. Branding and platform presets should remain separate follow-up PRs.

@@ -22,13 +22,22 @@ const screens = [
     'components-dropdowns',
     'components-fields',
     'components-selects',
-    'components-selects-open'
+    'components-selects-open',
+    'components-multiselects',
+    'components-multiselects-open'
 ];
 
 const viewports = [
     { name: 'compact', width: 420, height: 900 },
     { name: 'medium', width: 720, height: 900 },
     { name: 'large', width: 1440, height: 900 }
+];
+
+const darkScreens = [
+    'dashboard',
+    'invoices-error',
+    'components-selects',
+    'components-multiselects'
 ];
 
 async function capture() {
@@ -44,13 +53,20 @@ async function capture() {
             viewport: { width: viewport.width, height: viewport.height }
         });
 
-        for (const screen of screens) {
+        const captureTargets = screens.map(screen => ({ screen, theme: 'light' }));
+        if (viewport.name === 'compact' || viewport.name === 'large') {
+            darkScreens.forEach(screen => captureTargets.push({ screen, theme: 'dark' }));
+        }
+
+        for (const target of captureTargets) {
+            const screen = target.screen;
+            const isDark = target.theme === 'dark';
             const page = await context.newPage();
-            const url = `${baseUrl}/?screen=${screen}`;
-            const filename = `${screen}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
+            const url = `${baseUrl}/?screen=${screen}${isDark ? '&theme=dark' : ''}`;
+            const filename = `${screen}${isDark ? '-dark' : ''}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
             const filePath = path.join(outputDir, filename);
 
-            console.log(`Capturing ${screen} at ${viewport.name} (${viewport.width}x${viewport.height})...`);
+            console.log(`Capturing ${screen}${isDark ? ' dark' : ''} at ${viewport.name} (${viewport.width}x${viewport.height})...`);
 
             try {
                 await page.goto(url, { waitUntil: 'networkidle' });
@@ -59,10 +75,10 @@ async function capture() {
                 // Small stabilization delay
                 await page.waitForTimeout(2000);
                 await page.screenshot({ path: filePath });
-                results.push({ screen, viewport: viewport.name, size: `${viewport.width}x${viewport.height}`, file: filename, success: true });
+                results.push({ screen: isDark ? `${screen}-dark` : screen, viewport: viewport.name, size: `${viewport.width}x${viewport.height}`, file: filename, success: true });
             } catch (e) {
-                console.error(`Failed to capture ${screen} at ${viewport.name}: ${e.message}`);
-                results.push({ screen, viewport: viewport.name, size: `${viewport.width}x${viewport.height}`, success: false, error: e.message });
+                console.error(`Failed to capture ${screen}${isDark ? ' dark' : ''} at ${viewport.name}: ${e.message}`);
+                results.push({ screen: isDark ? `${screen}-dark` : screen, viewport: viewport.name, size: `${viewport.width}x${viewport.height}`, success: false, error: e.message });
             }
             await page.close();
         }

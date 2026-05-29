@@ -11,4 +11,6 @@ internal expect fun openSiteUrl(url: String)
 
 internal expect fun initialSiteRoute(): SiteRoute
 
-internal expect fun pushSiteRoute(route: SiteRoute)
+internal expect fun initialSiteDarkTheme(): Boolean
+
+internal expect fun pushSiteRoute(route: SiteRoute, darkTheme: Boolean)

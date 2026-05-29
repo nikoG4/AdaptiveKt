@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +28,7 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveSurface
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.layout.AdaptiveGrid
 
@@ -140,7 +140,7 @@ private fun DashboardPreview() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 82.dp)
-                            .background(Color(0xFFF8FAFC), RoundedCornerShape(8.dp))
+                            .background(AdaptiveTheme.colors.surfaceMuted, RoundedCornerShape(8.dp))
                             .border(1.dp, SiteLine, RoundedCornerShape(8.dp))
                             .padding(12.dp),
                     ) {

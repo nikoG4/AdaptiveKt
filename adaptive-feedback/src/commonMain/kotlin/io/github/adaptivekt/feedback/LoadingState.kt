@@ -10,10 +10,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -26,13 +26,13 @@ internal fun SimpleLoadingIndicator(
     Box(
         modifier = modifier
             .size(52.dp)
-            .border(width = 3.dp, color = Color(0xFFBFDBFE), shape = CircleShape),
+            .border(width = 3.dp, color = AdaptiveTheme.colors.primarySubtle, shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
                 .size(14.dp)
-                .background(Color(0xFF2563EB), CircleShape),
+                .background(AdaptiveTheme.colors.primary, CircleShape),
         )
     }
 }
@@ -56,7 +56,7 @@ fun LoadingState(
             SimpleText(
                 text = message,
                 fontSize = 14.sp,
-                color = Color(0xFF64748B),
+                color = AdaptiveTheme.colors.textMuted,
                 textAlign = TextAlign.Center,
             )
         }

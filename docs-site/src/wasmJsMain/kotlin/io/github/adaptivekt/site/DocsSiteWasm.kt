@@ -25,13 +25,21 @@ internal actual fun initialSiteRoute(): SiteRoute {
     }
 }
 
-internal actual fun pushSiteRoute(route: SiteRoute) {
+internal actual fun initialSiteDarkTheme(): Boolean {
+    return window.location.search
+        .removePrefix("?")
+        .split("&")
+        .any { it == "theme=dark" }
+}
+
+internal actual fun pushSiteRoute(route: SiteRoute, darkTheme: Boolean) {
     val base = siteBasePath()
-    val nextPath = if (route == SiteRoute.Home) {
+    val nextPathBase = if (route == SiteRoute.Home) {
         base
     } else {
         base + route.path.trim('/')
     }
+    val nextPath = if (darkTheme) "$nextPathBase?theme=dark" else nextPathBase
     window.history.pushState(null, route.label, nextPath)
 }
 

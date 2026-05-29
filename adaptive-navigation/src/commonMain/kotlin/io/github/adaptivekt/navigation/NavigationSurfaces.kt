@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,18 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
-
-private val NavigationSurfaceBackground = Color(0xFFF6F8FB)
-private val NavigationItemBackground = Color(0xFFFFFFFF)
-private val NavigationItemSelectedBackground = Color(0xFFE8F1FF)
-private val NavigationItemBorder = Color(0xFFE1E7EF)
-private val NavigationItemSelectedBorder = Color(0xFF2F7DF6)
-private val NavigationGlyphBackground = Color(0xFFE9EEF6)
-private val NavigationGlyphSelectedBackground = Color(0xFF2563EB)
-private val NavigationTextColor = Color(0xFF334155)
-private val NavigationTextSelectedColor = Color(0xFF0F172A)
-private val NavigationGlyphTextColor = Color(0xFF334155)
 
 @Composable
 public fun Sidebar(
@@ -49,20 +38,24 @@ public fun Sidebar(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(NavigationSurfaceBackground)
+            .background(AdaptiveTheme.colors.surfaceMuted)
             .padding(horizontal = AdaptiveTokens.Spacing.Large, vertical = AdaptiveTokens.Spacing.XLarge),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
     ) {
         BasicText(
             text = "AdaptiveKt Admin",
-            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)),
+            style = AdaptiveTheme.typography.subtitle.copy(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = AdaptiveTheme.colors.textPrimary,
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         BasicText(
             text = "Workspace overview",
-            style = TextStyle(fontSize = 12.sp, color = Color(0xFF64748B)),
+            style = AdaptiveTheme.typography.caption.copy(color = AdaptiveTheme.colors.textMuted),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -92,15 +85,19 @@ public fun Drawer(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(Color.White)
-            .border(width = 1.dp, color = NavigationItemBorder)
+            .background(AdaptiveTheme.colors.surface)
+            .border(width = 1.dp, color = AdaptiveTheme.colors.border)
             .padding(horizontal = AdaptiveTokens.Spacing.Large, vertical = AdaptiveTokens.Spacing.XLarge),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
     ) {
         BasicText(
             text = "AdaptiveKt Admin Demo",
-            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)),
+            style = AdaptiveTheme.typography.subtitle.copy(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = AdaptiveTheme.colors.textPrimary,
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -130,8 +127,8 @@ public fun BottomNavigation(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .border(width = 1.dp, color = NavigationItemBorder)
+            .background(AdaptiveTheme.colors.surface)
+            .border(width = 1.dp, color = AdaptiveTheme.colors.border)
             .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.Small),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
@@ -162,7 +159,7 @@ public fun NavigationRail(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(NavigationSurfaceBackground)
+            .background(AdaptiveTheme.colors.surfaceMuted)
             .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.Large),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,12 +192,12 @@ private fun NavigationItem(
     onItemSelected: (String) -> Unit,
     layout: NavigationItemLayout,
 ) {
-    val itemBackground = if (selected) NavigationItemSelectedBackground else NavigationItemBackground
-    val itemBorder = if (selected) NavigationItemSelectedBorder else NavigationItemBorder
-    val textColor = if (selected) NavigationTextSelectedColor else NavigationTextColor
-    val glyphBackground = if (selected) NavigationGlyphSelectedBackground else NavigationGlyphBackground
-    val glyphTextColor = if (selected) Color.White else NavigationGlyphTextColor
-    val shape = RoundedCornerShape(AdaptiveTokens.Radius.Medium)
+    val itemBackground = if (selected) AdaptiveTheme.colors.primarySubtle else AdaptiveTheme.colors.surface
+    val itemBorder = if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.border
+    val textColor = if (selected) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textSecondary
+    val glyphBackground = if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.disabledBackground
+    val glyphTextColor = if (selected) AdaptiveTheme.colors.textInverse else AdaptiveTheme.colors.textSecondary
+    val shape = AdaptiveTheme.shapes.medium
 
     val itemModifier = modifier
         .clickable { onItemSelected(item.id) }
@@ -290,7 +287,7 @@ private fun NavigationGlyph(
     Box(
         modifier = Modifier
             .size(AdaptiveTokens.Sizes.IconBox)
-            .background(background, shape = RoundedCornerShape(AdaptiveTokens.Radius.Pill)),
+            .background(background, shape = AdaptiveTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
         if (item.icon != null) {
@@ -298,7 +295,11 @@ private fun NavigationGlyph(
         } else {
             BasicText(
                 text = item.label.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = textColor),
+                style = AdaptiveTheme.typography.label.copy(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor,
+                ),
             )
         }
     }

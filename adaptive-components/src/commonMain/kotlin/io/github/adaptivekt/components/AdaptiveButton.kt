@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveColorScheme
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 public enum class AdaptiveButtonVariant {
@@ -58,7 +60,7 @@ public fun AdaptiveButton(
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val shape = AdaptiveComponentDefaults.PillShape
-    val colors = buttonColors(variant, enabled, hovered, pressed)
+    val colors = buttonColors(variant, enabled, hovered, pressed, AdaptiveTheme.colors)
     val metrics = buttonMetrics(size)
 
     Box(
@@ -128,26 +130,27 @@ private fun buttonColors(
     enabled: Boolean,
     hovered: Boolean,
     pressed: Boolean,
+    colorScheme: AdaptiveColorScheme,
 ): ButtonColors {
     if (!enabled) {
         return ButtonColors(
-            background = Color(0xFFF1F5F9),
-            content = Color(0xFF94A3B8),
-            border = Color(0xFFE2E8F0),
+            background = colorScheme.disabledBackground,
+            content = colorScheme.disabledText,
+            border = colorScheme.border,
         )
     }
 
     return when (variant) {
         AdaptiveButtonVariant.Primary -> ButtonColors(
             background = when {
-                pressed -> AdaptiveComponentDefaults.PrimaryPressed
-                hovered -> AdaptiveComponentDefaults.PrimaryHover
-                else -> AdaptiveComponentDefaults.Primary
+                pressed -> Color(0xFF1D4ED8)
+                hovered -> Color(0xFF315FDC)
+                else -> colorScheme.primary
             },
-            content = Color.White,
+            content = colorScheme.textInverse,
             border = when {
-                pressed -> AdaptiveComponentDefaults.PrimaryPressed
-                else -> AdaptiveComponentDefaults.Primary
+                pressed -> Color(0xFF1D4ED8)
+                else -> colorScheme.primary
             },
         )
 
@@ -155,10 +158,10 @@ private fun buttonColors(
             background = when {
                 pressed -> Color(0xFFE2E8F0)
                 hovered -> Color(0xFFF1F5F9)
-                else -> AdaptiveComponentDefaults.SurfaceSubtle
+                else -> colorScheme.surfaceMuted
             },
-            content = AdaptiveComponentDefaults.Text,
-            border = if (hovered || pressed) AdaptiveComponentDefaults.BorderStrong else AdaptiveComponentDefaults.Border,
+            content = colorScheme.textPrimary,
+            border = if (hovered || pressed) colorScheme.borderStrong else colorScheme.border,
         )
 
         AdaptiveButtonVariant.Ghost -> ButtonColors(
@@ -167,7 +170,7 @@ private fun buttonColors(
                 hovered -> Color(0xFFF8FAFC)
                 else -> Color.Transparent
             },
-            content = AdaptiveComponentDefaults.Text,
+            content = colorScheme.textPrimary,
             border = Color.Transparent,
             borderWidth = 0.dp,
         )
@@ -178,7 +181,7 @@ private fun buttonColors(
                 hovered -> Color(0xFFFFEEEE)
                 else -> Color(0xFFFEF2F2)
             },
-            content = AdaptiveComponentDefaults.Danger,
+            content = colorScheme.danger,
             border = if (hovered || pressed) Color(0xFFFCA5A5) else Color(0xFFFECACA),
         )
     }

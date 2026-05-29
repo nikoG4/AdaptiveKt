@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveContent
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 
@@ -74,14 +73,14 @@ public fun AdaptiveNavigationScaffold(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color(0x330F172A))
+                                        .background(AdaptiveTheme.colors.overlay)
                                         .clickable { drawerOpen = false },
                                 )
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .width(NavigationSurfaceWidth)
-                                        .background(Color.White)
+                                        .background(AdaptiveTheme.colors.surface)
                                 ) {
                                     Drawer(
                                         items = navItems,
@@ -106,7 +105,7 @@ public fun AdaptiveNavigationScaffold(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .align(Alignment.BottomCenter)
-                                    .background(Color(0xFFF5F5F5)),
+                                    .background(AdaptiveTheme.colors.surfaceMuted),
                             ) {
                                 BottomNavigation(
                                     items = navItems,
@@ -125,7 +124,7 @@ public fun AdaptiveNavigationScaffold(
                                 modifier = Modifier
                                     .width(NavigationRailWidth)
                                     .fillMaxHeight()
-                                    .background(Color(0xFFF5F5F5)),
+                                    .background(AdaptiveTheme.colors.surfaceMuted),
                                 onItemSelected = onItemSelected,
                             )
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -144,7 +143,7 @@ public fun AdaptiveNavigationScaffold(
                                 modifier = Modifier
                                     .width(NavigationSurfaceWidth)
                                     .fillMaxHeight()
-                                    .background(Color(0xFFF5F5F5)),
+                                    .background(AdaptiveTheme.colors.surfaceMuted),
                                 onItemSelected = onItemSelected,
                             )
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -178,8 +177,8 @@ private fun ContentTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(TopBarHeight)
-            .background(Color.White)
-            .border(width = 1.dp, color = Color(0xFFE2E8F0))
+            .background(AdaptiveTheme.colors.surface)
+            .border(width = 1.dp, color = AdaptiveTheme.colors.border)
             .padding(horizontal = AdaptiveTokens.Spacing.Large),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -200,8 +199,8 @@ private fun CompactTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(TopBarHeight)
-            .background(Color.White)
-            .border(width = 1.dp, color = Color(0xFFE2E8F0))
+            .background(AdaptiveTheme.colors.surface)
+            .border(width = 1.dp, color = AdaptiveTheme.colors.border)
             .padding(horizontal = AdaptiveTokens.Spacing.Medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -210,8 +209,8 @@ private fun CompactTopBar(
                 modifier = Modifier
                     .size(AdaptiveTokens.Sizes.ButtonHeight)
                     .clickable(onClick = onMenuClick)
-                    .background(Color(0xFFF8FAFC), RoundedCornerShape(AdaptiveTokens.Radius.Pill))
-                    .border(1.dp, Color(0xFFD7E0EA), RoundedCornerShape(AdaptiveTokens.Radius.Pill)),
+                    .background(AdaptiveTheme.colors.surfaceMuted, AdaptiveTheme.shapes.pill)
+                    .border(1.dp, AdaptiveTheme.colors.borderStrong, AdaptiveTheme.shapes.pill),
                 contentAlignment = Alignment.Center,
             ) {
                 BasicText(
@@ -219,7 +218,7 @@ private fun CompactTopBar(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E40AF),
+                        color = AdaptiveTheme.colors.primaryText,
                     ),
                     maxLines = 1,
                 )
@@ -240,7 +239,7 @@ private fun CompactTopBar(
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF0F172A),
+                        color = AdaptiveTheme.colors.textPrimary,
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

@@ -25,6 +25,8 @@ It does not depend on layout, navigation, data, forms, feedback, admin-demo, Mat
 - `AdaptiveSurface`
 - `AdaptiveDropdownMenu`
 - `AdaptiveMenuItem`
+- `AdaptiveSelect`
+- `AdaptiveMultiSelect`
 - `AdaptiveTextField`
 - `AdaptiveSearchField`
 - `AdaptiveSectionHeader`
@@ -82,12 +84,11 @@ Button hover and pressed states are painted inside the clipped pill shape. The i
 
 ## Not Included Yet
 
-- `AdaptiveSelect`
-- `AdaptiveMultiSelect`
 - DataView v2
 - Dark mode/theme system
 - Icon packs
-- Complex anchored menu positioning
+- Async/server-backed select search
+- Virtualized select menus
 - Massive migration of existing modules
 
 ## Future Adoption
@@ -256,8 +257,86 @@ Kept local intentionally:
 
 No feedback public API changed in PR C4.
 
+## PR C10 AdaptiveMultiSelect
+
+`adaptive-components` now includes `AdaptiveMultiSelect<T>`, a multi-selection companion to `AdaptiveSelect<T>`.
+
+Contract:
+
+- `selectedOptions` is the complete selected list.
+- `onSelectedOptionsChange` emits the complete next selected list.
+- `optionLabel` is required.
+- `optionContent` customizes option rows.
+- `chipContent` customizes selected chip content.
+- `searchable` filters locally.
+- `clearable` clears all selected options.
+- `maxVisibleChips` collapses overflow into a `+N` chip.
+- `enabled`, `isError`, and `supportingText` follow the select/text-field style contract.
+
+Showcase routes:
+
+- `components-multiselects`
+- `components-multiselects-open`
+
+Out of scope:
+
+- Async/server search.
+- Virtualized option lists.
+- Theme foundation or dark mode.
+
+## T1 AdaptiveTheme Foundation
+
+`adaptive-core` now includes the initial theme API:
+
+- `AdaptiveTheme`
+- `AdaptiveColorScheme`
+- `AdaptiveColorSchemes.defaultLight()`
+- `AdaptiveColorSchemes.defaultDark()`
+- `AdaptiveShapeScheme`
+- `AdaptiveTypography`
+- `AdaptiveStateScheme`
+
+`adaptive-components` consumes the theme in base primitives through direct token reads and `AdaptiveComponentDefaults`. The default light values intentionally match the previous visual style closely.
+
+Migrated in T1:
+
+- Buttons and icon buttons.
+- Badges and chips.
+- Cards, surfaces, dropdown containers, dividers, and section headers.
+- Text/search/select/multi-select input surfaces and text colors.
+- Menu items.
+
+Kept for later:
+
+- Platform presets.
+- A complete typography migration.
+
+## T2 Module Theme Migration
+
+`adaptive-feedback`, `adaptive-forms`, `adaptive-data`, and `adaptive-navigation` now consume `AdaptiveTheme` internally while preserving their public APIs.
+
+Migrated:
+
+- Feedback state surfaces, text, info and danger glyph treatments.
+- Form labels, section text, validation tones, and compact sticky action background.
+- Data table/card internal shells, status badge shell, metadata text, overflow menu shell, and primary overflow affordance.
+- Navigation shell backgrounds, drawer overlay, top bars, selected item state, glyph state, borders, and text colors.
+
+Still out of scope:
+
+- Dark mode.
+- Platform presets.
+- Table/form/navigation-specific token families beyond the shared base scheme.
+- Sorting, pagination, or DataView behavior changes.
+
+## T3 Dark Mode
+
+`AdaptiveColorSchemes.defaultDark()` is available and can be passed to `AdaptiveTheme(colorScheme = ...)`.
+
+Docs-site and admin-demo expose light/dark toggles. Their Wasm entry points also support `theme=dark` query parameters for repeatable screenshots.
+
 ## Limitations
 
-- Colors are local component defaults for now; a full theme/color-token system is future work.
-- Dropdown rendering is intentionally simple and inline for B3, avoiding unanchored popups while the public API remains minimal.
-- B3.1 validates the current top viewport of each focused section; deeper interaction-state screenshots are future work.
+- `AdaptiveTheme` exists with light and dark default schemes; platform presets are future work.
+- Dropdown rendering uses the shared anchored popup for select-style components.
+- B3.1 and later capture routes validate the current top viewport of each focused section; deeper interaction-state screenshots are future work.

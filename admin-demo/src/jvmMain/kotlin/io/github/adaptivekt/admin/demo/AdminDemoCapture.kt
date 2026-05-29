@@ -16,6 +16,7 @@ internal data class AdminDemoRunConfig(
     val output: String? = null,
     val delayMs: Long = 1200L,
     val accountMenuOpen: Boolean = false,
+    val darkTheme: Boolean = false,
 )
 
 internal fun parseAdminDemoArgs(args: Array<String>): AdminDemoRunConfig {
@@ -27,6 +28,7 @@ internal fun parseAdminDemoArgs(args: Array<String>): AdminDemoRunConfig {
     var output: String? = null
     var delayMs = 1200L
     var accountMenuOpen = false
+    var darkTheme = false
 
     var index = 0
     while (index < tokens.size) {
@@ -74,6 +76,17 @@ internal fun parseAdminDemoArgs(args: Array<String>): AdminDemoRunConfig {
                 accountMenuOpen = true
                 index += 1
             }
+            "--theme" -> {
+                if (index + 1 >= tokens.size) {
+                    throw IllegalArgumentException("Missing value for --theme")
+                }
+                darkTheme = when (tokens[index + 1].lowercase()) {
+                    "dark" -> true
+                    "light" -> false
+                    else -> throw IllegalArgumentException("Invalid theme: ${tokens[index + 1]}")
+                }
+                index += 2
+            }
             "--help", "-h" -> {
                 printAdminDemoHelp()
                 kotlin.system.exitProcess(0)
@@ -94,6 +107,7 @@ internal fun parseAdminDemoArgs(args: Array<String>): AdminDemoRunConfig {
         output = output,
         delayMs = delayMs,
         accountMenuOpen = accountMenuOpen,
+        darkTheme = darkTheme,
     )
 }
 
@@ -106,6 +120,7 @@ private fun printAdminDemoHelp() {
     println("  --output <path>")
     println("  --delayMs <int optional, default 1200>")
     println("  --accountMenuOpen")
+    println("  --theme <light|dark optional, default light>")
 }
 
 internal fun runAdminDemoCaptureMode(config: AdminDemoRunConfig): Nothing {
@@ -127,6 +142,7 @@ internal fun runAdminDemoCaptureMode(config: AdminDemoRunConfig): Nothing {
             AdminDemoApp(
                 initialScreen = config.screen,
                 initialAccountMenuOpen = config.accountMenuOpen,
+                initialDarkTheme = config.darkTheme,
             )
         }
         window.isAlwaysOnTop = true
@@ -140,6 +156,7 @@ internal fun runAdminDemoCaptureMode(config: AdminDemoRunConfig): Nothing {
         println("screen=${config.screen}")
         println("requested width=${config.width}, height=${config.height}")
         println("output=${outputFile.absolutePath}")
+        println("theme=${if (config.darkTheme) "dark" else "light"}")
         println("window.title=${window.title}")
         println("window.isVisible=${window.isVisible}")
         println("window.isShowing=${window.isShowing}")

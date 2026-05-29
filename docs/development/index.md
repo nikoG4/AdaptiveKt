@@ -6,6 +6,8 @@
 - Android SDK with platform 34 for Android targets
 - Node/Yarn managed by the Kotlin Gradle plugin for Wasm tasks
 
+See [Development Setup](setup.md) for JDK 17 shell setup and diagnostics.
+
 ## Verification
 
 ```powershell

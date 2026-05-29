@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,18 +28,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
-internal val SiteInk = Color(0xFF162033)
-internal val SiteMuted = Color(0xFF64748B)
-internal val SiteLine = Color(0xFFD8E0EC)
-internal val SiteSoft = Color(0xFFF7F9FC)
-internal val SiteAccent = Color(0xFF176B87)
+internal val SiteInk: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = AdaptiveTheme.colors.textPrimary
+
+internal val SiteMuted: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = AdaptiveTheme.colors.textMuted
+
+internal val SiteLine: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = AdaptiveTheme.colors.border
+
+internal val SiteSoft: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = AdaptiveTheme.colors.background
+
+internal val SiteAccent: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = AdaptiveTheme.colors.info
 
 @Composable
 internal fun SiteLayout(
     route: SiteRoute,
+    darkTheme: Boolean,
     onNavigate: (SiteRoute) -> Unit,
+    onThemeToggle: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Column(
@@ -46,7 +69,12 @@ internal fun SiteLayout(
             .fillMaxSize()
             .background(SiteSoft),
     ) {
-        SiteNavigation(route = route, onNavigate = onNavigate)
+        SiteNavigation(
+            route = route,
+            darkTheme = darkTheme,
+            onThemeToggle = onThemeToggle,
+            onNavigate = onNavigate,
+        )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,18 +125,19 @@ internal fun SiteText(
     text: String,
     modifier: Modifier = Modifier,
     fontSize: androidx.compose.ui.unit.TextUnit = 14.sp,
-    color: Color = SiteInk,
+    color: Color = Color.Unspecified,
     fontWeight: FontWeight = FontWeight.Normal,
     maxLines: Int = 1,
     monospace: Boolean = false,
 ) {
+    val resolvedColor = if (color == Color.Unspecified) SiteInk else color
     BasicText(
         text = text,
         modifier = modifier,
         style = TextStyle(
             fontSize = fontSize,
             lineHeight = fontSize * 1.18f,
-            color = color,
+            color = resolvedColor,
             fontWeight = fontWeight,
             fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default,
         ),

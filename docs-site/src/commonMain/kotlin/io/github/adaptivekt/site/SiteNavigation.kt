@@ -20,17 +20,20 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun SiteNavigation(
     route: SiteRoute,
+    darkTheme: Boolean,
+    onThemeToggle: () -> Unit,
     onNavigate: (SiteRoute) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(AdaptiveTheme.colors.surface)
             .border(1.dp, SiteLine)
             .padding(horizontal = 24.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -54,6 +57,12 @@ internal fun SiteNavigation(
                     onClick = { onNavigate(item) },
                 )
             }
+            AdaptiveButton(
+                text = if (darkTheme) "Light" else "Dark",
+                size = AdaptiveButtonSize.Small,
+                variant = AdaptiveButtonVariant.Secondary,
+                onClick = onThemeToggle,
+            )
             AdaptiveButton(
                 text = "GitHub",
                 size = AdaptiveButtonSize.Small,

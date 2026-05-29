@@ -2,6 +2,13 @@
 
 ## Post SITE-3
 
+- [x] Add local JDK 17 environment diagnostics and setup docs.
+- [x] Add AdaptiveTheme light/default foundation.
+- [x] T2: migrate data/forms/navigation/feedback internals to theme tokens where safe.
+- [x] T3: add dark-mode color scheme after light migration is stable.
+- [ ] T4: evaluate optional platform/brand presets.
+- [ ] Add async/server-backed search guidance for select-style components.
+- [ ] Evaluate virtualized option lists for very large select datasets.
 - [ ] Add optional docs-site visual diff baselines after the first Pages deployment.
 - [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
 - [ ] Validate iOS targets on macOS.
@@ -140,11 +147,12 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 - [ ] Diseñar `AdaptiveDropdownMenu` anclado antes de reemplazar popups de DataView
 - [ ] Revisar hover/pressed visual de row actions con captura manual o tooling futuro
 
-### AdaptiveSelect/MultiSelect (futuro)
+### Select-style components
 
-- [ ] Investigar API de select compositional
-- [ ] Documentar requerimientos
-- [ ] Listar casos de uso
+- [x] Implementar `AdaptiveSelect<T>`
+- [x] Implementar `AdaptiveMultiSelect<T>`
+- [ ] Investigar busqueda async/server-backed
+- [ ] Evaluar virtualizacion de menus grandes
 - [ ] **NO implementar aún**
 
 ### DataView v2
@@ -157,11 +165,12 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 
 ### Theme/dark mode foundation
 
-- [ ] Investigar AdaptiveTheme
-- [ ] Investigar AdaptiveColorScheme
-- [ ] Documentar tokens light/dark
-- [ ] Identificar colores hardcodeados por migrar
-- [ ] **NO implementar aún**
+- [x] Implementar AdaptiveTheme base
+- [x] Implementar AdaptiveColorScheme light/default
+- [x] Documentar tokens light y alcance dark futuro
+- [x] Identificar colores hardcodeados por migrar
+- [x] Migrar data/forms/navigation/feedback en T2
+- [ ] Implementar dark mode en T3
 
 ### UI polish basado en capturas
 

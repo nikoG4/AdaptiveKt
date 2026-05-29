@@ -16,17 +16,29 @@ AdaptiveKt is source-first today. Maven publishing is not available yet, so cons
 ## Features
 
 - Adaptive breakpoints and responsive helpers in `:adaptive-core`
+- Theme foundation with `AdaptiveTheme`, light/dark color schemes, shapes, typography, and state tokens used across core components and shared modules
 - Layout primitives including `AdaptiveContainer` and `AdaptiveGrid`
 - Navigation scaffold with breakpoint-driven navigation modes
 - Data view that switches between mobile cards and wider table layouts
 - Responsive form layout with sections, fields, validation messages, and actions
 - Feedback states for loading, empty, and error content
-- Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, and select
+- Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, and multi-select
 - Wasm browser demo
 - Compose Multiplatform/Wasm documentation site with live component examples
 - Visual verification tooling for Desktop and Web
 
 ## Quick Start
+
+Use JDK 17 for local development and Gradle builds. AdaptiveKt is validated with Java 17 in CI; newer JDKs can fail in Kotlin/Gradle before project compilation starts.
+
+Windows PowerShell session setup:
+
+```powershell
+$env:JAVA_HOME="C:\Program Files\Java\jdk-17"
+$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+.\tools\check-dev-environment.ps1
+.\gradlew.bat build --console=plain --stacktrace
+```
 
 Add the modules you need as source dependencies:
 
@@ -54,9 +66,17 @@ dependencies {
 ## Examples
 
 ```kotlin
-AdaptiveGrid(columns = 12) {
-    item(span = 6) { AdaptiveCard { /* content */ } }
-    item(span = 6) { AdaptiveCard { /* content */ } }
+AdaptiveTheme {
+    AdaptiveGrid(columns = 12) {
+        item(span = 6) { AdaptiveCard { /* content */ } }
+        item(span = 6) { AdaptiveCard { /* content */ } }
+    }
+}
+```
+
+```kotlin
+AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) {
+    AdminApp()
 }
 ```
 
@@ -71,6 +91,20 @@ AdaptiveSelect(
     label = "Status",
     searchable = true,
     clearable = true,
+)
+```
+
+```kotlin
+var teams by remember { mutableStateOf(listOf("Operations", "Finance")) }
+
+AdaptiveMultiSelect(
+    options = listOf("Operations", "Finance", "Support", "Sales"),
+    selectedOptions = teams,
+    onSelectedOptionsChange = { teams = it },
+    optionLabel = { it },
+    label = "Teams",
+    searchable = true,
+    maxVisibleChips = 2,
 )
 ```
 
@@ -136,6 +170,7 @@ Basic generated-site link check:
 - Component docs: `docs/components/`
 - Guides: `docs/guides/`
 - Development notes: `docs/development/`
+- Local setup: `docs/development/setup.md`
 - Roadmap: `docs/roadmap/`
 - Historical project docs: `docs/adaptive-kt/`
 
@@ -160,8 +195,8 @@ Serve the generated site locally:
 - Validate iOS targets on macOS
 - Publish artifacts to Maven Central
 - Expand visual regression coverage
-- Add theming foundation and dark mode later
-- MultiSelect is intentionally out of scope for this initial publication
+- Evaluate platform/brand presets
+- Add async/server search patterns for select-style components
 
 ## License
 
