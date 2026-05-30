@@ -114,7 +114,7 @@ internal fun parseAdminDemoArgs(args: Array<String>): AdminDemoRunConfig {
 private fun printAdminDemoHelp() {
     println("Admin Demo capture mode arguments:")
     println("  --capture")
-    println("  --screen <dashboard|employees|products|invoices|settings|components|components-buttons|components-badges|components-avatars|components-cards|components-dropdowns|components-fields>")
+    println("  --screen <dashboard|employees|products|invoices|settings|components|components-buttons|components-badges|components-avatars|components-cards|components-dropdowns|components-fields|components-selects|components-multiselects|components-carousels|components-navigation-tree>")
     println("  --width <int>")
     println("  --height <int>")
     println("  --output <path>")

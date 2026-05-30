@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +46,7 @@ public fun AdaptiveTextField(
     val shape = AdaptiveComponentDefaults.MediumShape
     val hasError = !validationMessage.isNullOrBlank()
     val border = when {
-        hasError -> Color(0xFFFCA5A5)
+        hasError -> AdaptiveComponentDefaults.Danger
         focused -> AdaptiveComponentDefaults.Primary
         else -> AdaptiveComponentDefaults.BorderStrong
     }

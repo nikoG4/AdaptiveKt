@@ -56,6 +56,8 @@ Desktop capture entry point:
 - `:adaptive-components`, `:adaptive-feedback`, `:adaptive-forms`, `:adaptive-data`, and `:adaptive-navigation` consume `AdaptiveTheme` tokens.
 - `:docs-site` and `:admin-demo` expose light/dark toggles.
 - Web capture tooling includes dark smoke screenshots for the docs site and selected admin-demo screens.
+- Button, icon button, menu item, select, multiselect, text field, chip, carousel, and navigation tree interaction states avoid light-only hover backgrounds.
+- Selected and hover states should use `AdaptiveTheme.colors` and `AdaptiveTheme.states`, not one-off white/light gray fixes.
 
 ## Limitations
 

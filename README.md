@@ -22,7 +22,8 @@ AdaptiveKt is source-first today. Maven Central publishing is not available yet,
 - Data view that switches between mobile cards and wider table layouts
 - Responsive form layout with sections, fields, validation messages, and actions
 - Feedback states for loading, empty, and error content
-- Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, and multi-select
+- Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, multi-select, and carousel
+- Hierarchical navigation tree for nested admin sidebars and settings panels
 - Wasm browser demo
 - Compose Multiplatform/Wasm documentation site with live component examples
 - Visual verification tooling for Desktop and Web
@@ -106,6 +107,18 @@ AdaptiveMultiSelect(
     searchable = true,
     maxVisibleChips = 2,
 )
+```
+
+```kotlin
+var slide by remember { mutableStateOf(0) }
+
+AdaptiveCarousel(
+    items = dashboardCards,
+    selectedIndex = slide,
+    onSelectedIndexChange = { slide = it },
+) { card, index ->
+    SummaryPanel(card, index)
+}
 ```
 
 ## Run The Demo

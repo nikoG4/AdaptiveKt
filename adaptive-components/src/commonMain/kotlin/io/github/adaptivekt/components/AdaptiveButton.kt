@@ -143,21 +143,18 @@ private fun buttonColors(
     return when (variant) {
         AdaptiveButtonVariant.Primary -> ButtonColors(
             background = when {
-                pressed -> Color(0xFF1D4ED8)
-                hovered -> Color(0xFF315FDC)
+                pressed -> colorScheme.primary
+                hovered -> colorScheme.primary
                 else -> colorScheme.primary
             },
             content = colorScheme.textInverse,
-            border = when {
-                pressed -> Color(0xFF1D4ED8)
-                else -> colorScheme.primary
-            },
+            border = colorScheme.primary,
         )
 
         AdaptiveButtonVariant.Secondary -> ButtonColors(
             background = when {
-                pressed -> Color(0xFFE2E8F0)
-                hovered -> Color(0xFFF1F5F9)
+                pressed -> colorScheme.surfaceRaised
+                hovered -> colorScheme.surfaceRaised
                 else -> colorScheme.surfaceMuted
             },
             content = colorScheme.textPrimary,
@@ -166,8 +163,8 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Ghost -> ButtonColors(
             background = when {
-                pressed -> Color(0xFFE2E8F0)
-                hovered -> Color(0xFFF8FAFC)
+                pressed -> colorScheme.surfaceMuted
+                hovered -> colorScheme.surfaceMuted
                 else -> Color.Transparent
             },
             content = colorScheme.textPrimary,
@@ -177,12 +174,12 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Danger -> ButtonColors(
             background = when {
-                pressed -> Color(0xFFFEE2E2)
-                hovered -> Color(0xFFFFEEEE)
-                else -> Color(0xFFFEF2F2)
+                pressed -> colorScheme.dangerSubtle
+                hovered -> colorScheme.dangerSubtle
+                else -> colorScheme.dangerSubtle
             },
             content = colorScheme.danger,
-            border = if (hovered || pressed) Color(0xFFFCA5A5) else Color(0xFFFECACA),
+            border = if (hovered || pressed) colorScheme.danger else colorScheme.dangerText,
         )
     }
 }

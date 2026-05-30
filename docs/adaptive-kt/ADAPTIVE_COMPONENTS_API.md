@@ -27,10 +27,13 @@ It does not depend on layout, navigation, data, forms, feedback, admin-demo, Mat
 - `AdaptiveMenuItem`
 - `AdaptiveSelect`
 - `AdaptiveMultiSelect`
+- `AdaptiveCarousel`
 - `AdaptiveTextField`
 - `AdaptiveSearchField`
 - `AdaptiveSectionHeader`
 - `AdaptiveDivider`
+- `AdaptiveThumbnail`
+- `AdaptiveChip`
 
 ## Examples
 
@@ -66,6 +69,31 @@ AdaptiveTextField(
 - Slots: `leadingIcon`, `trailingIcon`
 
 Button hover and pressed states are painted inside the clipped pill shape. The implementation avoids rectangular external hover overlays.
+
+## Carousel API
+
+`AdaptiveCarousel<T>` is a controlled carousel primitive for admin summaries and feature panels.
+
+- Empty lists render a neutral empty message or `emptyContent`.
+- Out-of-range indexes are clamped.
+- Controls use `AdaptiveIconButton` and `AdaptiveIcons`.
+- Indicators and controls are optional.
+- Looping can be enabled or disabled.
+
+Pure helpers:
+
+- `normalizeCarouselIndex`
+- `nextCarouselIndex`
+- `previousCarouselIndex`
+
+## MultiSelect Custom Content
+
+`AdaptiveMultiSelect` supports custom people-picker style rows and chips through existing compatible slots:
+
+- `optionContent(option, selected)`
+- `chipContent(option)`
+
+No API change is required for avatar rows, detail text, selected chips, remove affordances, or `+N` overflow chips.
 
 ## Avatar API
 

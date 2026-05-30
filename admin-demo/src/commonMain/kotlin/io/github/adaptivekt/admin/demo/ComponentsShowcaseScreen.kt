@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +37,7 @@ import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.components.AdaptiveCarousel
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveDropdownMenu
 import io.github.adaptivekt.components.AdaptiveIconButton
@@ -49,9 +49,12 @@ import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.layout.AdaptiveGrid
+import io.github.adaptivekt.navigation.AdaptiveNavigationTree
+import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 
 internal enum class ComponentsShowcaseSection(
     val title: String,
@@ -65,6 +68,8 @@ internal enum class ComponentsShowcaseSection(
     Fields("Fields", "TextField, SearchField, validation, disabled, and clear states."),
     Selects("Selects", "Single-select dropdown states, search, and clearing."),
     MultiSelects("MultiSelects", "Multi-select dropdowns with chips, search, and custom content."),
+    Carousels("Carousels", "Carousel controls, indicators, empty content, and edge cases."),
+    NavigationTree("Navigation tree", "Hierarchical sidebar navigation with controlled expansion."),
 }
 
 @Composable
@@ -123,6 +128,12 @@ internal fun ComponentsShowcaseScreen(
                     MultiSelectsSection(initialExpanded = initialMultiSelectExpanded)
                 }
             }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Carousels) {
+                item(span = sectionSpan(focusSection, cardSpan)) { CarouselsSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.NavigationTree) {
+                item(span = sectionSpan(focusSection, cardSpan)) { NavigationTreeSection() }
+            }
         }
     }
 }
@@ -149,8 +160,8 @@ private fun ButtonsSection() {
             AdaptiveButton("Disabled", enabled = false, onClick = {})
             AdaptiveButton(
                 text = "Create",
-                leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = Color.White) },
-                trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = Color.White) },
+                leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
+                trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
                 onClick = {},
             )
         }
@@ -165,7 +176,9 @@ private fun IconButtonsSection() {
             AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Close() }
             AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
             AdaptiveIconButton(onClick = {}) { AdaptiveIcons.ChevronDown() }
-            AdaptiveIconButton(onClick = {}, enabled = false) { AdaptiveIcons.Plus(tint = Color(0xFF94A3B8)) }
+            AdaptiveIconButton(onClick = {}, enabled = false) {
+                AdaptiveIcons.Plus(tint = AdaptiveTheme.colors.disabledText)
+            }
         }
     }
 }
@@ -202,7 +215,7 @@ private fun AvatarsSection() {
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .background(Color(0xFFE0F2FE)),
+                            .background(AdaptiveTheme.colors.infoSubtle),
                         contentAlignment = Alignment.Center,
                     ) {
                         Glyph("IMG")
@@ -302,8 +315,8 @@ private fun TextFieldsSection() {
             label = "Required field",
             placeholder = "Required value",
             validationMessage = "This field is required.",
-            leadingIcon = { AdaptiveIcons.Search(size = 16.dp, tint = Color(0xFF64748B)) },
-            trailingIcon = { AdaptiveIcons.Check(size = 16.dp, tint = Color(0xFF047857)) },
+            leadingIcon = { AdaptiveIcons.Search(size = 16.dp, tint = AdaptiveTheme.colors.textMuted) },
+            trailingIcon = { AdaptiveIcons.Check(size = 16.dp, tint = AdaptiveTheme.colors.success) },
         )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveSearchField(
@@ -360,10 +373,10 @@ private fun SelectsSection(initialExpanded: Boolean = false) {
 private fun MultiSelectsSection(initialExpanded: Boolean = false) {
     val departments = listOf("Operations", "Finance", "Support", "Sales", "Security")
     val people = listOf(
-        DemoPerson("Alicia Romero", "Operations"),
-        DemoPerson("Noah Kim", "Finance"),
-        DemoPerson("Marta Silva", "Support"),
-        DemoPerson("Dina Patel", "Security"),
+        DemoPerson("Alicia Romero", "Product Manager", "alicia@adaptivekt.io"),
+        DemoPerson("Noah Kim", "UX Designer", "noah@adaptivekt.io"),
+        DemoPerson("Marta Silva", "QA Lead", "marta@adaptivekt.io"),
+        DemoPerson("Dina Patel", "Security Analyst", "dina@adaptivekt.io"),
     )
     var selectedSimple by remember { mutableStateOf(listOf("Operations", "Finance")) }
     var selectedSearchable by remember { mutableStateOf(listOf("Support")) }
@@ -419,8 +432,9 @@ private fun MultiSelectsSection(initialExpanded: Boolean = false) {
             selectedOptions = selectedPeople,
             onSelectedOptionsChange = { selectedPeople = it },
             optionLabel = { it.name },
-            label = "Assignees",
+            label = "People picker",
             maxVisibleChips = 2,
+            searchable = true,
             optionContent = { person, selected ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -432,12 +446,28 @@ private fun MultiSelectsSection(initialExpanded: Boolean = false) {
                         Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
                         Column {
                             Label(person.name)
-                            Body(person.team)
+                            Body("${person.role} · ${person.email}")
                         }
                     }
                     if (selected) {
                         AdaptiveBadge("Selected")
                     }
+                }
+            },
+            chipContent = { person ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AdaptiveAvatar(name = person.name, size = 20.dp)
+                    Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.XSmall))
+                    BasicText(
+                        text = person.name,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = AdaptiveTheme.colors.primaryText,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             },
         )
@@ -454,7 +484,7 @@ private fun MultiSelectsSection(initialExpanded: Boolean = false) {
                     style = TextStyle(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1D4ED8),
+                        color = AdaptiveTheme.colors.primaryText,
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -486,8 +516,119 @@ private fun MultiSelectsSection(initialExpanded: Boolean = false) {
 
 private data class DemoPerson(
     val name: String,
-    val team: String,
+    val role: String,
+    val email: String,
 )
+
+private data class DemoCarouselItem(
+    val title: String,
+    val description: String,
+    val tone: AdaptiveBadgeTone,
+)
+
+@Composable
+private fun CarouselsSection() {
+    val items = listOf(
+        DemoCarouselItem("Revenue overview", "Monthly recurring revenue is up 12% across the admin workspace.", AdaptiveBadgeTone.Success),
+        DemoCarouselItem("Team activity", "Eight open reviews need attention before the next deployment window.", AdaptiveBadgeTone.Warning),
+        DemoCarouselItem("Support health", "Response time remains inside SLA for priority customers.", AdaptiveBadgeTone.Info),
+    )
+    var selectedIndex by remember { mutableStateOf(0) }
+    var edgeIndex by remember { mutableStateOf(0) }
+
+    ShowcaseCard(title = "Carousels", description = "Controlled carousel with indicators, loop behavior, and empty state.") {
+        AdaptiveCarousel(
+            items = items,
+            selectedIndex = selectedIndex,
+            onSelectedIndexChange = { selectedIndex = it },
+        ) { item, index ->
+            CarouselItemContent(item = item, eyebrow = "Slide ${index + 1} of ${items.size}")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCarousel(
+            items = items.take(1),
+            selectedIndex = edgeIndex,
+            onSelectedIndexChange = { edgeIndex = it },
+            loop = false,
+        ) { item, _ ->
+            CarouselItemContent(item = item, eyebrow = "Single item")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCarousel(
+            items = emptyList<DemoCarouselItem>(),
+            selectedIndex = 0,
+            onSelectedIndexChange = {},
+            emptyContent = { Body("Empty carousel content stays stable and readable.") },
+        ) { item, _ ->
+            CarouselItemContent(item = item, eyebrow = "Unused")
+        }
+    }
+}
+
+@Composable
+private fun CarouselItemContent(item: DemoCarouselItem, eyebrow: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Body(eyebrow)
+            AdaptiveBadge(item.tone.name.lowercase().replaceFirstChar { it.uppercase() }, tone = item.tone)
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        Label(item.title)
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+        Body(item.description)
+    }
+}
+
+@Composable
+private fun NavigationTreeSection() {
+    val treeItems = remember {
+        listOf(
+            AdaptiveNavigationTreeItem(
+                id = "workspace",
+                label = "Workspace",
+                badge = "4",
+                children = listOf(
+                    AdaptiveNavigationTreeItem("overview", "Overview"),
+                    AdaptiveNavigationTreeItem("activity", "Activity"),
+                    AdaptiveNavigationTreeItem("reports", "Reports", badge = "New"),
+                ),
+            ),
+            AdaptiveNavigationTreeItem(
+                id = "operations",
+                label = "Operations",
+                children = listOf(
+                    AdaptiveNavigationTreeItem("employees", "Employees"),
+                    AdaptiveNavigationTreeItem("products", "Products"),
+                    AdaptiveNavigationTreeItem(
+                        id = "billing",
+                        label = "Billing",
+                        children = listOf(
+                            AdaptiveNavigationTreeItem("invoices", "Invoices"),
+                            AdaptiveNavigationTreeItem("statements", "Statements", enabled = false),
+                        ),
+                    ),
+                ),
+            ),
+            AdaptiveNavigationTreeItem("settings", "Settings"),
+        )
+    }
+    var selectedItem by remember { mutableStateOf("overview") }
+    var expandedItems by remember { mutableStateOf(setOf("workspace", "operations", "billing")) }
+
+    ShowcaseCard(title = "Navigation tree", description = "Controlled hierarchy for admin sidebars and nested settings.") {
+        AdaptiveNavigationTree(
+            items = treeItems,
+            selectedItemId = selectedItem,
+            onItemSelected = { selectedItem = it.id },
+            expandedItemIds = expandedItems,
+            onExpandedItemIdsChange = { expandedItems = it },
+        )
+    }
+}
 
 @Composable
 private fun SectionHeaderDividerSection() {
@@ -542,7 +683,7 @@ private fun Label(text: String) {
         style = TextStyle(
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF0F172A),
+            color = AdaptiveTheme.colors.textPrimary,
         ),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -553,7 +694,7 @@ private fun Label(text: String) {
 private fun Body(text: String) {
     BasicText(
         text = text,
-        style = TextStyle(fontSize = 13.sp, color = Color(0xFF64748B)),
+        style = TextStyle(fontSize = 13.sp, color = AdaptiveTheme.colors.textMuted),
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
     )
@@ -565,8 +706,8 @@ private fun Glyph(text: String) {
         modifier = Modifier
             .size(22.dp)
             .clip(RoundedCornerShape(AdaptiveTokens.Radius.Pill))
-            .background(Color(0xFFEFF6FF))
-            .border(1.dp, Color(0xFFBFDBFE), RoundedCornerShape(AdaptiveTokens.Radius.Pill)),
+            .background(AdaptiveTheme.colors.primarySubtle)
+            .border(1.dp, AdaptiveTheme.colors.borderStrong, RoundedCornerShape(AdaptiveTokens.Radius.Pill)),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
@@ -574,7 +715,7 @@ private fun Glyph(text: String) {
             style = TextStyle(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1D4ED8),
+                color = AdaptiveTheme.colors.primaryText,
             ),
             maxLines = 1,
         )

@@ -36,6 +36,7 @@ import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.components.AdaptiveCarousel
 import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveIconButton
@@ -64,6 +65,8 @@ import io.github.adaptivekt.forms.ValidationMessage
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
+import io.github.adaptivekt.navigation.AdaptiveNavigationTree
+import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 
 @Composable
 internal fun SiteComponentsPage() {
@@ -315,6 +318,73 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
                 },
             )
         }
+    },
+    LiveExample(
+        title = "AdaptiveCarousel",
+        description = "Controlled carousel for compact admin summaries, onboarding cards, or feature panels.",
+        code = """AdaptiveCarousel(
+    items = cards,
+    selectedIndex = selectedIndex,
+    onSelectedIndexChange = { selectedIndex = it },
+) { item, index -> CardContent(item) }""",
+    ) {
+        val cards = listOf("Revenue overview", "Team activity", "Support health")
+        var selectedIndex by remember { mutableStateOf(0) }
+        AdaptiveCarousel(
+            items = cards,
+            selectedIndex = selectedIndex,
+            onSelectedIndexChange = { selectedIndex = it },
+        ) { item, index ->
+            Column {
+                AdaptiveBadge("Slide ${index + 1}", tone = AdaptiveBadgeTone.Info)
+                Spacer(modifier = Modifier.height(8.dp))
+                SiteText(item, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
+                SiteText("Carousel content stays controlled by the caller.", color = SiteMuted)
+            }
+        }
+    },
+    LiveExample(
+        title = "AdaptiveNavigationTree",
+        description = "Controlled hierarchical navigation for nested admin sidebars and settings pages.",
+        code = """AdaptiveNavigationTree(
+    items = tree,
+    selectedItemId = selected,
+    onItemSelected = { selected = it.id },
+    expandedItemIds = expanded,
+    onExpandedItemIdsChange = { expanded = it },
+)""",
+    ) {
+        val tree = remember {
+            listOf(
+                AdaptiveNavigationTreeItem(
+                    id = "workspace",
+                    label = "Workspace",
+                    badge = "3",
+                    children = listOf(
+                        AdaptiveNavigationTreeItem("overview", "Overview"),
+                        AdaptiveNavigationTreeItem("activity", "Activity"),
+                    ),
+                ),
+                AdaptiveNavigationTreeItem(
+                    id = "operations",
+                    label = "Operations",
+                    children = listOf(
+                        AdaptiveNavigationTreeItem("employees", "Employees"),
+                        AdaptiveNavigationTreeItem("invoices", "Invoices", badge = "New"),
+                    ),
+                ),
+            )
+        }
+        var selected by remember { mutableStateOf("overview") }
+        var expanded by remember { mutableStateOf(setOf("workspace", "operations")) }
+        AdaptiveNavigationTree(
+            items = tree,
+            selectedItemId = selected,
+            onItemSelected = { selected = it.id },
+            expandedItemIds = expanded,
+            onExpandedItemIdsChange = { expanded = it },
+        )
     },
     LiveExample(
         title = "AdaptiveNavigationScaffold",

@@ -82,6 +82,22 @@ fun AdaptiveNavigationScaffold(
 
 ## Public navigation components
 
+### AdaptiveNavigationTree
+
+`AdaptiveNavigationTree` is a controlled hierarchy primitive for nested admin navigation. It does not replace `AdaptiveNavigationScaffold`; use it inside sidebars, drawers, or settings panels when a navigation group needs children.
+
+```kotlin
+AdaptiveNavigationTree(
+    items = treeItems,
+    selectedItemId = selected,
+    onItemSelected = { selected = it.id },
+    expandedItemIds = expanded,
+    onExpandedItemIdsChange = { expanded = it },
+)
+```
+
+It supports badges, disabled rows, `maxDepth`, controlled expansion, and dark-mode safe selected/hover states.
+
 ### Sidebar
 
 ```kotlin

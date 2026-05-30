@@ -62,6 +62,38 @@ AdaptiveMultiSelect(
 )
 ```
 
+## People Picker Pattern
+
+The existing slots are enough for a people picker; no separate API is required.
+
+```kotlin
+AdaptiveMultiSelect(
+    options = people,
+    selectedOptions = selectedPeople,
+    onSelectedOptionsChange = { selectedPeople = it },
+    optionLabel = { it.name },
+    maxVisibleChips = 2,
+    optionContent = { person, selected ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(name = person.name, size = 28.dp)
+            Column {
+                Text(person.name)
+                Text(person.email)
+            }
+            if (selected) AdaptiveBadge("Selected")
+        }
+    },
+    chipContent = { person ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(name = person.name, size = 20.dp)
+            Text(person.name)
+        }
+    },
+)
+```
+
+The default trigger still owns removal, clear-all, search, and `+N` overflow behavior.
+
 ## Custom Chip Content
 
 ```kotlin

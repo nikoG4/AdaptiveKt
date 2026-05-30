@@ -12,7 +12,11 @@
 - [ ] Add optional docs-site visual diff baselines after the first Pages deployment.
 - [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
 - [x] Add manual macOS validation workflow for local publishing.
-- [ ] Run manual macOS validation workflow and inspect iOS artifacts.
+- [x] Run manual macOS validation workflow and inspect iOS artifacts.
+- [x] Add `AdaptiveCarousel` and `AdaptiveNavigationTree` primitives.
+- [x] Add UI Kit showcase coverage for carousel and navigation tree.
+- [ ] Add deeper visual regression baselines for new dark hover states.
+- [ ] Consider `AdaptiveBreadcrumbs` or `AdaptiveAccordion` in a later UI navigation polish PR.
 - [ ] Reduce docs-site Wasm bundle size only if it becomes a practical hosting/performance issue.
 - [ ] Consider a small responsive navigation refinement for very narrow docs-site widths.
 - [ ] Add Maven publishing setup in a dedicated publishing PR.

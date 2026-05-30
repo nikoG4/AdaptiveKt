@@ -19,6 +19,33 @@ AdaptiveMultiSelect(
 
 Advanced example: enable `searchable`, set `maxVisibleChips`, and provide `optionContent` for avatar rows or `chipContent` for custom selected chips.
 
+People picker example:
+
+```kotlin
+AdaptiveMultiSelect(
+    options = people,
+    selectedOptions = selectedPeople,
+    onSelectedOptionsChange = { selectedPeople = it },
+    optionLabel = { it.name },
+    optionContent = { person, selected ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(name = person.name, size = 28.dp)
+            Column {
+                Text(person.name)
+                Text(person.role)
+            }
+            if (selected) AdaptiveBadge("Selected")
+        }
+    },
+    chipContent = { person ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(name = person.name, size = 20.dp)
+            Text(person.name)
+        }
+    },
+)
+```
+
 Responsive notes: the menu matches the anchor width, has a max height, and selected chips collapse to `+N` when `maxVisibleChips` is exceeded.
 
 Multiplatform notes: implemented in common Compose using Foundation and AdaptiveKt primitives; it compiles for JVM, Android, iOS targets, and Wasm.

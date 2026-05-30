@@ -18,11 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 @Composable
@@ -37,10 +37,10 @@ public fun AdaptiveMenuItem(
     val hovered by interactionSource.collectIsHoveredAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
     val background = when {
-        destructive && hovered -> Color(0xFFFEE2E2)
-        destructive -> Color.Transparent
-        hovered -> Color(0xFFF8FAFC)
-        else -> Color.Transparent
+        destructive && hovered -> AdaptiveTheme.colors.dangerSubtle
+        destructive -> androidx.compose.ui.graphics.Color.Transparent
+        hovered -> AdaptiveComponentDefaults.SurfaceSubtle
+        else -> androidx.compose.ui.graphics.Color.Transparent
     }
     val contentColor = if (destructive) AdaptiveComponentDefaults.Danger else AdaptiveComponentDefaults.Text
 

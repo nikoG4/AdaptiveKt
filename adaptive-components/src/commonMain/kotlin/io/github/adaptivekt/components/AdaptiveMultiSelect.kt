@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 public fun <T> filterMultiSelectOptions(
@@ -86,7 +87,7 @@ public fun <T> AdaptiveMultiSelect(
 
     val shape = AdaptiveComponentDefaults.MediumShape
     val borderColor = when {
-        isError -> Color(0xFFFCA5A5)
+        isError -> AdaptiveComponentDefaults.Danger
         expanded -> AdaptiveComponentDefaults.Primary
         else -> AdaptiveComponentDefaults.BorderStrong
     }
@@ -289,7 +290,7 @@ private fun <T> MultiSelectTrigger(
                                 {
                                     AdaptiveIcons.Close(
                                         size = 12.dp,
-                                        tint = Color.White,
+                                        tint = AdaptiveTheme.colors.textInverse,
                                         contentDescription = "Remove ${optionLabel(option)}",
                                     )
                                 }

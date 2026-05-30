@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -32,9 +31,9 @@ public fun AdaptiveIconButton(
     val pressed by interactionSource.collectIsPressedAsState()
     val shape = AdaptiveComponentDefaults.PillShape
     val background = when {
-        !enabled -> Color(0xFFF8FAFC)
-        pressed -> Color(0xFFE2E8F0)
-        hovered -> Color(0xFFF1F5F9)
+        !enabled -> AdaptiveComponentDefaults.DisabledSurface
+        pressed -> AdaptiveComponentDefaults.Surface
+        hovered -> AdaptiveComponentDefaults.Surface
         else -> AdaptiveComponentDefaults.SurfaceSubtle
     }
     val border = if (hovered || pressed) AdaptiveComponentDefaults.BorderStrong else AdaptiveComponentDefaults.Border

@@ -93,7 +93,7 @@ public fun <T> AdaptiveSelect(
 
     val shape = AdaptiveComponentDefaults.MediumShape
     val borderColor = when {
-        isError -> Color(0xFFFCA5A5)
+        isError -> AdaptiveComponentDefaults.Danger
         expanded -> AdaptiveComponentDefaults.Primary
         else -> AdaptiveComponentDefaults.BorderStrong
     }

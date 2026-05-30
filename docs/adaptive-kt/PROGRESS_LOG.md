@@ -1,3 +1,25 @@
+UI-NAV-1 - Carousel and Hierarchical Navigation
+===============================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Summary:
+- Confirmed PUBLISH-1A manual macOS publishing validation passed before starting UI work.
+- Added `AdaptiveCarousel` to `:adaptive-components` with pure index helpers and tests.
+- Added `AdaptiveNavigationTree` to `:adaptive-navigation` as a controlled hierarchy primitive.
+- Expanded the admin-demo UI Kit and capture routes with carousel and navigation tree sections.
+- Improved the MultiSelect showcase into a people picker using existing `optionContent` and `chipContent` slots, with no API change.
+- Reworked several hover/selected colors to use `AdaptiveTheme` tokens instead of light-only interaction colors.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No Material 3 or external dependencies.
+- No Kamel in library modules.
+- No public API breakage.
+
 T3 - Dark Mode
 ==============
 

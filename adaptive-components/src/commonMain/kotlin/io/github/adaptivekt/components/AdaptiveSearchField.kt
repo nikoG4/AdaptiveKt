@@ -2,9 +2,9 @@ package io.github.adaptivekt.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 public fun AdaptiveSearchField(
@@ -22,7 +22,7 @@ public fun AdaptiveSearchField(
         placeholder = placeholder,
         enabled = enabled,
         leadingIcon = {
-            AdaptiveIcons.Search(size = 16.dp, tint = Color(0xFF64748B))
+            AdaptiveIcons.Search(size = 16.dp, tint = AdaptiveTheme.colors.textMuted)
         },
         trailingIcon = if (onClear != null && value.isNotEmpty()) {
             {
@@ -30,7 +30,7 @@ public fun AdaptiveSearchField(
                     onClick = onClear,
                     size = 28.dp,
                 ) {
-                    AdaptiveIcons.Close(size = 18.dp)
+                    AdaptiveIcons.Close(size = 18.dp, tint = AdaptiveTheme.colors.textMuted)
                 }
             }
         } else {
