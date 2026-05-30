@@ -697,3 +697,57 @@ Constraints preserved:
 - No push.
 - No public API changes.
 - No component code changes.
+
+PUBLISH-1A - macOS/iOS Publishing Validation Plan
+=================================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Objective:
+- Prepare safe macOS/iOS validation for local multiplatform publishing.
+- Add a manual-only GitHub Actions validation workflow.
+- Document signing and remote publishing plans without enabling remote publication.
+
+Publishing task audit:
+- Windows exposes local publish tasks for Kotlin Multiplatform metadata, JVM, Android release, and Wasm JS.
+- iOS compile tasks are listed, but Kotlin/Native Apple targets are disabled on Windows.
+- iOS publication artifacts must be validated on macOS.
+
+Workflow:
+- Added `.github/workflows/publishing-validation.yml`.
+- The workflow runs only with `workflow_dispatch`.
+- It uses `macos-latest` and JDK 17.
+- It runs `./gradlew build --console=plain --stacktrace`.
+- It runs `./gradlew publishAllPublicationsToLocalTestRepository --console=plain --stacktrace`.
+- It lists and uploads `build/local-maven` as a workflow artifact.
+- It verifies expected iOS artifact directories for all seven publishable modules.
+
+Signing plan:
+- Signing remains disabled for local publishing.
+- Future remote publishing should use conditional in-memory signing properties.
+- Builds without secrets must continue to pass.
+- No keys, tokens, passwords, or credentials were added.
+
+Files created:
+- `.github/workflows/publishing-validation.yml`
+- `docs/publishing/IOS_MACOS_VALIDATION.md`
+
+Files updated:
+- `docs/publishing/MAVEN_CENTRAL_READINESS.md`
+- `docs/publishing/LOCAL_PUBLISHING.md`
+- `docs/adaptive-kt/NEXT_WORK_QUEUE.md`
+- `docs/adaptive-kt/PROGRESS_LOG.md`
+
+Constraints preserved:
+- No Maven Central publication.
+- No remote snapshot publication.
+- No signing.
+- No secrets.
+- No release.
+- No tag.
+- No push.
+- No component code changes.
+- No public API changes.
+- No `settings.gradle.kts` changes.

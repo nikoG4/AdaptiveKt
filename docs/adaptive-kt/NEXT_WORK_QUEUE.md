@@ -11,7 +11,8 @@
 - [ ] Evaluate virtualized option lists for very large select datasets.
 - [ ] Add optional docs-site visual diff baselines after the first Pages deployment.
 - [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
-- [ ] Validate iOS targets on macOS.
+- [x] Add manual macOS validation workflow for local publishing.
+- [ ] Run manual macOS validation workflow and inspect iOS artifacts.
 - [ ] Reduce docs-site Wasm bundle size only if it becomes a practical hosting/performance issue.
 - [ ] Consider a small responsive navigation refinement for very narrow docs-site widths.
 - [ ] Add Maven publishing setup in a dedicated publishing PR.
@@ -210,10 +211,12 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 - [x] Confirmar GitHub Actions CI y Pages existentes
 - [x] Agregar dry-run local de Maven publishing
 - [x] Configurar POM metadata básica
+- [x] Agregar workflow manual seguro para validar publishing local en macOS
+- [x] Documentar validación macOS/iOS y plan de signing sin secretos
 - [ ] Confirmar artifacts de sources/docs para Maven Central real
 - [ ] Documentar estrategia de tags de release
 - [ ] Configurar signing y secrets
-- [ ] Agregar workflow manual de publicación
+- [ ] Agregar workflow manual de publicación remota
 
 ### P2 — Mejoras recomendadas:
 - [ ] Agregar coverage thresholds a CI
@@ -225,7 +228,7 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 - [ ] Agregar coverage badge
 
 ### Próximo paso inmediato:
-PUBLISH-1: validar artifacts en macOS/iOS, definir estrategia de signing/docs jar y preparar workflow manual de publicación sin ejecución automática.
+PUBLISH-1B/PUBLISH-2: ejecutar validación macOS manual, definir estrategia de sources/docs jars, signing condicional y workflow manual de publicación remota sin ejecución automática.
 
 ### PUBLISH-0B Completado (2026-05-30)
 - [x] Definir `GROUP=io.github.nikog4.adaptivekt`.
@@ -244,6 +247,15 @@ PUBLISH-1: validar artifacts en macOS/iOS, definir estrategia de signing/docs ja
 - [x] Verificar `compileKotlinJvm`.
 - [x] Verificar `compileKotlinWasmJs`.
 - [x] Confirmar que el consumer no usa `project(":...")` ni `includeBuild`.
+
+### PUBLISH-1A Completado (2026-05-30)
+- [x] Auditar tareas de publishing disponibles en Windows.
+- [x] Documentar que Windows valida metadata, JVM, Android release y Wasm JS.
+- [x] Documentar que iOS requiere macOS.
+- [x] Crear `docs/publishing/IOS_MACOS_VALIDATION.md`.
+- [x] Crear workflow manual `.github/workflows/publishing-validation.yml`.
+- [x] Mantener el workflow sin secrets, sin remoto, sin release y sin tag.
+- [x] Documentar plan futuro de signing condicional.
 
 ---
 

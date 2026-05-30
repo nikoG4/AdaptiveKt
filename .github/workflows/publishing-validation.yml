@@ -1,0 +1,64 @@
+name: Publishing Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos-local-publishing:
+    name: macOS local publishing validation
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Validate build
+        run: ./gradlew build --console=plain --stacktrace
+
+      - name: Publish to local test repository
+        run: ./gradlew publishAllPublicationsToLocalTestRepository --console=plain --stacktrace
+
+      - name: List local Maven artifacts
+        run: |
+          test -d build/local-maven
+          find build/local-maven -type f | sort | sed -n '1,240p'
+
+      - name: Verify expected iOS artifacts
+        run: |
+          set -euo pipefail
+          base="build/local-maven/io/github/nikog4/adaptivekt"
+          modules="adaptive-core adaptive-components adaptive-layout adaptive-feedback adaptive-navigation adaptive-forms adaptive-data"
+          targets="iosarm64 iossimulatorarm64 iosx64"
+
+          for module in $modules; do
+            for target in $targets; do
+              artifact="$base/${module}-${target}"
+              if [ ! -d "$artifact" ]; then
+                echo "Missing expected iOS artifact directory: $artifact"
+                exit 1
+              fi
+            done
+          done
+
+      - name: Upload local Maven repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-maven-publishing-validation
+          path: build/local-maven/
+          if-no-files-found: error
+          retention-days: 7

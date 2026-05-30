@@ -75,6 +75,60 @@ Initial version:
 - Add a manual GitHub Actions publishing workflow after local dry run succeeds.
 - Perform Sonatype Central Portal validation.
 
+## Platform Publishing Validation
+
+Windows currently validates local Maven publishing for:
+
+- Kotlin Multiplatform root metadata.
+- JVM.
+- Android release.
+- Wasm JS.
+
+iOS publications require macOS. Apple targets are declared, but Windows disables Kotlin/Native Apple targets, so Windows cannot prove `iosX64`, `iosArm64`, or `iosSimulatorArm64` artifact generation.
+
+Manual macOS validation is documented in `docs/publishing/IOS_MACOS_VALIDATION.md`.
+
+The repository also contains `.github/workflows/publishing-validation.yml`, a safe manual-only validation workflow. It runs on `macos-latest`, performs a full build, publishes only to `build/local-maven`, verifies expected iOS artifact directories, and uploads the local Maven repository as an inspection artifact.
+
+That workflow does not use secrets, sign artifacts, publish remotely, create tags, or create releases.
+
+## Signing Plan
+
+Signing is not configured or required for local publishing.
+
+Future Maven Central publishing should use Gradle signing configured conditionally. Builds without signing credentials must continue to pass, and local dry-run publishing to `build/local-maven` must not require signing.
+
+Future secret-backed properties:
+
+```text
+ORG_GRADLE_PROJECT_signingInMemoryKey
+ORG_GRADLE_PROJECT_signingInMemoryKeyPassword
+```
+
+Future Maven Central or Central Portal credentials should also be supplied through GitHub Secrets, for example:
+
+```text
+ORG_GRADLE_PROJECT_mavenCentralUsername
+ORG_GRADLE_PROJECT_mavenCentralPassword
+```
+
+No signing keys, passwords, tokens, or credentials should be committed to the repository.
+
+## Future Remote Publishing Workflow
+
+Remote publishing should be added in a later PUBLISH-1B/PUBLISH-2 phase.
+
+It should:
+
+- be manual-only;
+- require a confirmed Maven Central namespace;
+- require signing secrets;
+- require publishing credentials;
+- use an explicit release/tag strategy;
+- avoid running automatically on push.
+
+This PUBLISH-1A phase intentionally does not configure an active remote Maven repository.
+
 ## Local Dry Run
 
 Run:
@@ -105,7 +159,7 @@ The same pattern is generated for the other publishable modules.
 - iOS targets are declared, but local Windows builds disable Apple targets. iOS publication validation must run on macOS.
 - No signing is configured yet.
 - No remote Maven Central repository is configured yet.
-- No publish workflow is configured yet.
+- No remote publish workflow is configured yet.
 - No Dokka/docs jar strategy is configured yet.
 
 ## Consumer Smoke Test

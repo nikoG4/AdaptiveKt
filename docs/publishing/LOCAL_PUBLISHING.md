@@ -112,11 +112,31 @@ This verifies that the local Maven artifacts are consumable by an external Kotli
 - It does not publish `admin-demo` or `docs-site`.
 - It does not validate iOS publication consumption; that must run on macOS.
 
+## macOS/iOS Validation
+
+iOS artifact generation must be validated on macOS because Windows disables Kotlin/Native Apple targets.
+
+Use the manual workflow:
+
+```text
+.github/workflows/publishing-validation.yml
+```
+
+or run on macOS:
+
+```bash
+./gradlew build --console=plain --stacktrace
+./gradlew publishAllPublicationsToLocalTestRepository --console=plain --stacktrace
+```
+
+This remains local-only publishing to `build/local-maven`.
+
 ## Maven Central Follow-Up
 
 PUBLISH-1 should add:
 
 - final namespace confirmation;
+- macOS/iOS publication validation;
 - signing configuration that is disabled unless credentials are present;
 - POM validation for Maven Central requirements;
 - docs/source artifact strategy;
