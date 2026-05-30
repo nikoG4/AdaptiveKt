@@ -50,7 +50,7 @@ class AdaptiveValueTest {
     }
 
     @Test
-    fun `large falls back to compact when large, expanded, and medium are null`() {
+    fun `large falls back to compact when all larger values are null`() {
         assertEquals("compact", adaptiveValue(AdaptiveBreakpoint.Large, "compact", null, null, null))
     }
 }
