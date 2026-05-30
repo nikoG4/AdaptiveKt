@@ -181,6 +181,72 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 
 ---
 
+## AUDIT-1 Completado (2026-05-30)
+===================================================
+
+- [x] Ejecutar auditoría de estado del proyecto
+- [x] Generar reporte en PROJECT_READINESS_AUDIT.md
+- [x] Actualizar PROGRESS_LOG.md con hallazgos
+- [x] Actualizar NEXT_WORK_QUEUE.md con próximos pasos
+
+### PUBLISH-0A Corrección (2026-05-30)
+- [x] Corregir `PROJECT_READINESS_AUDIT.md`.
+- [x] Confirmar que `.github/workflows/ci.yml` existe.
+- [x] Confirmar que `.github/workflows/pages.yml` existe.
+- [x] Documentar que `admin-demo` y `docs-site` permanecen en `settings.gradle.kts`.
+- [x] Documentar que `admin-demo` y `docs-site` quedan fuera solo de Maven publishing.
+- [x] Crear `LICENSE` Apache-2.0.
+- [x] Crear `CHANGELOG.md` inicial.
+- [x] Crear `docs/publishing/MAVEN_CENTRAL_READINESS.md`.
+
+### P0 — Bloqueantes reales a resolver antes de PUBLISH-0:
+- [x] Crear LICENSE file (Apache 2.0)
+- [x] Crear CHANGELOG.md inicial
+- [x] Definir una estrategia única de versionado (`GROUP`/`VERSION_NAME` en `gradle.properties`)
+- [x] Definir groupId/artifactIds finales para dry-run local
+- [x] Definir estrategia de publishing para módulos publicables (`maven-publish` nativo)
+
+### P1 — Antes de Maven Central:
+- [x] Confirmar GitHub Actions CI y Pages existentes
+- [x] Agregar dry-run local de Maven publishing
+- [x] Configurar POM metadata básica
+- [ ] Confirmar artifacts de sources/docs para Maven Central real
+- [ ] Documentar estrategia de tags de release
+- [ ] Configurar signing y secrets
+- [ ] Agregar workflow manual de publicación
+
+### P2 — Mejoras recomendadas:
+- [ ] Agregar coverage thresholds a CI
+- [ ] Documentar iOS targets requieren macOS
+- [ ] Agregar audit de dependencia de licencias
+
+### P3 — Nice to have:
+- [ ] Agregar GitHub Actions badge en README
+- [ ] Agregar coverage badge
+
+### Próximo paso inmediato:
+PUBLISH-1: validar artifacts en macOS/iOS, definir estrategia de signing/docs jar y preparar workflow manual de publicación sin ejecución automática.
+
+### PUBLISH-0B Completado (2026-05-30)
+- [x] Definir `GROUP=io.github.nikog4.adaptivekt`.
+- [x] Definir `VERSION_NAME=0.1.0-alpha01`.
+- [x] Configurar `maven-publish` solo en módulos de librería.
+- [x] Mantener `admin-demo` y `docs-site` dentro del build pero fuera de publishing.
+- [x] Agregar repositorio local de dry-run en `build/local-maven`.
+- [x] Agregar tarea agregada `publishAllPublicationsToLocalTestRepository`.
+- [x] Documentar `docs/publishing/LOCAL_PUBLISHING.md`.
+
+### PUBLISH-0C Completado (2026-05-30)
+- [x] Crear `tools/verify-local-publishing-consumer.ps1`.
+- [x] Crear consumer temporal en `build/local-consumer-smoke`.
+- [x] Consumir `build/local-maven` como repositorio Maven.
+- [x] Usar coordenadas Maven para los 7 módulos publicables.
+- [x] Verificar `compileKotlinJvm`.
+- [x] Verificar `compileKotlinWasmJs`.
+- [x] Confirmar que el consumer no usa `project(":...")` ni `includeBuild`.
+
+---
+
 ## Resumen por Herramienta
 
 | Herramienta | Qué hacer | Qué NO hacer |

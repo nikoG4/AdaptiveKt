@@ -431,3 +431,269 @@ Constraints preserved:
 - Kept `:admin-demo` as a separate Wasm application and linked it from the docs site.
 - Updated `tools/prepare-pages-site.ps1` so `site-dist/` is rooted at the docs-site distribution and `admin-demo` is copied to `site-dist/demo/app/`.
 - Updated GitHub Pages deployment to use the generated `site-dist` artifact.
+
+## AUDIT-1 — Project Readiness Audit
+===========================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Objective:
+- Execute a complete repository audit before Maven Central publishing.
+- Generate a readiness report with findings, risks, and P0-P3 recommendations.
+- Document API inventory, module publicability, and tooling verification.
+- **NO code changes, no Gradle modifications, no commits, no push.**
+
+Constraints:
+- Do not touch source code of components.
+- Do not refactor or fix bugs except minor documentation.
+- Do not change APIs.
+- Do not change Gradle.
+- Do not touch captures.
+- Do not create commits or push.
+- Max 90 minutes duration.
+- Stop any verification stuck >20 minutes.
+
+Phases executed:
+1. Estado inicial: `git status --short` (clean), `git diff --stat` (no changes).
+2. Auditoría de estructura del repo: 9 módulos auditados (7 públicos, 2 no publicables: admin-demo, docs-site).
+3. Auditoría de APIs públicas: 40+ APIs inventariadas (Core: 15, Components: 23, Otros: 10).
+4. Auditoría de documentación: README, docs/components/, docs/adaptive-kt/, docs/development/*.md revisados (sin roturas).
+5. Auditoría de publicación futura: Verificado que faltaban LICENSE, CHANGELOG y una estrategia única de versionado.
+6. Auditoría visual/tooling: 8 scripts de PowerShell documentados y verificados.
+7. Verificación ligera: JDK 17 confirmado, check-dev-environment.ps1 ejecutado sin errores.
+
+Hallazgos principales:
+- **P0 — Bloqueantes:**
+  - ❌ LICENSE file no existía antes de PUBLISH-0A
+  - ⚠️ Falta definir una estrategia única de versionado
+  - ⚠️ admin-demo/docs-site deben excluirse solo de Maven publishing, no de `settings.gradle.kts`
+- **P1 — Importantes:**
+  - ✅ GitHub Actions CI/Pages existen
+  - ❌ CHANGELOG.md no existía antes de PUBLISH-0A
+  - ⚠️ Sin configuración de sources/javadocs
+- **P2 — Mejoras:**
+  - Documentar iOS targets requieren macOS
+  - Agregar coverage thresholds a CI
+  - Audit de dependencia de licencias
+- **P3 — Nice to have:**
+  - Agregar GitHub Actions badge en README
+  - Agregar coverage badge
+
+Maven readiness checklist (antes de PUBLISH-0):
+- [x] LICENSE — creado en PUBLISH-0A
+- [ ] Estrategia única de versionado — pendiente
+- [ ] groupId — ⚠️ PENDIENTE (ej. io.github.adaptivekt)
+- [ ] maven-publish plugin — ❌ NO CONFIGURADO (propósito de esta tarea)
+- [ ] sources/javadocs — ⚠️ PENDIENTE verificar
+- [ ] signing — ⚠️ OPCIONAL
+- [ ] secrets cleanup — ✅ OK
+- [ ] workflow manual — ⚠️ NO EXISTE (P2)
+- [ ] dry-run local — ⚠️ NO IMPLEMENTADO
+- [ ] release notes (CHANGELOG) — ⚠️ NO EXISTE (P2)
+- [ ] tag strategy — ⚠️ NO DOCUMENTADO
+
+Tooling audit:
+- ✅ tools/check-dev-environment.ps1 — Validar JDK 17, JAVA_HOME, Android SDK
+- ✅ tools/prepare-pages-site.ps1 — Build docs-site + admin-demo para GitHub Pages
+- ✅ tools/check-site-links.ps1 — Verificar links internos de site-dist
+- ✅ tools/capture-admin-demo.ps1 — Capturas Desktop de admin-demo
+- ✅ tools/capture-admin-demo-web.ps1 — Capturas Web con Playwright
+- ✅ tools/capture-docs-site-web.ps1 — Capturas Web de docs-site
+- ✅ tools/serve-site-dist.ps1 — Servir site-dist localmente
+
+Archivo de auditoría creado:
+- docs/adaptive-kt/PROJECT_READINESS_AUDIT.md
+
+Próximos pasos recomendados (orden P0→P3):
+1. Crear LICENSE file (Apache 2.0). Hecho en PUBLISH-0A.
+2. Crear CHANGELOG.md para release notes. Hecho en PUBLISH-0A.
+3. Definir estrategia única de versionado.
+4. Configurar Maven publishing solo para módulos publicables.
+5. Mantener admin-demo/docs-site en `settings.gradle.kts` y fuera de publishing.
+
+Verificaciones ejecutadas:
+- git status/diff (clean)
+- java -version (JDK 17.0.11 LTS)
+- tools/check-dev-environment.ps1 (PASS)
+- Revisión de 9 módulos Gradle (OK)
+- Revisión de 40+ APIs públicas (consistentes)
+- Revisión de documentación (*.md) (sin roturas)
+- Revisión de 8 scripts PowerShell (válidos)
+
+Veredicto: PENDIENTE (requiere correcciones P0 antes de PUBLISH-0)
+
+Reporte completo: docs/adaptive-kt/PROJECT_READINESS_AUDIT.md
+
+PUBLISH-0A - Corrected Maven Publishing Readiness Audit
+=======================================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Objective:
+- Correct the AUDIT-1 report before Maven publishing work.
+- Keep this as documentation/readiness only.
+- Do not publish, release, tag, push, or change component APIs.
+
+Corrections:
+- Corrected the recommendation about `:admin-demo` and `:docs-site`.
+  They must remain in `settings.gradle.kts` for demos, docs-site, captures, and GitHub Pages.
+  They should be excluded only from future Maven publishing configuration.
+- Corrected the versioning finding.
+  A dedicated `version.gradle.kts` is optional; the real requirement is one documented version strategy.
+- Corrected the GitHub Actions finding.
+  `.github/workflows/ci.yml` and `.github/workflows/pages.yml` already exist.
+
+Files created:
+- `LICENSE`
+- `CHANGELOG.md`
+- `docs/publishing/MAVEN_CENTRAL_READINESS.md`
+
+Files updated:
+- `README.md`
+- `docs/adaptive-kt/PROJECT_READINESS_AUDIT.md`
+- `docs/adaptive-kt/NEXT_WORK_QUEUE.md`
+- `docs/adaptive-kt/PROGRESS_LOG.md`
+
+Constraints preserved:
+- No Maven publishing.
+- No release.
+- No tag.
+- No push.
+- No component code changes.
+- No public API changes.
+- No `settings.gradle.kts` changes.
+
+PUBLISH-0B - Local Maven Publishing Dry Run
+===========================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Objective:
+- Define a single group/version strategy.
+- Configure publishing only for AdaptiveKt library modules.
+- Add a local Maven publishing dry-run without remote publication, secrets, release, tag, or push.
+
+Version strategy:
+- `GROUP=io.github.nikog4.adaptivekt`
+- `VERSION_NAME=0.1.0-alpha01`
+- Both are defined once in `gradle.properties`.
+
+Publishing strategy:
+- Uses Gradle's built-in `maven-publish` plugin.
+- No external publishing plugin was added.
+- Local dry-run repository: `build/local-maven`.
+- Aggregate task: `publishAllPublicationsToLocalTestRepository`.
+
+Publishable modules:
+- `adaptive-core`
+- `adaptive-components`
+- `adaptive-layout`
+- `adaptive-feedback`
+- `adaptive-navigation`
+- `adaptive-forms`
+- `adaptive-data`
+
+Non-publishable modules:
+- `admin-demo`
+- `docs-site`
+
+Notes:
+- `admin-demo` and `docs-site` remain in `settings.gradle.kts`.
+- They do not receive `maven-publish` configuration.
+- Android release variants are enabled for publication on library modules.
+- JVM, Android release, Wasm JS, and Kotlin Multiplatform root publications are generated locally on Windows.
+- iOS targets remain declared, but Apple target validation/publication must run on macOS.
+
+Files updated:
+- `gradle.properties`
+- `build.gradle.kts`
+- `adaptive-core/build.gradle.kts`
+- `adaptive-components/build.gradle.kts`
+- `adaptive-layout/build.gradle.kts`
+- `adaptive-feedback/build.gradle.kts`
+- `adaptive-navigation/build.gradle.kts`
+- `adaptive-forms/build.gradle.kts`
+- `adaptive-data/build.gradle.kts`
+- `README.md`
+- `CHANGELOG.md`
+- `docs/publishing/MAVEN_CENTRAL_READINESS.md`
+- `docs/publishing/LOCAL_PUBLISHING.md`
+- `docs/adaptive-kt/NEXT_WORK_QUEUE.md`
+- `docs/adaptive-kt/PROGRESS_LOG.md`
+
+Verification:
+- `.\gradlew.bat tasks --all --console=plain` passed and showed publish tasks only for library modules.
+- `.\gradlew.bat publishAllPublicationsToLocalTestRepository --console=plain --stacktrace` passed.
+- `build/local-maven/io/github/nikog4/adaptivekt` contains library artifacts and no `admin-demo` or `docs-site` artifacts.
+- Initial full `build` failed with Kotlin compiler OOM; `gradle.properties` was adjusted to `-Xmx4g` and `org.gradle.workers.max=2`.
+- `.\gradlew.bat build --console=plain --stacktrace` passed after the memory/paralellism adjustment.
+
+Constraints preserved:
+- No Maven Central publication.
+- No remote snapshot publication.
+- No signing or secrets.
+- No release.
+- No tag.
+- No push.
+- No public API changes.
+- No component UI changes.
+- No `settings.gradle.kts` changes.
+
+PUBLISH-0C - Local Publishing Consumer Smoke Test
+=================================================
+
+Status: Completed
+
+Date: 2026-05-30
+
+Objective:
+- Verify that artifacts generated in `build/local-maven` can be consumed by an external project.
+- Keep verification local only, with no Maven Central publication, remote snapshots, secrets, release, tag, or push.
+
+Implementation:
+- Added `tools/verify-local-publishing-consumer.ps1`.
+- The script recreates `build/local-consumer-smoke`.
+- The smoke project uses `build/local-maven` as a Maven repository.
+- The smoke project uses Maven coordinates only, not `project(":...")` dependencies.
+- The smoke project does not use `includeBuild`.
+
+Coordinates consumed:
+- `io.github.nikog4.adaptivekt:adaptive-core:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-components:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-layout:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-feedback:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-navigation:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-forms:0.1.0-alpha01`
+- `io.github.nikog4.adaptivekt:adaptive-data:0.1.0-alpha01`
+
+Consumer coverage:
+- JVM compile via `compileKotlinJvm`.
+- Wasm JS compile via `compileKotlinWasmJs`.
+- Representative imports from core, components, layout, feedback, navigation, forms, and data.
+
+Verification:
+- `.\gradlew.bat publishAllPublicationsToLocalTestRepository --console=plain --stacktrace` passed.
+- `.\tools\verify-local-publishing-consumer.ps1` passed.
+- Generated smoke project inspected to confirm it uses `build/local-maven` and Maven coordinates.
+
+Limitations:
+- Does not validate iOS consumption because that must run on macOS.
+- Does not publish remotely.
+- Does not validate signing or Maven Central release requirements.
+- Does not run a rendered app; it is a compile smoke test.
+
+Constraints preserved:
+- No Maven Central publication.
+- No remote snapshot publication.
+- No secrets.
+- No release.
+- No tag.
+- No push.
+- No public API changes.
+- No component code changes.

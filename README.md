@@ -2,7 +2,7 @@
 
 Compose Multiplatform admin UI toolkit for adaptive dashboards, data views, forms, navigation, feedback states, and shared UI components.
 
-AdaptiveKt is source-first today. Maven publishing is not available yet, so consume it as included Gradle modules or a repository/submodule dependency.
+AdaptiveKt is source-first today. Maven Central publishing is not available yet, so consume it as included Gradle modules or a repository/submodule dependency. A local Maven publishing dry-run is available for release preparation.
 
 ## Platform Support
 
@@ -171,6 +171,7 @@ Basic generated-site link check:
 - Guides: `docs/guides/`
 - Development notes: `docs/development/`
 - Local setup: `docs/development/setup.md`
+- Local publishing dry-run: `docs/publishing/LOCAL_PUBLISHING.md`
 - Roadmap: `docs/roadmap/`
 - Historical project docs: `docs/adaptive-kt/`
 
@@ -200,4 +201,4 @@ Serve the generated site locally:
 
 ## License
 
-Apache License 2.0.
+Apache License 2.0. See [LICENSE](LICENSE).
