@@ -186,6 +186,7 @@ Basic generated-site link check:
 - Development notes: `docs/development/`
 - Local setup: `docs/development/setup.md`
 - Local publishing dry-run: `docs/publishing/LOCAL_PUBLISHING.md`
+- Signing and release workflow preparation: `docs/publishing/SIGNING_AND_RELEASE_WORKFLOW.md`
 - Roadmap: `docs/roadmap/`
 - Historical project docs: `docs/adaptive-kt/`
 

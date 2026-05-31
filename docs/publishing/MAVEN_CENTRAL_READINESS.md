@@ -96,7 +96,8 @@ That workflow does not use secrets, sign artifacts, publish remotely, create tag
 
 Signing is not configured or required for local publishing.
 
-Future Maven Central publishing should use Gradle signing configured conditionally. Builds without signing credentials must continue to pass, and local dry-run publishing to `build/local-maven` must not require signing.
+PUBLISH-1B prepares conditional signing in the Gradle build so local builds continue to pass when signing secrets are absent.
+Local publishing to `build/local-maven` remains valid without signing, and publication tasks do not require signing unless `signingInMemoryKey` and `signingInMemoryKeyPassword` are provided.
 
 Future secret-backed properties:
 

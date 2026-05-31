@@ -20,6 +20,27 @@ Constraints preserved:
 - No API removals or destructive changes.
 - No generated outputs committed.
 
+PUBLISH-1B - Conditional Signing and Manual Publish Workflow Prepared
+==================================================================
+
+Status: Completed
+
+Date: 2026-05-31
+
+Summary:
+- Added conditional Gradle signing in library modules using `signingInMemoryKey` and `signingInMemoryKeyPassword`.
+- Verified that local build and `publishAllPublicationsToLocalTestRepository` continue to pass without signing secrets.
+- Added a manual GitHub Actions workflow at `.github/workflows/publish-release.yml` that is `workflow_dispatch` only and explicitly disables remote publishing.
+- Documented future secrets, workflow behavior, and PUBLISH-2 requirements in `docs/publishing/SIGNING_AND_RELEASE_WORKFLOW.md`.
+- Preserved no-release, no-tag, no-secrets, no-remote-publish constraints.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No Material 3 or external dependencies.
+- No API removals or destructive changes.
+- No generated outputs committed.
+
 UI-ANIM-1 - Carousel and Feedback Loading Animations
 ====================================================
 

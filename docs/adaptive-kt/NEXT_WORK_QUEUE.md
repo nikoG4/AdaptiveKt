@@ -13,6 +13,7 @@
 - [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
 - [x] Add manual macOS validation workflow for local publishing.
 - [x] Run manual macOS validation workflow and inspect iOS artifacts.
+- [ ] Add conditional signing and manual publish workflow documentation for PUBLISH-1B.
 - [x] Add `AdaptiveCarousel` and `AdaptiveNavigationTree` primitives.
 - [x] Add UI Kit showcase coverage for carousel and navigation tree.
 - [x] Add carousel transition animations and animated feedback loading indicators.

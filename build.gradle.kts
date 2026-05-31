@@ -1,5 +1,6 @@
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.plugins.signing.SigningExtension
 
 plugins {
     kotlin("multiplatform") version "2.1.21" apply false
@@ -42,6 +43,20 @@ val publicationDescriptions = mapOf(
 subprojects {
     if (name in publishableProjects) {
         pluginManager.apply("maven-publish")
+        pluginManager.apply("signing")
+
+        val signingInMemoryKey = providers.gradleProperty("signingInMemoryKey")
+        val signingInMemoryKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword")
+        val hasSigningKeys = signingInMemoryKey.isPresent && signingInMemoryKeyPassword.isPresent
+
+        extensions.configure<SigningExtension>("signing") {
+            isRequired = hasSigningKeys
+
+            if (hasSigningKeys) {
+                useInMemoryPgpKeys(signingInMemoryKey.get(), signingInMemoryKeyPassword.get())
+                sign(extensions.getByType<PublishingExtension>().publications)
+            }
+        }
 
         extensions.configure<PublishingExtension>("publishing") {
             repositories {

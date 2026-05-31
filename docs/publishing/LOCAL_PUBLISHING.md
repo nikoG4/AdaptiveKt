@@ -142,3 +142,7 @@ PUBLISH-1 should add:
 - docs/source artifact strategy;
 - a manual-only GitHub Actions publish workflow;
 - Central Portal dry-run/release process documentation.
+
+## PUBLISH-1B Preparation
+
+This repo is prepared for PUBLISH-1B with conditional Gradle signing and a manual release workflow that is currently disabled for remote publishing. See `docs/publishing/SIGNING_AND_RELEASE_WORKFLOW.md` for details.

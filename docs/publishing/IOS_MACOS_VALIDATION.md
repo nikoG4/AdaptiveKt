@@ -37,6 +37,8 @@ build/local-maven/
 
 This is a local dry-run repository only. It does not publish to Maven Central, does not use secrets, does not sign artifacts, does not create a release, and does not create a tag.
 
+For PUBLISH-1B, conditional signing and a manual publish workflow are prepared, but remote publishing remains disabled until the Maven Central namespace and secrets are confirmed.
+
 ## Expected iOS Artifacts
 
 After local publishing on macOS, inspect:

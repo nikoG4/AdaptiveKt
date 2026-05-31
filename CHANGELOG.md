@@ -16,6 +16,10 @@
 - Visual verification tooling.
 - Local Maven publishing dry-run configuration for library modules.
 
+### Changed
+- Prepared conditional Gradle signing support for future Maven Central release workflows.
+- Added a manual `publish-release.yml` workflow for safe manual publish preparation without remote publishing.
+
 ### Fixed
 - Mobile Wasm admin-demo content now scrolls normally on compact/touch viewports.
 - Default sidebar navigation no longer renders primary items as large card rows.
