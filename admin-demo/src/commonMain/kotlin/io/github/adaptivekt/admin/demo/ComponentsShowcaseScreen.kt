@@ -86,6 +86,7 @@ internal fun ComponentsShowcaseScreen(
     focusSection: ComponentsShowcaseSection? = null,
     initialSelectExpanded: Boolean = false,
     initialMultiSelectExpanded: Boolean = false,
+    externalContentScroll: Boolean = false,
 ) {
     val adaptiveInfo = rememberAdaptiveInfo()
     val cardSpan = if (adaptiveInfo.isCompact) 12 else 6
@@ -95,7 +96,7 @@ internal fun ComponentsShowcaseScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (focusSection == null) Modifier.verticalScroll(rememberScrollState()) else Modifier),
+            .then(if (focusSection == null && !externalContentScroll) Modifier.verticalScroll(rememberScrollState()) else Modifier),
     ) {
         AdaptiveSectionHeader(
             title = title,

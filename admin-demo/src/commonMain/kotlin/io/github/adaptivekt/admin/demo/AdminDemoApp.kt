@@ -25,6 +25,7 @@ public fun AdminDemoApp(
     initialScreen: AdminDemoScreen = AdminDemoScreen.Dashboard,
     initialAccountMenuOpen: Boolean = false,
     initialDarkTheme: Boolean = false,
+    contentScrollEnabled: Boolean = false,
 ) {
     var darkTheme by remember { mutableStateOf(initialDarkTheme) }
     AdaptiveTheme(
@@ -35,6 +36,7 @@ public fun AdminDemoApp(
             initialAccountMenuOpen = initialAccountMenuOpen,
             darkTheme = darkTheme,
             onThemeToggle = { darkTheme = !darkTheme },
+            contentScrollEnabled = contentScrollEnabled,
         )
     }
 }
@@ -45,6 +47,7 @@ private fun AdminDemoThemedApp(
     initialAccountMenuOpen: Boolean,
     darkTheme: Boolean,
     onThemeToggle: () -> Unit,
+    contentScrollEnabled: Boolean,
 ) {
     var selectedItemId by remember {
         mutableStateOf(
@@ -82,7 +85,7 @@ private fun AdminDemoThemedApp(
                 .fillMaxSize()
                 .background(AdaptiveTheme.colors.background)
                 .padding(padding)
-                .verticalScroll(rememberScrollState()),
+                .then(if (contentScrollEnabled) Modifier.verticalScroll(rememberScrollState()) else Modifier),
         ) {
             AdaptiveContainer {
                 when (selectedItemId) {
@@ -95,6 +98,7 @@ private fun AdminDemoThemedApp(
                         focusSection = initialScreen.componentsShowcaseSection,
                         initialSelectExpanded = initialScreen == AdminDemoScreen.ComponentsSelectsOpen,
                         initialMultiSelectExpanded = initialScreen == AdminDemoScreen.ComponentsMultiSelectsOpen,
+                        externalContentScroll = contentScrollEnabled,
                     )
                     else -> DashboardScreen()
                 }

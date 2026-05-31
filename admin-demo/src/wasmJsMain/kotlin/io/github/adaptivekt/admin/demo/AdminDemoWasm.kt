@@ -12,6 +12,10 @@ public fun main() {
     val initialScreen = AdminDemoScreen.fromId(screenParam)
 
     ComposeViewport(viewportContainerId = "webApp") {
-        AdminDemoApp(initialScreen = initialScreen, initialDarkTheme = darkTheme)
+        AdminDemoApp(
+            initialScreen = initialScreen,
+            initialDarkTheme = darkTheme,
+            contentScrollEnabled = true,
+        )
     }
 }
