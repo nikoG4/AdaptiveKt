@@ -6,12 +6,18 @@
     <title>AdaptiveKt Admin Demo</title>
     <style>
         html,
-        body,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
         #webApp {
             width: 100%;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
+            min-height: 100dvh;
+            touch-action: auto;
         }
     </style>
 </head>

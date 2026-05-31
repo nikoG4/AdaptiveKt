@@ -118,6 +118,8 @@ Stable for v0.1:
 - `AdaptiveNavigationScaffold`
 - `AdaptiveNavItem`
 - `AdaptiveNavigationMode`
+- `AdaptiveNavigationItemStyle`
+- `AdaptiveNavigationDensity`
 - `navigationModeForBreakpoint`
 - `Sidebar`
 - `Drawer`

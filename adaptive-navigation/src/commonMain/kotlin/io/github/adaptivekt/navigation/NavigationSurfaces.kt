@@ -3,6 +3,9 @@ package io.github.adaptivekt.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,10 +17,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,17 +37,31 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
+public enum class AdaptiveNavigationItemStyle {
+    Pill,
+    Card,
+    Minimal,
+}
+
+public enum class AdaptiveNavigationDensity {
+    Compact,
+    Comfortable,
+}
+
 @Composable
 public fun Sidebar(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxHeight()
             .background(AdaptiveTheme.colors.surfaceMuted)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = AdaptiveTokens.Spacing.Large, vertical = AdaptiveTokens.Spacing.XLarge),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -67,9 +90,11 @@ public fun Sidebar(
                 selected = item.id == selectedItemId,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = AdaptiveTokens.Spacing.Small),
+                    .padding(vertical = if (density == AdaptiveNavigationDensity.Compact) 2.dp else 4.dp),
                 onItemSelected = onItemSelected,
                 layout = NavigationItemLayout.Sidebar,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -80,6 +105,8 @@ public fun Drawer(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 ) {
     Column(
@@ -87,6 +114,7 @@ public fun Drawer(
             .fillMaxHeight()
             .background(AdaptiveTheme.colors.surface)
             .border(width = 1.dp, color = AdaptiveTheme.colors.border)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = AdaptiveTokens.Spacing.Large, vertical = AdaptiveTokens.Spacing.XLarge),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -109,9 +137,11 @@ public fun Drawer(
                 selected = item.id == selectedItemId,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = AdaptiveTokens.Spacing.Small),
+                    .padding(vertical = if (density == AdaptiveNavigationDensity.Compact) 2.dp else 4.dp),
                 onItemSelected = onItemSelected,
                 layout = NavigationItemLayout.Sidebar,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -122,6 +152,8 @@ public fun BottomNavigation(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 ) {
     Row(
@@ -144,6 +176,8 @@ public fun BottomNavigation(
                     .padding(horizontal = AdaptiveTokens.Spacing.Small),
                 onItemSelected = onItemSelected,
                 layout = NavigationItemLayout.BottomNavigation,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -154,6 +188,8 @@ public fun NavigationRail(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 ) {
     Column(
@@ -170,9 +206,11 @@ public fun NavigationRail(
                 selected = item.id == selectedItemId,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = AdaptiveTokens.Spacing.Small),
+                    .padding(vertical = if (density == AdaptiveNavigationDensity.Compact) 2.dp else 4.dp),
                 onItemSelected = onItemSelected,
                 layout = NavigationItemLayout.NavigationRail,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -191,19 +229,73 @@ private fun NavigationItem(
     modifier: Modifier = Modifier,
     onItemSelected: (String) -> Unit,
     layout: NavigationItemLayout,
+    itemStyle: AdaptiveNavigationItemStyle,
+    density: AdaptiveNavigationDensity,
 ) {
-    val itemBackground = if (selected) AdaptiveTheme.colors.primarySubtle else AdaptiveTheme.colors.surface
-    val itemBorder = if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.border
-    val textColor = if (selected) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textSecondary
-    val glyphBackground = if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.disabledBackground
-    val glyphTextColor = if (selected) AdaptiveTheme.colors.textInverse else AdaptiveTheme.colors.textSecondary
-    val shape = AdaptiveTheme.shapes.medium
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val shape = when (itemStyle) {
+        AdaptiveNavigationItemStyle.Card -> AdaptiveTheme.shapes.medium
+        AdaptiveNavigationItemStyle.Pill,
+        AdaptiveNavigationItemStyle.Minimal -> AdaptiveTheme.shapes.small
+    }
+    val itemBackground = when (itemStyle) {
+        AdaptiveNavigationItemStyle.Card -> when {
+            selected -> AdaptiveTheme.colors.primarySubtle
+            hovered -> AdaptiveTheme.colors.surfaceRaised
+            else -> AdaptiveTheme.colors.surface
+        }
+        AdaptiveNavigationItemStyle.Pill -> when {
+            selected -> AdaptiveTheme.colors.primarySubtle
+            hovered -> AdaptiveTheme.colors.surfaceRaised
+            else -> Color.Transparent
+        }
+        AdaptiveNavigationItemStyle.Minimal -> when {
+            selected -> AdaptiveTheme.colors.surfaceRaised
+            hovered -> AdaptiveTheme.colors.surfaceMuted
+            else -> Color.Transparent
+        }
+    }
+    val itemBorder = when (itemStyle) {
+        AdaptiveNavigationItemStyle.Card -> if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.border
+        AdaptiveNavigationItemStyle.Pill,
+        AdaptiveNavigationItemStyle.Minimal -> Color.Transparent
+    }
+    val textColor = when {
+        selected && itemStyle == AdaptiveNavigationItemStyle.Minimal -> AdaptiveTheme.colors.textPrimary
+        selected -> AdaptiveTheme.colors.primaryText
+        else -> AdaptiveTheme.colors.textSecondary
+    }
+    val glyphBackground = if (itemStyle == AdaptiveNavigationItemStyle.Card) {
+        if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.disabledBackground
+    } else {
+        Color.Transparent
+    }
+    val glyphTextColor = when {
+        itemStyle == AdaptiveNavigationItemStyle.Card && selected -> AdaptiveTheme.colors.textInverse
+        selected -> AdaptiveTheme.colors.primaryText
+        else -> AdaptiveTheme.colors.textMuted
+    }
+    val minHeight = when (density) {
+        AdaptiveNavigationDensity.Compact -> 40.dp
+        AdaptiveNavigationDensity.Comfortable -> AdaptiveTokens.Sizes.NavItemHeight
+    }
+    val railHeight = when (density) {
+        AdaptiveNavigationDensity.Compact -> 60.dp
+        AdaptiveNavigationDensity.Comfortable -> 66.dp
+    }
 
     val itemModifier = modifier
-        .clickable { onItemSelected(item.id) }
+        .clip(shape)
         .background(itemBackground, shape = shape)
         .border(width = 1.dp, color = itemBorder, shape = shape)
-        .padding(AdaptiveTokens.Spacing.Small)
+        .hoverable(interactionSource = interactionSource)
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = { onItemSelected(item.id) },
+        )
+        .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = if (density == AdaptiveNavigationDensity.Compact) 6.dp else AdaptiveTokens.Spacing.Small)
 
     val labelText = compactNavigationLabel(item.label.ifBlank { item.id })
 
@@ -211,19 +303,22 @@ private fun NavigationItem(
         NavigationItemLayout.Sidebar -> {
             Row(
                 modifier = itemModifier
-                    .heightIn(min = AdaptiveTokens.Sizes.NavItemHeight),
+                    .heightIn(min = minHeight),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                NavigationGlyph(item, glyphBackground, glyphTextColor)
+                if (itemStyle == AdaptiveNavigationItemStyle.Pill) {
+                    ActiveIndicator(selected)
+                }
+                NavigationGlyph(item, glyphBackground, glyphTextColor, itemStyle)
                 BasicText(
                     text = item.label,
                     modifier = Modifier
-                        .padding(start = AdaptiveTokens.Spacing.Medium)
+                        .padding(start = AdaptiveTokens.Spacing.Small)
                         .fillMaxWidth(),
                     style = TextStyle(
                         fontSize = 14.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                         color = textColor,
                     ),
                     maxLines = 1,
@@ -233,17 +328,17 @@ private fun NavigationItem(
         }
         NavigationItemLayout.NavigationRail -> {
             Column(
-                modifier = itemModifier.heightIn(min = 72.dp),
+                modifier = itemModifier.heightIn(min = railHeight),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                NavigationGlyph(item, glyphBackground, glyphTextColor)
+                NavigationGlyph(item, glyphBackground, glyphTextColor, itemStyle)
                 Spacer(modifier = Modifier.size(AdaptiveTokens.Spacing.Small))
                 BasicText(
                     text = labelText,
                     style = TextStyle(
                         fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                         color = textColor,
                         textAlign = TextAlign.Center,
                     ),
@@ -259,13 +354,13 @@ private fun NavigationItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                NavigationGlyph(item, glyphBackground, glyphTextColor)
+                NavigationGlyph(item, glyphBackground, glyphTextColor, itemStyle)
                 Spacer(modifier = Modifier.size(AdaptiveTokens.Spacing.Small))
                 BasicText(
                     text = labelText,
                     style = TextStyle(
                         fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                         color = textColor,
                         textAlign = TextAlign.Center,
                     ),
@@ -279,14 +374,29 @@ private fun NavigationItem(
 }
 
 @Composable
+private fun ActiveIndicator(selected: Boolean) {
+    Box(
+        modifier = Modifier
+            .padding(end = AdaptiveTokens.Spacing.Small)
+            .size(width = 3.dp, height = 22.dp)
+            .background(
+                color = if (selected) AdaptiveTheme.colors.primary else Color.Transparent,
+                shape = AdaptiveTheme.shapes.pill,
+            ),
+    )
+}
+
+@Composable
 private fun NavigationGlyph(
     item: AdaptiveNavItem,
     background: Color,
     textColor: Color,
+    itemStyle: AdaptiveNavigationItemStyle,
 ) {
+    val glyphSize = if (itemStyle == AdaptiveNavigationItemStyle.Card) AdaptiveTokens.Sizes.IconBox else 22.dp
     Box(
         modifier = Modifier
-            .size(AdaptiveTokens.Sizes.IconBox)
+            .size(glyphSize)
             .background(background, shape = AdaptiveTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {

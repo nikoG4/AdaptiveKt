@@ -1,3 +1,25 @@
+UX-FIX-1 - Mobile Demo Scroll and Sidebar Navigation Polish
+===========================================================
+
+Status: Completed
+
+Date: 2026-05-31
+
+Summary:
+- Fixed mobile Wasm admin-demo scrolling by making the demo content vertically scrollable and relaxing the Wasm root overflow lock.
+- Changed default navigation rows from large card-like items to a compact pill/list style.
+- Added `AdaptiveNavigationItemStyle` with `Pill`, `Card`, and `Minimal` variants.
+- Added `AdaptiveNavigationDensity` with `Comfortable` and `Compact` variants.
+- Kept the previous card navigation treatment as an opt-in style.
+- Updated the UI Kit navigation tree showcase with pill, card, and minimal examples.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No Material 3 or external dependencies.
+- No API removals or destructive changes.
+- No generated outputs committed.
+
 UI-ANIM-1 - Carousel and Feedback Loading Animations
 ====================================================
 

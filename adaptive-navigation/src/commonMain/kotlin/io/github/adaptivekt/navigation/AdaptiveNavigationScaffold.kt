@@ -1,8 +1,8 @@
 package io.github.adaptivekt.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.components.AdaptiveIconButton
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
@@ -44,6 +46,8 @@ public fun AdaptiveNavigationScaffold(
     onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     preferBottomNavigationOnCompact: Boolean = false,
+    navigationItemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    navigationDensity: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     topBar: (@Composable () -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -86,6 +90,8 @@ public fun AdaptiveNavigationScaffold(
                                         items = navItems,
                                         selectedItemId = selectedItemId,
                                         modifier = Modifier.fillMaxSize(),
+                                        itemStyle = navigationItemStyle,
+                                        density = navigationDensity,
                                         onItemSelected = {
                                             onItemSelected(it)
                                             drawerOpen = false
@@ -111,6 +117,8 @@ public fun AdaptiveNavigationScaffold(
                                     items = navItems,
                                     selectedItemId = selectedItemId,
                                     modifier = Modifier.fillMaxWidth(),
+                                    itemStyle = navigationItemStyle,
+                                    density = navigationDensity,
                                     onItemSelected = onItemSelected,
                                 )
                             }
@@ -125,6 +133,8 @@ public fun AdaptiveNavigationScaffold(
                                     .width(NavigationRailWidth)
                                     .fillMaxHeight()
                                     .background(AdaptiveTheme.colors.surfaceMuted),
+                                itemStyle = navigationItemStyle,
+                                density = navigationDensity,
                                 onItemSelected = onItemSelected,
                             )
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -144,6 +154,8 @@ public fun AdaptiveNavigationScaffold(
                                     .width(NavigationSurfaceWidth)
                                     .fillMaxHeight()
                                     .background(AdaptiveTheme.colors.surfaceMuted),
+                                itemStyle = navigationItemStyle,
+                                density = navigationDensity,
                                 onItemSelected = onItemSelected,
                             )
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -205,23 +217,15 @@ private fun CompactTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showMenu) {
-            Box(
-                modifier = Modifier
-                    .size(AdaptiveTokens.Sizes.ButtonHeight)
-                    .clickable(onClick = onMenuClick)
-                    .background(AdaptiveTheme.colors.surfaceMuted, AdaptiveTheme.shapes.pill)
-                    .border(1.dp, AdaptiveTheme.colors.borderStrong, AdaptiveTheme.shapes.pill),
-                contentAlignment = Alignment.Center,
+            AdaptiveIconButton(
+                onClick = onMenuClick,
+                size = AdaptiveTokens.Sizes.ButtonHeight,
             ) {
-                BasicText(
-                    text = if (drawerOpen) "x" else "\u2630",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AdaptiveTheme.colors.primaryText,
-                    ),
-                    maxLines = 1,
-                )
+                if (drawerOpen) {
+                    AdaptiveIcons.Close(tint = AdaptiveTheme.colors.primaryText, contentDescription = "Close navigation")
+                } else {
+                    AdaptiveIcons.Menu(tint = AdaptiveTheme.colors.primaryText, contentDescription = "Open navigation")
+                }
             }
         }
 

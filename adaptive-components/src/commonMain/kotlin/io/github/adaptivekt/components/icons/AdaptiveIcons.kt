@@ -103,6 +103,20 @@ public object AdaptiveIcons {
     }
 
     @Composable
+    public fun Menu(
+        modifier: Modifier = Modifier,
+        size: Dp = 16.dp,
+        tint: Color = Color(0xFF374151),
+        contentDescription: String? = null,
+    ) {
+        FunctionalIcon(modifier, size, tint, contentDescription) { side, stroke ->
+            drawLine(tint, Offset(side * 0.24f, side * 0.32f), Offset(side * 0.76f, side * 0.32f), stroke, StrokeCap.Round)
+            drawLine(tint, Offset(side * 0.24f, side * 0.50f), Offset(side * 0.76f, side * 0.50f), stroke, StrokeCap.Round)
+            drawLine(tint, Offset(side * 0.24f, side * 0.68f), Offset(side * 0.76f, side * 0.68f), stroke, StrokeCap.Round)
+        }
+    }
+
+    @Composable
     public fun Search(
         modifier: Modifier = Modifier,
         size: Dp = 16.dp,

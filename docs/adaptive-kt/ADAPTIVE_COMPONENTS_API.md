@@ -240,6 +240,7 @@ Available icons:
 - `ChevronLeft`
 - `Plus`
 - `MoreVertical`
+- `Menu`
 - `Search`
 - `Check`
 
@@ -248,6 +249,18 @@ Implementation notes:
 - Icons are drawn with Compose `Canvas` in `commonMain`.
 - No external dependencies, icon packs, Material 3 icons, SVG files, or resources were added.
 - Component icon slots remain open for app/domain icons supplied by developers.
+
+## UX-FIX-1 Navigation Defaults
+
+`adaptive-navigation` now exposes shared style knobs for scaffold, sidebar, drawer, rail, bottom navigation and navigation tree rows:
+
+- `AdaptiveNavigationItemStyle.Pill` is the default professional admin sidebar style.
+- `AdaptiveNavigationItemStyle.Card` keeps the previous larger touch/card treatment as an opt-in variant.
+- `AdaptiveNavigationItemStyle.Minimal` is available for documentation-style sidebars.
+- `AdaptiveNavigationDensity.Comfortable` is the default.
+- `AdaptiveNavigationDensity.Compact` reduces row height for denser navigation.
+
+The default pill style uses flat rows, subtle hover surfaces, selected primary-subtle backgrounds and a small active indicator instead of large bordered cards with avatar-like initials.
 
 Adopted in this PR:
 

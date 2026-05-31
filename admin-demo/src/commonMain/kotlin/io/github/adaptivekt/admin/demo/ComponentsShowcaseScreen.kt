@@ -61,6 +61,8 @@ import io.github.adaptivekt.feedback.LoadingState
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
+import io.github.adaptivekt.navigation.AdaptiveNavigationDensity
+import io.github.adaptivekt.navigation.AdaptiveNavigationItemStyle
 
 internal enum class ComponentsShowcaseSection(
     val title: String,
@@ -707,6 +709,47 @@ private fun NavigationTreeSection() {
             onItemSelected = { selectedItem = it.id },
             expandedItemIds = expandedItems,
             onExpandedItemIdsChange = { expandedItems = it },
+        )
+    }
+
+    Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+
+    ShowcaseCard(title = "Navigation item styles", description = "Default pill navigation plus card and minimal variants.") {
+        AdaptiveGrid(columns = 12, horizontalGap = AdaptiveTokens.Spacing.Medium, verticalGap = AdaptiveTokens.Spacing.Medium) {
+            item(span = 4) {
+                NavigationStylePreview("Pill default", AdaptiveNavigationItemStyle.Pill, AdaptiveNavigationDensity.Comfortable)
+            }
+            item(span = 4) {
+                NavigationStylePreview("Card", AdaptiveNavigationItemStyle.Card, AdaptiveNavigationDensity.Comfortable)
+            }
+            item(span = 4) {
+                NavigationStylePreview("Minimal compact", AdaptiveNavigationItemStyle.Minimal, AdaptiveNavigationDensity.Compact)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NavigationStylePreview(
+    title: String,
+    style: AdaptiveNavigationItemStyle,
+    density: AdaptiveNavigationDensity,
+) {
+    Column {
+        Label(title)
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveNavigationTree(
+            items = listOf(
+                AdaptiveNavigationTreeItem("overview", "Overview"),
+                AdaptiveNavigationTreeItem("reports", "Reports", badge = "New"),
+                AdaptiveNavigationTreeItem("settings", "Settings", enabled = style != AdaptiveNavigationItemStyle.Minimal),
+            ),
+            selectedItemId = "reports",
+            onItemSelected = {},
+            expandedItemIds = emptySet(),
+            onExpandedItemIdsChange = {},
+            itemStyle = style,
+            density = density,
         )
     }
 }

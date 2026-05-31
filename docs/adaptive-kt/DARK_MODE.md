@@ -44,6 +44,7 @@ Admin demo:
 /?screen=components-selects&theme=dark
 /?screen=components-multiselects&theme=dark
 /?screen=components-carousels&theme=dark
+/?screen=components-navigation-tree&theme=dark
 /?screen=components-feedback&theme=dark
 ```
 
@@ -58,7 +59,8 @@ Desktop capture entry point:
 - `:adaptive-components`, `:adaptive-feedback`, `:adaptive-forms`, `:adaptive-data`, and `:adaptive-navigation` consume `AdaptiveTheme` tokens.
 - `:docs-site` and `:admin-demo` expose light/dark toggles.
 - Web capture tooling includes dark smoke screenshots for the docs site and selected admin-demo screens.
-- Button, icon button, menu item, select, multiselect, text field, chip, carousel, loading, and navigation tree interaction states avoid light-only hover backgrounds.
+- Button, icon button, menu item, select, multiselect, text field, chip, carousel, loading, sidebar, drawer, rail, and navigation tree interaction states avoid light-only hover backgrounds.
+- Default navigation selected/hover states use `primarySubtle`, `primaryText`, `surfaceRaised`, and `surfaceMuted` instead of fixed light backgrounds.
 - Selected and hover states should use `AdaptiveTheme.colors` and `AdaptiveTheme.states`, not one-off white/light gray fixes.
 
 ## Limitations

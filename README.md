@@ -18,7 +18,7 @@ AdaptiveKt is source-first today. Maven Central publishing is not available yet,
 - Adaptive breakpoints and responsive helpers in `:adaptive-core`
 - Theme foundation with `AdaptiveTheme`, light/dark color schemes, shapes, typography, and state tokens used across core components and shared modules
 - Layout primitives including `AdaptiveContainer` and `AdaptiveGrid`
-- Navigation scaffold with breakpoint-driven navigation modes
+- Navigation scaffold with breakpoint-driven navigation modes and professional pill-style sidebar defaults
 - Data view that switches between mobile cards and wider table layouts
 - Responsive form layout with sections, fields, validation messages, and actions
 - Feedback states for animated loading, empty, and error content

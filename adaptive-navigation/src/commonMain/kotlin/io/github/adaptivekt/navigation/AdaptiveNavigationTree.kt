@@ -52,6 +52,8 @@ public fun AdaptiveNavigationTree(
     onExpandedItemIdsChange: (Set<String>) -> Unit,
     modifier: Modifier = Modifier,
     maxDepth: Int = 6,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -66,6 +68,8 @@ public fun AdaptiveNavigationTree(
                 expandedItemIds = expandedItemIds,
                 onExpandedItemIdsChange = onExpandedItemIdsChange,
                 onItemSelected = onItemSelected,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -80,6 +84,8 @@ private fun NavigationTreeNode(
     expandedItemIds: Set<String>,
     onExpandedItemIdsChange: (Set<String>) -> Unit,
     onItemSelected: (AdaptiveNavigationTreeItem) -> Unit,
+    itemStyle: AdaptiveNavigationItemStyle,
+    density: AdaptiveNavigationDensity,
 ) {
     val hasChildren = item.children.isNotEmpty() && depth < maxDepth
     val expanded = item.id in expandedItemIds
@@ -99,6 +105,8 @@ private fun NavigationTreeNode(
             }
             onItemSelected(item)
         },
+        itemStyle = itemStyle,
+        density = density,
     )
 
     if (hasChildren && expanded) {
@@ -111,6 +119,8 @@ private fun NavigationTreeNode(
                 expandedItemIds = expandedItemIds,
                 onExpandedItemIdsChange = onExpandedItemIdsChange,
                 onItemSelected = onItemSelected,
+                itemStyle = itemStyle,
+                density = density,
             )
         }
     }
@@ -124,28 +134,37 @@ private fun NavigationTreeRow(
     expanded: Boolean,
     hasChildren: Boolean,
     onClick: () -> Unit,
+    itemStyle: AdaptiveNavigationItemStyle,
+    density: AdaptiveNavigationDensity,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = AdaptiveTheme.shapes.medium
+    val shape = if (itemStyle == AdaptiveNavigationItemStyle.Card) AdaptiveTheme.shapes.medium else AdaptiveTheme.shapes.small
     val enabled = item.enabled
     val background = when {
         !enabled -> Color.Transparent
+        selected && itemStyle == AdaptiveNavigationItemStyle.Minimal -> AdaptiveTheme.colors.surfaceRaised
         selected -> AdaptiveTheme.colors.primarySubtle
+        hovered && itemStyle == AdaptiveNavigationItemStyle.Minimal -> AdaptiveTheme.colors.surfaceMuted
         hovered -> AdaptiveTheme.colors.surfaceRaised
         else -> Color.Transparent
     }
-    val border = if (selected) AdaptiveTheme.colors.primary else Color.Transparent
+    val border = if (itemStyle == AdaptiveNavigationItemStyle.Card && selected) AdaptiveTheme.colors.primary else Color.Transparent
     val textColor = when {
         !enabled -> AdaptiveTheme.colors.disabledText
+        selected && itemStyle == AdaptiveNavigationItemStyle.Minimal -> AdaptiveTheme.colors.textPrimary
         selected -> AdaptiveTheme.colors.primaryText
         else -> AdaptiveTheme.colors.textSecondary
+    }
+    val minHeight = when (density) {
+        AdaptiveNavigationDensity.Compact -> 40.dp
+        AdaptiveNavigationDensity.Comfortable -> AdaptiveTokens.Sizes.NavItemHeight
     }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = AdaptiveTokens.Sizes.NavItemHeight)
+            .heightIn(min = minHeight)
             .clip(shape)
             .background(background, shape)
             .border(1.dp, border, shape)
@@ -159,8 +178,8 @@ private fun NavigationTreeRow(
             .padding(
                 start = AdaptiveTokens.Spacing.Small + (depth * 16).dp,
                 end = AdaptiveTokens.Spacing.Small,
-                top = AdaptiveTokens.Spacing.Small,
-                bottom = AdaptiveTokens.Spacing.Small,
+                top = if (density == AdaptiveNavigationDensity.Compact) 6.dp else AdaptiveTokens.Spacing.Small,
+                bottom = if (density == AdaptiveNavigationDensity.Compact) 6.dp else AdaptiveTokens.Spacing.Small,
             ),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,

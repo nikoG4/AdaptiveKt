@@ -55,6 +55,18 @@ The Web capture matrix includes light screenshots for the main admin-demo screen
 - `components-navigation-tree`
 - `components-feedback`
 
+For mobile scroll regressions, also review the public demo at `390x844` or `420x900`:
+
+- `/demo/app/`
+- `/demo/app/?theme=dark`
+- `/demo/app/?screen=components-carousels`
+- `/demo/app/?screen=components-navigation-tree`
+- `/demo/app/?screen=components-multiselects`
+- `/demo/app/?screen=components-feedback`
+- `/demo/app/?screen=invoices-loading`
+
+The content should respond to touch/trackpad vertical scroll, and carousel/select interactions should not leave the page stuck.
+
 ## Admin Demo Desktop
 
 ```powershell

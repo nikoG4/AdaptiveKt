@@ -39,22 +39,45 @@ enum class AdaptiveNavigationMode {
 
 ### AdaptiveNavigationScaffold
 
-The primary scaffold for adaptive navigation chrome. It chooses presentation automatically by breakpoint and uses the slots for optional customization only.
+The primary scaffold for adaptive navigation chrome. It chooses presentation automatically by breakpoint and uses slots for optional customization only.
 
 ```kotlin
 @Composable
 fun AdaptiveNavigationScaffold(
-    modifier: Modifier = Modifier,
     navItems: List<AdaptiveNavItem>,
     selectedItemId: String?,
     onItemSelected: (String) -> Unit,
-    topBar: @Composable (AdaptiveNavItem?) -> Unit = {},
-    sidebarContent: @Composable (() -> Unit)? = null,
-    drawerContent: @Composable (() -> Unit)? = null,
-    bottomBar: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    preferBottomNavigationOnCompact: Boolean = false,
+    navigationItemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    navigationDensity: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
+    topBar: (@Composable () -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 )
 ```
+
+### Navigation Item Style
+
+Default navigation rows are now flat pill/list rows rather than card-like rows. The card treatment remains available as an opt-in variant.
+
+```kotlin
+enum class AdaptiveNavigationItemStyle {
+    Pill,
+    Card,
+    Minimal,
+}
+
+enum class AdaptiveNavigationDensity {
+    Compact,
+    Comfortable,
+}
+```
+
+- `Pill` is the default admin dashboard style: compact rows, subtle hover state, primary-subtle selected state and an optional left active indicator.
+- `Card` preserves the earlier larger card/touch-friendly treatment.
+- `Minimal` is suitable for documentation sidebars or dense settings navigation.
+- `Comfortable` keeps rows around `44.dp`.
+- `Compact` keeps rows around `40.dp`.
 
 ## Breakpoint rules
 
@@ -93,10 +116,12 @@ AdaptiveNavigationTree(
     onItemSelected = { selected = it.id },
     expandedItemIds = expanded,
     onExpandedItemIdsChange = { expanded = it },
+    itemStyle = AdaptiveNavigationItemStyle.Pill,
+    density = AdaptiveNavigationDensity.Comfortable,
 )
 ```
 
-It supports badges, disabled rows, `maxDepth`, controlled expansion, and dark-mode safe selected/hover states.
+It supports badges, disabled rows, `maxDepth`, controlled expansion, the same item style/density knobs, and dark-mode safe selected/hover states.
 
 ### Sidebar
 
@@ -106,6 +131,8 @@ fun Sidebar(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 )
 ```
@@ -118,6 +145,8 @@ fun Drawer(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 )
 ```
@@ -130,6 +159,8 @@ fun BottomNavigation(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 )
 ```
@@ -142,6 +173,8 @@ fun NavigationRail(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
 )
 ```
@@ -182,31 +215,22 @@ AdaptiveNavigationScaffold(
     navItems = navItems,
     selectedItemId = selectedItem,
     onItemSelected = onItemSelected,
-    topBar = { selected -> AdminTopBar(selected?.label ?: "Admin") },
-    sidebarContent = {
-        Sidebar(
-            items = navItems,
-            selectedItemId = selectedItem,
-            onItemSelected = onItemSelected
-        )
-    },
-    drawerContent = {
-        Drawer(
-            items = navItems,
-            selectedItemId = selectedItem,
-            onItemSelected = onItemSelected
-        )
-    },
-    bottomBar = {
-        BottomNavigation(
-            items = navItems,
-            selectedItemId = selectedItem,
-            onItemSelected = onItemSelected
-        )
-    }
+    navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+    topBar = { AdminTopBar() },
 ) { padding ->
     ScreenContent(Modifier.padding(padding))
 }
+```
+
+To keep the previous larger row treatment:
+
+```kotlin
+AdaptiveNavigationScaffold(
+    navItems = navItems,
+    selectedItemId = selectedItem,
+    onItemSelected = onItemSelected,
+    navigationItemStyle = AdaptiveNavigationItemStyle.Card,
+)
 ```
 
 ## Compose Multiplatform notes

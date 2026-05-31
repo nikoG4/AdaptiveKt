@@ -16,6 +16,7 @@
 - [x] Add `AdaptiveCarousel` and `AdaptiveNavigationTree` primitives.
 - [x] Add UI Kit showcase coverage for carousel and navigation tree.
 - [x] Add carousel transition animations and animated feedback loading indicators.
+- [x] Fix mobile admin-demo scroll and switch sidebar defaults to compact pill navigation.
 - [ ] Add deeper visual regression baselines for new dark hover states.
 - [ ] Consider autoplay for carousel only if a future product use case needs it.
 - [ ] Consider `AdaptiveBreadcrumbs` or `AdaptiveAccordion` in a later UI navigation polish PR.
@@ -144,7 +145,7 @@ Lista ordenada de próximas tareas separadas por herramienta. Solo documentació
 
 - [ ] Migrar primitives visuales seguros de `adaptive-navigation` a `adaptive-components`
 - [ ] Evaluar `AdaptiveSurface`/`AdaptiveDivider` para paneles de navigation sin cambiar API
-- [ ] Evaluar `AdaptiveIcons` para affordances internas de navigation
+- [x] Evaluar `AdaptiveIcons` para affordances internas de navigation
 - [ ] Mantener API publica de navigation
 - [ ] No tocar data/forms/feedback en el mismo PR
 

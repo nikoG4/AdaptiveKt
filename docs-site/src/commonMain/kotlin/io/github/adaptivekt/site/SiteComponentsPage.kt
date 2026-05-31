@@ -67,6 +67,7 @@ import io.github.adaptivekt.forms.ValidationMessage
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
+import io.github.adaptivekt.navigation.AdaptiveNavigationItemStyle
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 
@@ -392,8 +393,13 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
     },
     LiveExample(
         title = "AdaptiveNavigationScaffold",
-        description = "Small preview of the navigation shell.",
-        code = """AdaptiveNavigationScaffold(navItems, selectedItemId, onItemSelected) { padding -> ... }""",
+        description = "Small preview of the navigation shell with the default pill sidebar style.",
+        code = """AdaptiveNavigationScaffold(
+    navItems = navItems,
+    selectedItemId = selected,
+    onItemSelected = { selected = it },
+    navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+) { padding -> ... }""",
     ) {
         var selected by remember { mutableStateOf("dashboard") }
         Box(modifier = Modifier.fillMaxWidth().height(260.dp).border(1.dp, SiteLine)) {
@@ -405,6 +411,7 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
                 ),
                 selectedItemId = selected,
                 onItemSelected = { selected = it },
+                navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
             ) { padding ->
                 Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
                     SiteText("Selected: $selected", fontWeight = FontWeight.Bold)

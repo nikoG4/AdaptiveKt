@@ -18,6 +18,7 @@ Implemented in `io.github.adaptivekt.components.icons.AdaptiveIcons`:
 - `ChevronLeft`
 - `Plus`
 - `MoreVertical`
+- `Menu`
 - `Search`
 - `Check`
 
@@ -61,6 +62,7 @@ AdaptiveIcons.MoreVertical(
 - `AdaptiveSearchField` uses `AdaptiveIcons.Search` as the default leading affordance.
 - `AdaptiveSearchField` uses `AdaptiveIcons.Close` for clear actions.
 - `adaptive-data` uses `AdaptiveIcons.MoreVertical` for row overflow triggers.
+- `adaptive-navigation` uses `AdaptiveIcons.Menu` and `AdaptiveIcons.Close` for the compact drawer toggle.
 - `admin-demo` uses `Plus`, `ChevronRight`, `ChevronDown`, `Search`, `Close`, and `Check` in obvious component affordances and showcase examples.
 
 ## Developer Icons
