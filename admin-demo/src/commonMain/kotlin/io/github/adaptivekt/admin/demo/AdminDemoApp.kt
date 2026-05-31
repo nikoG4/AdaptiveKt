@@ -114,6 +114,7 @@ private val AdminDemoScreen.componentsShowcaseSection: ComponentsShowcaseSection
         AdminDemoScreen.ComponentsMultiSelectsOpen -> ComponentsShowcaseSection.MultiSelects
         AdminDemoScreen.ComponentsCarousels -> ComponentsShowcaseSection.Carousels
         AdminDemoScreen.ComponentsNavigationTree -> ComponentsShowcaseSection.NavigationTree
+        AdminDemoScreen.ComponentsFeedback -> ComponentsShowcaseSection.Feedback
         else -> null
     }
 

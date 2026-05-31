@@ -1,3 +1,25 @@
+UI-ANIM-1 - Carousel and Feedback Loading Animations
+====================================================
+
+Status: Completed
+
+Date: 2026-05-31
+
+Summary:
+- Added animated transitions to `AdaptiveCarousel` with `Slide`, `Fade`, `Scale`, and `None` modes.
+- Added `animationDurationMillis` while keeping existing carousel calls source-compatible.
+- Added pure carousel direction helper coverage for normal and looped navigation.
+- Upgraded `LoadingState` with animated `Spinner`, `Dots`, and `Pulse` indicator styles.
+- Expanded admin-demo UI Kit and Web/Desktop capture routes with a focused `components-feedback` screen.
+- Refreshed docs-site examples for animated carousel and loading states.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No Material 3 or external dependencies.
+- No autoplay.
+- No Kamel, Robot, or Playwright in library modules.
+
 UI-NAV-1 - Carousel and Hierarchical Navigation
 ===============================================
 

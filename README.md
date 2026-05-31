@@ -21,7 +21,7 @@ AdaptiveKt is source-first today. Maven Central publishing is not available yet,
 - Navigation scaffold with breakpoint-driven navigation modes
 - Data view that switches between mobile cards and wider table layouts
 - Responsive form layout with sections, fields, validation messages, and actions
-- Feedback states for loading, empty, and error content
+- Feedback states for animated loading, empty, and error content
 - Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, multi-select, and carousel
 - Hierarchical navigation tree for nested admin sidebars and settings panels
 - Wasm browser demo
@@ -116,6 +116,7 @@ AdaptiveCarousel(
     items = dashboardCards,
     selectedIndex = slide,
     onSelectedIndexChange = { slide = it },
+    transition = AdaptiveCarouselTransition.Slide,
 ) { card, index ->
     SummaryPanel(card, index)
 }

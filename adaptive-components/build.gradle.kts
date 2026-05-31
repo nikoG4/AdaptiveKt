@@ -23,6 +23,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":adaptive-core"))
+                implementation(compose.animation)
                 implementation(compose.foundation)
             }
         }

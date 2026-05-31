@@ -65,7 +65,8 @@ $componentScreens = @(
     "components-multiselects",
     "components-multiselects-open",
     "components-carousels",
-    "components-navigation-tree"
+    "components-navigation-tree",
+    "components-feedback"
 )
 
 $screens = if ($ComponentsOnly) {

@@ -27,7 +27,7 @@ Complete reference for all AdaptiveKt components, organized by module.
 - [**Adaptive Menu Item**](components/adaptive-menu-item.md) — Menu items
 - [**Adaptive Select**](components/adaptive-select.md) — Dropdown selection
 - [**Adaptive Multi Select**](adaptive-multi-select.md) — Multi-value dropdown selection
-- [**Adaptive Carousel**](adaptive-carousel.md) — Controlled carousel panels
+- [**Adaptive Carousel**](adaptive-carousel.md) — Animated controlled carousel panels
 - [**Adaptive Icons**](components/adaptive-icons.md) — Icon library
 
 ## Navigation
@@ -46,7 +46,7 @@ Complete reference for all AdaptiveKt components, organized by module.
 
 ## Feedback
 
-- [**Empty, Loading, Error States**](feedback/adaptive-feedback-states.md) — Feedback UI
+- [**Empty, Loading, Error States**](feedback-states.md) — Feedback UI with animated loading indicators
 
 ## Quick Links
 

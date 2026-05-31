@@ -24,6 +24,7 @@ kotlin {
             dependencies {
                 implementation(project(":adaptive-core"))
                 implementation(project(":adaptive-components"))
+                implementation(compose.animation)
                 implementation(compose.foundation)
             }
         }

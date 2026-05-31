@@ -34,7 +34,7 @@ Internal visual primitives found:
 | Shared state container | Local centered column with padding/max width | Migrated to `AdaptiveSurface` | Gives Empty/Loading/Error a shared professional panel |
 | Empty default glyph | Raw text symbol | Migrated to `AdaptiveIcons.Search` | Removes crude text-as-icon default |
 | Error default glyph | Raw `!` symbol | Migrated to `AdaptiveIcons.Close` | Removes crude text-as-icon default using existing icon set |
-| Loading indicator | Local Foundation-only indicator | Kept | Works without Material/coroutines/animation scope changes |
+| Loading indicator | Local Foundation-only indicator | Kept | Later animated in UI-ANIM-1 with Compose Multiplatform animation APIs, still without Material or external dependencies |
 | Actions | User-provided slots | Kept | `action` and `retryAction` are caller-owned composables |
 | Text rendering | Local `BasicText` helper | Kept | No shared body/title text primitive exists yet |
 
@@ -46,7 +46,7 @@ Internal visual primitives found:
 
 ## Helpers Kept
 
-- `SimpleLoadingIndicator` remains local and Foundation-only.
+- `SimpleLoadingIndicator` remains local, Foundation-only, and animated.
 - `SimpleText` remains local.
 - `action` and `retryAction` remain slots controlled by the caller.
 
@@ -114,7 +114,7 @@ Observed:
 - Empty/Error states no longer show raw text glyphs.
 - Feedback panels are centered and keep a reasonable max width on large screens.
 - Compact feedback states fit without overflow.
-- Loading remains simple and presentable.
+- Loading remains simple, presentable, and animated.
 - Action slots still render the caller-provided buttons.
 
 Capture runs still emit SLF4J no-binding warnings from the demo-only Kamel/Ktor image stack, but screenshots are written and Gradle tasks complete successfully.

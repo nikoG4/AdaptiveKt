@@ -37,4 +37,28 @@ class AdaptiveCarouselTest {
     fun previousCarouselIndex_staysAtStartWhenLoopDisabled() {
         assertEquals(0, previousCarouselIndex(index = 0, itemCount = 4, loop = false))
     }
+
+    @Test
+    fun carouselSlideDirection_returnsZeroForEmptyOrSingleItem() {
+        assertEquals(0, carouselSlideDirection(previousIndex = 0, nextIndex = 1, itemCount = 0))
+        assertEquals(0, carouselSlideDirection(previousIndex = 0, nextIndex = 0, itemCount = 1))
+    }
+
+    @Test
+    fun carouselSlideDirection_detectsNormalForwardAndBackwardMovement() {
+        assertEquals(1, carouselSlideDirection(previousIndex = 1, nextIndex = 2, itemCount = 4))
+        assertEquals(-1, carouselSlideDirection(previousIndex = 2, nextIndex = 1, itemCount = 4))
+    }
+
+    @Test
+    fun carouselSlideDirection_detectsLoopEdges() {
+        assertEquals(1, carouselSlideDirection(previousIndex = 3, nextIndex = 0, itemCount = 4, loop = true))
+        assertEquals(-1, carouselSlideDirection(previousIndex = 0, nextIndex = 3, itemCount = 4, loop = true))
+    }
+
+    @Test
+    fun carouselSlideDirection_handlesLoopDisabledEdges() {
+        assertEquals(-1, carouselSlideDirection(previousIndex = 3, nextIndex = 0, itemCount = 4, loop = false))
+        assertEquals(1, carouselSlideDirection(previousIndex = 0, nextIndex = 3, itemCount = 4, loop = false))
+    }
 }

@@ -38,6 +38,9 @@ import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveCarousel
+import io.github.adaptivekt.components.AdaptiveCarouselTransition
+import io.github.adaptivekt.components.AdaptiveChip
+import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveDropdownMenu
 import io.github.adaptivekt.components.AdaptiveIconButton
@@ -48,10 +51,13 @@ import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
+import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
+import io.github.adaptivekt.feedback.LoadingState
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
@@ -68,8 +74,9 @@ internal enum class ComponentsShowcaseSection(
     Fields("Fields", "TextField, SearchField, validation, disabled, and clear states."),
     Selects("Selects", "Single-select dropdown states, search, and clearing."),
     MultiSelects("MultiSelects", "Multi-select dropdowns with chips, search, and custom content."),
-    Carousels("Carousels", "Carousel controls, indicators, empty content, and edge cases."),
+    Carousels("Carousels", "Animated carousel transitions, controls, indicators, and edge cases."),
     NavigationTree("Navigation tree", "Hierarchical sidebar navigation with controlled expansion."),
+    Feedback("Feedback", "Animated loading states and feedback defaults."),
 }
 
 @Composable
@@ -133,6 +140,9 @@ internal fun ComponentsShowcaseScreen(
             }
             if (focusSection == null || focusSection == ComponentsShowcaseSection.NavigationTree) {
                 item(span = sectionSpan(focusSection, cardSpan)) { NavigationTreeSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Feedback) {
+                item(span = sectionSpan(focusSection, cardSpan)) { FeedbackSection() }
             }
         }
     }
@@ -523,20 +533,45 @@ private data class DemoPerson(
 private data class DemoCarouselItem(
     val title: String,
     val description: String,
+    val metric: String,
+    val label: String,
     val tone: AdaptiveBadgeTone,
+    val chipTone: AdaptiveChipTone,
 )
 
 @Composable
 private fun CarouselsSection() {
     val items = listOf(
-        DemoCarouselItem("Revenue overview", "Monthly recurring revenue is up 12% across the admin workspace.", AdaptiveBadgeTone.Success),
-        DemoCarouselItem("Team activity", "Eight open reviews need attention before the next deployment window.", AdaptiveBadgeTone.Warning),
-        DemoCarouselItem("Support health", "Response time remains inside SLA for priority customers.", AdaptiveBadgeTone.Info),
+        DemoCarouselItem(
+            title = "Revenue overview",
+            description = "Monthly recurring revenue is up across the admin workspace.",
+            metric = "$42.8k",
+            label = "MRR",
+            tone = AdaptiveBadgeTone.Success,
+            chipTone = AdaptiveChipTone.Success,
+        ),
+        DemoCarouselItem(
+            title = "Team activity",
+            description = "Eight open reviews need attention before the deployment window.",
+            metric = "8",
+            label = "Reviews",
+            tone = AdaptiveBadgeTone.Warning,
+            chipTone = AdaptiveChipTone.Warning,
+        ),
+        DemoCarouselItem(
+            title = "Support health",
+            description = "Response time remains inside SLA for priority customers.",
+            metric = "96%",
+            label = "SLA",
+            tone = AdaptiveBadgeTone.Info,
+            chipTone = AdaptiveChipTone.Info,
+        ),
     )
     var selectedIndex by remember { mutableStateOf(0) }
     var edgeIndex by remember { mutableStateOf(0) }
+    var fadeIndex by remember { mutableStateOf(1) }
 
-    ShowcaseCard(title = "Carousels", description = "Controlled carousel with indicators, loop behavior, and empty state.") {
+    ShowcaseCard(title = "Carousels", description = "Animated controlled carousel with slide/fade transitions, polished indicators, and edge states.") {
         AdaptiveCarousel(
             items = items,
             selectedIndex = selectedIndex,
@@ -546,12 +581,21 @@ private fun CarouselsSection() {
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveCarousel(
-            items = items.take(1),
+            items = items,
+            selectedIndex = fadeIndex,
+            onSelectedIndexChange = { fadeIndex = it },
+            transition = AdaptiveCarouselTransition.Fade,
+        ) { item, index ->
+            CarouselItemContent(item = item, eyebrow = "Fade ${index + 1} of ${items.size}")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCarousel(
+            items = items.take(2),
             selectedIndex = edgeIndex,
             onSelectedIndexChange = { edgeIndex = it },
             loop = false,
         ) { item, _ ->
-            CarouselItemContent(item = item, eyebrow = "Single item")
+            CarouselItemContent(item = item, eyebrow = "Loop disabled")
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveCarousel(
@@ -567,19 +611,56 @@ private fun CarouselsSection() {
 
 @Composable
 private fun CarouselItemContent(item: DemoCarouselItem, eyebrow: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Body(eyebrow)
-            AdaptiveBadge(item.tone.name.lowercase().replaceFirstChar { it.uppercase() }, tone = item.tone)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AdaptiveThumbnail(label = item.title, size = 54.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Body(eyebrow)
+                AdaptiveBadge(item.tone.name.lowercase().replaceFirstChar { it.uppercase() }, tone = item.tone)
+            }
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Label(item.title)
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+            Body(item.description)
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+                AdaptiveChip(text = item.metric, selected = true, tone = item.chipTone)
+                AdaptiveChip(text = item.label, tone = AdaptiveChipTone.Neutral)
+            }
         }
-        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
-        Label(item.title)
-        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
-        Body(item.description)
+    }
+}
+
+@Composable
+private fun FeedbackSection() {
+    val adaptiveInfo = rememberAdaptiveInfo()
+    val span = if (adaptiveInfo.isCompact) 12 else 4
+    ShowcaseCard(title = "Feedback loading", description = "Animated loading states with spinner, dots, and pulse styles.") {
+        AdaptiveGrid(columns = 12, horizontalGap = AdaptiveTokens.Spacing.Medium, verticalGap = AdaptiveTokens.Spacing.Medium) {
+            item(span = span) {
+                LoadingState(message = "Syncing workspace")
+            }
+            item(span = span) {
+                LoadingState(
+                    message = "Loading activity",
+                    indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots,
+                )
+            }
+            item(span = span) {
+                LoadingState(
+                    message = "Preparing report",
+                    indicatorStyle = AdaptiveLoadingIndicatorStyle.Pulse,
+                )
+            }
+        }
     }
 }
 

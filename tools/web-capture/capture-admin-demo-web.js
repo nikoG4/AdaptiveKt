@@ -26,7 +26,8 @@ const screens = [
     'components-multiselects',
     'components-multiselects-open',
     'components-carousels',
-    'components-navigation-tree'
+    'components-navigation-tree',
+    'components-feedback'
 ];
 
 const viewports = [
@@ -41,7 +42,8 @@ const darkScreens = [
     'components-selects',
     'components-multiselects',
     'components-carousels',
-    'components-navigation-tree'
+    'components-navigation-tree',
+    'components-feedback'
 ];
 
 async function capture() {

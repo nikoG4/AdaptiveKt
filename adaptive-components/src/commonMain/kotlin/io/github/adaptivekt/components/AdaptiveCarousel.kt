@@ -1,5 +1,18 @@
 package io.github.adaptivekt.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,10 +27,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,6 +68,32 @@ public fun previousCarouselIndex(index: Int, itemCount: Int, loop: Boolean = tru
     }
 }
 
+/**
+ * Returns 1 for forward movement, -1 for backward movement, and 0 when there is no movement.
+ */
+public fun carouselSlideDirection(
+    previousIndex: Int,
+    nextIndex: Int,
+    itemCount: Int,
+    loop: Boolean = true,
+): Int {
+    if (itemCount <= 1) return 0
+    val previous = normalizeCarouselIndex(previousIndex, itemCount)
+    val next = normalizeCarouselIndex(nextIndex, itemCount)
+    if (previous == next) return 0
+    if (loop && previous == itemCount - 1 && next == 0) return 1
+    if (loop && previous == 0 && next == itemCount - 1) return -1
+    return if (next > previous) 1 else -1
+}
+
+public enum class AdaptiveCarouselTransition {
+    Slide,
+    Fade,
+    Scale,
+    None,
+}
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 public fun <T> AdaptiveCarousel(
     items: List<T>,
@@ -61,11 +104,19 @@ public fun <T> AdaptiveCarousel(
     loop: Boolean = true,
     showControls: Boolean = true,
     showIndicators: Boolean = true,
+    transition: AdaptiveCarouselTransition = AdaptiveCarouselTransition.Slide,
+    animationDurationMillis: Int = 240,
     emptyContent: (@Composable () -> Unit)? = null,
     itemContent: @Composable (item: T, index: Int) -> Unit,
 ) {
     val safeIndex = normalizeCarouselIndex(selectedIndex, items.size)
     val canNavigate = enabled && items.size > 1
+    var previousSafeIndex by remember { mutableIntStateOf(safeIndex) }
+    val slideDirection = carouselSlideDirection(previousSafeIndex, safeIndex, items.size, loop)
+
+    LaunchedEffect(safeIndex) {
+        previousSafeIndex = safeIndex
+    }
 
     AdaptiveCard(
         modifier = modifier.fillMaxWidth(),
@@ -106,7 +157,19 @@ public fun <T> AdaptiveCarousel(
             }
 
             Box(modifier = Modifier.weight(1f)) {
-                itemContent(items[safeIndex], safeIndex)
+                AnimatedContent(
+                    targetState = safeIndex,
+                    transitionSpec = {
+                        carouselContentTransform(
+                            transition = transition,
+                            direction = slideDirection,
+                            durationMillis = animationDurationMillis,
+                        )
+                    },
+                    label = "AdaptiveCarouselContent",
+                ) { index ->
+                    itemContent(items[index], index)
+                }
             }
 
             if (showControls) {
@@ -139,6 +202,36 @@ public fun <T> AdaptiveCarousel(
                 }
             }
         }
+    }
+}
+
+private fun carouselContentTransform(
+    transition: AdaptiveCarouselTransition,
+    direction: Int,
+    durationMillis: Int,
+): ContentTransform {
+    val duration = durationMillis.coerceAtLeast(0)
+    val animationSpec = tween<Float>(durationMillis = duration)
+    return when (transition) {
+        AdaptiveCarouselTransition.Slide -> {
+            val resolvedDirection = if (direction == 0) 1 else direction
+            slideInHorizontally(
+                animationSpec = tween(durationMillis = duration),
+                initialOffsetX = { width -> width * resolvedDirection },
+            ) + fadeIn(animationSpec = animationSpec) togetherWith
+                slideOutHorizontally(
+                    animationSpec = tween(durationMillis = duration),
+                    targetOffsetX = { width -> -width * resolvedDirection },
+                ) + fadeOut(animationSpec = animationSpec)
+        }
+        AdaptiveCarouselTransition.Fade -> {
+            fadeIn(animationSpec = animationSpec) togetherWith fadeOut(animationSpec = animationSpec)
+        }
+        AdaptiveCarouselTransition.Scale -> {
+            scaleIn(initialScale = 0.96f, animationSpec = animationSpec) + fadeIn(animationSpec = animationSpec) togetherWith
+                scaleOut(targetScale = 0.98f, animationSpec = animationSpec) + fadeOut(animationSpec = animationSpec)
+        }
+        AdaptiveCarouselTransition.None -> EnterTransition.None togetherWith ExitTransition.None
     }
 }
 

@@ -37,6 +37,7 @@ import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveCarousel
+import io.github.adaptivekt.components.AdaptiveCarouselTransition
 import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveIconButton
@@ -57,6 +58,7 @@ import io.github.adaptivekt.data.AdaptiveDataMobileRole
 import io.github.adaptivekt.data.AdaptiveDataView
 import io.github.adaptivekt.feedback.EmptyState
 import io.github.adaptivekt.feedback.ErrorState
+import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
 import io.github.adaptivekt.feedback.LoadingState
 import io.github.adaptivekt.forms.AdaptiveFormColumns
 import io.github.adaptivekt.forms.AdaptiveFormLayout
@@ -321,11 +323,12 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
     },
     LiveExample(
         title = "AdaptiveCarousel",
-        description = "Controlled carousel for compact admin summaries, onboarding cards, or feature panels.",
+        description = "Animated controlled carousel for compact admin summaries, onboarding cards, or feature panels.",
         code = """AdaptiveCarousel(
     items = cards,
     selectedIndex = selectedIndex,
     onSelectedIndexChange = { selectedIndex = it },
+    transition = AdaptiveCarouselTransition.Slide,
 ) { item, index -> CardContent(item) }""",
     ) {
         val cards = listOf("Revenue overview", "Team activity", "Support health")
@@ -334,6 +337,7 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
             items = cards,
             selectedIndex = selectedIndex,
             onSelectedIndexChange = { selectedIndex = it },
+            transition = AdaptiveCarouselTransition.Slide,
         ) { item, index ->
             Column {
                 AdaptiveBadge("Slide ${index + 1}", tone = AdaptiveBadgeTone.Info)
@@ -451,12 +455,19 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
         title = "Feedback states",
         description = "Empty, loading, and error states for workflows.",
         code = """EmptyState(title = "No results")
-LoadingState(message = "Loading")
+LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots)
 ErrorState(title = "Unable to load")""",
     ) {
         AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
             item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
-            item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { LoadingState(message = "Loading") } }
+            item(span = 4) {
+                Box(Modifier.heightIn(min = 180.dp)) {
+                    LoadingState(
+                        message = "Loading",
+                        indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots,
+                    )
+                }
+            }
             item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
         }
     },

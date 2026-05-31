@@ -79,12 +79,17 @@ Button hover and pressed states are painted inside the clipped pill shape. The i
 - Controls use `AdaptiveIconButton` and `AdaptiveIcons`.
 - Indicators and controls are optional.
 - Looping can be enabled or disabled.
+- Item transitions are animated by default with `AdaptiveCarouselTransition.Slide`.
+- `AdaptiveCarouselTransition.None` disables animation.
 
 Pure helpers:
 
 - `normalizeCarouselIndex`
 - `nextCarouselIndex`
 - `previousCarouselIndex`
+- `carouselSlideDirection`
+
+The carousel uses Compose Multiplatform animation APIs in `commonMain` and does not add external dependencies.
 
 ## MultiSelect Custom Content
 
@@ -266,6 +271,26 @@ Kept local intentionally:
 - Validation message text, because there is no shared validation-message primitive yet.
 
 No forms public API changed in PR C3.
+
+## UI-ANIM-1 Carousel And Loading Animation
+
+`AdaptiveCarousel` now supports animated item transitions while keeping the existing controlled API compatible.
+
+Added:
+
+- `AdaptiveCarouselTransition.Slide`
+- `AdaptiveCarouselTransition.Fade`
+- `AdaptiveCarouselTransition.Scale`
+- `AdaptiveCarouselTransition.None`
+- `animationDurationMillis`
+
+`adaptive-feedback` also exposes animated loading styles:
+
+- `AdaptiveLoadingIndicatorStyle.Spinner`
+- `AdaptiveLoadingIndicatorStyle.Dots`
+- `AdaptiveLoadingIndicatorStyle.Pulse`
+
+The default `LoadingState()` remains source-compatible and now uses the animated spinner.
 
 ## PR C4 Adaptive Feedback Adoption
 

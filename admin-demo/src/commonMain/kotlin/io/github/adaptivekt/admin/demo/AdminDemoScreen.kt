@@ -21,7 +21,8 @@ public enum class AdminDemoScreen(public val id: String) {
     ComponentsMultiSelects("components-multiselects"),
     ComponentsMultiSelectsOpen("components-multiselects-open"),
     ComponentsCarousels("components-carousels"),
-    ComponentsNavigationTree("components-navigation-tree");
+    ComponentsNavigationTree("components-navigation-tree"),
+    ComponentsFeedback("components-feedback");
 
     public companion object {
         public fun fromId(id: String?): AdminDemoScreen = when (id?.lowercase()) {
@@ -46,6 +47,7 @@ public enum class AdminDemoScreen(public val id: String) {
             ComponentsMultiSelectsOpen.id -> ComponentsMultiSelectsOpen
             ComponentsCarousels.id -> ComponentsCarousels
             ComponentsNavigationTree.id -> ComponentsNavigationTree
+            ComponentsFeedback.id -> ComponentsFeedback
             else -> Dashboard
         }
     }

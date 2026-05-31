@@ -51,6 +51,9 @@ The Web capture matrix includes light screenshots for the main admin-demo screen
 - `invoices-error`
 - `components-selects`
 - `components-multiselects`
+- `components-carousels`
+- `components-navigation-tree`
+- `components-feedback`
 
 ## Admin Demo Desktop
 
@@ -60,7 +63,7 @@ The Web capture matrix includes light screenshots for the main admin-demo screen
 
 Desktop capture uses AWT `Robot` and requires an active graphical session.
 
-The desktop capture entry point accepts `--theme dark` for individual dark screenshots. The batch PowerShell matrix remains light-only for now.
+The desktop capture entry point accepts `--theme dark` for individual dark screenshots. The batch PowerShell script accepts `-Theme both` to capture the current light/dark matrix, including focused component sections such as carousel and feedback loading.
 
 ## Link Check
 
