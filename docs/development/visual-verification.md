@@ -26,6 +26,8 @@ Captured routes:
 - `/demo/app/` smoke target
 - `/demo/app/?theme=dark` smoke target
 
+The docs-site screenshots are captured with Playwright `fullPage: true`, so long documentation and component pages include scrolled content such as examples, code blocks, API tables, and notes in a single image.
+
 Viewports:
 
 - compact: `420x900`

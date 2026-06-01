@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
 import io.github.adaptivekt.components.AdaptiveAccordion
 import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveAvatarShape
@@ -41,133 +40,205 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveCarousel
 import io.github.adaptivekt.components.AdaptiveCarouselTransition
 import io.github.adaptivekt.components.AdaptiveChip
-import io.github.adaptivekt.components.AdaptiveDialog
-import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveChipTone
+import io.github.adaptivekt.components.AdaptiveDialog
 import io.github.adaptivekt.components.AdaptiveIconButton
-import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.AdaptiveMultiSelect
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSurface
+import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.data.AdaptiveActionPriority
+import io.github.adaptivekt.data.AdaptiveDataAction
 import io.github.adaptivekt.data.AdaptiveDataColumn
 import io.github.adaptivekt.data.AdaptiveDataContent
 import io.github.adaptivekt.data.AdaptiveDataMobileRole
 import io.github.adaptivekt.data.AdaptiveDataView
+import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
 import io.github.adaptivekt.feedback.EmptyState
 import io.github.adaptivekt.feedback.ErrorState
-import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
 import io.github.adaptivekt.feedback.LoadingState
 import io.github.adaptivekt.forms.AdaptiveFormColumns
 import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.forms.FieldSpan
 import io.github.adaptivekt.forms.ValidationMessage
+import io.github.adaptivekt.forms.ValidationMessageType
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
-import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.navigation.AdaptiveNavigationItemStyle
+import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 
 @Composable
 internal fun SiteComponentsPage() {
-    PageHeader(
-        eyebrow = "Live catalog",
-        title = "Components rendered in Wasm",
-        description = "Each example below uses the real AdaptiveKt component APIs. Snippets are embedded as text for this phase.",
-    )
-    Spacer(modifier = Modifier.height(24.dp))
+    val docs = remember { componentDocs() }
+    var selectedId by remember { mutableStateOf("adaptive-button") }
+    val selected = docs.firstOrNull { it.id == selectedId } ?: docs.first()
+    val navGroups = docs.groupBy { it.family }.map { (family, items) ->
+        DocsNavGroup(
+            title = family,
+            items = items.map { DocsNavItem(it.id, it.title.removePrefix("Adaptive"), it.summary) },
+        )
+    }
 
-    AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
-        componentExamples().forEach { example ->
-            item(span = 6) {
-                SiteComponentDetailPage(example)
-            }
-        }
+    DocsShell(
+        eyebrow = "Components",
+        title = "Rendered examples, code and API tables",
+        description = "Browse the AdaptiveKt public component surface. Every page shows what the component is for, a real rendered example, copyable code, parameters, variants and usage notes.",
+        navGroups = navGroups,
+        selectedId = selected.id,
+        onSelectedIdChange = { selectedId = it },
+        onThisPage = listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Responsive", "Accessibility", "Limitations"),
+    ) {
+        ComponentDocArticle(selected)
     }
 }
 
-internal data class LiveExample(
-    val title: String,
-    val description: String,
-    val code: String,
-    val content: @Composable () -> Unit,
+private fun commonNotes(title: String): List<String> = listOf(
+    "$title reads AdaptiveTheme colors and shape tokens.",
+    "Light and dark modes are handled by the active AdaptiveTheme color scheme.",
 )
 
-@Composable
-internal fun SiteComponentDetailPage(example: LiveExample) {
-    AdaptiveCard {
-        SiteText(example.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        SiteText(example.description, color = SiteMuted, maxLines = 3)
-        Spacer(modifier = Modifier.height(16.dp))
-        AdaptiveSurface(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
-        ) {
-            example.content()
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        CodeBlock(example.code)
-    }
-}
-
-private fun componentExamples(): List<LiveExample> = listOf(
-    LiveExample(
+private fun componentDocs(): List<ComponentDoc> = listOf(
+    ComponentDoc(
+        id = "adaptive-theme",
+        family = "Foundations",
         title = "AdaptiveTheme",
-        description = "Shared colors, shapes, typography, and state tokens for AdaptiveKt primitives.",
-        code = """AdaptiveTheme(
-    colorScheme = AdaptiveColorSchemes.defaultLight().copy(
-        primary = Color(0xFF0F766E),
-    ),
-) { App() }""",
-    ) {
-        val teal = AdaptiveColorSchemes.defaultLight().copy(
-            primary = Color(0xFF0F766E),
-            primarySubtle = Color(0xFFCCFBF1),
-            primaryText = Color(0xFF134E4A),
-        )
-        AdaptiveTheme(colorScheme = teal) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                AdaptiveButton("Themed", onClick = {})
-                AdaptiveChip("Token", tone = AdaptiveChipTone.Primary, selected = true)
-                AdaptiveBadge("Light")
+        summary = "Theme root that provides colors, shapes, typography and interaction state tokens.",
+        usage = "Wrap application content once near the root so AdaptiveKt primitives share consistent visual defaults.",
+        basicExample = DocsExample(
+            "Default theme",
+            "Use the light or dark color scheme as the root for your Compose content.",
+            """
+AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
+    App()
+}
+            """,
+        ) {
+            AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
+                AdaptiveCard {
+                    SiteText("Themed surface", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AdaptiveButton("Action", onClick = {})
+                }
             }
-        }
-    },
-    LiveExample(
+        },
+        parameters = listOf(
+            ComponentParameter("colorScheme", "AdaptiveColorScheme", "AdaptiveColorSchemes.defaultLight()", false, "Semantic colors for surfaces, text, feedback, selections and component states."),
+            ComponentParameter("shapes", "AdaptiveShapeScheme", "AdaptiveShapeScheme.default()", false, "Shape tokens used by cards, buttons, menus and fields."),
+            ComponentParameter("typography", "AdaptiveTypography", "AdaptiveTypography.default()", false, "Typography defaults for labels, body text and headings."),
+            ComponentParameter("states", "AdaptiveStateScheme", "AdaptiveStateScheme.default()", false, "State tokens for hover, pressed, selected, disabled and focus behavior."),
+            ComponentParameter("content", "@Composable () -> Unit", "required", true, "The UI subtree that reads the theme values."),
+        ),
+        variants = listOf(
+            DocsExample(
+                "Dark scheme",
+                "Switch the color scheme at the root. Components keep their contrast tokens.",
+                """AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) { App() }""",
+            ) {
+                AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) {
+                    AdaptiveCard {
+                        SiteText("Dark themed card", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AdaptiveBadge("Dark", tone = AdaptiveBadgeTone.Info)
+                    }
+                }
+            },
+        ),
+        themingNotes = commonNotes("AdaptiveTheme"),
+        responsiveNotes = listOf("Theme values are global and do not depend on screen size by themselves."),
+        accessibilityNotes = listOf("Use color schemes with sufficient contrast for both light and dark modes."),
+        limitations = listOf("AdaptiveKt does not yet expose a full design-token editor or runtime theme builder."),
+    ),
+    ComponentDoc(
+        id = "adaptive-button",
+        family = "Actions",
         title = "AdaptiveButton",
-        description = "Button variants, sizes, and icon slots.",
-        code = """AdaptiveButton("Save", onClick = {})
-AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {})""",
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            AdaptiveButton("Save", onClick = {})
-            AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {})
-            AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, size = AdaptiveButtonSize.Small, onClick = {})
-        }
-    },
-    LiveExample(
+        summary = "Rounded action button with primary, secondary, ghost and danger variants.",
+        usage = "Use it for explicit commands. Keep primary actions scarce and use secondary or ghost variants for supporting actions.",
+        basicExample = DocsExample(
+            "Primary action",
+            "The default button is intentionally ready to use without custom modifiers.",
+            """AdaptiveButton("Save changes", onClick = { save() })""",
+        ) {
+            AdaptiveButton("Save changes", onClick = {})
+        },
+        parameters = listOf(
+            ComponentParameter("text", "String", "required", true, "Visible label."),
+            ComponentParameter("onClick", "() -> Unit", "required", true, "Command invoked when the button is pressed."),
+            ComponentParameter("variant", "AdaptiveButtonVariant", "Primary", false, "Primary, Secondary, Ghost or Danger visual treatment."),
+            ComponentParameter("size", "AdaptiveButtonSize", "Medium", false, "Small, Medium or Large height and padding."),
+            ComponentParameter("enabled", "Boolean", "true", false, "Disables click and lowers contrast."),
+            ComponentParameter("leadingIcon / trailingIcon", "(@Composable () -> Unit)?", "null", false, "Optional icons rendered inside the pill shape."),
+        ),
+        variants = listOf(
+            DocsExample(
+                "Variants and icons",
+                "Secondary and ghost actions stay quiet; danger is semantic but not visually loud.",
+                """
+AdaptiveButton("New", leadingIcon = { AdaptiveIcons.Plus() }, onClick = {})
+AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {})
+AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
+                """,
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    AdaptiveButton("New", leadingIcon = { AdaptiveIcons.Plus(size = 15.dp, tint = AdaptiveTheme.colors.textInverse) }, onClick = {})
+                    AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {})
+                    AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
+                }
+            },
+        ),
+        themingNotes = commonNotes("AdaptiveButton"),
+        responsiveNotes = listOf("Buttons keep stable height; wrap them in FlowRow or Column on compact screens."),
+        accessibilityNotes = listOf("Use clear text labels. Icon-only actions should use AdaptiveIconButton with meaningful icon content descriptions."),
+        limitations = listOf("There is no built-in loading button state yet."),
+    ),
+    ComponentDoc(
+        id = "adaptive-icon-button",
+        family = "Actions",
         title = "AdaptiveIconButton",
-        description = "Compact icon actions for toolbars and rows.",
-        code = """AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }""",
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }
-            AdaptiveIconButton(onClick = {}, enabled = false) { AdaptiveIcons.Close(tint = Color(0xFF94A3B8)) }
-        }
-    },
-    LiveExample(
+        summary = "Compact rounded icon action for menus, clear buttons and toolbar actions.",
+        usage = "Use for recognizable compact actions such as close, search, overflow and navigation controls.",
+        basicExample = DocsExample(
+            "Toolbar icons",
+            "Icon buttons preserve shape in hover and pressed states.",
+            """AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }""",
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
+                AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }
+                AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Close() }
+            }
+        },
+        parameters = listOf(
+            ComponentParameter("onClick", "() -> Unit", "required", true, "Command invoked when pressed."),
+            ComponentParameter("enabled", "Boolean", "true", false, "Disables interaction."),
+            ComponentParameter("size", "Dp", "40.dp", false, "Square hit area."),
+            ComponentParameter("content", "@Composable () -> Unit", "required", true, "Icon content, typically AdaptiveIcons."),
+        ),
+        variants = listOf(),
+        themingNotes = commonNotes("AdaptiveIconButton"),
+        responsiveNotes = listOf("Works well in dense toolbars and table/card overflow areas."),
+        accessibilityNotes = listOf("Provide semantic content descriptions on the icon when the action is not already described by nearby text."),
+        limitations = listOf("It is not a general icon library; AdaptiveIcons only cover functional affordances."),
+    ),
+    simpleDisplayDoc(
+        id = "adaptive-badge",
+        family = "Display",
         title = "AdaptiveBadge",
-        description = "Semantic status labels for admin surfaces.",
+        summary = "Pill status label with neutral, success, warning, danger and info tones.",
         code = """AdaptiveBadge("Paid", tone = AdaptiveBadgeTone.Success)""",
+        parameters = listOf(
+            ComponentParameter("text", "String", "required", true, "Badge label."),
+            ComponentParameter("tone", "AdaptiveBadgeTone", "Neutral", false, "Semantic color tone."),
+        ),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AdaptiveBadge("Paid", tone = AdaptiveBadgeTone.Success)
@@ -175,32 +246,19 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
             AdaptiveBadge("Blocked", tone = AdaptiveBadgeTone.Danger)
         }
     },
-    LiveExample(
-        title = "AdaptiveAvatar",
-        description = "Initials fallback with circle or rounded shape.",
-        code = """AdaptiveAvatar(name = "Alicia Romero")""",
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            AdaptiveAvatar("Alicia Romero", size = 42.dp)
-            AdaptiveAvatar("Noah Kim", size = 42.dp)
-            AdaptiveAvatar("Team", size = 42.dp, shape = AdaptiveAvatarShape.Rounded)
-        }
-    },
-    LiveExample(
-        title = "AdaptiveThumbnail",
-        description = "Object thumbnail with label fallback.",
-        code = """AdaptiveThumbnail(label = "Router Gigabit")""",
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            AdaptiveThumbnail("Router Gigabit", tone = Color(0xFFE0F2FE))
-            AdaptiveThumbnail("Invoice PDF", tone = Color(0xFFDCFCE7))
-            AdaptiveThumbnail("Warehouse", tone = Color(0xFFFFEDD5))
-        }
-    },
-    LiveExample(
+    simpleDisplayDoc(
+        id = "adaptive-chip",
+        family = "Display",
         title = "AdaptiveChip",
-        description = "Compact tags and filter pills.",
-        code = """AdaptiveChip("Active", selected = true, tone = AdaptiveChipTone.Primary)""",
+        summary = "Compact pill for filters, tags and selected values.",
+        code = """AdaptiveChip("Active", selected = true, tone = AdaptiveChipTone.Primary, onClick = {})""",
+        parameters = listOf(
+            ComponentParameter("text", "String", "required", true, "Chip label."),
+            ComponentParameter("selected", "Boolean", "false", false, "Applies selected emphasis."),
+            ComponentParameter("enabled", "Boolean", "true", false, "Disables interaction."),
+            ComponentParameter("tone", "AdaptiveChipTone", "Neutral", false, "Semantic tone."),
+            ComponentParameter("onClick", "(() -> Unit)?", "null", false, "Optional click action."),
+        ),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AdaptiveChip("Active", selected = true, tone = AdaptiveChipTone.Primary, onClick = {})
@@ -208,381 +266,610 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
             AdaptiveChip("Late", tone = AdaptiveChipTone.Warning)
         }
     },
-    LiveExample(
-        title = "AdaptiveCard / AdaptiveSurface",
-        description = "Reusable containers for admin content.",
-        code = """AdaptiveCard { AdaptiveSurface { ... } }""",
+    simpleDisplayDoc(
+        id = "adaptive-avatar",
+        family = "Display",
+        title = "AdaptiveAvatar",
+        summary = "Name-based avatar with initials fallback and optional image slot.",
+        code = """AdaptiveAvatar(name = "Alicia Romero", size = 40.dp)""",
+        parameters = listOf(
+            ComponentParameter("name", "String", "required", true, "Name used for initials fallback."),
+            ComponentParameter("image", "(@Composable () -> Unit)?", "null", false, "Optional custom image content clipped to the shape."),
+            ComponentParameter("size", "Dp", "36.dp", false, "Avatar width and height."),
+            ComponentParameter("shape", "AdaptiveAvatarShape", "Circle", false, "Circle or Rounded."),
+        ),
     ) {
-        AdaptiveCard(contentPadding = PaddingValues(12.dp)) {
-            SiteText("Card surface", fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            AdaptiveSurface(contentPadding = PaddingValues(10.dp)) {
-                SiteText("Nested neutral surface", color = SiteMuted)
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar("Alicia Romero", size = 42.dp)
+            AdaptiveAvatar("Noah Kim", size = 42.dp)
+            AdaptiveAvatar("Team", size = 42.dp, shape = AdaptiveAvatarShape.Rounded)
         }
     },
-    LiveExample(
-        title = "AdaptiveTextField",
-        description = "Foundation text input with label and validation.",
-        code = """AdaptiveTextField(value, onValueChange, label = "Company")""",
+    simpleDisplayDoc(
+        id = "adaptive-thumbnail",
+        family = "Display",
+        title = "AdaptiveThumbnail",
+        summary = "Small object thumbnail for products, files and media with label fallback.",
+        code = """AdaptiveThumbnail(label = "Router Gigabit")""",
+        parameters = listOf(
+            ComponentParameter("label", "String", "required", true, "Text used for fallback initials."),
+            ComponentParameter("size", "Dp", "44.dp", false, "Thumbnail size."),
+            ComponentParameter("shape", "Shape", "AdaptiveTokens.Radius.Medium", false, "Clipping shape."),
+            ComponentParameter("image", "(@Composable () -> Unit)?", "null", false, "Optional thumbnail content."),
+            ComponentParameter("tone", "Color", "Color(0xFF64748B)", false, "Fallback tone color."),
+        ),
     ) {
-        var value by remember { mutableStateOf("AdaptiveKt Inc.") }
-        AdaptiveTextField(
-            value = value,
-            onValueChange = { value = it },
-            label = "Company",
-            validationMessage = if (value.isBlank()) "Company is required" else null,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            AdaptiveThumbnail("Router Gigabit", tone = Color(0xFFE0F2FE))
+            AdaptiveThumbnail("Invoice PDF", tone = Color(0xFFDCFCE7))
+            AdaptiveThumbnail("Warehouse", tone = Color(0xFFFFEDD5))
+        }
     },
-    LiveExample(
-        title = "AdaptiveSearchField",
-        description = "Search input with clear affordance.",
-        code = """AdaptiveSearchField(value = query, onValueChange = { query = it })""",
-    ) {
-        var query by remember { mutableStateOf("invoice") }
-        AdaptiveSearchField(value = query, onValueChange = { query = it }, onClear = { query = "" })
-    },
-    LiveExample(
-        title = "AdaptiveAnchoredDropdownMenu",
-        description = "Popup menu anchored to a trigger.",
-        code = """AdaptiveAnchoredDropdownMenu(expanded, onExpandedChange, anchor = { _, toggle -> ... })""",
-    ) {
-        var expanded by remember { mutableStateOf(false) }
-        AdaptiveAnchoredDropdownMenu(
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
-            anchor = { _, toggle ->
-                AdaptiveButton("Actions", variant = AdaptiveButtonVariant.Secondary, onClick = toggle)
-            },
+    ComponentDoc(
+        id = "adaptive-card-surface",
+        family = "Display",
+        title = "AdaptiveCard and AdaptiveSurface",
+        summary = "Reusable content containers with professional default border, radius and padding.",
+        usage = "Use AdaptiveCard for vertical content and optional click behavior; use AdaptiveSurface for neutral framed regions.",
+        basicExample = DocsExample(
+            "Card and surface",
+            "Both containers are Foundation-only and follow AdaptiveTheme shapes and surface colors.",
+            """AdaptiveCard { AdaptiveSurface { Content() } }""",
         ) {
-            AdaptiveMenuItem("Open", onClick = { expanded = false })
-            AdaptiveMenuItem("Archive", onClick = { expanded = false })
-            AdaptiveMenuItem("Delete", destructive = true, onClick = { expanded = false })
-        }
+            AdaptiveCard(contentPadding = PaddingValues(12.dp)) {
+                SiteText("Card title", fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                AdaptiveSurface(contentPadding = PaddingValues(10.dp)) {
+                    SiteText("Neutral surface content", color = SiteMuted)
+                }
+            }
+        },
+        parameters = listOf(
+            ComponentParameter("modifier", "Modifier", "Modifier", false, "Root modifier."),
+            ComponentParameter("contentPadding", "PaddingValues", "Spacing.Large", false, "Internal padding."),
+            ComponentParameter("onClick", "(() -> Unit)?", "null", false, "AdaptiveCard only: optional clickable behavior."),
+            ComponentParameter("content", "@Composable scope", "required", true, "Child content."),
+        ),
+        themingNotes = commonNotes("AdaptiveCard"),
+        responsiveNotes = listOf("Containers fill available width and work inside one-column mobile layouts."),
+        accessibilityNotes = listOf("If clickable, make content label text explicit."),
+        limitations = listOf("No heavy elevation or shadow system yet."),
+    ),
+    inputDoc("adaptive-text-field", "AdaptiveTextField", "Foundation text input with label, placeholder, disabled state and validation message.") {
+        var value by remember { mutableStateOf("AdaptiveKt Inc.") }
+        AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")
     },
-    LiveExample(
+    ComponentDoc(
+        id = "adaptive-search-field",
+        family = "Inputs",
+        title = "AdaptiveSearchField",
+        summary = "Search input with built-in search icon and optional clear action.",
+        usage = "Use it for filters and local search controls in toolbars, data views and dropdowns.",
+        basicExample = DocsExample(
+            "Search with clear",
+            "The clear affordance is an embedded vector icon, not a raw character.",
+            """AdaptiveSearchField(value = query, onValueChange = { query = it }, onClear = { query = "" })""",
+        ) {
+            var query by remember { mutableStateOf("invoice") }
+            AdaptiveSearchField(value = query, onValueChange = { query = it }, onClear = { query = "" })
+        },
+        parameters = inputParameters() + listOf(ComponentParameter("onClear", "(() -> Unit)?", "null", false, "Shows a clear button when value is not empty.")),
+        themingNotes = commonNotes("AdaptiveSearchField"),
+        responsiveNotes = listOf("Fill width on mobile; place inside toolbars or cards."),
+        accessibilityNotes = listOf("Use a clear placeholder such as Search invoices."),
+        limitations = listOf("Does not perform filtering by itself."),
+    ),
+    ComponentDoc(
+        id = "adaptive-select",
+        family = "Inputs",
         title = "AdaptiveSelect",
-        description = "Nullable single-select dropdown with local search.",
-        code = """AdaptiveSelect(options, selectedOption, onOptionSelected, optionLabel = { it })""",
-    ) {
-        var selected by remember { mutableStateOf<String?>(null) }
-        AdaptiveSelect(
-            options = listOf("Open", "Pending", "Closed"),
-            selectedOption = selected,
-            onOptionSelected = { selected = it },
-            optionLabel = { it },
-            label = "Status",
-            searchable = true,
-            clearable = true,
-        )
-    },
-    LiveExample(
+        summary = "Single-selection dropdown with optional search, clear and custom option rendering.",
+        usage = "Use for bounded option sets such as status, team, category or plan.",
+        basicExample = DocsExample(
+            "Searchable select",
+            "The menu is anchored to the trigger and can match trigger width.",
+            """
+AdaptiveSelect(
+    options = statuses,
+    selectedOption = selected,
+    onOptionSelected = { selected = it },
+    optionLabel = { it },
+    searchable = true,
+)
+            """,
+        ) {
+            var selected by remember { mutableStateOf<String?>(null) }
+            AdaptiveSelect(
+                options = listOf("Open", "Pending", "Closed"),
+                selectedOption = selected,
+                onOptionSelected = { selected = it },
+                optionLabel = { it },
+                label = "Status",
+                searchable = true,
+            )
+        },
+        parameters = selectParameters(multi = false),
+        variants = listOf(peopleSelectExample()),
+        themingNotes = commonNotes("AdaptiveSelect"),
+        responsiveNotes = listOf("On compact screens it fills the available width. Keep menu content concise."),
+        accessibilityNotes = listOf("Use label and supportingText to make intent and validation explicit."),
+        limitations = listOf("Remote async loading is intentionally not part of the component yet."),
+    ),
+    ComponentDoc(
+        id = "adaptive-multi-select",
+        family = "Inputs",
         title = "AdaptiveMultiSelect",
-        description = "Multi-select dropdown with selected chips, local search, overflow, and custom option rows.",
-        code = """AdaptiveMultiSelect(
-    options = teams,
+        summary = "Multi-selection dropdown with selected chips, search, custom option rows and overflow count.",
+        usage = "Use for assigning people, teams, tags and filters where selected values should remain visible.",
+        basicExample = DocsExample(
+            "People picker",
+            "The existing chipContent and optionContent slots are enough for avatar-based people pickers.",
+            """
+AdaptiveMultiSelect(
+    options = people,
     selectedOptions = selected,
     onSelectedOptionsChange = { selected = it },
-    optionLabel = { it },
+    optionLabel = { it.name },
     maxVisibleChips = 2,
-)""",
-    ) {
-        val teams = listOf("Operations", "Finance", "Support", "Security", "Sales")
-        var selected by remember { mutableStateOf(listOf("Operations", "Finance", "Support")) }
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    optionContent = { person, selected -> PeopleOption(person, selected) },
+    chipContent = { person -> PeopleChip(person) },
+)
+            """,
+        ) {
+            val people = remember {
+                listOf(
+                    Person("Alicia Romero", "Product Manager"),
+                    Person("David Chen", "Engineer"),
+                    Person("Marta Silva", "QA Lead"),
+                    Person("Noah Kim", "Designer"),
+                )
+            }
+            var selected by remember { mutableStateOf(people.take(3)) }
             AdaptiveMultiSelect(
-                options = teams,
+                options = people,
                 selectedOptions = selected,
                 onSelectedOptionsChange = { selected = it },
-                optionLabel = { it },
-                label = "Teams",
-                placeholder = "Choose teams",
-                searchable = true,
-                clearable = true,
+                optionLabel = { it.name },
+                label = "Assignees",
                 maxVisibleChips = 2,
+                optionContent = { person, isSelected -> PeopleOption(person, isSelected) },
+                chipContent = { person -> PeopleChip(person) },
             )
-            AdaptiveMultiSelect(
-                options = listOf("Alicia Romero", "Noah Kim", "Marta Silva"),
-                selectedOptions = listOf("Alicia Romero"),
-                onSelectedOptionsChange = {},
-                optionLabel = { it },
-                label = "Custom options",
-                optionContent = { name, selectedOption ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            AdaptiveAvatar(name = name, size = 28.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            SiteText(name, fontWeight = FontWeight.Bold)
-                        }
-                        if (selectedOption) {
-                            AdaptiveBadge("Selected")
-                        }
+        },
+        parameters = selectParameters(multi = true),
+        variants = listOf(),
+        themingNotes = commonNotes("AdaptiveMultiSelect"),
+        responsiveNotes = listOf("Selected chips collapse into +N overflow after maxVisibleChips."),
+        accessibilityNotes = listOf("Custom option rows should still expose readable names and selection state visually."),
+        limitations = listOf("Keyboard navigation polish can be expanded in a later accessibility pass."),
+    ),
+    ComponentDoc(
+        id = "adaptive-form-layout",
+        family = "Forms",
+        title = "AdaptiveFormLayout",
+        summary = "Responsive form sections with field spans, labels, validation messages and action slots.",
+        usage = "Use it to structure settings and admin forms without hand-rolling compact/desktop grids.",
+        basicExample = DocsExample(
+            "Settings form",
+            "Compact uses one column; wider screens use the configured column counts.",
+            """AdaptiveFormLayout { section("Workspace") { field("Name") { AdaptiveTextField(...) } } }""",
+        ) {
+            var name by remember { mutableStateOf("AdaptiveKt") }
+            AdaptiveFormLayout(columns = AdaptiveFormColumns(compact = 1, medium = 2, expanded = 2, large = 2)) {
+                section(title = "Workspace", description = "Company defaults") {
+                    field("Name", span = FieldSpan.Half, required = true) {
+                        AdaptiveTextField(value = name, onValueChange = { name = it })
                     }
-                },
-            )
-        }
-    },
-    LiveExample(
-        title = "AdaptiveCarousel",
-        description = "Animated controlled carousel for compact admin summaries, onboarding cards, or feature panels.",
-        code = """AdaptiveCarousel(
-    items = cards,
-    selectedIndex = selectedIndex,
-    onSelectedIndexChange = { selectedIndex = it },
-    transition = AdaptiveCarouselTransition.Slide,
-) { item, index -> CardContent(item) }""",
-    ) {
-        val cards = listOf("Revenue overview", "Team activity", "Support health")
-        var selectedIndex by remember { mutableStateOf(0) }
-        AdaptiveCarousel(
-            items = cards,
-            selectedIndex = selectedIndex,
-            onSelectedIndexChange = { selectedIndex = it },
-            transition = AdaptiveCarouselTransition.Slide,
-        ) { item, index ->
-            Column {
-                AdaptiveBadge("Slide ${index + 1}", tone = AdaptiveBadgeTone.Info)
-                Spacer(modifier = Modifier.height(8.dp))
-                SiteText(item, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                SiteText("Carousel content stays controlled by the caller.", color = SiteMuted)
-            }
-        }
-    },
-    LiveExample(
-        title = "AdaptiveNavigationTree",
-        description = "Controlled hierarchical navigation for nested admin sidebars and settings pages.",
-        code = """AdaptiveNavigationTree(
-    items = tree,
-    selectedItemId = selected,
-    onItemSelected = { selected = it.id },
-    expandedItemIds = expanded,
-    onExpandedItemIdsChange = { expanded = it },
-)""",
-    ) {
-        val tree = remember {
-            listOf(
-                AdaptiveNavigationTreeItem(
-                    id = "workspace",
-                    label = "Workspace",
-                    badge = "3",
-                    children = listOf(
-                        AdaptiveNavigationTreeItem("overview", "Overview"),
-                        AdaptiveNavigationTreeItem("activity", "Activity"),
-                    ),
-                ),
-                AdaptiveNavigationTreeItem(
-                    id = "operations",
-                    label = "Operations",
-                    children = listOf(
-                        AdaptiveNavigationTreeItem("employees", "Employees"),
-                        AdaptiveNavigationTreeItem("invoices", "Invoices", badge = "New"),
-                    ),
-                ),
-            )
-        }
-        var selected by remember { mutableStateOf("overview") }
-        var expanded by remember { mutableStateOf(setOf("workspace", "operations")) }
-        AdaptiveNavigationTree(
-            items = tree,
-            selectedItemId = selected,
-            onItemSelected = { selected = it.id },
-            expandedItemIds = expanded,
-            onExpandedItemIdsChange = { expanded = it },
-        )
-    },
-    LiveExample(
-        title = "AdaptiveNavigationScaffold",
-        description = "Small preview of the navigation shell with the default pill sidebar style.",
-        code = """AdaptiveNavigationScaffold(
-    navItems = navItems,
-    selectedItemId = selected,
-    onItemSelected = { selected = it },
-    navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
-) { padding -> ... }""",
-    ) {
-        var selected by remember { mutableStateOf("dashboard") }
-        Box(modifier = Modifier.fillMaxWidth().height(260.dp).border(1.dp, SiteLine)) {
-            AdaptiveNavigationScaffold(
-                navItems = listOf(
-                    AdaptiveNavItem("dashboard", "Dashboard"),
-                    AdaptiveNavItem("orders", "Orders"),
-                    AdaptiveNavItem("settings", "Settings"),
-                ),
-                selectedItemId = selected,
-                onItemSelected = { selected = it },
-                navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
-            ) { padding ->
-                Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-                    SiteText("Selected: $selected", fontWeight = FontWeight.Bold)
+                    field("Plan", span = FieldSpan.Half, validationMessage = ValidationMessage("Preview account", ValidationMessageType.Info)) {
+                        AdaptiveTextField(value = "Team", onValueChange = {}, enabled = false)
+                    }
+                }
+                actions {
+                    primary { AdaptiveButton("Save", onClick = {}) }
+                    secondary { AdaptiveButton("Reset", variant = AdaptiveButtonVariant.Secondary, onClick = {}) }
                 }
             }
-        }
-    },
-    LiveExample(
+        },
+        parameters = listOf(
+            ComponentParameter("columns", "AdaptiveFormColumns", "AdaptiveFormColumns()", false, "Column counts per breakpoint."),
+            ComponentParameter("labelPosition", "LabelPosition", "Top", false, "Top or Start labels when columns allow it."),
+            ComponentParameter("stickyActionsOnCompact", "Boolean", "false", false, "Whether compact actions stick at bottom."),
+            ComponentParameter("maxWidth", "Dp", "AdaptiveTokens.Widths.Form", false, "Maximum form width."),
+            ComponentParameter("content", "AdaptiveFormScope.() -> Unit", "required", true, "Sections, fields and actions."),
+        ),
+        themingNotes = commonNotes("AdaptiveFormLayout"),
+        responsiveNotes = listOf("Compact always resolves to top labels and one-column fields unless configured otherwise."),
+        accessibilityNotes = listOf("Use required and validationMessage so users understand constraints."),
+        limitations = listOf("AdaptiveSelect integration remains slot-based; there is no form field registry."),
+    ),
+    ComponentDoc(
+        id = "adaptive-data-view",
+        family = "Data",
+        title = "AdaptiveDataView",
+        summary = "Responsive data view that renders desktop tables and compact cards from the same column definitions.",
+        usage = "Use it for admin lists where mobile users need cards instead of squeezed tables.",
+        basicExample = DocsExample(
+            "Customers table/card",
+            "Column metadata controls mobile title, subtitle and status behavior.",
+            """AdaptiveDataView(state = AdaptiveDataContent(rows), columns = columns, rowActions = actions)""",
+        ) {
+            val rows = listOf(DemoRow("Acme", "Paid", "$1,200"), DemoRow("Northwind", "Open", "$840"))
+            AdaptiveDataView(
+                state = AdaptiveDataContent(rows),
+                columns = listOf(
+                    AdaptiveDataColumn("customer", "Customer", weight = 2f, mobileRole = AdaptiveDataMobileRole.Title) { SiteText(it.customer, fontWeight = FontWeight.Bold) },
+                    AdaptiveDataColumn("status", "Status", mobileRole = AdaptiveDataMobileRole.Status) { AdaptiveBadge(it.status, tone = if (it.status == "Paid") AdaptiveBadgeTone.Success else AdaptiveBadgeTone.Info) },
+                    AdaptiveDataColumn("amount", "Amount") { SiteText(it.amount) },
+                ),
+                rowActions = listOf(
+                    AdaptiveDataAction("view", "View", AdaptiveActionPriority.Primary) {},
+                    AdaptiveDataAction("archive", "Archive", AdaptiveActionPriority.Overflow) {},
+                ),
+            )
+        },
+        parameters = listOf(
+            ComponentParameter("state", "AdaptiveDataState<T>", "required", true, "Loading, error, empty or content state."),
+            ComponentParameter("columns", "List<AdaptiveDataColumn<T>>", "required", true, "Column definitions and mobile metadata."),
+            ComponentParameter("filterSlot", "AdaptiveFilterSlot?", "null", false, "Optional filters above data."),
+            ComponentParameter("actions", "(@Composable () -> Unit)?", "null", false, "Optional toolbar actions."),
+            ComponentParameter("rowActions", "List<AdaptiveDataAction<T>>", "emptyList()", false, "Primary, secondary and overflow row actions."),
+            ComponentParameter("cardContent", "(@Composable (T) -> Unit)?", "null", false, "Optional custom card renderer; default cards use column metadata."),
+        ),
+        themingNotes = commonNotes("AdaptiveDataView"),
+        responsiveNotes = listOf("Compact and medium use cards; expanded and large use tables."),
+        accessibilityNotes = listOf("Use readable column headers and action labels."),
+        limitations = listOf("Pagination and sorting are not part of this component yet."),
+    ),
+    ComponentDoc(
+        id = "adaptive-navigation-scaffold",
+        family = "Navigation",
+        title = "AdaptiveNavigationScaffold",
+        summary = "Responsive navigation shell that switches between sidebar, rail, drawer and bottom navigation modes.",
+        usage = "Use for admin shells where navigation should adapt by breakpoint without rewriting the screen.",
+        basicExample = DocsExample(
+            "Navigation shell preview",
+            "The scaffold computes navigation mode from available width.",
+            """AdaptiveNavigationScaffold(navItems, selectedItemId, onItemSelected) { padding -> Content(padding) }""",
+        ) {
+            var selected by remember { mutableStateOf("dashboard") }
+            Box(modifier = Modifier.fillMaxWidth().height(260.dp).border(1.dp, SiteLine)) {
+                AdaptiveNavigationScaffold(
+                    navItems = listOf(AdaptiveNavItem("dashboard", "Dashboard"), AdaptiveNavItem("orders", "Orders"), AdaptiveNavItem("settings", "Settings")),
+                    selectedItemId = selected,
+                    onItemSelected = { selected = it },
+                    navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
+                ) { padding ->
+                    Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+                        SiteText("Selected: $selected", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        },
+        parameters = listOf(
+            ComponentParameter("navItems", "List<AdaptiveNavItem>", "required", true, "Navigation items."),
+            ComponentParameter("selectedItemId", "String", "required", true, "Selected item id."),
+            ComponentParameter("onItemSelected", "(String) -> Unit", "required", true, "Selection callback."),
+            ComponentParameter("topBar", "(@Composable () -> Unit)?", "null", false, "Optional top bar slot."),
+            ComponentParameter("navigationItemStyle", "AdaptiveNavigationItemStyle", "Card", false, "Card, Pill or Minimal item style."),
+            ComponentParameter("content", "@Composable (PaddingValues) -> Unit", "required", true, "Screen content with scaffold padding."),
+        ),
+        themingNotes = commonNotes("AdaptiveNavigationScaffold"),
+        responsiveNotes = listOf("Compact uses drawer/bottom patterns; medium can use rail; large uses sidebar."),
+        accessibilityNotes = listOf("Provide short labels that remain legible in rail and bottom modes."),
+        limitations = listOf("Deep nested sidebar hierarchy is handled by AdaptiveNavigationTree, not the scaffold itself."),
+    ),
+    ComponentDoc(
+        id = "adaptive-navigation-tree",
+        family = "Navigation",
+        title = "AdaptiveNavigationTree",
+        summary = "Controlled hierarchical navigation for nested admin sidebars and settings pages.",
+        usage = "Use it when a page needs groups, children, selected child state, expansion state and badges.",
+        basicExample = DocsExample(
+            "Hierarchical nav",
+            "Expansion is controlled by the caller.",
+            """AdaptiveNavigationTree(items, selectedItemId, onItemSelected, expandedItemIds, onExpandedItemIdsChange)""",
+        ) {
+            NavigationTreePreview()
+        },
+        parameters = listOf(
+            ComponentParameter("items", "List<AdaptiveNavigationTreeItem>", "required", true, "Tree roots."),
+            ComponentParameter("selectedItemId", "String?", "required", true, "Currently selected item id."),
+            ComponentParameter("onItemSelected", "(AdaptiveNavigationTreeItem) -> Unit", "required", true, "Selection callback."),
+            ComponentParameter("expandedItemIds", "Set<String>", "required", true, "Expanded node ids."),
+            ComponentParameter("onExpandedItemIdsChange", "(Set<String>) -> Unit", "required", true, "Expansion callback."),
+            ComponentParameter("maxDepth", "Int", "6", false, "Maximum nesting depth to render."),
+        ),
+        themingNotes = commonNotes("AdaptiveNavigationTree"),
+        responsiveNotes = listOf("Use it inside sidebar, drawer or settings panels; it fills width."),
+        accessibilityNotes = listOf("Keep labels concise and expose selected state visually."),
+        limitations = listOf("Keyboard tree navigation can be expanded in a future pass."),
+    ),
+    simpleDisplayDoc(
+        id = "adaptive-breadcrumbs",
+        family = "Navigation",
         title = "AdaptiveBreadcrumbs",
-        description = "Breadcrumb navigation for hierarchical pages and deep links.",
-        code = """AdaptiveBreadcrumbs(
-    items = listOf("Home", "Projects", "Billing"),
-    selectedItem = "Billing",
-    onItemSelected = { /* navigate */ },
-    itemLabel = { value -> value },
-)""",
+        summary = "Horizontal breadcrumb trail for hierarchy and deep links.",
+        code = """AdaptiveBreadcrumbs(items, selectedItem, onItemSelected, itemLabel = { it })""",
+        parameters = listOf(
+            ComponentParameter("items", "List<T>", "required", true, "Breadcrumb items."),
+            ComponentParameter("selectedItem", "T?", "required", true, "Current item."),
+            ComponentParameter("onItemSelected", "(T) -> Unit", "required", true, "Navigation callback."),
+            ComponentParameter("itemLabel", "(T) -> String", "required", true, "Label renderer."),
+            ComponentParameter("separator", "@Composable () -> Unit", "ChevronRight", false, "Custom separator icon/content."),
+        ),
     ) {
         var selected by remember { mutableStateOf("Billing") }
-        AdaptiveBreadcrumbs(
-            items = listOf("Home", "Projects", "Billing", "Invoice #123"),
-            selectedItem = selected,
-            onItemSelected = { selected = it },
-            itemLabel = { value -> value },
-        )
+        AdaptiveBreadcrumbs(listOf("Home", "Projects", "Billing", "Invoice #123"), selected, { selected = it }, itemLabel = { it })
     },
-    LiveExample(
-        title = "AdaptiveAccordion",
-        description = "Expandable panels for nested content and disclosure controls.",
-        code = """AdaptiveAccordion(
-    title = "Account settings",
-    subtitle = "Manage your preferences",
-    defaultExpanded = false,
-) {
-    Text("Panel content")
-}""",
-    ) {
-        AdaptiveAccordion(
-            title = "Account settings",
-            subtitle = "Manage your preferences",
-            defaultExpanded = true,
-        ) {
-            Column {
-                SiteText("Change your password, email, and preferences.")
-                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
-                AdaptiveButton(text = "Edit settings", size = AdaptiveButtonSize.Small, onClick = {})
-            }
-        }
-    },
-    LiveExample(
+    simpleDisplayDoc(
+        id = "adaptive-tabs",
+        family = "Navigation",
         title = "AdaptiveTabs",
-        description = "Segmented tabs for switching compact content sections.",
-        code = """AdaptiveTabs(
-    tabs = listOf("Overview", "Activity", "Team"),
-    selectedTab = selectedTab,
-    onTabSelected = { selectedTab = it },
-    tabLabel = { it },
-)""",
+        summary = "Segmented horizontal tabs with scroll support for compact widths.",
+        code = """AdaptiveTabs(tabs, selectedTab, onTabSelected, tabLabel = { it })""",
+        parameters = listOf(
+            ComponentParameter("tabs", "List<T>", "required", true, "Tab models."),
+            ComponentParameter("selectedTab", "T", "required", true, "Current selected tab."),
+            ComponentParameter("onTabSelected", "(T) -> Unit", "required", true, "Selection callback."),
+            ComponentParameter("tabLabel", "(T) -> String", "required", true, "Label renderer."),
+        ),
     ) {
         val tabs = listOf("Overview", "Activity", "Team")
-        var selectedTab by remember { mutableStateOf(tabs.first()) }
-        Column {
-            AdaptiveTabs(
-                tabs = tabs,
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                tabLabel = { title -> title },
-            )
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-            AdaptiveCard {
-                SiteText("$selectedTab content", fontWeight = FontWeight.Bold)
-            }
-        }
+        var selected by remember { mutableStateOf(tabs.first()) }
+        AdaptiveTabs(tabs, selected, { selected = it }, tabLabel = { it })
     },
-    LiveExample(
-        title = "AdaptiveDialog",
-        description = "Modal dialog surface with confirm and dismiss actions.",
-        code = """AdaptiveDialog(
-    onDismissRequest = { /* close */ },
-    title = "Confirm action",
-    dismissButton = { AdaptiveButton(text = "Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = {}) },
-    confirmButton = { AdaptiveButton(text = "Confirm", onClick = {}) },
-) {
-    Text("Are you sure?")
-}""",
-    ) {
-        var showDialog by remember { mutableStateOf(false) }
-        Column {
-            AdaptiveButton(text = "Open dialog", onClick = { showDialog = true })
-            if (showDialog) {
-                AdaptiveDialog(
-                    onDismissRequest = { showDialog = false },
-                    title = "Confirm action",
-                    dismissButton = {
-                        AdaptiveButton(text = "Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false })
-                    },
-                    confirmButton = {
-                        AdaptiveButton(text = "Confirm", onClick = { showDialog = false })
-                    },
-                ) {
-                    SiteText("Dialog content for confirmation flows.")
+    ComponentDoc(
+        id = "adaptive-carousel",
+        family = "Display",
+        title = "AdaptiveCarousel",
+        summary = "Controlled carousel with slide, fade, scale or no transition.",
+        usage = "Use for compact feature panels, onboarding and dashboard summaries. The caller owns selectedIndex.",
+        basicExample = DocsExample(
+            "Slide carousel",
+            "Controls and indicators are optional; selectedIndex is normalized safely.",
+            """AdaptiveCarousel(items, selectedIndex, onSelectedIndexChange) { item, index -> ... }""",
+        ) {
+            val cards = listOf("Revenue overview", "Team activity", "Support health")
+            var selectedIndex by remember { mutableStateOf(0) }
+            AdaptiveCarousel(cards, selectedIndex, { selectedIndex = it }, transition = AdaptiveCarouselTransition.Slide) { item, index ->
+                Column {
+                    AdaptiveBadge("Slide ${index + 1}", tone = AdaptiveBadgeTone.Info)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SiteText(item, fontWeight = FontWeight.Bold)
+                    SiteText("Controlled content slot.", color = SiteMuted)
                 }
             }
-        }
-    },
-    LiveExample(
-        title = "AdaptiveDataView",
-        description = "Responsive data view with real columns and content state.",
-        code = """AdaptiveDataView(state = AdaptiveDataContent(items), columns = columns)""",
-    ) {
-        val rows = listOf(
-            DemoRow("Acme", "Paid", "$1,200"),
-            DemoRow("Northwind", "Open", "$840"),
-        )
-        AdaptiveDataView(
-            state = AdaptiveDataContent(rows),
-            columns = listOf(
-                AdaptiveDataColumn("customer", "Customer", weight = 2f, mobileRole = AdaptiveDataMobileRole.Title) { SiteText(it.customer, fontWeight = FontWeight.Bold) },
-                AdaptiveDataColumn("status", "Status", mobileRole = AdaptiveDataMobileRole.Status) { SiteText(it.status) },
-                AdaptiveDataColumn("amount", "Amount") { SiteText(it.amount) },
-            ),
-        )
-    },
-    LiveExample(
-        title = "AdaptiveFormLayout",
-        description = "Responsive sections, field spans, validation, and actions.",
-        code = """AdaptiveFormLayout { section { field(label = "Name") { AdaptiveTextField(...) } } }""",
-    ) {
-        var name by remember { mutableStateOf("AdaptiveKt") }
-        AdaptiveFormLayout(columns = AdaptiveFormColumns(compact = 1, medium = 2, expanded = 2, large = 2)) {
-            section(title = "Workspace") {
-                field(label = "Name", span = FieldSpan.Half, required = true) {
-                    AdaptiveTextField(value = name, onValueChange = { name = it }, placeholder = "Name")
+        },
+        parameters = listOf(
+            ComponentParameter("items", "List<T>", "required", true, "Items to display."),
+            ComponentParameter("selectedIndex", "Int", "required", true, "Controlled selected index."),
+            ComponentParameter("onSelectedIndexChange", "(Int) -> Unit", "required", true, "Selection callback."),
+            ComponentParameter("loop", "Boolean", "true", false, "Whether next/previous wraps around."),
+            ComponentParameter("showControls", "Boolean", "true", false, "Shows left/right controls."),
+            ComponentParameter("showIndicators", "Boolean", "true", false, "Shows indicators."),
+            ComponentParameter("transition", "AdaptiveCarouselTransition", "Slide", false, "Slide, Fade, Scale or None."),
+            ComponentParameter("emptyContent", "(@Composable () -> Unit)?", "null", false, "Optional empty state."),
+        ),
+        variants = listOf(
+            DocsExample(
+                "Fade transition",
+                "Use transition = Fade for quiet content changes.",
+                """AdaptiveCarousel(..., transition = AdaptiveCarouselTransition.Fade) { item, index -> ... }""",
+            ) {
+                var selected by remember { mutableStateOf(0) }
+                AdaptiveCarousel(listOf("Fade", "Scale", "Slide"), selected, { selected = it }, transition = AdaptiveCarouselTransition.Fade) { item, _ ->
+                    SiteText("Transition: $item", fontWeight = FontWeight.Bold)
                 }
-                field(label = "Plan", span = FieldSpan.Half, validationMessage = ValidationMessage("Preview account")) {
-                    AdaptiveTextField(value = "Team", onValueChange = {}, enabled = false)
+            },
+        ),
+        themingNotes = commonNotes("AdaptiveCarousel"),
+        responsiveNotes = listOf("The carousel fills width and keeps controls inside the card."),
+        accessibilityNotes = listOf("Provide visible content text; avoid relying only on indicator dots."),
+        limitations = listOf("Autoplay is intentionally not included."),
+    ),
+    ComponentDoc(
+        id = "feedback-states",
+        family = "Feedback",
+        title = "EmptyState, LoadingState and ErrorState",
+        summary = "Polished workflow states with default glyphs, titles, descriptions and optional action slots.",
+        usage = "Use these for data loading, empty search results, retryable errors and first-run states.",
+        basicExample = DocsExample(
+            "State trio",
+            "Each state has a sensible default visual treatment.",
+            """EmptyState("No results", description = "Try another filter.")""",
+        ) {
+            AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
+                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
+                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots) } }
+                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
+            }
+        },
+        parameters = listOf(
+            ComponentParameter("title", "String", "required", true, "EmptyState/ErrorState title."),
+            ComponentParameter("description", "String?", "null", false, "Optional supporting text."),
+            ComponentParameter("icon", "(@Composable () -> Unit)?", "null", false, "Optional custom icon."),
+            ComponentParameter("action / retryAction", "(@Composable () -> Unit)?", "null", false, "Optional user-provided action slot."),
+            ComponentParameter("indicatorStyle", "AdaptiveLoadingIndicatorStyle", "Spinner", false, "LoadingState only: Spinner, Dots or Pulse."),
+        ),
+        variants = listOf(),
+        themingNotes = commonNotes("Feedback states"),
+        responsiveNotes = listOf("States center themselves and constrain content width."),
+        accessibilityNotes = listOf("Use descriptive titles and provide retry actions for recoverable errors."),
+        limitations = listOf("The action slot is caller-owned; AdaptiveKt does not infer button labels."),
+    ),
+    ComponentDoc(
+        id = "adaptive-accordion-dialog",
+        family = "Overlay / Disclosure",
+        title = "AdaptiveAccordion and AdaptiveDialog",
+        summary = "Disclosure and modal primitives for settings, confirmations and long content.",
+        usage = "Use Accordion for inline detail and Dialog for focused decisions or confirmations.",
+        basicExample = DocsExample(
+            "Accordion and dialog",
+            "Both are Foundation-only and use theme surfaces.",
+            """AdaptiveAccordion(title = "Account settings") { ... }""",
+        ) {
+            var showDialog by remember { mutableStateOf(false) }
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                AdaptiveAccordion(title = "Account settings", subtitle = "Manage preferences", defaultExpanded = true) {
+                    AdaptiveButton("Open dialog", onClick = { showDialog = true })
+                }
+                if (showDialog) {
+                    AdaptiveDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = "Confirm action",
+                        dismissButton = { AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false }) },
+                        confirmButton = { AdaptiveButton("Confirm", onClick = { showDialog = false }) },
+                    ) {
+                        SiteText("Dialog content for confirmation flows.", maxLines = 3)
+                    }
                 }
             }
-            actions {
-                primary { AdaptiveButton("Save", onClick = {}) }
-                secondary { AdaptiveButton("Reset", variant = AdaptiveButtonVariant.Secondary, onClick = {}) }
-            }
-        }
-    },
-    LiveExample(
-        title = "Feedback states",
-        description = "Empty, loading, and error states for workflows.",
-        code = """EmptyState(title = "No results")
-LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots)
-ErrorState(title = "Unable to load")""",
-    ) {
-        AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
-            item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
-            item(span = 4) {
-                Box(Modifier.heightIn(min = 180.dp)) {
-                    LoadingState(
-                        message = "Loading",
-                        indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots,
-                    )
-                }
-            }
-            item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
-        }
-    },
+        },
+        parameters = listOf(
+            ComponentParameter("title", "String?", "required/optional", true, "Accordion title required; Dialog title optional."),
+            ComponentParameter("expanded", "Boolean?", "null", false, "Accordion controlled expanded state."),
+            ComponentParameter("onDismissRequest", "() -> Unit", "required", true, "Dialog dismiss callback."),
+            ComponentParameter("confirmButton", "@Composable () -> Unit", "required", true, "Dialog confirm action slot."),
+            ComponentParameter("content", "@Composable () -> Unit", "required", true, "Panel or dialog content."),
+        ),
+        variants = listOf(),
+        themingNotes = commonNotes("Overlay and disclosure"),
+        responsiveNotes = listOf("Dialog constrains height and scrolls content to avoid infinite desktop height."),
+        accessibilityNotes = listOf("Use descriptive titles and clear confirm/dismiss actions."),
+        limitations = listOf("Focus trapping and advanced keyboard management can be expanded later."),
+    ),
 )
 
-private data class DemoRow(
-    val customer: String,
-    val status: String,
-    val amount: String,
+@Composable
+private fun PeopleOption(person: Person, selected: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(person.name, size = 30.dp)
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                SiteText(person.name, fontWeight = FontWeight.Bold, maxLines = 1)
+                SiteText(person.detail, color = SiteMuted, maxLines = 1)
+            }
+        }
+        if (selected) AdaptiveBadge("Selected", tone = AdaptiveBadgeTone.Success)
+    }
+}
+
+@Composable
+private fun PeopleChip(person: Person) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        AdaptiveAvatar(person.name, size = 20.dp)
+        Spacer(modifier = Modifier.width(6.dp))
+        SiteText(person.name.substringBefore(" "), fontWeight = FontWeight.Bold, maxLines = 1)
+    }
+}
+
+@Composable
+private fun NavigationTreePreview() {
+    val tree = remember {
+        listOf(
+            AdaptiveNavigationTreeItem("workspace", "Workspace", badge = "3", children = listOf(AdaptiveNavigationTreeItem("overview", "Overview"), AdaptiveNavigationTreeItem("activity", "Activity"))),
+            AdaptiveNavigationTreeItem("operations", "Operations", children = listOf(AdaptiveNavigationTreeItem("employees", "Employees"), AdaptiveNavigationTreeItem("invoices", "Invoices", badge = "New"))),
+        )
+    }
+    var selected by remember { mutableStateOf("overview") }
+    var expanded by remember { mutableStateOf(setOf("workspace", "operations")) }
+    AdaptiveNavigationTree(tree, selected, { selected = it.id }, expanded, { expanded = it })
+}
+
+private data class Person(val name: String, val detail: String)
+
+private data class DemoRow(val customer: String, val status: String, val amount: String)
+
+private fun inputParameters(): List<ComponentParameter> = listOf(
+    ComponentParameter("value", "String", "required", true, "Current text."),
+    ComponentParameter("onValueChange", "(String) -> Unit", "required", true, "Text change callback."),
+    ComponentParameter("label", "String?", "null", false, "Optional label above the field."),
+    ComponentParameter("placeholder", "String?", "null", false, "Placeholder shown when empty."),
+    ComponentParameter("enabled", "Boolean", "true", false, "Disables input."),
+    ComponentParameter("validationMessage", "String?", "null", false, "Shows error styling and message."),
+)
+
+private fun selectParameters(multi: Boolean): List<ComponentParameter> = listOf(
+    ComponentParameter("options", "List<T>", "required", true, "Available options."),
+    ComponentParameter(if (multi) "selectedOptions" else "selectedOption", if (multi) "List<T>" else "T?", "required", true, "Current selection."),
+    ComponentParameter(if (multi) "onSelectedOptionsChange" else "onOptionSelected", if (multi) "(List<T>) -> Unit" else "(T?) -> Unit", "required", true, "Selection callback."),
+    ComponentParameter("optionLabel", "(T) -> String", "required", true, "Label for search and default rendering."),
+    ComponentParameter("searchable", "Boolean", if (multi) "true" else "false", false, "Shows local search in the menu."),
+    ComponentParameter("clearable", "Boolean", "true", false, "Shows clear affordance."),
+    ComponentParameter("optionContent", "Composable slot", "null", false, "Custom option row."),
+    ComponentParameter(if (multi) "chipContent" else "selectedContent", "Composable slot", "null", false, "Custom selected value rendering."),
+)
+
+private fun peopleSelectExample(): DocsExample = DocsExample(
+    "Custom option",
+    "Use optionContent for richer rows while optionLabel remains the searchable text.",
+    """AdaptiveSelect(options = people, optionLabel = { it.name }, optionContent = { person, selected -> ... })""",
+) {
+    val people = listOf(Person("Alicia Romero", "Product Manager"), Person("Noah Kim", "Designer"))
+    var selected by remember { mutableStateOf<Person?>(people.first()) }
+    AdaptiveSelect(
+        options = people,
+        selectedOption = selected,
+        onOptionSelected = { selected = it },
+        optionLabel = { it.name },
+        label = "Owner",
+        optionContent = { person, isSelected -> PeopleOption(person, isSelected) },
+        selectedContent = { person -> PeopleChip(person) },
+    )
+}
+
+private fun inputDoc(
+    id: String,
+    title: String,
+    summary: String,
+    preview: @Composable () -> Unit,
+): ComponentDoc = ComponentDoc(
+    id = id,
+    family = "Inputs",
+    title = title,
+    summary = summary,
+    usage = "Use it where a form or filter needs a text value with clear labeling and validation.",
+    basicExample = DocsExample(title, summary, """AdaptiveTextField(value, onValueChange, label = "Company")""", preview),
+    parameters = inputParameters(),
+    variants = listOf(
+        DocsExample(
+            "Validation",
+            "A validation message changes the border and renders supporting text below.",
+            """AdaptiveTextField(value = "", onValueChange = {}, label = "Email", validationMessage = "Email is required")""",
+        ) {
+            AdaptiveTextField(value = "", onValueChange = {}, label = "Email", placeholder = "team@example.com", validationMessage = "Email is required")
+        },
+    ),
+    themingNotes = commonNotes(title),
+    responsiveNotes = listOf("Fields fill width and should be stacked in one column on compact screens."),
+    accessibilityNotes = listOf("Always provide label or nearby descriptive text."),
+    limitations = listOf("Input masking and complex formatters are not built in."),
+)
+
+private fun simpleDisplayDoc(
+    id: String,
+    family: String,
+    title: String,
+    summary: String,
+    code: String,
+    parameters: List<ComponentParameter>,
+    preview: @Composable () -> Unit,
+): ComponentDoc = ComponentDoc(
+    id = id,
+    family = family,
+    title = title,
+    summary = summary,
+    usage = "Use this primitive directly when the default visual style matches the information hierarchy you need.",
+    basicExample = DocsExample(title, summary, code, preview),
+    parameters = parameters,
+    variants = emptyList(),
+    themingNotes = commonNotes(title),
+    responsiveNotes = listOf("This primitive is compact and safe inside mobile one-column layouts."),
+    accessibilityNotes = listOf("Keep visible labels concise and meaningful."),
+    limitations = listOf("No special limitations beyond its intentionally small scope."),
 )

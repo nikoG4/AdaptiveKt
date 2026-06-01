@@ -39,6 +39,21 @@ It does not depend on layout, navigation, data, forms, feedback, admin-demo, Mat
 - `AdaptiveThumbnail`
 - `AdaptiveChip`
 
+## Public Docs Site Coverage
+
+The Compose/Wasm docs-site now includes a rendered component catalog for the public surface of `:adaptive-components` and related AdaptiveKt modules.
+
+Each component article is designed to include:
+
+- What the component is for.
+- A real rendered example.
+- Copyable code.
+- Public parameters.
+- Variants and usage notes where relevant.
+- Theming, responsive, accessibility, and limitation notes.
+
+The catalog is documentation only; it does not introduce new public APIs.
+
 ## Examples
 
 ```kotlin
@@ -422,4 +437,4 @@ Docs-site and admin-demo expose light/dark toggles. Their Wasm entry points also
 
 - `AdaptiveTheme` exists with light and dark default schemes; platform presets are future work.
 - Dropdown rendering uses the shared anchored popup for select-style components.
-- B3.1 and later capture routes validate the current top viewport of each focused section; deeper interaction-state screenshots are future work.
+- Docs-site screenshots use full-page web capture for long docs pages, but interaction-state visual regression baselines are still future work.

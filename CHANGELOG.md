@@ -12,6 +12,7 @@
 - Animated feedback loading indicators.
 - Navigation item style and density defaults for pill, card and minimal sidebar rows.
 - AdaptiveKt SVG brand assets and docs-site logo integration.
+- Rebuilt docs-site experience with a product home page, rendered docs pages, component examples, copyable code blocks, API tables, and responsive docs navigation.
 - Responsive layout, forms, data, navigation and feedback modules.
 - Docs-site and admin demo.
 - Visual verification tooling.

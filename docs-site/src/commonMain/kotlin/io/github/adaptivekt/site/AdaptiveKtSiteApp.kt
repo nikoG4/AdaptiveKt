@@ -16,12 +16,15 @@ public fun AdaptiveKtSiteApp() {
     AdaptiveTheme(
         colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
     ) {
+        val navigateTo: (SiteRoute) -> Unit = {
+            route = it
+            pushSiteRoute(it, darkTheme)
+        }
         SiteLayout(
             route = route,
             darkTheme = darkTheme,
             onNavigate = {
-                route = it
-                pushSiteRoute(it, darkTheme)
+                navigateTo(it)
             },
             onThemeToggle = {
                 val nextDarkTheme = !darkTheme
@@ -31,9 +34,9 @@ public fun AdaptiveKtSiteApp() {
         ) {
             when (route) {
                 SiteRoute.Home -> SiteHomePage(
-                    onOpenComponents = { route = SiteRoute.Components },
-                    onOpenDocs = { route = SiteRoute.Docs },
-                    onOpenDemo = { route = SiteRoute.Demo },
+                    onOpenComponents = { navigateTo(SiteRoute.Components) },
+                    onOpenDocs = { navigateTo(SiteRoute.Docs) },
+                    onOpenDemo = { navigateTo(SiteRoute.Demo) },
                 )
                 SiteRoute.Components -> SiteComponentsPage()
                 SiteRoute.Docs -> SiteDocsPage()

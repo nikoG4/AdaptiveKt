@@ -30,7 +30,7 @@ AdaptiveKt is source-first today. Maven Central publishing is not available yet,
 - Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, multi-select, and carousel
 - Hierarchical navigation tree for nested admin sidebars and settings panels
 - Wasm browser demo
-- Compose Multiplatform/Wasm documentation site with live component examples
+- Public Compose Multiplatform/Wasm documentation site with a product home page, rendered docs pages, live component examples, code snippets, and API tables
 - Visual verification tooling for Desktop and Web
 
 ## Quick Start
@@ -151,12 +151,14 @@ Output: `admin-demo/build/dist/wasmJs/productionExecutable/`
 
 ## Run The Documentation Site
 
-The landing and component catalog are implemented in `:docs-site` with Compose Multiplatform/Wasm and render real AdaptiveKt components.
+The public documentation site is implemented in `:docs-site` with Compose Multiplatform/Wasm. It includes a product landing page, a documentation overview, and a live component catalog rendered with real AdaptiveKt APIs.
 
 ```powershell
 .\gradlew.bat :docs-site:wasmJsBrowserDevelopmentRun
 .\gradlew.bat :docs-site:wasmJsBrowserDistribution
 ```
+
+The generated Pages artifact also includes the admin demo under `/demo/app/`.
 
 ## Visual Capture
 

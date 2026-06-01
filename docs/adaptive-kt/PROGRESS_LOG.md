@@ -1,3 +1,25 @@
+DOCSITE-PRO-2 - Public Documentation Experience Rebuild
+=======================================================
+
+Status: Completed
+
+Date: 2026-06-01
+
+Summary:
+- Rebuilt the Compose/Wasm docs-site into a fuller public documentation experience instead of a minimal landing page.
+- Added a product home page with clear positioning, platform support, publishing status, CTAs, and a rendered AdaptiveKt preview.
+- Reworked `/docs/` into rendered documentation topics for setup, theme, layout, local publishing, visual verification, and roadmap.
+- Reworked `/components/` into a component catalog with docs navigation, rendered examples, copyable code blocks, parameter tables, variants, and notes.
+- Added docs-site-only primitives in `DocsUi.kt` and data models in `DocsModels.kt`.
+- Kept Maven Central status truthful: AdaptiveKt is not published remotely yet; local publishing remains the documented path.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No API changes to AdaptiveKt modules.
+- No Material 3 or external dependencies.
+- No generated outputs committed.
+
 DOCSITE-BRAND-1 - AdaptiveKt Branding and Logo Assets
 =====================================================
 

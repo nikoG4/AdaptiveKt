@@ -63,7 +63,7 @@ internal fun SiteNavigation(
                 text = "GitHub",
                 size = AdaptiveButtonSize.Small,
                 variant = AdaptiveButtonVariant.Secondary,
-                onClick = { openSiteUrl("https://github.com/adaptivekt/adaptive-kt") },
+                onClick = { openSiteUrl("https://github.com/nikoG4/AdaptiveKt") },
             )
         }
     }

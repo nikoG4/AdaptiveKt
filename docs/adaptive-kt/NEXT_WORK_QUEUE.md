@@ -11,6 +11,10 @@
 - [ ] Evaluate virtualized option lists for very large select datasets.
 - [ ] Add optional docs-site visual diff baselines after the first Pages deployment.
 - [ ] Add a non-blocking scheduled link check for deployed Pages URLs.
+- [x] Rebuild docs-site home, docs, and component catalog into a public-facing documentation experience.
+- [ ] Add direct component deep links or query parameters for docs-site component selection.
+- [ ] Add real browser clipboard integration for docs-site code copy buttons.
+- [ ] Add expanded full-page visual baselines for docs-site docs/components dark and light pages.
 - [x] Add manual macOS validation workflow for local publishing.
 - [x] Run manual macOS validation workflow and inspect iOS artifacts.
 - [ ] Add conditional signing and manual publish workflow documentation for PUBLISH-1B.
