@@ -17,6 +17,13 @@
 - `AdaptiveTokens.Radius`
 - `AdaptiveTokens.PaneWidths`
 
+### adaptive-components
+
+- `AdaptiveBreadcrumbs`
+- `AdaptiveAccordion`
+- `AdaptiveTabs`
+- `AdaptiveDialog`
+
 ### adaptive-layout
 
 - `AdaptiveContainer`

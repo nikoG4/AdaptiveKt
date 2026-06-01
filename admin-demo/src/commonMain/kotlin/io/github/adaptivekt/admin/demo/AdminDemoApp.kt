@@ -98,6 +98,7 @@ private fun AdminDemoThemedApp(
                         focusSection = initialScreen.componentsShowcaseSection,
                         initialSelectExpanded = initialScreen == AdminDemoScreen.ComponentsSelectsOpen,
                         initialMultiSelectExpanded = initialScreen == AdminDemoScreen.ComponentsMultiSelectsOpen,
+                        initialDialogOpen = initialScreen == AdminDemoScreen.ComponentsDialogsOpen,
                         externalContentScroll = contentScrollEnabled,
                     )
                     else -> DashboardScreen()
@@ -121,6 +122,11 @@ private val AdminDemoScreen.componentsShowcaseSection: ComponentsShowcaseSection
         AdminDemoScreen.ComponentsMultiSelectsOpen -> ComponentsShowcaseSection.MultiSelects
         AdminDemoScreen.ComponentsCarousels -> ComponentsShowcaseSection.Carousels
         AdminDemoScreen.ComponentsNavigationTree -> ComponentsShowcaseSection.NavigationTree
+        AdminDemoScreen.ComponentsBreadcrumbs -> ComponentsShowcaseSection.Breadcrumbs
+        AdminDemoScreen.ComponentsAccordions -> ComponentsShowcaseSection.Accordions
+        AdminDemoScreen.ComponentsTabs -> ComponentsShowcaseSection.Tabs
+        AdminDemoScreen.ComponentsDialogs,
+        AdminDemoScreen.ComponentsDialogsOpen -> ComponentsShowcaseSection.Dialogs
         AdminDemoScreen.ComponentsFeedback -> ComponentsShowcaseSection.Feedback
         else -> null
     }

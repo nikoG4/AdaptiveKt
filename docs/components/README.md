@@ -20,6 +20,10 @@ Complete reference for all AdaptiveKt components, organized by module.
 - [**Adaptive Icon Button**](components/adaptive-icon-button.md) — Icon-only buttons
 - [**Adaptive Badge**](components/adaptive-badge.md) — Status indicators
 - [**Adaptive Avatar**](components/adaptive-avatar.md) — User images with initials fallback
+- [**Adaptive Breadcrumbs**](components/adaptive-breadcrumbs.md) — Page hierarchy navigation
+- [**Adaptive Accordion**](components/adaptive-accordion.md) — Expandable disclosure sections
+- [**Adaptive Tabs**](components/adaptive-tabs.md) — Segmented tab navigation
+- [**Adaptive Dialog**](components/adaptive-dialog.md) — Modal confirmation and workflow surfaces
 - [**Adaptive Card**](components/adaptive-card.md) — Surface containers
 - [**Adaptive Text Field**](components/adaptive-text-field.md) — Form inputs
 - [**Adaptive Search Field**](components/adaptive-search-field.md) — Search inputs

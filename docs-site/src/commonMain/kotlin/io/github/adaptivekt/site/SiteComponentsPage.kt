@@ -28,10 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
+import io.github.adaptivekt.components.AdaptiveAccordion
 import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveAvatarShape
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.components.AdaptiveBreadcrumbs
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
@@ -39,6 +41,8 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveCarousel
 import io.github.adaptivekt.components.AdaptiveCarouselTransition
 import io.github.adaptivekt.components.AdaptiveChip
+import io.github.adaptivekt.components.AdaptiveDialog
+import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMenuItem
@@ -415,6 +419,103 @@ AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}
             ) { padding ->
                 Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
                     SiteText("Selected: $selected", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    },
+    LiveExample(
+        title = "AdaptiveBreadcrumbs",
+        description = "Breadcrumb navigation for hierarchical pages and deep links.",
+        code = """AdaptiveBreadcrumbs(
+    items = listOf("Home", "Projects", "Billing"),
+    selectedItem = "Billing",
+    onItemSelected = { /* navigate */ },
+    itemLabel = { value -> value },
+)""",
+    ) {
+        var selected by remember { mutableStateOf("Billing") }
+        AdaptiveBreadcrumbs(
+            items = listOf("Home", "Projects", "Billing", "Invoice #123"),
+            selectedItem = selected,
+            onItemSelected = { selected = it },
+            itemLabel = { value -> value },
+        )
+    },
+    LiveExample(
+        title = "AdaptiveAccordion",
+        description = "Expandable panels for nested content and disclosure controls.",
+        code = """AdaptiveAccordion(
+    title = "Account settings",
+    subtitle = "Manage your preferences",
+    defaultExpanded = false,
+) {
+    Text("Panel content")
+}""",
+    ) {
+        AdaptiveAccordion(
+            title = "Account settings",
+            subtitle = "Manage your preferences",
+            defaultExpanded = true,
+        ) {
+            Column {
+                SiteText("Change your password, email, and preferences.")
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+                AdaptiveButton(text = "Edit settings", size = AdaptiveButtonSize.Small, onClick = {})
+            }
+        }
+    },
+    LiveExample(
+        title = "AdaptiveTabs",
+        description = "Segmented tabs for switching compact content sections.",
+        code = """AdaptiveTabs(
+    tabs = listOf("Overview", "Activity", "Team"),
+    selectedTab = selectedTab,
+    onTabSelected = { selectedTab = it },
+    tabLabel = { it },
+)""",
+    ) {
+        val tabs = listOf("Overview", "Activity", "Team")
+        var selectedTab by remember { mutableStateOf(tabs.first()) }
+        Column {
+            AdaptiveTabs(
+                tabs = tabs,
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it },
+                tabLabel = { title -> title },
+            )
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+            AdaptiveCard {
+                SiteText("$selectedTab content", fontWeight = FontWeight.Bold)
+            }
+        }
+    },
+    LiveExample(
+        title = "AdaptiveDialog",
+        description = "Modal dialog surface with confirm and dismiss actions.",
+        code = """AdaptiveDialog(
+    onDismissRequest = { /* close */ },
+    title = "Confirm action",
+    dismissButton = { AdaptiveButton(text = "Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = {}) },
+    confirmButton = { AdaptiveButton(text = "Confirm", onClick = {}) },
+) {
+    Text("Are you sure?")
+}""",
+    ) {
+        var showDialog by remember { mutableStateOf(false) }
+        Column {
+            AdaptiveButton(text = "Open dialog", onClick = { showDialog = true })
+            if (showDialog) {
+                AdaptiveDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = "Confirm action",
+                    dismissButton = {
+                        AdaptiveButton(text = "Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false })
+                    },
+                    confirmButton = {
+                        AdaptiveButton(text = "Confirm", onClick = { showDialog = false })
+                    },
+                ) {
+                    SiteText("Dialog content for confirmation flows.")
                 }
             }
         }

@@ -28,6 +28,10 @@ It does not depend on layout, navigation, data, forms, feedback, admin-demo, Mat
 - `AdaptiveSelect`
 - `AdaptiveMultiSelect`
 - `AdaptiveCarousel`
+- `AdaptiveBreadcrumbs`
+- `AdaptiveAccordion`
+- `AdaptiveTabs`
+- `AdaptiveDialog`
 - `AdaptiveTextField`
 - `AdaptiveSearchField`
 - `AdaptiveSectionHeader`
@@ -60,6 +64,19 @@ AdaptiveTextField(
     label = "Company name",
     placeholder = "Acme Corp",
 )
+
+AdaptiveBreadcrumbs(
+    items = listOf("Home", "Products", "Widgets"),
+    onItemSelected = { /* navigate */ },
+)
+
+AdaptiveDialog(
+    open = showConfirm,
+    title = "Confirm action",
+    onDismissRequest = { showConfirm = false },
+) {
+    AdaptiveButton(text = "Confirm", onClick = { showConfirm = false })
+}
 ```
 
 ## Button API

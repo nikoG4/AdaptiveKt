@@ -66,6 +66,11 @@ $componentScreens = @(
     "components-multiselects-open",
     "components-carousels",
     "components-navigation-tree",
+    "components-breadcrumbs",
+    "components-accordions",
+    "components-tabs",
+    "components-dialogs",
+    "components-dialogs-open",
     "components-feedback"
 )
 

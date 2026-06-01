@@ -33,6 +33,8 @@ import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveAvatarShape
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.components.AdaptiveAccordion
+import io.github.adaptivekt.components.AdaptiveBreadcrumbs
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
@@ -41,6 +43,7 @@ import io.github.adaptivekt.components.AdaptiveCarousel
 import io.github.adaptivekt.components.AdaptiveCarouselTransition
 import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
+import io.github.adaptivekt.components.AdaptiveDialog
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveDropdownMenu
 import io.github.adaptivekt.components.AdaptiveIconButton
@@ -50,6 +53,7 @@ import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveSurface
+import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
@@ -78,6 +82,10 @@ internal enum class ComponentsShowcaseSection(
     MultiSelects("MultiSelects", "Multi-select dropdowns with chips, search, and custom content."),
     Carousels("Carousels", "Animated carousel transitions, controls, indicators, and edge cases."),
     NavigationTree("Navigation tree", "Hierarchical sidebar navigation with controlled expansion."),
+    Breadcrumbs("Breadcrumbs", "Clickable breadcrumb navigation for page hierarchy."),
+    Accordions("Accordions", "Expandable sections for nested content and disclosure controls."),
+    Tabs("Tabs", "Tabbed content navigation for compact section switching."),
+    Dialogs("Dialogs", "Modal dialog surfaces for confirm/dismiss workflows."),
     Feedback("Feedback", "Animated loading states and feedback defaults."),
 }
 
@@ -86,6 +94,7 @@ internal fun ComponentsShowcaseScreen(
     focusSection: ComponentsShowcaseSection? = null,
     initialSelectExpanded: Boolean = false,
     initialMultiSelectExpanded: Boolean = false,
+    initialDialogOpen: Boolean = false,
     externalContentScroll: Boolean = false,
 ) {
     val adaptiveInfo = rememberAdaptiveInfo()
@@ -143,6 +152,18 @@ internal fun ComponentsShowcaseScreen(
             }
             if (focusSection == null || focusSection == ComponentsShowcaseSection.NavigationTree) {
                 item(span = sectionSpan(focusSection, cardSpan)) { NavigationTreeSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Breadcrumbs) {
+                item(span = sectionSpan(focusSection, cardSpan)) { BreadcrumbsSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Accordions) {
+                item(span = sectionSpan(focusSection, cardSpan)) { AccordionsSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Tabs) {
+                item(span = sectionSpan(focusSection, cardSpan)) { TabsSection() }
+            }
+            if (focusSection == null || focusSection == ComponentsShowcaseSection.Dialogs) {
+                item(span = sectionSpan(focusSection, cardSpan)) { DialogsSection(initialOpen = initialDialogOpen) }
             }
             if (focusSection == null || focusSection == ComponentsShowcaseSection.Feedback) {
                 item(span = sectionSpan(focusSection, cardSpan)) { FeedbackSection() }
@@ -752,6 +773,96 @@ private fun NavigationStylePreview(
             itemStyle = style,
             density = density,
         )
+    }
+}
+
+@Composable
+private fun BreadcrumbsSection() {
+    var selected by remember { mutableStateOf("Overview") }
+    val items = listOf("Overview", "Projects", "Billing", "Invoice #123")
+
+    ShowcaseCard(title = "Breadcrumbs", description = "Hierarchical page navigation with clickable path items.") {
+        AdaptiveBreadcrumbs(
+            items = items,
+            selectedItem = selected,
+            onItemSelected = { selected = it },
+            itemLabel = { it },
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        BasicText(
+            text = "Selected: $selected",
+            style = TextStyle(fontSize = 13.sp, color = AdaptiveTheme.colors.textSecondary),
+        )
+    }
+}
+
+@Composable
+private fun AccordionsSection() {
+    ShowcaseCard(title = "Accordions", description = "Expandable disclosure panels for nested details.") {
+        AdaptiveAccordion(
+            title = "Account settings",
+            subtitle = "Manage notification and billing preferences.",
+            defaultExpanded = true,
+        ) {
+            Column {
+                Body("Change your password, email, and user preferences in this panel.")
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+                AdaptiveButton(text = "Edit settings", size = AdaptiveButtonSize.Small, onClick = {})
+            }
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveAccordion(
+            title = "Support details",
+            subtitle = "Frequently requested help topics.",
+        ) {
+            Column {
+                Body("View answers to common questions and contact support from the admin console.")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabsSection() {
+    val tabs = listOf("Overview", "Activity", "Team")
+    var selectedTab by remember { mutableStateOf(tabs.first()) }
+
+    ShowcaseCard(title = "Tabs", description = "Segmented tabs for switching page sections.") {
+        AdaptiveTabs(
+            tabs = tabs,
+            selectedTab = selectedTab,
+            onTabSelected = { selectedTab = it },
+            tabLabel = { it },
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCard {
+            Label("$selectedTab content")
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Body("This panel updates when the active tab changes.")
+        }
+    }
+}
+
+@Composable
+private fun DialogsSection(initialOpen: Boolean = false) {
+    var showDialog by remember { mutableStateOf(initialOpen) }
+
+    ShowcaseCard(title = "Dialogs", description = "Modal dialogs for confirmation and decision flows.") {
+        AdaptiveButton(text = "Open dialog", onClick = { showDialog = true })
+        if (showDialog) {
+            AdaptiveDialog(
+                onDismissRequest = { showDialog = false },
+                title = "Confirm action",
+                dismissButton = {
+                    AdaptiveButton(text = "Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false })
+                },
+                confirmButton = {
+                    AdaptiveButton(text = "Confirm", onClick = { showDialog = false })
+                },
+            ) {
+                Body("Are you sure you want to continue? This dialog demonstrates a modal surface with actions.")
+            }
+        }
     }
 }
 

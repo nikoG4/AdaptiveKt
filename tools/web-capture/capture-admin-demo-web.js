@@ -27,6 +27,11 @@ const screens = [
     'components-multiselects-open',
     'components-carousels',
     'components-navigation-tree',
+    'components-breadcrumbs',
+    'components-accordions',
+    'components-tabs',
+    'components-dialogs',
+    'components-dialogs-open',
     'components-feedback'
 ];
 
@@ -43,6 +48,8 @@ const darkScreens = [
     'components-multiselects',
     'components-carousels',
     'components-navigation-tree',
+    'components-dialogs',
+    'components-dialogs-open',
     'components-feedback'
 ];
 

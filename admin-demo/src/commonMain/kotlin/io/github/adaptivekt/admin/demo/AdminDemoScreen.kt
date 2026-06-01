@@ -22,6 +22,11 @@ public enum class AdminDemoScreen(public val id: String) {
     ComponentsMultiSelectsOpen("components-multiselects-open"),
     ComponentsCarousels("components-carousels"),
     ComponentsNavigationTree("components-navigation-tree"),
+    ComponentsBreadcrumbs("components-breadcrumbs"),
+    ComponentsAccordions("components-accordions"),
+    ComponentsTabs("components-tabs"),
+    ComponentsDialogs("components-dialogs"),
+    ComponentsDialogsOpen("components-dialogs-open"),
     ComponentsFeedback("components-feedback");
 
     public companion object {
@@ -47,6 +52,11 @@ public enum class AdminDemoScreen(public val id: String) {
             ComponentsMultiSelectsOpen.id -> ComponentsMultiSelectsOpen
             ComponentsCarousels.id -> ComponentsCarousels
             ComponentsNavigationTree.id -> ComponentsNavigationTree
+            ComponentsBreadcrumbs.id -> ComponentsBreadcrumbs
+            ComponentsAccordions.id -> ComponentsAccordions
+            ComponentsTabs.id -> ComponentsTabs
+            ComponentsDialogs.id -> ComponentsDialogs
+            ComponentsDialogsOpen.id -> ComponentsDialogsOpen
             ComponentsFeedback.id -> ComponentsFeedback
             else -> Dashboard
         }
