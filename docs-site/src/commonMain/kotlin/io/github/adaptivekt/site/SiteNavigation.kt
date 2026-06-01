@@ -6,15 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveButton
@@ -39,10 +37,8 @@ internal fun SiteNavigation(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BasicText(
-            text = "AdaptiveKt",
-            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = SiteInk),
-        )
+        AdaptiveKtLogo(symbolSize = 34.dp, wordmarkSize = 18.sp)
+        Spacer(modifier = Modifier.width(16.dp))
         FlowRow(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),

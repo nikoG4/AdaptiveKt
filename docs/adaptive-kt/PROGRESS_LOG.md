@@ -1,3 +1,22 @@
+DOCSITE-BRAND-1 - AdaptiveKt Branding and Logo Assets
+=====================================================
+
+Status: Completed
+
+Date: 2026-06-01
+
+Summary:
+- Added a professional AdaptiveKt SVG symbol and wordmark variants for light, dark, and mono contexts.
+- Integrated the brand mark into the docs-site navbar, home hero, footer, favicon, and README.
+- Documented brand asset locations and usage in `docs/development/docs-site.md`.
+- Kept the implementation dependency-free and vector-first.
+
+Constraints preserved:
+- No Maven Central publishing.
+- No release, tag, or secrets.
+- No Material 3 or external dependencies.
+- No generated outputs committed.
+
 UX-FIX-1 - Mobile Demo Scroll and Sidebar Navigation Polish
 ===========================================================
 

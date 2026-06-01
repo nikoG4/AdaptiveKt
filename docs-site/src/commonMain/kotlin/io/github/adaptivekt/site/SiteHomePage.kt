@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,76 +39,98 @@ internal fun SiteHomePage(
     onOpenDocs: () -> Unit,
     onOpenDemo: () -> Unit,
 ) {
-    AdaptiveGrid(columns = 12, horizontalGap = 24.dp, verticalGap = 24.dp) {
-        item(span = 7) {
-            Column {
-                AdaptiveBadge("KMP/Wasm site", tone = AdaptiveBadgeTone.Info)
-                Spacer(modifier = Modifier.height(16.dp))
-                SiteText("AdaptiveKt", fontSize = 58.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(modifier = Modifier.height(10.dp))
-                SiteText(
-                    "Compose Multiplatform Admin UI Toolkit",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SiteAccent,
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(
-                    "Build adaptive admin dashboards, data views, forms, navigation shells, feedback states, and reusable components with one Compose codebase.",
-                    fontSize = 16.sp,
-                    color = SiteMuted,
-                    maxLines = 5,
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AdaptiveButton("View Demo", onClick = onOpenDemo)
-                    AdaptiveButton("Browse Components", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenComponents)
-                    AdaptiveButton("Read Docs", variant = AdaptiveButtonVariant.Ghost, onClick = onOpenDocs)
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val compact = maxWidth < 700.dp
+        val heroSpan = if (compact) 12 else 7
+        val previewSpan = if (compact) 12 else 5
+        val platformSpan = if (compact) 6 else 3
+        val featureSpan = if (compact) 12 else 4
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            AdaptiveGrid(columns = 12, horizontalGap = 24.dp, verticalGap = 24.dp) {
+                item(span = heroSpan) {
+                    Column {
+                        AdaptiveBadge("KMP/Wasm site", tone = AdaptiveBadgeTone.Info)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        AdaptiveKtLogo(
+                            symbolSize = if (compact) 54.dp else 62.dp,
+                            wordmarkSize = if (compact) 42.sp else 54.sp,
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        SiteText(
+                            "Compose Multiplatform Admin UI Toolkit",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SiteAccent,
+                            maxLines = if (compact) 2 else 1,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        SiteText(
+                            "Build adaptive admin dashboards, data views, forms, navigation shells, feedback states, and reusable components with one Compose codebase.",
+                            fontSize = 16.sp,
+                            color = SiteMuted,
+                            maxLines = 5,
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        if (compact) {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                AdaptiveButton("View Demo", onClick = onOpenDemo)
+                                AdaptiveButton("Browse Components", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenComponents)
+                                AdaptiveButton("Read Docs", variant = AdaptiveButtonVariant.Ghost, onClick = onOpenDocs)
+                            }
+                        } else {
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                AdaptiveButton("View Demo", onClick = onOpenDemo)
+                                AdaptiveButton("Browse Components", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenComponents)
+                                AdaptiveButton("Read Docs", variant = AdaptiveButtonVariant.Ghost, onClick = onOpenDocs)
+                            }
+                        }
+                    }
+                }
+                item(span = previewSpan) {
+                    DashboardPreview()
                 }
             }
-        }
-        item(span = 5) {
-            DashboardPreview()
-        }
-    }
 
-    Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
-    AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
-        listOf(
-            "Desktop" to "JVM demo and capture tooling",
-            "Android" to "Library targets enabled",
-            "iOS" to "Declared, pending macOS validation",
-            "Web/Wasm" to "Docs site and admin demo distribution",
-        ).forEach { (title, body) ->
-            item(span = 3) {
-                AdaptiveCard {
-                    SiteText(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SiteText(body, color = SiteMuted, maxLines = 3)
+            AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
+                listOf(
+                    "Desktop" to "JVM demo and capture tooling",
+                    "Android" to "Library targets enabled",
+                    "iOS" to "Declared, pending macOS validation",
+                    "Web/Wasm" to "Docs site and admin demo distribution",
+                ).forEach { (title, body) ->
+                    item(span = platformSpan) {
+                        AdaptiveCard {
+                            SiteText(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            SiteText(body, color = SiteMuted, maxLines = 3)
+                        }
+                    }
                 }
             }
-        }
-    }
 
-    Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
-    PageHeader(
-        eyebrow = "Features",
-        title = "Built from the real toolkit",
-        description = "This page is rendered by Compose Multiplatform/Wasm and uses AdaptiveKt components directly.",
-    )
-    Spacer(modifier = Modifier.height(20.dp))
-    AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
-        listOf(
-            "Layouts" to "AdaptiveContent, containers, and grid primitives.",
-            "Navigation" to "Admin shell primitives with responsive modes.",
-            "DataView" to "Cards on compact screens, table on wider screens.",
-            "Forms" to "Sections, fields, validation, and actions.",
-            "Feedback" to "Empty, loading, and error states.",
-            "Components" to "Buttons, badges, avatars, chips, fields, menus, and select.",
-        ).forEach { (title, body) ->
-            item(span = 4) { AdaptiveSurface { FeatureRow(title, body) } }
+            PageHeader(
+                eyebrow = "Features",
+                title = "Built from the real toolkit",
+                description = "This page is rendered by Compose Multiplatform/Wasm and uses AdaptiveKt components directly.",
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
+                listOf(
+                    "Layouts" to "AdaptiveContent, containers, and grid primitives.",
+                    "Navigation" to "Admin shell primitives with responsive modes.",
+                    "DataView" to "Cards on compact screens, table on wider screens.",
+                    "Forms" to "Sections, fields, validation, and actions.",
+                    "Feedback" to "Empty, loading, and error states.",
+                    "Components" to "Buttons, badges, avatars, chips, fields, menus, and select.",
+                ).forEach { (title, body) ->
+                    item(span = featureSpan) { AdaptiveSurface { FeatureRow(title, body) } }
+                }
+            }
         }
     }
 }

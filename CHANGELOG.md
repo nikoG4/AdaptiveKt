@@ -11,6 +11,7 @@
 - AdaptiveNavigationTree.
 - Animated feedback loading indicators.
 - Navigation item style and density defaults for pill, card and minimal sidebar rows.
+- AdaptiveKt SVG brand assets and docs-site logo integration.
 - Responsive layout, forms, data, navigation and feedback modules.
 - Docs-site and admin demo.
 - Visual verification tooling.

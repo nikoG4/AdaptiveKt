@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs-site/src/wasmJsMain/resources/assets/brand/adaptivekt-logo-dark.svg">
+  <img alt="AdaptiveKt" src="docs-site/src/wasmJsMain/resources/assets/brand/adaptivekt-logo-light.svg" width="312">
+</picture>
+
 # AdaptiveKt
 
 Compose Multiplatform admin UI toolkit for adaptive dashboards, data views, forms, navigation, feedback states, and shared UI components.

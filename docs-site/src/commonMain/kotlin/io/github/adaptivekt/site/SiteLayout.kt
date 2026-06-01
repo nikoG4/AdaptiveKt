@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -90,6 +91,8 @@ internal fun SiteLayout(
             ) {
                 content()
                 Spacer(modifier = Modifier.height(48.dp))
+                SiteFooter()
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -180,6 +183,25 @@ internal fun CodeBlock(code: String) {
             fontSize = 12.sp,
             monospace = true,
             maxLines = 12,
+        )
+    }
+}
+
+@Composable
+private fun SiteFooter() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.medium)
+            .border(1.dp, SiteLine, AdaptiveTheme.shapes.medium)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AdaptiveKtLogo(symbolSize = 32.dp, wordmarkSize = 18.sp)
+        SiteText(
+            text = "Adaptive UI primitives for Kotlin and Compose Multiplatform.",
+            color = SiteMuted,
+            maxLines = 2,
         )
     }
 }
