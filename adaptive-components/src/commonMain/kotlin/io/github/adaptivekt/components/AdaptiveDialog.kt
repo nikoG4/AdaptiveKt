@@ -50,6 +50,7 @@ public fun AdaptiveDialog(
         Box(
             modifier = Modifier
                 .widthIn(max = AdaptiveTokens.Widths.Form)
+                .heightIn(max = 560.dp)
                 .clip(AdaptiveComponentDefaults.MediumShape)
                 .background(AdaptiveComponentDefaults.Surface)
                 .border(1.dp, AdaptiveComponentDefaults.Border, AdaptiveComponentDefaults.MediumShape)
