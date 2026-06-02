@@ -84,7 +84,7 @@ internal fun SiteLayout(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .widthIn(max = 1360.dp)
                     .padding(horizontal = 24.dp, vertical = 28.dp),
             ) {

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -85,11 +87,11 @@ internal fun DocsShell(
                 SiteFooter()
             }
         } else {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = false)
                 Spacer(modifier = Modifier.height(28.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(22.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
@@ -97,11 +99,15 @@ internal fun DocsShell(
                         navGroups = navGroups,
                         selectedId = selectedId,
                         onSelectedIdChange = onSelectedIdChange,
-                        modifier = Modifier.width(238.dp),
+                        modifier = Modifier
+                            .width(238.dp)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
                     )
                     Column(
                         modifier = Modifier
                             .weight(1f)
+                            .fillMaxHeight()
                             .verticalScroll(rememberScrollState()),
                     ) {
                         content()
@@ -112,7 +118,10 @@ internal fun DocsShell(
                         DocsOnThisPage(
                             items = onThisPage,
                             compact = false,
-                            modifier = Modifier.width(210.dp),
+                            modifier = Modifier
+                                .width(210.dp)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState()),
                         )
                     }
                 }
