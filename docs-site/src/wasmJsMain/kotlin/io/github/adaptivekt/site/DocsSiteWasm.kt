@@ -1,6 +1,9 @@
 package io.github.adaptivekt.site
 
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.window
 
@@ -32,15 +35,39 @@ internal actual fun initialSiteDarkTheme(): Boolean {
         .any { it == "theme=dark" }
 }
 
-internal actual fun pushSiteRoute(route: SiteRoute, darkTheme: Boolean) {
+internal actual fun initialSiteHash(): String {
+    return window.location.hash.removePrefix("#")
+}
+
+internal actual fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkTheme: Boolean) {
     val base = siteBasePath()
     val nextPathBase = if (route == SiteRoute.Home) {
         base
     } else {
         base + route.path.trim('/')
     }
-    val nextPath = if (darkTheme) "$nextPathBase?theme=dark" else nextPathBase
-    window.history.pushState(null, route.label, nextPath)
+    val query = if (darkTheme) "?theme=dark" else ""
+    val hashPart = if (hash.isNotEmpty()) "#$hash" else ""
+    val nextPath = "$nextPathBase$query$hashPart"
+    
+    // Only push if the path actually changed to avoid stacking identical states
+    if (window.location.pathname + window.location.search + window.location.hash != nextPath) {
+        window.history.pushState(null, route.label, nextPath)
+    }
+}
+
+internal actual fun observeHistory(onHistoryChange: (SiteRoute, String) -> Unit): () -> Unit {
+    val listener: (org.w3c.dom.events.Event) -> Unit = {
+        onHistoryChange(initialSiteRoute(), initialSiteHash())
+    }
+    window.addEventListener("popstate", listener)
+    return {
+        window.removeEventListener("popstate", listener)
+    }
+}
+
+internal actual fun Modifier.docsClickableCursor(enabled: Boolean): Modifier {
+    return if (enabled) this.pointerHoverIcon(PointerIcon.Hand) else this
 }
 
 private fun siteBasePath(): String {

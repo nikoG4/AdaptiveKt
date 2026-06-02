@@ -28,9 +28,12 @@ import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.layout.AdaptiveGrid
 
 @Composable
-internal fun SiteDocsPage() {
+internal fun SiteDocsPage(
+    selectedHash: String,
+    onSelectedHashChange: (String) -> Unit,
+) {
     val topics = remember { docsTopics() }
-    var selectedId by remember { mutableStateOf("getting-started") }
+    val selectedId = selectedHash.ifEmpty { topics.first().id }
     val selected = topics.firstOrNull { it.id == selectedId } ?: topics.first()
     val navGroups = topics.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
@@ -45,8 +48,8 @@ internal fun SiteDocsPage() {
         description = "AdaptiveKt docs are written for public consumption: what each primitive does, how to use it, how it behaves responsively, and what is still intentionally pending.",
         navGroups = navGroups,
         selectedId = selected.id,
-        onSelectedIdChange = { selectedId = it },
-        onThisPage = listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
+        onSelectedIdChange = onSelectedHashChange,
+        onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
     ) {
         AdaptiveCard {
             AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)

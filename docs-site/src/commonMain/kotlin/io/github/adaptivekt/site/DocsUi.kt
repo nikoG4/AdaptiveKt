@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -58,22 +60,34 @@ internal fun DocsShell(
     navGroups: List<DocsNavGroup>,
     selectedId: String,
     onSelectedIdChange: (String) -> Unit,
-    onThisPage: List<String>,
+    onThisPage: List<String>?,
     content: @Composable () -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val compact = maxWidth < 880.dp
-        Column(modifier = Modifier.fillMaxWidth()) {
-            DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = compact)
-            Spacer(modifier = Modifier.height(if (compact) 20.dp else 28.dp))
-
-            if (compact) {
+        
+        if (compact) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = true)
+                Spacer(modifier = Modifier.height(20.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     DocsCompactNav(navGroups = navGroups, selectedId = selectedId, onSelectedIdChange = onSelectedIdChange)
-                    DocsOnThisPage(items = onThisPage, compact = true)
+                    if (!onThisPage.isNullOrEmpty()) {
+                        DocsOnThisPage(items = onThisPage, compact = true)
+                    }
                     content()
                 }
-            } else {
+                Spacer(modifier = Modifier.height(48.dp))
+                SiteFooter()
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = false)
+                Spacer(modifier = Modifier.height(28.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(22.dp),
@@ -85,10 +99,22 @@ internal fun DocsShell(
                         onSelectedIdChange = onSelectedIdChange,
                         modifier = Modifier.width(238.dp),
                     )
-                    Column(modifier = Modifier.weight(1f)) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
                         content()
+                        Spacer(modifier = Modifier.height(48.dp))
+                        SiteFooter()
                     }
-                    DocsOnThisPage(items = onThisPage, compact = false, modifier = Modifier.width(210.dp))
+                    if (!onThisPage.isNullOrEmpty()) {
+                        DocsOnThisPage(
+                            items = onThisPage,
+                            compact = false,
+                            modifier = Modifier.width(210.dp),
+                        )
+                    }
                 }
             }
         }
@@ -105,12 +131,21 @@ internal fun DocsHeroHeader(
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveBadge(text = eyebrow, tone = AdaptiveBadgeTone.Info)
         Spacer(modifier = Modifier.height(12.dp))
-        SiteText(
+        val primary = AdaptiveTheme.colors.primary
+        val info = AdaptiveTheme.colors.info
+        val success = AdaptiveTheme.colors.success
+        BasicText(
             text = title,
-            fontSize = if (compact) 34.sp else 48.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = SiteInk,
+            style = TextStyle(
+                fontSize = if (compact) 34.sp else 48.sp,
+                lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
+                fontWeight = FontWeight.ExtraBold,
+                brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                    colors = listOf(primary, info, success)
+                ),
+            ),
             maxLines = if (compact) 4 else 2,
+            overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(10.dp))
         SiteText(
@@ -190,6 +225,7 @@ private fun DocsNavButton(
             .clip(shape)
             .background(background, shape)
             .border(1.dp, border, shape)
+            .docsClickableCursor()
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 9.dp),
         style = TextStyle(
@@ -312,14 +348,20 @@ internal fun DocsCodeBlock(
                 text = title,
                 style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFCBD5E1)),
             )
-            AdaptiveButton(
-                text = if (copied) "Copied" else "Copy",
-                size = AdaptiveButtonSize.Small,
-                variant = AdaptiveButtonVariant.Secondary,
+            AdaptiveIconButton(
                 onClick = {
                     requestCopyToClipboard(code.trimIndent())
                     copied = true
                 },
+                size = 32.dp,
+                content = {
+                    androidx.compose.foundation.Image(
+                        imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
+                        contentDescription = if (copied) "Copied" else "Copy code",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                        modifier = Modifier.size(16.dp).docsClickableCursor()
+                    )
+                }
             )
         }
         Box(

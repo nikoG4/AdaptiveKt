@@ -11,6 +11,10 @@ internal expect fun openSiteUrl(url: String)
 
 internal expect fun initialSiteRoute(): SiteRoute
 
+internal expect fun initialSiteHash(): String
+
 internal expect fun initialSiteDarkTheme(): Boolean
 
-internal expect fun pushSiteRoute(route: SiteRoute, darkTheme: Boolean)
+internal expect fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkTheme: Boolean)
+
+internal expect fun observeHistory(onHistoryChange: (SiteRoute, String) -> Unit): () -> Unit

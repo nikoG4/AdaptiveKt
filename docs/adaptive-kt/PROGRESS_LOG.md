@@ -879,3 +879,18 @@ Constraints preserved:
 - No component code changes.
 - No public API changes.
 - No `settings.gradle.kts` changes.
+
+DOCSITE-PRO-3 - Public Documentation UX Polish
+=============================================
+
+Status: Completed
+
+Changes:
+- Implemented SiteNavigationController logic abstracting hash routing and Web History API (popstate). Browser Back and Forward now work internally.
+- Implemented independent vertical scrolling on Desktop for Sidebar, Content, and TOC.
+- Made TOC dynamic per component.
+- Created custom SVG iconography (DocsIcons: Copy, Check, GitHub, Sun, Moon).
+- Created custom pointer icon modifier (docsClickableCursor) to display a hand cursor on clickable elements.
+- Added subtle gradient to Hero using AdaptiveTheme accent colors.
+- Ensured Mobile retains single-column layout with standard global touch scroll.
+

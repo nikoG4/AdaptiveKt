@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
+import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
@@ -53,17 +55,29 @@ internal fun SiteNavigation(
                     onClick = { onNavigate(item) },
                 )
             }
-            AdaptiveButton(
-                text = if (darkTheme) "Light" else "Dark",
-                size = AdaptiveButtonSize.Small,
-                variant = AdaptiveButtonVariant.Secondary,
+            AdaptiveIconButton(
                 onClick = onThemeToggle,
+                size = 32.dp,
+                content = {
+                    androidx.compose.foundation.Image(
+                        imageVector = if (darkTheme) DocsIcons.Moon else DocsIcons.Sun,
+                        contentDescription = if (darkTheme) "Switch to light theme" else "Switch to dark theme",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                        modifier = Modifier.size(18.dp).docsClickableCursor()
+                    )
+                }
             )
-            AdaptiveButton(
-                text = "GitHub",
-                size = AdaptiveButtonSize.Small,
-                variant = AdaptiveButtonVariant.Secondary,
+            AdaptiveIconButton(
                 onClick = { openSiteUrl("https://github.com/nikoG4/AdaptiveKt") },
+                size = 32.dp,
+                content = {
+                    androidx.compose.foundation.Image(
+                        imageVector = DocsIcons.GitHub,
+                        contentDescription = "GitHub",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                        modifier = Modifier.size(18.dp).docsClickableCursor()
+                    )
+                }
             )
         }
     }

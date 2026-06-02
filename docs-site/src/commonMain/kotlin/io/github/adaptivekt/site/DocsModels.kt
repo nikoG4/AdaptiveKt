@@ -41,12 +41,21 @@ internal data class ComponentDoc(
     val responsiveNotes: List<String> = emptyList(),
     val accessibilityNotes: List<String> = emptyList(),
     val limitations: List<String> = emptyList(),
-)
+) {
+    val tocItems: List<String> get() = buildList {
+        add("Overview")
+        add("Basic usage")
+        if (parameters.isNotEmpty()) add("Parameters")
+        if (variants.isNotEmpty()) add("Examples and variants")
+        add("Behavior notes")
+    }
+}
 
 internal data class DocsTopic(
     val id: String,
     val family: String,
     val title: String,
     val summary: String,
+    val tocItems: List<String>? = null,
     val content: @Composable () -> Unit,
 )

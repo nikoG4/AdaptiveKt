@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +58,12 @@ internal fun SiteHomePage(
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val compact = maxWidth < 760.dp
 
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(44.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(44.dp)
+        ) {
             AdaptiveGrid(columns = 12, horizontalGap = 26.dp, verticalGap = 26.dp) {
                 item(span = if (compact) 12 else 7) {
                     HomeHeroText(
@@ -74,6 +81,7 @@ internal fun SiteHomePage(
             HomeInstallSection(compact = compact)
             HomeFeatureSection(compact = compact)
             HomeWhySection(compact = compact, onOpenDocs = onOpenDocs)
+            SiteFooter()
         }
     }
 }

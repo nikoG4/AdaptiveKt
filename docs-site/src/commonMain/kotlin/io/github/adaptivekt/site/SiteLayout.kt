@@ -79,8 +79,7 @@ internal fun SiteLayout(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
+                .weight(1f),
             contentAlignment = Alignment.TopCenter,
         ) {
             Column(
@@ -90,9 +89,6 @@ internal fun SiteLayout(
                     .padding(horizontal = 24.dp, vertical = 28.dp),
             ) {
                 content()
-                Spacer(modifier = Modifier.height(48.dp))
-                SiteFooter()
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -188,7 +184,7 @@ internal fun CodeBlock(code: String) {
 }
 
 @Composable
-private fun SiteFooter() {
+internal fun SiteFooter() {
     Column(
         modifier = Modifier
             .fillMaxWidth()

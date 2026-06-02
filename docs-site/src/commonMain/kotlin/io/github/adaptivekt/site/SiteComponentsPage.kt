@@ -77,9 +77,12 @@ import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 
 @Composable
-internal fun SiteComponentsPage() {
+internal fun SiteComponentsPage(
+    selectedHash: String,
+    onSelectedHashChange: (String) -> Unit,
+) {
     val docs = remember { componentDocs() }
-    var selectedId by remember { mutableStateOf("adaptive-button") }
+    val selectedId = selectedHash.ifEmpty { docs.first().id }
     val selected = docs.firstOrNull { it.id == selectedId } ?: docs.first()
     val navGroups = docs.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
@@ -94,8 +97,8 @@ internal fun SiteComponentsPage() {
         description = "Browse the AdaptiveKt public component surface. Every page shows what the component is for, a real rendered example, copyable code, parameters, variants and usage notes.",
         navGroups = navGroups,
         selectedId = selected.id,
-        onSelectedIdChange = { selectedId = it },
-        onThisPage = listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Responsive", "Accessibility", "Limitations"),
+        onSelectedIdChange = onSelectedHashChange,
+        onThisPage = selected.tocItems,
     ) {
         ComponentDocArticle(selected)
     }
