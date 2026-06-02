@@ -44,7 +44,7 @@ internal actual fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkThe
     val nextPathBase = if (route == SiteRoute.Home) {
         base
     } else {
-        base + route.path.trim('/')
+        base + route.path.trim('/') + "/"
     }
     val query = if (darkTheme) "?theme=dark" else ""
     val hashPart = if (hash.isNotEmpty()) "#$hash" else ""
@@ -71,9 +71,9 @@ internal actual fun Modifier.docsClickableCursor(enabled: Boolean): Modifier {
 }
 
 private fun siteBasePath(): String {
-    val path = window.location.pathname
+    val path = window.location.pathname.trimEnd('/') + "/"
     listOf("/components/", "/docs/", "/demo/").forEach { suffix ->
         if (path.endsWith(suffix)) return path.removeSuffix(suffix) + "/"
     }
-    return if (path.endsWith("/")) path else path.substringBeforeLast('/', missingDelimiterValue = "") + "/"
+    return path
 }
