@@ -66,6 +66,7 @@ internal fun DocsShell(
     selectedId: String,
     onSelectedIdChange: (String) -> Unit,
     onThisPage: List<String>?,
+    onTocItemClick: ((String) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -85,7 +86,7 @@ internal fun DocsShell(
                         DocsOnThisPage(
                             items = onThisPage, 
                             compact = true,
-                            onItemClick = { onSelectedIdChange(it.lowercase().replace(" ", "-")) }
+                            onItemClick = { onTocItemClick?.invoke(it) }
                         )
                     }
                     content()
@@ -125,7 +126,7 @@ internal fun DocsShell(
                         DocsOnThisPage(
                             items = onThisPage,
                             compact = false,
-                            onItemClick = { onSelectedIdChange(it.lowercase().replace(" ", "-")) },
+                            onItemClick = { onTocItemClick?.invoke(it) },
                             modifier = Modifier
                                 .width(210.dp)
                                 .fillMaxHeight()

@@ -99,6 +99,7 @@ internal fun SiteComponentsPage(
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
         onThisPage = selected.tocItems,
+        onTocItemClick = { /* TOC clicks are currently for local focal feedback only; they do not touch the primary route */ },
     ) {
         ComponentDocArticle(selected)
     }

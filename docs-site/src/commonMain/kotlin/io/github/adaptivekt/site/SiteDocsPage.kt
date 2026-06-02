@@ -50,6 +50,7 @@ internal fun SiteDocsPage(
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
         onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
+        onTocItemClick = { /* Local focal navigation only; preserves primary route */ },
     ) {
         AdaptiveCard {
             AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
