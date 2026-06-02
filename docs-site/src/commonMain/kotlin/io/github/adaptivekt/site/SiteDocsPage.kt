@@ -172,12 +172,15 @@ AdaptiveGrid(columns = 12) {
 }
                     """,
                 ) {
-                    AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
-                        listOf("Compact" to "1 column", "Expanded" to "2-4 columns").forEach { (title, body) ->
-                            item(span = 6) {
-                                AdaptiveCard {
-                                    SiteText(title, fontWeight = FontWeight.Bold)
-                                    SiteText(body, color = SiteMuted)
+                    androidx.compose.foundation.layout.BoxWithConstraints {
+                        val compact = maxWidth < 600.dp
+                        AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
+                            listOf("Compact" to "1 column", "Expanded" to "2-4 columns").forEach { (title, body) ->
+                                item(span = if (compact) 12 else 6) {
+                                    AdaptiveCard {
+                                        SiteText(title, fontWeight = FontWeight.Bold)
+                                        SiteText(body, color = SiteMuted)
+                                    }
                                 }
                             }
                         }
@@ -238,17 +241,20 @@ AdaptiveGrid(columns = 12) {
 ./tools/capture-admin-demo.ps1 -Theme both
                 """,
             )
-            AdaptiveGrid(columns = 12, horizontalGap = 12.dp, verticalGap = 12.dp) {
-                listOf(
-                    "Home compact" to "Checks hero, install block and navbar.",
-                    "Components compact" to "Checks one-column docs and code blocks.",
-                    "Components dark" to "Checks contrast and selected states.",
-                    "Demo app" to "Checks the real admin UI remains usable.",
-                ).forEach { (title, body) ->
-                    item(span = 6) {
-                        AdaptiveCard {
-                            SiteText(title, fontWeight = FontWeight.Bold)
-                            SiteText(body, color = SiteMuted, maxLines = 4)
+            androidx.compose.foundation.layout.BoxWithConstraints {
+                val compact = maxWidth < 600.dp
+                AdaptiveGrid(columns = 12, horizontalGap = 12.dp, verticalGap = 12.dp) {
+                    listOf(
+                        "Home compact" to "Checks hero, install block and navbar.",
+                        "Components compact" to "Checks one-column docs and code blocks.",
+                        "Components dark" to "Checks contrast and selected states.",
+                        "Demo app" to "Checks the real admin UI remains usable.",
+                    ).forEach { (title, body) ->
+                        item(span = if (compact) 12 else 6) {
+                            AdaptiveCard {
+                                SiteText(title, fontWeight = FontWeight.Bold)
+                                SiteText(body, color = SiteMuted, maxLines = 4)
+                            }
                         }
                     }
                 }

@@ -31,19 +31,22 @@ internal fun SiteDemoPage() {
         )
     }
     Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
-    AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
-        listOf("Dashboard", "Employees", "Products", "Invoices", "Settings", "UI Kit").forEach { screen ->
-            item(span = 4) {
-                AdaptiveCard {
-                    SiteText(screen, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
-                    SiteText("Available in the complete admin demo.", color = SiteMuted)
-                    Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-                    AdaptiveButton(
-                        text = "Open",
-                        variant = AdaptiveButtonVariant.Secondary,
-                        onClick = { openSiteUrl("demo/app/?screen=${screen.lowercase().replace(" ", "-")}") },
-                    )
+    androidx.compose.foundation.layout.BoxWithConstraints {
+        val compact = maxWidth < 600.dp
+        AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
+            listOf("Dashboard", "Employees", "Products", "Invoices", "Settings", "UI Kit").forEach { screen ->
+                item(span = if (compact) 12 else 4) {
+                    AdaptiveCard {
+                        SiteText(screen, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+                        SiteText("Available in the complete admin demo.", color = SiteMuted)
+                        Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
+                        AdaptiveButton(
+                            text = "Open",
+                            variant = AdaptiveButtonVariant.Secondary,
+                            onClick = { openSiteUrl("demo/app/?screen=${screen.lowercase().replace(" ", "-")}") },
+                        )
+                    }
                 }
             }
         }

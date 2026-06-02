@@ -141,76 +141,81 @@ private fun HomeProductPreview() {
     var slide by remember { mutableStateOf(0) }
 
     AdaptiveCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        BoxWithConstraints {
+            val compact = maxWidth < 600.dp
             Column {
-                SiteText("Admin workspace", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                SiteText("Live AdaptiveKt preview", color = SiteMuted, maxLines = 2)
-            }
-            AdaptiveBadge("Stable", tone = AdaptiveBadgeTone.Success)
-        }
-        Spacer(modifier = Modifier.height(18.dp))
-        AdaptiveTabs(
-            tabs = listOf("Overview", "Forms", "Data"),
-            selectedTab = tab,
-            onTabSelected = { tab = it },
-            tabLabel = { it },
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        AdaptiveGrid(columns = 12, horizontalGap = 12.dp, verticalGap = 12.dp) {
-            listOf("Revenue" to "$42k", "Users" to "1,284", "SLA" to "99.9%", "Open" to "37").forEach { (label, value) ->
-                item(span = 6) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 84.dp)
-                            .background(AdaptiveTheme.colors.surfaceMuted, RoundedCornerShape(10.dp))
-                            .border(1.dp, SiteLine, RoundedCornerShape(10.dp))
-                            .padding(12.dp),
-                    ) {
-                        Column {
-                            SiteText(label, color = SiteMuted, fontSize = 12.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            SiteText(value, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column {
+                        SiteText("Admin workspace", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        SiteText("Live AdaptiveKt preview", color = SiteMuted, maxLines = 2)
+                    }
+                    AdaptiveBadge("Stable", tone = AdaptiveBadgeTone.Success)
+                }
+                Spacer(modifier = Modifier.height(18.dp))
+                AdaptiveTabs(
+                    tabs = listOf("Overview", "Forms", "Data"),
+                    selectedTab = tab,
+                    onTabSelected = { tab = it },
+                    tabLabel = { it },
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AdaptiveGrid(columns = 12, horizontalGap = 12.dp, verticalGap = 12.dp) {
+                    listOf("Revenue" to "$42k", "Users" to "1,284", "SLA" to "99.9%", "Open" to "37").forEach { (label, value) ->
+                        item(span = if (compact) 12 else 6) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 84.dp)
+                                    .background(AdaptiveTheme.colors.surfaceMuted, RoundedCornerShape(10.dp))
+                                    .border(1.dp, SiteLine, RoundedCornerShape(10.dp))
+                                    .padding(12.dp),
+                            ) {
+                                Column {
+                                    SiteText(label, color = SiteMuted, fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    SiteText(value, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        AdaptiveTextField(value = "AdaptiveKt Inc.", onValueChange = {}, label = "Workspace")
-        Spacer(modifier = Modifier.height(12.dp))
-        AdaptiveSelect(
-            options = listOf("Active", "Pending", "Paused"),
-            selectedOption = selectedStatus,
-            onOptionSelected = { selectedStatus = it ?: "Active" },
-            optionLabel = { it },
-            label = "Status",
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        AdaptiveMultiSelect(
-            options = listOf("Platform", "Design", "Support", "Finance"),
-            selectedOptions = selectedTeams,
-            onSelectedOptionsChange = { selectedTeams = it },
-            optionLabel = { it },
-            label = "Teams",
-            maxVisibleChips = 2,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        AdaptiveCarousel(
-            items = listOf("Ship admin screens", "Document components", "Verify visually"),
-            selectedIndex = slide,
-            onSelectedIndexChange = { slide = it },
-        ) { item, index ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                AdaptiveAvatar(name = item, size = 36.dp)
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    SiteText(item, fontWeight = FontWeight.Bold, maxLines = 2)
-                    SiteText("Step ${index + 1} of the toolkit workflow", color = SiteMuted, maxLines = 2)
+                Spacer(modifier = Modifier.height(16.dp))
+                AdaptiveTextField(value = "AdaptiveKt Inc.", onValueChange = {}, label = "Workspace")
+                Spacer(modifier = Modifier.height(12.dp))
+                AdaptiveSelect(
+                    options = listOf("Active", "Pending", "Paused"),
+                    selectedOption = selectedStatus,
+                    onOptionSelected = { selectedStatus = it ?: "Active" },
+                    optionLabel = { it },
+                    label = "Status",
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                AdaptiveMultiSelect(
+                    options = listOf("Platform", "Design", "Support", "Finance"),
+                    selectedOptions = selectedTeams,
+                    onSelectedOptionsChange = { selectedTeams = it },
+                    optionLabel = { it },
+                    label = "Teams",
+                    maxVisibleChips = if (compact) 1 else 2,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AdaptiveCarousel(
+                    items = listOf("Ship admin screens", "Document components", "Verify visually"),
+                    selectedIndex = slide,
+                    onSelectedIndexChange = { slide = it },
+                ) { item, index ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AdaptiveAvatar(name = item, size = 36.dp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            SiteText(item, fontWeight = FontWeight.Bold, maxLines = 2)
+                            SiteText("Step ${index + 1} of the toolkit workflow", color = SiteMuted, maxLines = 2)
+                        }
+                    }
                 }
             }
         }

@@ -678,10 +678,13 @@ AdaptiveMultiSelect(
             "Each state has a sensible default visual treatment.",
             """EmptyState("No results", description = "Try another filter.")""",
         ) {
-            AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
-                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
-                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots) } }
-                item(span = 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
+            androidx.compose.foundation.layout.BoxWithConstraints {
+                val compact = maxWidth < 600.dp
+                AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots) } }
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
+                }
             }
         },
         parameters = listOf(
