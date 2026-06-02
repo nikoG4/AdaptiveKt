@@ -165,25 +165,6 @@ internal fun FeatureRow(title: String, body: String) {
 }
 
 @Composable
-internal fun CodeBlock(code: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF0F172A))
-            .border(1.dp, Color(0xFF1E293B))
-            .padding(AdaptiveTokens.Spacing.Medium),
-    ) {
-        SiteText(
-            text = code.trimIndent(),
-            color = Color(0xFFE2E8F0),
-            fontSize = 12.sp,
-            monospace = true,
-            maxLines = 12,
-        )
-    }
-}
-
-@Composable
 internal fun SiteFooter() {
     Column(
         modifier = Modifier

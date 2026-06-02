@@ -127,15 +127,16 @@ private fun HomeHeroText(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            AdaptiveButton("Get started", onClick = onOpenDocs)
-            AdaptiveButton("Browse docs", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenDocs)
-            AdaptiveButton("View components", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenComponents)
-            AdaptiveButton("Open demo", variant = AdaptiveButtonVariant.Ghost, onClick = onOpenDemo)
+            AdaptiveButton("Get started", onClick = onOpenDocs, modifier = Modifier.docsClickableCursor())
+            AdaptiveButton("Browse docs", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenDocs, modifier = Modifier.docsClickableCursor())
+            AdaptiveButton("View components", variant = AdaptiveButtonVariant.Secondary, onClick = onOpenComponents, modifier = Modifier.docsClickableCursor())
+            AdaptiveButton("Open demo", variant = AdaptiveButtonVariant.Ghost, onClick = onOpenDemo, modifier = Modifier.docsClickableCursor())
             AdaptiveButton(
                 text = "GitHub",
                 variant = AdaptiveButtonVariant.Ghost,
                 trailingIcon = { AdaptiveIcons.ChevronRight(size = 15.dp, tint = AdaptiveTheme.colors.textPrimary) },
                 onClick = { openSiteUrl("https://github.com/nikoG4/AdaptiveKt") },
+                modifier = Modifier.docsClickableCursor()
             )
         }
     }
@@ -335,7 +336,7 @@ private fun HomeWhySection(compact: Boolean, onOpenDocs: () -> Unit) {
                         "Explicit docs with rendered examples",
                     ).forEach { AdaptiveChip(it, tone = AdaptiveChipTone.Primary, selected = true) }
                     Spacer(modifier = Modifier.height(4.dp))
-                    AdaptiveButton("Start with the docs", onClick = onOpenDocs)
+                    AdaptiveButton("Start with the docs", onClick = onOpenDocs, modifier = Modifier.docsClickableCursor())
                 }
             }
         }

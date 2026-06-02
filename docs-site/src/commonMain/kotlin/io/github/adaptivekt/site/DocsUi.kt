@@ -54,6 +54,9 @@ import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+
 @Composable
 internal fun DocsShell(
     eyebrow: String,
@@ -79,7 +82,11 @@ internal fun DocsShell(
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     DocsCompactNav(navGroups = navGroups, selectedId = selectedId, onSelectedIdChange = onSelectedIdChange)
                     if (!onThisPage.isNullOrEmpty()) {
-                        DocsOnThisPage(items = onThisPage, compact = true)
+                        DocsOnThisPage(
+                            items = onThisPage, 
+                            compact = true,
+                            onItemClick = { onSelectedIdChange(it.lowercase().replace(" ", "-")) }
+                        )
                     }
                     content()
                 }
@@ -118,10 +125,12 @@ internal fun DocsShell(
                         DocsOnThisPage(
                             items = onThisPage,
                             compact = false,
+                            onItemClick = { onSelectedIdChange(it.lowercase().replace(" ", "-")) },
                             modifier = Modifier
                                 .width(210.dp)
                                 .fillMaxHeight()
-                                .verticalScroll(rememberScrollState()),
+                                .verticalScroll(rememberScrollState())
+                                .padding(start = 8.dp),
                         )
                     }
                 }
@@ -212,6 +221,7 @@ private fun DocsCompactNav(
                     selected = item.id == selectedId,
                     tone = if (item.id == selectedId) AdaptiveChipTone.Primary else AdaptiveChipTone.Neutral,
                     onClick = { onSelectedIdChange(item.id) },
+                    modifier = Modifier.docsClickableCursor()
                 )
             }
         }
@@ -251,6 +261,7 @@ private fun DocsNavButton(
 internal fun DocsOnThisPage(
     items: List<String>,
     compact: Boolean,
+    onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AdaptiveSurface(modifier = modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(14.dp)) {
@@ -261,11 +272,27 @@ internal fun DocsOnThisPage(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items.forEach { AdaptiveBadge(it, tone = AdaptiveBadgeTone.Neutral) }
+                    items.forEach { item ->
+                        AdaptiveBadge(
+                            text = item, 
+                            tone = AdaptiveBadgeTone.Neutral,
+                            modifier = Modifier
+                                .docsClickableCursor()
+                                .clickable { onItemClick(item) }
+                        )
+                    }
                 }
             } else {
                 items.forEach { item ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(AdaptiveTheme.shapes.small)
+                            .docsClickableCursor()
+                            .clickable { onItemClick(item) }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
                                 .width(6.dp)
@@ -337,6 +364,14 @@ internal fun DocsCodeBlock(
     title: String = "Kotlin",
 ) {
     var copied by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(copied) {
+        if (copied) {
+            delay(2000)
+            copied = false
+        }
+    }
+    
     val shape = RoundedCornerShape(10.dp)
     Column(
         modifier = Modifier
@@ -363,12 +398,13 @@ internal fun DocsCodeBlock(
                     copied = true
                 },
                 size = 32.dp,
+                modifier = Modifier.docsClickableCursor(),
                 content = {
                     androidx.compose.foundation.Image(
                         imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
                         contentDescription = if (copied) "Copied" else "Copy code",
                         colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(16.dp).docsClickableCursor()
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             )

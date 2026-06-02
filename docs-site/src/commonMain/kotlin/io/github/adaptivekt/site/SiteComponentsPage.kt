@@ -129,7 +129,7 @@ AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
                 AdaptiveCard {
                     SiteText("Themed surface", fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    AdaptiveButton("Action", onClick = {})
+                    AdaptiveButton("Action", onClick = {}, modifier = Modifier.docsClickableCursor())
                 }
             }
         },
@@ -171,7 +171,7 @@ AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
             "The default button is intentionally ready to use without custom modifiers.",
             """AdaptiveButton("Save changes", onClick = { save() })""",
         ) {
-            AdaptiveButton("Save changes", onClick = {})
+            AdaptiveButton("Save changes", onClick = {}, modifier = Modifier.docsClickableCursor())
         },
         parameters = listOf(
             ComponentParameter("text", "String", "required", true, "Visible label."),
@@ -192,9 +192,9 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
                 """,
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AdaptiveButton("New", leadingIcon = { AdaptiveIcons.Plus(size = 15.dp, tint = AdaptiveTheme.colors.textInverse) }, onClick = {})
-                    AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {})
-                    AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
+                    AdaptiveButton("New", leadingIcon = { AdaptiveIcons.Plus(size = 15.dp, tint = AdaptiveTheme.colors.textInverse) }, onClick = {}, modifier = Modifier.docsClickableCursor())
+                    AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Secondary, onClick = {}, modifier = Modifier.docsClickableCursor())
+                    AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {}, modifier = Modifier.docsClickableCursor())
                 }
             },
         ),
@@ -716,15 +716,20 @@ AdaptiveMultiSelect(
         ) {
             var showDialog by remember { mutableStateOf(false) }
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AdaptiveAccordion(title = "Account settings", subtitle = "Manage preferences", defaultExpanded = true) {
-                    AdaptiveButton("Open dialog", onClick = { showDialog = true })
+                AdaptiveAccordion(
+                    title = "Account settings", 
+                    subtitle = "Manage preferences", 
+                    defaultExpanded = true,
+                    modifier = Modifier.docsClickableCursor()
+                ) {
+                    AdaptiveButton("Open dialog", onClick = { showDialog = true }, modifier = Modifier.docsClickableCursor())
                 }
                 if (showDialog) {
                     AdaptiveDialog(
                         onDismissRequest = { showDialog = false },
                         title = "Confirm action",
-                        dismissButton = { AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false }) },
-                        confirmButton = { AdaptiveButton("Confirm", onClick = { showDialog = false }) },
+                        dismissButton = { AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false }, modifier = Modifier.docsClickableCursor()) },
+                        confirmButton = { AdaptiveButton("Confirm", onClick = { showDialog = false }, modifier = Modifier.docsClickableCursor()) },
                     ) {
                         SiteText("Dialog content for confirmation flows.", maxLines = 3)
                     }
