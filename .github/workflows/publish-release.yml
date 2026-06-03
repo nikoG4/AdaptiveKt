@@ -97,8 +97,31 @@ jobs:
           print(value, end="")
           PY
 
-          if grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$raw_key"; then
-            cp "$raw_key" "$normalized_key"
+          extract_armor() {
+            local source_file="$1"
+            local output_file="$2"
+            SOURCE_FILE="$source_file" OUTPUT_FILE="$output_file" python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          begin = "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+          end = "-----END PGP PRIVATE KEY BLOCK-----"
+          source = Path(os.environ["SOURCE_FILE"])
+          output = Path(os.environ["OUTPUT_FILE"])
+
+          text = source.read_text(errors="ignore")
+          start = text.find(begin)
+          finish = text.find(end, start if start >= 0 else 0)
+          if start < 0 or finish < 0:
+              raise SystemExit(1)
+
+          finish += len(end)
+          output.write_text(text[start:finish].strip() + "\n")
+          PY
+          }
+
+          if extract_armor "$raw_key" "$normalized_key"; then
+            :
           else
             if ! base64 --decode < "$raw_key" > "$decoded_key" 2>/dev/null; then
               base64 -D < "$raw_key" > "$decoded_key"
@@ -119,8 +142,8 @@ jobs:
               path.write_text(text)
           PY
 
-            if grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$decoded_key"; then
-              cp "$decoded_key" "$normalized_key"
+            if extract_armor "$decoded_key" "$normalized_key"; then
+              :
             else
               export GNUPGHOME="$RUNNER_TEMP/adaptivekt-gnupg"
               mkdir -p "$GNUPGHOME"
