@@ -46,11 +46,12 @@ These values must not be committed to the repository.
 ## How signing is activated
 
 - The Gradle build reads `signingInMemoryKey` and `signingInMemoryKeyPassword`.
+- The Gradle build can also read `signingInMemoryKeyFile` and load the ASCII-armored key from that temporary file.
 - Signing is enabled only when both properties are present.
 - If signing keys are missing, local build and local publishing continue to work.
 - The build does not require signing for local `publishAllPublicationsToLocalTestRepository`.
 - The release workflow normalizes `SIGNINGINMEMORYKEY` before invoking Gradle. It accepts an ASCII-armored private key directly, base64-encoded ASCII armor, or a base64-encoded secret keyring that can be imported and re-exported as ASCII armor in the temporary runner environment.
-- Gradle still receives only the ASCII-armored in-memory key format required by `useInMemoryPgpKeys`.
+- Gradle receives the normalized ASCII-armored key via `signingInMemoryKeyFile`, avoiding multi-line secret values in `$GITHUB_ENV`.
 
 ## Manual publish workflow
 

@@ -71,7 +71,10 @@ subprojects {
             from(layout.buildDirectory.dir("generated/javadoc-placeholder"))
         }
 
-        val signingInMemoryKey = providers.gradleProperty("signingInMemoryKey")
+        val signingInMemoryKeyFile = providers.gradleProperty("signingInMemoryKeyFile")
+        val signingInMemoryKey = signingInMemoryKeyFile
+            .map { file(it).readText() }
+            .orElse(providers.gradleProperty("signingInMemoryKey"))
         val signingInMemoryKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword")
         val hasSigningKeys = signingInMemoryKey.isPresent && signingInMemoryKeyPassword.isPresent
 

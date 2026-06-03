@@ -111,20 +111,14 @@ jobs:
             exit 1
           fi
 
-          {
-            echo 'ORG_GRADLE_PROJECT_signingInMemoryKey<<ADAPTIVEKT_SIGNING_KEY'
-            cat "$normalized_key"
-            echo 'ADAPTIVEKT_SIGNING_KEY'
-            echo 'ORG_GRADLE_PROJECT_signingInMemoryKeyPassword<<ADAPTIVEKT_SIGNING_PASSWORD'
-            printf '%s\n' "$SIGNING_KEY_PASSWORD"
-            echo 'ADAPTIVEKT_SIGNING_PASSWORD'
-          } >> "$GITHUB_ENV"
+          echo "ORG_GRADLE_PROJECT_signingInMemoryKeyFile=$normalized_key" >> "$GITHUB_ENV"
+          echo "ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=$SIGNING_KEY_PASSWORD" >> "$GITHUB_ENV"
 
       - name: Validate release secrets are present
         run: |
           missing=0
-          if [ -z "$ORG_GRADLE_PROJECT_signingInMemoryKey" ]; then
-            echo "Missing SIGNINGINMEMORYKEY secret."
+          if [ -z "$ORG_GRADLE_PROJECT_signingInMemoryKeyFile" ]; then
+            echo "Missing normalized signing key file."
             missing=1
           fi
           if [ -z "$ORG_GRADLE_PROJECT_signingInMemoryKeyPassword" ]; then
