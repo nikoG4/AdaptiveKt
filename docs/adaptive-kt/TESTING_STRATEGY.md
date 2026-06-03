@@ -51,7 +51,7 @@ Because Compose Multiplatform does not yet support fully reliable cross-platform
 - `rememberAdaptiveInfo()` breakpoint mapping from width values.
 - `adaptiveValue(...)` resolution across all breakpoint combinations.
 - `AdaptiveVisibility` with inclusive/exclusive sets.
-- state-driven rendering of `EmptyState`, `LoadingState`, and `ErrorState`.
+- state-driven rendering of `AdaptiveEmptyState`, `AdaptiveLoadingState`, and `AdaptiveErrorState`.
 
 ### adaptiveValue fallback expectations
 

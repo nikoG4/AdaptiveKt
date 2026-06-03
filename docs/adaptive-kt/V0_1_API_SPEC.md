@@ -415,11 +415,11 @@ fun <T> AdaptiveDataView(
 
 ## adaptive-feedback
 
-### EmptyState
+### AdaptiveEmptyState
 
 ```kotlin
 @Composable
-fun EmptyState(
+fun AdaptiveEmptyState(
     modifier: Modifier = Modifier,
     title: String,
     message: String,
@@ -427,21 +427,21 @@ fun EmptyState(
 )
 ```
 
-### LoadingState
+### AdaptiveLoadingState
 
 ```kotlin
 @Composable
-fun LoadingState(
+fun AdaptiveLoadingState(
     modifier: Modifier = Modifier,
     message: String? = null,
 )
 ```
 
-### ErrorState
+### AdaptiveErrorState
 
 ```kotlin
 @Composable
-fun ErrorState(
+fun AdaptiveErrorState(
     modifier: Modifier = Modifier,
     title: String = "Error",
     message: String,
@@ -471,7 +471,7 @@ fun ErrorState(
 - Mobile: drawer/hamburger navigation, card-based lists, 1-column forms.
 - Use `AdaptiveDataView` for lists.
 - Use `AdaptiveFormLayout` for forms.
-- Use `EmptyState`, `LoadingState`, `ErrorState` for data states.
+- Use `AdaptiveEmptyState`, `AdaptiveLoadingState`, `AdaptiveErrorState` for data states.
 
 ### Demo structure example
 

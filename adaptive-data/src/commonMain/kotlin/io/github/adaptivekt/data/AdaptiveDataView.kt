@@ -48,9 +48,9 @@ import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
-import io.github.adaptivekt.feedback.EmptyState
-import io.github.adaptivekt.feedback.ErrorState
-import io.github.adaptivekt.feedback.LoadingState
+import io.github.adaptivekt.feedback.AdaptiveEmptyState
+import io.github.adaptivekt.feedback.AdaptiveErrorState
+import io.github.adaptivekt.feedback.AdaptiveLoadingState
 
 /**
  * Displays adaptive data using a responsive table or card layout depending on the current breakpoint.
@@ -87,18 +87,18 @@ public fun <T> AdaptiveDataView(
             }
 
             when (state) {
-                is AdaptiveDataLoading -> LoadingState(message = "Loading data")
-                is AdaptiveDataError -> ErrorState(
+                is AdaptiveDataLoading -> AdaptiveLoadingState(message = "Loading data")
+                is AdaptiveDataError -> AdaptiveErrorState(
                     title = state.title,
                     description = state.description,
                 )
-                is AdaptiveDataEmpty -> EmptyState(
+                is AdaptiveDataEmpty -> AdaptiveEmptyState(
                     title = state.title,
                     description = state.description,
                 )
                 is AdaptiveDataContent -> {
                     if (state.items.isEmpty()) {
-                        EmptyState(
+                        AdaptiveEmptyState(
                             title = "No data available",
                             description = "Try adjusting filters or create a new record.",
                         )

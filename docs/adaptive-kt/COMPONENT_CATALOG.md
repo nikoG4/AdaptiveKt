@@ -83,9 +83,9 @@ This catalog summarizes the public components and primitives that are documented
 
 ## adaptive-feedback
 
-- `EmptyState`
-- `LoadingState`
-- `ErrorState`
+- `AdaptiveEmptyState`
+- `AdaptiveLoadingState`
+- `AdaptiveErrorState`
 - `AdaptiveLoadingIndicatorStyle`
 
 ## Demo And Docs Surfaces

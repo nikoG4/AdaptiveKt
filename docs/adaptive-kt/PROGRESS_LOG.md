@@ -93,7 +93,7 @@ Summary:
 - Added animated transitions to `AdaptiveCarousel` with `Slide`, `Fade`, `Scale`, and `None` modes.
 - Added `animationDurationMillis` while keeping existing carousel calls source-compatible.
 - Added pure carousel direction helper coverage for normal and looped navigation.
-- Upgraded `LoadingState` with animated `Spinner`, `Dots`, and `Pulse` indicator styles.
+- Upgraded `AdaptiveLoadingState` with animated `Spinner`, `Dots`, and `Pulse` indicator styles.
 - Expanded admin-demo UI Kit and Web/Desktop capture routes with a focused `components-feedback` screen.
 - Refreshed docs-site examples for animated carousel and loading states.
 
@@ -482,7 +482,7 @@ Objective:
 - Preserve the existing public feedback API.
 
 Audit findings:
-- `EmptyState`, `LoadingState`, and `ErrorState` share an internal `FeedbackStateLayout`.
+- `AdaptiveEmptyState`, `AdaptiveLoadingState`, and `AdaptiveErrorState` share an internal `FeedbackStateLayout`.
 - `action` and `retryAction` are caller-provided composable slots, so they should not be replaced by `AdaptiveButton`.
 - Empty and error states used raw text glyphs by default.
 - Loading indicator is local, Foundation-only, and small enough to keep.
@@ -493,8 +493,8 @@ Dependency:
 
 Implementation:
 - `FeedbackStateLayout` now uses `AdaptiveSurface` while preserving centered layout and max width.
-- `EmptyState` default glyph now uses `AdaptiveIcons.Search`.
-- `ErrorState` default glyph now uses `AdaptiveIcons.Close`.
+- `AdaptiveEmptyState` default glyph now uses `AdaptiveIcons.Search`.
+- `AdaptiveErrorState` default glyph now uses `AdaptiveIcons.Close`.
 - Loading indicator, text helper, and action slots remain local/unchanged.
 
 Capture tooling:
@@ -506,13 +506,13 @@ Capture tooling:
 
 Public API:
 - No public API changed.
-- Preserved `EmptyState`, `LoadingState`, and `ErrorState`.
+- Preserved `AdaptiveEmptyState`, `AdaptiveLoadingState`, and `AdaptiveErrorState`.
 - `FeedbackStateLayout` remains internal.
 
 Files modified:
 - adaptive-feedback/build.gradle.kts
-- adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/EmptyState.kt
-- adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/ErrorState.kt
+- adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveEmptyState.kt
+- adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveErrorState.kt
 - adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/FeedbackStateLayout.kt
 - admin-demo/src/commonMain/kotlin/io/github/adaptivekt/admin/demo/AdminDemoApp.kt
 - admin-demo/src/commonMain/kotlin/io/github/adaptivekt/admin/demo/AdminDemoScreen.kt

@@ -95,7 +95,7 @@ The smoke imports and compiles references to:
 - `AdaptiveBreakpoint`, `AdaptiveTheme`, `AdaptiveColorSchemes`;
 - `AdaptiveButton`, `AdaptiveCard`;
 - `AdaptiveGrid`;
-- `EmptyState`;
+- `AdaptiveEmptyState`;
 - `AdaptiveNavigationScaffold`, `AdaptiveNavItem`;
 - `AdaptiveFormLayout`;
 - `AdaptiveDataView`, `AdaptiveDataColumn`, `AdaptiveDataContent`.

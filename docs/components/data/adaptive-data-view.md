@@ -262,7 +262,7 @@ AdaptiveDataView(
 - [`AdaptiveCard`](./adaptive-card.md) — Individual item card display
 - [`AdaptiveButton`](./adaptive-button.md) — Action buttons
 - [`AdaptiveFormLayout`](../forms/adaptive-form-layout.md) — Create/edit forms
-- [`EmptyState`, `LoadingState`, `ErrorState`](../feedback/adaptive-feedback-states.md)
+- [`AdaptiveEmptyState`, `AdaptiveLoadingState`, `AdaptiveErrorState`](../feedback/adaptive-feedback-states.md)
 
 ## See Also
 

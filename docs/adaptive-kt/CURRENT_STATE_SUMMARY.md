@@ -25,7 +25,7 @@ adaptive-kt
 | `:adaptive-layout` | :adaptive-core, compose.foundation | AdaptiveContainer, AdaptiveGrid | Usado por :adaptive-forms, :adaptive-data, :admin-demo |
 | `:adaptive-navigation` | :adaptive-core, compose.foundation | NavigationScaffold, NavItem, NavMode, Surfaces (Drawer, Rail, Sidebar, BottomNav) | Usado por :admin-demo |
 | `:adaptive-forms` | :adaptive-core, :adaptive-layout, compose.foundation | AdaptiveFormLayout, FormTypes, FormColumns, LabelPosition, Validation | Usado por :admin-demo, :adaptive-data |
-| `:adaptive-feedback` | :adaptive-core, compose.foundation | EmptyState, LoadingState, ErrorState | Usado por :adaptive-data, :admin-demo |
+| `:adaptive-feedback` | :adaptive-core, compose.foundation | AdaptiveEmptyState, AdaptiveLoadingState, AdaptiveErrorState | Usado por :adaptive-data, :admin-demo |
 | `:adaptive-data` | :adaptive-core, :adaptive-layout, :adaptive-feedback, compose.foundation | AdaptiveDataView, DataColumn, DataState, FilterSlot, Action<T> | Usado por :admin-demo |
 | `:admin-demo` | Todos los anteriores + compose.desktop.currentOs | AdminDemoApp, AdminDemoScreen, Model data | Standalone demo con capture tooling |
 
@@ -87,9 +87,9 @@ adaptive-kt
 - [x] Tokens de navegación en adaptive-core
 
 ### :adaptive-feedback - Completado
-- [x] EmptyState(title, description, icon, action)
-- [x] LoadingState(message) con simple border circle indicator
-- [x] ErrorState(title, description, icon, retryAction)
+- [x] AdaptiveEmptyState(title, description, icon, action)
+- [x] AdaptiveLoadingState(message) con simple border circle indicator
+- [x] AdaptiveErrorState(title, description, icon, retryAction)
 - [x] FeedbackStateLayout (helper compartido)
 - [x] SimpleText (wrapper de BasicText)
 - [x] SimpleLoadingIndicator (helper)
@@ -291,7 +291,7 @@ El módulo admin-demo contiene componentes UI internos que podrían migrarse a :
 - InfoRow
 
 **Feedback states:**
-- LoadingState (ya en adaptive-feedback)
+- AdaptiveLoadingState (ya en adaptive-feedback)
 - SimpleLoadingIndicator (internal helper)
 
 ### Conclusiones de análisis

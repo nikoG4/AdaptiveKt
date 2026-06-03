@@ -40,7 +40,7 @@ AdaptiveKt is a mature, multi-module Compose Multiplatform admin UI framework wi
 | `:adaptive-core` | ✅ Stable | Breakpoints, Tokens, Scopes, WindowSize, Visibility | JVM, Android, iOS, Wasm |
 | `:adaptive-layout` | ✅ Stable | AdaptiveContainer, AdaptiveGrid | JVM, Android, iOS, Wasm |
 | `:adaptive-navigation` | ✅ Stable | NavigationScaffold, NavItem, NavMode, Surfaces | JVM, Android, iOS, Wasm |
-| `:adaptive-feedback` | ✅ Stable | EmptyState, LoadingState, ErrorState | JVM, Android, iOS, Wasm |
+| `:adaptive-feedback` | ✅ Stable | AdaptiveEmptyState, AdaptiveLoadingState, AdaptiveErrorState | JVM, Android, iOS, Wasm |
 | `:adaptive-forms` | ✅ Stable | AdaptiveFormLayout, FormScope, LabelPosition | JVM, Android, iOS, Wasm |
 | `:adaptive-data` | ✅ Stable | AdaptiveDataView, DataColumn, DataState, Actions | JVM, Android, iOS, Wasm |
 | `:adaptive-components` | ✅ Stable | AdaptiveButton, Avatar, Badge, Card, Menu, TextField | JVM, Android, iOS, Wasm |

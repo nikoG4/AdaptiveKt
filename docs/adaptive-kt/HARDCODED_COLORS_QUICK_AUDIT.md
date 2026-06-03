@@ -102,7 +102,7 @@ Archivo: `adaptive-data/src/commonMain/kotlin/io/github/adaptivekt/data/Adaptive
 
 ### adaptive-feedback
 
-Archivo: `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/EmptyState.kt` (y otros)
+Archivo: `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveEmptyState.kt` (y otros)
 
 | Variable | Color | Uso | Riesgo |
 |----------|-------|--------|

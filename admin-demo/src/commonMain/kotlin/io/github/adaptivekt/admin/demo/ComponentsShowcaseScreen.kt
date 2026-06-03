@@ -61,7 +61,7 @@ import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
-import io.github.adaptivekt.feedback.LoadingState
+import io.github.adaptivekt.feedback.AdaptiveLoadingState
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
@@ -670,16 +670,16 @@ private fun FeedbackSection() {
     ShowcaseCard(title = "Feedback loading", description = "Animated loading states with spinner, dots, and pulse styles.") {
         AdaptiveGrid(columns = 12, horizontalGap = AdaptiveTokens.Spacing.Medium, verticalGap = AdaptiveTokens.Spacing.Medium) {
             item(span = span) {
-                LoadingState(message = "Syncing workspace")
+                AdaptiveLoadingState(message = "Syncing workspace")
             }
             item(span = span) {
-                LoadingState(
+                AdaptiveLoadingState(
                     message = "Loading activity",
                     indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots,
                 )
             }
             item(span = span) {
-                LoadingState(
+                AdaptiveLoadingState(
                     message = "Preparing report",
                     indicatorStyle = AdaptiveLoadingIndicatorStyle.Pulse,
                 )

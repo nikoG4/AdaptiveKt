@@ -26,7 +26,7 @@ Build an adaptive Compose Multiplatform toolkit focused on responsive structure,
   - basic `AdaptiveDataView`
   - `AdaptiveDataColumn<T>`, `AdaptiveDataState<out T>`
 - `adaptive-feedback`
-  - `EmptyState`, `LoadingState`, `ErrorState`
+  - `AdaptiveEmptyState`, `AdaptiveLoadingState`, `AdaptiveErrorState`
 - `admin-demo`
   - desktop and mobile demo of dashboard, employees, products, invoices, settings
 

@@ -34,7 +34,7 @@ v0.1-alpha is intentionally limited to a core adaptive foundation and the most e
    - `AdaptiveDataView`, `AdaptiveDataColumn`, `AdaptiveDataState`.
 
 6. `adaptive-feedback`
-   - `EmptyState`, `LoadingState`, `ErrorState`.
+   - `AdaptiveEmptyState`, `AdaptiveLoadingState`, `AdaptiveErrorState`.
 
 ## Adaptive state model
 

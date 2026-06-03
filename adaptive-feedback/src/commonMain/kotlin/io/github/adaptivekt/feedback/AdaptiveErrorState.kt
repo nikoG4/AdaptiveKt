@@ -22,7 +22,7 @@ import io.github.adaptivekt.core.AdaptiveTokens
  * @param retryAction Optional composable for a retry button or similar.
  */
 @Composable
-fun ErrorState(
+fun AdaptiveErrorState(
     title: String,
     modifier: Modifier = Modifier,
     description: String? = null,

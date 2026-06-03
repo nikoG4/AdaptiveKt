@@ -167,19 +167,19 @@ fun <T> AdaptiveDataView(
 )
 ```
 
-### EmptyState / LoadingState / ErrorState
+### AdaptiveEmptyState / AdaptiveLoadingState / AdaptiveErrorState
 
 These are simple feedback primitives used by data-driven screens.
 
 ```kotlin
 @Composable
-fun EmptyState(...)
+fun AdaptiveEmptyState(...)
 
 @Composable
-fun LoadingState(...)
+fun AdaptiveLoadingState(...)
 
 @Composable
-fun ErrorState(...)
+fun AdaptiveErrorState(...)
 ```
 
 ## Adaptive utilities

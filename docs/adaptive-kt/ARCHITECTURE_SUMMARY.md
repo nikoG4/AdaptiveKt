@@ -107,9 +107,9 @@ adaptive-kt/
 
 | API | Descripción |
 |-----|-------------|
-| `EmptyState` | Empty state composable |
-| `LoadingState` | Loading state composable |
-| `ErrorState` | Error state composable |
+| `AdaptiveEmptyState` | Empty state composable |
+| `AdaptiveLoadingState` | Loading state composable |
+| `AdaptiveErrorState` | Error state composable |
 
 ### admin-demo
 

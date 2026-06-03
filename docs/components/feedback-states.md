@@ -2,20 +2,20 @@
 
 Purpose: consistent loading, empty, and error states.
 
-Use `LoadingState`, `EmptyState`, and `ErrorState` in data and workflow screens.
+Use `AdaptiveLoadingState`, `AdaptiveEmptyState`, and `AdaptiveErrorState` in data and workflow screens.
 
-Primary API: `LoadingState`, `EmptyState`, `ErrorState`, and the internal shared `FeedbackStateLayout`.
+Primary API: `AdaptiveLoadingState`, `AdaptiveEmptyState`, `AdaptiveErrorState`, and the internal shared `FeedbackStateLayout`.
 
 Simple example:
 
 ```kotlin
-EmptyState(title = "No invoices", description = "Create an invoice to get started.")
+AdaptiveEmptyState(title = "No invoices", description = "Create an invoice to get started.")
 ```
 
 Animated loading example:
 
 ```kotlin
-LoadingState(
+AdaptiveLoadingState(
     message = "Loading activity",
     indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots,
 )
@@ -27,7 +27,7 @@ Loading indicator styles:
 - `Dots`
 - `Pulse`
 
-Advanced example: use `ErrorState` with a retry action.
+Advanced example: use `AdaptiveErrorState` with a retry action.
 
 Responsive notes: keep titles short on compact screens.
 

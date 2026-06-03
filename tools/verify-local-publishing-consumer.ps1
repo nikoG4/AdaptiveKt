@@ -118,7 +118,7 @@ import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.data.AdaptiveDataColumn
 import io.github.adaptivekt.data.AdaptiveDataContent
 import io.github.adaptivekt.data.AdaptiveDataView
-import io.github.adaptivekt.feedback.EmptyState
+import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
@@ -142,7 +142,7 @@ fun ConsumerSmokeApp() {
 
             AdaptiveButton(text = "Published button", onClick = {})
 
-            EmptyState(title = "Published empty state")
+            AdaptiveEmptyState(title = "Published empty state")
 
             AdaptiveFormLayout {
                 section(title = "Published form") {

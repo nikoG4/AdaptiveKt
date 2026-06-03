@@ -49,12 +49,12 @@ Documentar todos los componentes, helpers y composites visuales existentes en Ad
 | **AdaptiveContainer** | adaptive-layout/AdaptiveContainer.kt | adaptive-layout | API Pública | Container centrado que adapta breakpoint | adaptive-layout (quedar) |
 | **AdaptiveGrid** | adaptive-layout/AdaptiveGrid.kt | adaptive-layout | API Pública | Grid adaptativo con fillMaxWidth(fraction) | adaptive-layout (quedar) |
 | AdaptiveDataView | adaptive-data/AdaptiveDataView.kt | adaptive-data | API Pública | Table/Card responsive con states/acciones/colunas | adaptive-data (quedar) |
-| EmptyState | adaptive-feedback/EmptyState.kt | adaptive-feedback | API Pública | Empty state con title/description/icon/action | adaptive-feedback (quedar) |
-| LoadingState | adaptive-feedback/LoadingState.kt | adaptive-feedback | API Pública | Loading state con border circle indicator | adaptive-feedback (quedar) |
-| ErrorState | adaptive-feedback/ErrorState.kt | adaptive-feedback | API Pública | Error state con title/description/icon/retry | adaptive-feedback (quedar) |
+| AdaptiveEmptyState | adaptive-feedback/AdaptiveEmptyState.kt | adaptive-feedback | API Pública | Empty state con title/description/icon/action | adaptive-feedback (quedar) |
+| AdaptiveLoadingState | adaptive-feedback/AdaptiveLoadingState.kt | adaptive-feedback | API Pública | Loading state con border circle indicator | adaptive-feedback (quedar) |
+| AdaptiveErrorState | adaptive-feedback/AdaptiveErrorState.kt | adaptive-feedback | API Pública | Error state con title/description/icon/retry | adaptive-feedback (quedar) |
 | FeedbackStateLayout | adaptive-feedback/FeedbackStateLayout.kt | adaptive-feedback | Internal | Layout compartido para feedback states | adaptive-feedback (quedar) |
-| SimpleLoadingIndicator | adaptive-feedback/LoadingState.kt | adaptive-feedback | Internal | Indicador de carga simple con border | adaptive-feedback (quedar) |
-| SimpleText | adaptive-feedback/EmptyState.kt | adaptive-feedback | Internal | Wrapper BasicText para reutilización | adaptive-feedback (quedar) |
+| SimpleLoadingIndicator | adaptive-feedback/AdaptiveLoadingState.kt | adaptive-feedback | Internal | Indicador de carga simple con border | adaptive-feedback (quedar) |
+| SimpleText | adaptive-feedback/AdaptiveEmptyState.kt | adaptive-feedback | Internal | Wrapper BasicText para reutilización | adaptive-feedback (quedar) |
 | AdaptiveDataColumn.cell | adaptive-data/AdaptiveDataView.kt | adaptive-data | API Pública | Slot por columna en AdaptiveDataView | adaptive-data (quedar) |
 | AdaptiveFilterSlot | adaptive-data/AdaptiveDataTypes.kt | adaptive-data | API Pública (typealias) | Slot opcional para filtro en DataView | adaptive-data (quedar) |
 | AdaptiveActionsSlot | adaptive-data/AdaptiveDataView.kt | adaptive-data | Internal | Slot de acciones en toolbar | adaptive-data (quedar) |
@@ -157,7 +157,7 @@ Documentar todos los componentes, helpers y composites visuales existentes en Ad
 - AdaptiveFormLayout, AdaptiveFormColumns, LabelPosition, FieldSpan (específico forms)
 - AdaptiveDataView, AdaptiveDataColumn, AdaptiveDataState (específico data)
 - AdaptiveNavigationScaffold, Drawer, BottomNavigation, NavigationRail, Sidebar (específico nav)
-- EmptyState, LoadingState, ErrorState (ya en adaptive-feedback)
+- AdaptiveEmptyState, AdaptiveLoadingState, AdaptiveErrorState (ya en adaptive-feedback)
 - AdaptiveContainer, AdaptiveGrid (ya en adaptive-layout)
 
 ### Plan de migración

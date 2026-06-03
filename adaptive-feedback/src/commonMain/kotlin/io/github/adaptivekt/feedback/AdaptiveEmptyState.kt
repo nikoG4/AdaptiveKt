@@ -49,7 +49,7 @@ internal fun SimpleText(
  * @param action Optional composable for a call-to-action button or similar.
  */
 @Composable
-fun EmptyState(
+fun AdaptiveEmptyState(
     title: String,
     modifier: Modifier = Modifier,
     description: String? = null,

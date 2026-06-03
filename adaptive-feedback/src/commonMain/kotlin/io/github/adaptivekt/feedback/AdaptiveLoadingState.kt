@@ -163,7 +163,7 @@ private fun PulseLoadingIndicator(modifier: Modifier = Modifier) {
  * @param indicatorStyle Visual style for the animated default indicator.
  */
 @Composable
-fun LoadingState(
+fun AdaptiveLoadingState(
     modifier: Modifier = Modifier,
     message: String? = null,
     indicatorStyle: AdaptiveLoadingIndicatorStyle = AdaptiveLoadingIndicatorStyle.Spinner,

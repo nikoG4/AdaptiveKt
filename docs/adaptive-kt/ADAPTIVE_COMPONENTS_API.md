@@ -335,7 +335,7 @@ Added:
 - `AdaptiveLoadingIndicatorStyle.Dots`
 - `AdaptiveLoadingIndicatorStyle.Pulse`
 
-The default `LoadingState()` remains source-compatible and now uses the animated spinner.
+The default `AdaptiveLoadingState()` remains source-compatible and now uses the animated spinner.
 
 ## PR C4 Adaptive Feedback Adoption
 

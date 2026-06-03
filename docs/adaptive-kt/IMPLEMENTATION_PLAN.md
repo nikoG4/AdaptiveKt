@@ -56,9 +56,9 @@ Implement responsive layout primitives for v0.1-alpha.
 Implement the feedback primitives used by the demo.
 
 ### Files expected
-- `adaptive-feedback/src/commonMain/kotlin/.../EmptyState.kt`
-- `adaptive-feedback/src/commonMain/kotlin/.../LoadingState.kt`
-- `adaptive-feedback/src/commonMain/kotlin/.../ErrorState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/.../AdaptiveEmptyState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/.../AdaptiveLoadingState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/.../AdaptiveErrorState.kt`
 - `adaptive-feedback/src/commonTest/kotlin/.../AdaptiveFeedbackTest.kt`
 
 ### Criteria of acceptance
@@ -164,7 +164,7 @@ Build the minimal demo app showcasing v0.1-alpha.
 - desktop view shows sidebar, table list, and 2-column forms.
 - mobile view shows drawer/hamburger, card list, and 1-column forms.
 - `AdaptiveDataView` and `AdaptiveFormLayout` are used in screens.
-- `EmptyState`, `LoadingState`, and `ErrorState` are demonstrated.
+- `AdaptiveEmptyState`, `AdaptiveLoadingState`, and `AdaptiveErrorState` are demonstrated.
 
 ### Gradle verification
 - `./gradlew :admin-demo:run`

@@ -32,7 +32,7 @@ PR D1 intentionally adds remote image loading to `:admin-demo` only for visual d
 - `AdaptiveGrid` organizes dashboard KPI cards.
 - `AdaptiveDataView` renders desktop tables and generated mobile cards.
 - `AdaptiveFormLayout` organizes form sections, fields, validation, and actions.
-- `EmptyState`, `LoadingState`, and `ErrorState` are available from the invoice state toggles.
+- `AdaptiveEmptyState`, `AdaptiveLoadingState`, and `AdaptiveErrorState` are available from the invoice state toggles.
 
 ## PR8 - Professional Admin Defaults
 

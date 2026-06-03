@@ -140,9 +140,9 @@ Candidate future improvement:
 
 Stable for v0.1:
 
-- `EmptyState`
-- `LoadingState`
-- `ErrorState`
+- `AdaptiveEmptyState`
+- `AdaptiveLoadingState`
+- `AdaptiveErrorState`
 
 Do not break without deprecation:
 

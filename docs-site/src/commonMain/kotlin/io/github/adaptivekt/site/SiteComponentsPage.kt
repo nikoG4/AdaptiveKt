@@ -61,9 +61,9 @@ import io.github.adaptivekt.data.AdaptiveDataContent
 import io.github.adaptivekt.data.AdaptiveDataMobileRole
 import io.github.adaptivekt.data.AdaptiveDataView
 import io.github.adaptivekt.feedback.AdaptiveLoadingIndicatorStyle
-import io.github.adaptivekt.feedback.EmptyState
-import io.github.adaptivekt.feedback.ErrorState
-import io.github.adaptivekt.feedback.LoadingState
+import io.github.adaptivekt.feedback.AdaptiveEmptyState
+import io.github.adaptivekt.feedback.AdaptiveErrorState
+import io.github.adaptivekt.feedback.AdaptiveLoadingState
 import io.github.adaptivekt.forms.AdaptiveFormColumns
 import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.forms.FieldSpan
@@ -674,29 +674,29 @@ AdaptiveMultiSelect(
     ComponentDoc(
         id = "feedback-states",
         family = "Feedback",
-        title = "EmptyState, LoadingState and ErrorState",
+        title = "AdaptiveEmptyState, AdaptiveLoadingState and AdaptiveErrorState",
         summary = "Polished workflow states with default glyphs, titles, descriptions and optional action slots.",
         usage = "Use these for data loading, empty search results, retryable errors and first-run states.",
         basicExample = DocsExample(
             "State trio",
             "Each state has a sensible default visual treatment.",
-            """EmptyState("No results", description = "Try another filter.")""",
+            """AdaptiveEmptyState("No results", description = "Try another filter.")""",
         ) {
             androidx.compose.foundation.layout.BoxWithConstraints {
                 val compact = maxWidth < 600.dp
                 AdaptiveGrid(columns = 12, horizontalGap = 10.dp, verticalGap = 10.dp) {
-                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { EmptyState("No results", description = "Try another filter.") } }
-                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { LoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots) } }
-                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { ErrorState("Unable to load", description = "Retry later.") } }
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { AdaptiveEmptyState("No results", description = "Try another filter.") } }
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { AdaptiveLoadingState(message = "Loading", indicatorStyle = AdaptiveLoadingIndicatorStyle.Dots) } }
+                    item(span = if (compact) 12 else 4) { Box(Modifier.heightIn(min = 180.dp)) { AdaptiveErrorState("Unable to load", description = "Retry later.") } }
                 }
             }
         },
         parameters = listOf(
-            ComponentParameter("title", "String", "required", true, "EmptyState/ErrorState title."),
+            ComponentParameter("title", "String", "required", true, "AdaptiveEmptyState/AdaptiveErrorState title."),
             ComponentParameter("description", "String?", "null", false, "Optional supporting text."),
             ComponentParameter("icon", "(@Composable () -> Unit)?", "null", false, "Optional custom icon."),
             ComponentParameter("action / retryAction", "(@Composable () -> Unit)?", "null", false, "Optional user-provided action slot."),
-            ComponentParameter("indicatorStyle", "AdaptiveLoadingIndicatorStyle", "Spinner", false, "LoadingState only: Spinner, Dots or Pulse."),
+            ComponentParameter("indicatorStyle", "AdaptiveLoadingIndicatorStyle", "Spinner", false, "AdaptiveLoadingState only: Spinner, Dots or Pulse."),
         ),
         variants = listOf(),
         themingNotes = commonNotes("Feedback states"),

@@ -21,9 +21,9 @@ No dependency was added in the opposite direction, and no cycle was introduced.
 Audited files:
 
 - `adaptive-feedback/build.gradle.kts`
-- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/EmptyState.kt`
-- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/ErrorState.kt`
-- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/LoadingState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveEmptyState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveErrorState.kt`
+- `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/AdaptiveLoadingState.kt`
 - `adaptive-feedback/src/commonMain/kotlin/io/github/adaptivekt/feedback/FeedbackStateLayout.kt`
 - Admin demo invoice states
 
@@ -41,8 +41,8 @@ Internal visual primitives found:
 ## Migrated Helpers
 
 - `FeedbackStateLayout` now uses `AdaptiveSurface`.
-- `EmptyState` default icon now uses `AdaptiveIcons.Search`.
-- `ErrorState` default icon now uses `AdaptiveIcons.Close`.
+- `AdaptiveEmptyState` default icon now uses `AdaptiveIcons.Search`.
+- `AdaptiveErrorState` default icon now uses `AdaptiveIcons.Close`.
 
 ## Helpers Kept
 
@@ -58,9 +58,9 @@ No public API changed.
 
 Preserved:
 
-- `EmptyState`
-- `LoadingState`
-- `ErrorState`
+- `AdaptiveEmptyState`
+- `AdaptiveLoadingState`
+- `AdaptiveErrorState`
 
 `FeedbackStateLayout` remains internal.
 
