@@ -35,19 +35,19 @@ import io.github.adaptivekt.core.AdaptiveTokens
  * Modal dialog primitive for focused decisions, confirmations, and alerts.
  *
  * @param onDismissRequest Callback invoked when the user attempts to close the dialog.
+ * @param confirmButton Composable slot for the primary confirm action.
  * @param modifier Modifier applied to the dialog content surface.
  * @param title Optional text title displayed at the top.
- * @param confirmButton Composable slot for the primary confirm action.
  * @param dismissButton Optional composable slot for the secondary dismiss action.
  * @param content Composable slot for the main dialog content.
  */
 @Composable
 public fun AdaptiveDialog(
     onDismissRequest: () -> Unit,
-    title: String? = null,
     confirmButton: @Composable () -> Unit,
-    dismissButton: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
+    title: String? = null,
+    dismissButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

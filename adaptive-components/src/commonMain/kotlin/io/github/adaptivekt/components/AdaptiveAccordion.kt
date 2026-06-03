@@ -44,8 +44,8 @@ import io.github.adaptivekt.core.AdaptiveTokens
  */
 @Composable
 public fun AdaptiveAccordion(
-    modifier: Modifier = Modifier,
     title: String,
+    modifier: Modifier = Modifier,
     subtitle: String? = null,
     expanded: Boolean? = null,
     defaultExpanded: Boolean = false,
