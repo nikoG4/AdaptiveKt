@@ -29,8 +29,8 @@ jobs:
       REQUESTED_VERSION: ${{ inputs.version }}
       CONFIRM: ${{ inputs.confirm }}
       DRY_RUN_ONLY: ${{ inputs.dryRunOnly }}
-      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNINGINMEMORYKEY }}
-      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNINGINMEMORYKEYPASSWORD }}
+      SIGNING_KEY_INPUT: ${{ secrets.SIGNINGINMEMORYKEY }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNINGINMEMORYKEYPASSWORD }}
       MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVENCENTRALUSERNAME }}
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVENCENTRALPASSWORD }}
 
@@ -73,6 +73,52 @@ jobs:
             echo "Requested version does not match the project version. Update gradle.properties first."
             exit 1
           fi
+
+      - name: Normalize signing key for Gradle
+        run: |
+          if [ -z "$SIGNING_KEY_INPUT" ]; then
+            echo "Missing SIGNINGINMEMORYKEY secret."
+            exit 1
+          fi
+          if [ -z "$SIGNING_KEY_PASSWORD" ]; then
+            echo "Missing SIGNINGINMEMORYKEYPASSWORD secret."
+            exit 1
+          fi
+
+          normalized_key="$RUNNER_TEMP/signing-key.asc"
+          decoded_key="$RUNNER_TEMP/signing-key.decoded"
+
+          if printf '%s' "$SIGNING_KEY_INPUT" | grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----'; then
+            printf '%s' "$SIGNING_KEY_INPUT" > "$normalized_key"
+          else
+            if ! printf '%s' "$SIGNING_KEY_INPUT" | base64 --decode > "$decoded_key" 2>/dev/null; then
+              printf '%s' "$SIGNING_KEY_INPUT" | base64 -D > "$decoded_key"
+            fi
+
+            if grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$decoded_key"; then
+              cp "$decoded_key" "$normalized_key"
+            else
+              export GNUPGHOME="$RUNNER_TEMP/adaptivekt-gnupg"
+              mkdir -p "$GNUPGHOME"
+              chmod 700 "$GNUPGHOME"
+              gpg --batch --import "$decoded_key"
+              gpg --batch --pinentry-mode loopback --passphrase "$SIGNING_KEY_PASSWORD" --armor --export-secret-keys > "$normalized_key"
+            fi
+          fi
+
+          if ! grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$normalized_key"; then
+            echo "Signing key could not be normalized to ASCII-armored private key format."
+            exit 1
+          fi
+
+          {
+            echo 'ORG_GRADLE_PROJECT_signingInMemoryKey<<ADAPTIVEKT_SIGNING_KEY'
+            cat "$normalized_key"
+            echo 'ADAPTIVEKT_SIGNING_KEY'
+            echo 'ORG_GRADLE_PROJECT_signingInMemoryKeyPassword<<ADAPTIVEKT_SIGNING_PASSWORD'
+            printf '%s\n' "$SIGNING_KEY_PASSWORD"
+            echo 'ADAPTIVEKT_SIGNING_PASSWORD'
+          } >> "$GITHUB_ENV"
 
       - name: Validate release secrets are present
         run: |
