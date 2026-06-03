@@ -6,7 +6,7 @@
 
 - Uses `AdaptiveAnchoredDropdownMenu` for popup positioning.
 - `selectedOption` is nullable.
-- `onOptionSelected(null)` clears selection.
+- `onSelectedOptionChange(null)` clears selection.
 - `optionLabel` is required.
 - `optionContent` and `selectedContent` are optional slots.
 - `searchable` filters options locally with `selectMatchesQuery`.
@@ -29,7 +29,7 @@ var status by remember { mutableStateOf<String?>(null) }
 AdaptiveSelect(
     options = listOf("Open", "Pending", "Closed"),
     selectedOption = status,
-    onOptionSelected = { status = it },
+    onSelectedOptionChange = { status = it },
     optionLabel = { it },
     label = "Status",
     placeholder = "Choose status",

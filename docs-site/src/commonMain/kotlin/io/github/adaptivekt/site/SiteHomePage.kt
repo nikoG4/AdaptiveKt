@@ -198,7 +198,7 @@ private fun HomeProductPreview() {
                 AdaptiveSelect(
                     options = listOf("Active", "Pending", "Paused"),
                     selectedOption = selectedStatus,
-                    onOptionSelected = { selectedStatus = it ?: "Active" },
+                    onSelectedOptionChange = { selectedStatus = it ?: "Active" },
                     optionLabel = { it },
                     label = "Status",
                 )

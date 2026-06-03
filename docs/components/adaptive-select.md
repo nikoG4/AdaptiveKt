@@ -4,7 +4,7 @@ Purpose: nullable single-select dropdown.
 
 Use it when a form or filter needs exactly one optional value.
 
-Primary API: `AdaptiveSelect(options, selectedOption, onOptionSelected, optionLabel, searchable, clearable, enabled, isError, supportingText, optionContent, selectedContent)`.
+Primary API: `AdaptiveSelect(options, selectedOption, onSelectedOptionChange, optionLabel, searchable, clearable, enabled, isError, supportingText, optionContent, selectedContent)`.
 
 Simple example:
 
@@ -12,7 +12,7 @@ Simple example:
 AdaptiveSelect(
     options = listOf("Draft", "Sent", "Paid"),
     selectedOption = status,
-    onOptionSelected = { status = it },
+    onSelectedOptionChange = { status = it },
     optionLabel = { it },
 )
 ```

@@ -92,7 +92,7 @@ var selected by remember { mutableStateOf<String?>(null) }
 AdaptiveSelect(
     options = listOf("Open", "Pending", "Closed"),
     selectedOption = selected,
-    onOptionSelected = { selected = it },
+    onSelectedOptionChange = { selected = it },
     optionLabel = { it },
     label = "Status",
     searchable = true,

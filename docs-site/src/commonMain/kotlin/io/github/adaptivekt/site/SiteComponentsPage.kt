@@ -376,7 +376,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
 AdaptiveSelect(
     options = statuses,
     selectedOption = selected,
-    onOptionSelected = { selected = it },
+    onSelectedOptionChange = { selected = it },
     optionLabel = { it },
     searchable = true,
 )
@@ -386,7 +386,7 @@ AdaptiveSelect(
             AdaptiveSelect(
                 options = listOf("Open", "Pending", "Closed"),
                 selectedOption = selected,
-                onOptionSelected = { selected = it },
+                onSelectedOptionChange = { selected = it },
                 optionLabel = { it },
                 label = "Status",
                 searchable = true,
@@ -813,7 +813,7 @@ private fun inputParameters(): List<ComponentParameter> = listOf(
 private fun selectParameters(multi: Boolean): List<ComponentParameter> = listOf(
     ComponentParameter("options", "List<T>", "required", true, "Available options."),
     ComponentParameter(if (multi) "selectedOptions" else "selectedOption", if (multi) "List<T>" else "T?", "required", true, "Current selection."),
-    ComponentParameter(if (multi) "onSelectedOptionsChange" else "onOptionSelected", if (multi) "(List<T>) -> Unit" else "(T?) -> Unit", "required", true, "Selection callback."),
+    ComponentParameter(if (multi) "onSelectedOptionsChange" else "onSelectedOptionChange", if (multi) "(List<T>) -> Unit" else "(T?) -> Unit", "required", true, "Selection callback."),
     ComponentParameter("optionLabel", "(T) -> String", "required", true, "Label for search and default rendering."),
     ComponentParameter("searchable", "Boolean", if (multi) "true" else "false", false, "Shows local search in the menu."),
     ComponentParameter("clearable", "Boolean", "true", false, "Shows clear affordance."),
@@ -831,7 +831,7 @@ private fun peopleSelectExample(): DocsExample = DocsExample(
     AdaptiveSelect(
         options = people,
         selectedOption = selected,
-        onOptionSelected = { selected = it },
+        onSelectedOptionChange = { selected = it },
         optionLabel = { it.name },
         label = "Owner",
         optionContent = { person, isSelected -> PeopleOption(person, isSelected) },

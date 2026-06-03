@@ -52,7 +52,7 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
  *
  * @param options The list of options to display.
  * @param selectedOption The currently selected option, or null for no selection.
- * @param onOptionSelected Called when an option is selected (null when cleared).
+ * @param onSelectedOptionChange Called when an option is selected (null when cleared).
  * @param optionLabel Returns the display label for an option.
  * @param modifier Optional modifier.
  * @param label Optional label above the select field.
@@ -72,7 +72,7 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
 public fun <T> AdaptiveSelect(
     options: List<T>,
     selectedOption: T?,
-    onOptionSelected: (T?) -> Unit,
+    onSelectedOptionChange: (T?) -> Unit,
     optionLabel: (T) -> String,
     modifier: Modifier = Modifier,
     label: String? = null,
@@ -141,7 +141,7 @@ public fun <T> AdaptiveSelect(
                     shape = shape,
                     selectedContent = selectedContent,
                     onClear = {
-                        onOptionSelected(null)
+                        onSelectedOptionChange(null)
                         expanded = false
                     },
                     onClick = toggle,
@@ -190,7 +190,7 @@ public fun <T> AdaptiveSelect(
                         SelectOptionWrapper(
                             selected = isSelected,
                             onClick = {
-                                onOptionSelected(option)
+                                onSelectedOptionChange(option)
                                 expanded = false
                                 searchQuery = ""
                             },
@@ -202,7 +202,7 @@ public fun <T> AdaptiveSelect(
                             text = optionLabel(option),
                             selected = isSelected,
                             onClick = {
-                                onOptionSelected(option)
+                                onSelectedOptionChange(option)
                                 expanded = false
                                 searchQuery = ""
                             },

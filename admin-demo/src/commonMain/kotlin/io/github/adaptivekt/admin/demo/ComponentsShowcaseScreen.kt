@@ -372,7 +372,7 @@ private fun SelectsSection(initialExpanded: Boolean = false) {
         AdaptiveSelect(
             options = listOf("Option A", "Option B", "Option C"),
             selectedOption = selectedOption,
-            onOptionSelected = { selectedOption = it },
+            onSelectedOptionChange = { selectedOption = it },
             optionLabel = { it },
             label = "Choose an option",
             placeholder = "Pick one",
@@ -384,7 +384,7 @@ private fun SelectsSection(initialExpanded: Boolean = false) {
         AdaptiveSelect(
             options = listOf("USD", "EUR", "PYG"),
             selectedOption = "USD",
-            onOptionSelected = {},
+            onSelectedOptionChange = {},
             optionLabel = { it },
             label = "Disabled select",
             enabled = false,
@@ -393,7 +393,7 @@ private fun SelectsSection(initialExpanded: Boolean = false) {
         AdaptiveSelect(
             options = listOf("Operations", "Finance", "Support"),
             selectedOption = null,
-            onOptionSelected = {},
+            onSelectedOptionChange = {},
             optionLabel = { it },
             label = "Team",
             placeholder = "Required team",

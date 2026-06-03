@@ -8,7 +8,7 @@ AdaptiveSelect(
     options = languages,
     selectedOption = selectedLanguage,
     optionLabel = { it.name },
-    onOptionSelected = { selectedLanguage = it }
+    onSelectedOptionChange = { selectedLanguage = it }
 )
 ```
 
@@ -20,7 +20,7 @@ AdaptiveSelect(
     options = employees,
     selectedOption = selectedEmployee,
     optionLabel = { it.name },
-    onOptionSelected = { selectedEmployee = it },
+    onSelectedOptionChange = { selectedEmployee = it },
     optionContent = { employee ->
         // avatar + name + role + badge, etc.
     },
