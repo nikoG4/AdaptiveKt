@@ -1,16 +1,18 @@
 # Maven Central Readiness
 
-Status: local dry-run publishing is configured. No Maven Central publishing, remote snapshot publishing, release, tag, signing, or secrets are configured.
+Status: local dry-run publishing is configured. Conditional signing and a guarded Central Portal workflow are prepared. No Maven Central upload, remote snapshot publishing, release, or tag has been executed.
 
 ## Strategy Chosen
 
-PUBLISH-0B uses Gradle's built-in `maven-publish` plugin.
+AdaptiveKt uses Gradle's built-in `maven-publish` plugin for generating Kotlin Multiplatform Maven publications.
 
 Reason:
 
 - It avoids adding another external Gradle plugin before the first local publishing proof.
 - It works well enough for a local Kotlin Multiplatform publishing dry-run.
-- It keeps Maven Central-specific signing/secrets/workflow setup for a later dedicated publishing PR.
+- It keeps publication generation explicit and avoids switching to a larger publishing plugin before the first alpha.
+
+For Central Portal, the release workflow prepares a Maven repository layout bundle from `build/local-maven` and uploads that bundle to the official Central Publisher API only when the manual guard is satisfied.
 
 Versioning is centralized in `gradle.properties`:
 
@@ -64,16 +66,27 @@ Initial version:
 0.1.0-alpha01
 ```
 
-## Real Blockers
+## Maven Central Requirements
 
-- Confirm whether `io.github.nikog4.adaptivekt` is the final Maven Central namespace.
-- Confirm final release version before tagging.
-- Confirm generated artifacts on macOS for iOS publications.
-- Decide whether documentation artifacts need Dokka or another docs jar strategy.
-- Configure signing.
-- Configure required secrets.
-- Add a manual GitHub Actions publishing workflow after local dry run succeeds.
-- Perform Sonatype Central Portal validation.
+Current status:
+
+- Namespace confirmed: `io.github.nikog4`.
+- Group ID configured: `io.github.nikog4.adaptivekt`.
+- Version configured: `0.1.0-alpha01`.
+- POM metadata configured for name, description, URL, license, developer, and SCM.
+- Sources jars are generated.
+- Placeholder javadoc jars are generated for the alpha release.
+- Gradle generates checksums in the local Maven repository.
+- Signing is conditional and activates when signing Gradle properties are supplied.
+- GitHub Secrets are configured for signing and Central Portal credentials.
+
+Remaining release gates:
+
+- Validate signed artifacts in the manual release workflow.
+- Validate iOS artifacts on `macos-latest`.
+- Run the release workflow in dry-run mode.
+- Run the guarded Central Portal upload only after explicit human approval.
+- Create tags/releases only after the Central Portal deployment has been accepted and published.
 
 ## Platform Publishing Validation
 
@@ -92,43 +105,44 @@ The repository also contains `.github/workflows/publishing-validation.yml`, a sa
 
 That workflow does not use secrets, sign artifacts, publish remotely, create tags, or create releases.
 
-## Signing Plan
+## Signing
 
-Signing is not configured or required for local publishing.
+Signing is configured with Gradle's Signing plugin for publishable modules only.
 
-PUBLISH-1B prepares conditional signing in the Gradle build so local builds continue to pass when signing secrets are absent.
-Local publishing to `build/local-maven` remains valid without signing, and publication tasks do not require signing unless `signingInMemoryKey` and `signingInMemoryKeyPassword` are provided.
-
-Future secret-backed properties:
+The build reads:
 
 ```text
-ORG_GRADLE_PROJECT_signingInMemoryKey
-ORG_GRADLE_PROJECT_signingInMemoryKeyPassword
+signingInMemoryKey
+signingInMemoryKeyPassword
 ```
 
-Future Maven Central or Central Portal credentials should also be supplied through GitHub Secrets, for example:
-
-```text
-ORG_GRADLE_PROJECT_mavenCentralUsername
-ORG_GRADLE_PROJECT_mavenCentralPassword
-```
+Local builds without those properties continue to work and produce unsigned local artifacts. The release workflow maps GitHub Secrets to the corresponding `ORG_GRADLE_PROJECT_...` environment variables so Gradle signs all publications during the guarded release pipeline.
 
 No signing keys, passwords, tokens, or credentials should be committed to the repository.
 
-## Future Remote Publishing Workflow
+## Central Portal Workflow
 
-Remote publishing should be added in a later PUBLISH-1B/PUBLISH-2 phase.
+`.github/workflows/publish-release.yml` is manual-only and has two modes.
 
-It should:
+Dry run:
 
-- be manual-only;
-- require a confirmed Maven Central namespace;
-- require signing secrets;
-- require publishing credentials;
-- use an explicit release/tag strategy;
-- avoid running automatically on push.
+- `dryRunOnly=true`
+- `confirm=DRY_RUN`
+- Builds the project.
+- Publishes signed artifacts to `build/local-maven`.
+- Runs the consumer smoke test.
+- Prepares and validates a Central Portal bundle.
+- Uploads the bundle as a GitHub Actions artifact.
+- Does not contact Maven Central or Central Portal.
 
-This PUBLISH-1A phase intentionally does not configure an active remote Maven repository.
+Guarded Central Portal upload:
+
+- `dryRunOnly=false`
+- `confirm=PUBLISH`
+- Uses the official Publisher API endpoint `https://central.sonatype.com/api/v1/publisher/upload`.
+- Authenticates with a `Bearer` token derived from the Central Portal user token username and password.
+- Uploads the generated bundle with `publishingType=USER_MANAGED`.
+- Does not auto-publish to Maven Central; the deployment must be reviewed and published in Central Portal after validation.
 
 ## Local Dry Run
 
@@ -158,10 +172,9 @@ The same pattern is generated for the other publishable modules.
 ## Current Limitations
 
 - iOS targets are declared, but local Windows builds disable Apple targets. iOS publication validation must run on macOS.
-- No signing is configured yet.
-- No remote Maven Central repository is configured yet.
-- No remote publish workflow is configured yet.
-- No Dokka/docs jar strategy is configured yet.
+- Local Windows publishing does not produce `.asc` files because signing secrets are intentionally not present locally.
+- The alpha release uses placeholder javadoc jars instead of Dokka-generated API documentation.
+- The Central Portal workflow uses `USER_MANAGED` deployments; it does not automatically publish after validation.
 
 ## Consumer Smoke Test
 

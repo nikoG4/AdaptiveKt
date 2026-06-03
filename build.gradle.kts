@@ -1,5 +1,6 @@
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 
 plugins {
@@ -45,6 +46,31 @@ subprojects {
         pluginManager.apply("maven-publish")
         pluginManager.apply("signing")
 
+        val writeJavadocPlaceholder = tasks.register("writeJavadocPlaceholder") {
+            val outputDir = layout.buildDirectory.dir("generated/javadoc-placeholder")
+
+            outputs.dir(outputDir)
+
+            doLast {
+                val readme = outputDir.get().file("README.md").asFile
+                readme.parentFile.mkdirs()
+                readme.writeText(
+                    """
+                    # AdaptiveKt ${project.name}
+
+                    This is a placeholder Javadoc artifact for the AdaptiveKt alpha release.
+                    API documentation is available from the project documentation site and source artifacts.
+                    """.trimIndent() + "\n",
+                )
+            }
+        }
+
+        val javadocJar = tasks.register<Jar>("javadocJar") {
+            archiveClassifier.set("javadoc")
+            dependsOn(writeJavadocPlaceholder)
+            from(layout.buildDirectory.dir("generated/javadoc-placeholder"))
+        }
+
         val signingInMemoryKey = providers.gradleProperty("signingInMemoryKey")
         val signingInMemoryKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword")
         val hasSigningKeys = signingInMemoryKey.isPresent && signingInMemoryKeyPassword.isPresent
@@ -68,6 +94,7 @@ subprojects {
 
             publications.withType<MavenPublication>().configureEach {
                 artifactId = project.name
+                artifact(javadocJar)
                 pom {
                     name.set("AdaptiveKt ${project.name}")
                     description.set(publicationDescriptions.getValue(project.name))

@@ -35,9 +35,9 @@ The second command publishes to:
 build/local-maven/
 ```
 
-This is a local dry-run repository only. It does not publish to Maven Central, does not use secrets, does not sign artifacts, does not create a release, and does not create a tag.
+This is a local dry-run repository only. It does not publish to Maven Central, does not create a release, and does not create a tag. It signs artifacts only when signing Gradle properties are supplied.
 
-For PUBLISH-1B, conditional signing and a manual publish workflow are prepared, but remote publishing remains disabled until the Maven Central namespace and secrets are confirmed.
+For PUBLISH-4, conditional signing and a guarded manual release workflow are prepared. Dry runs do not contact Central Portal. A remote upload requires `dryRunOnly=false` and `confirm=PUBLISH`.
 
 ## Expected iOS Artifacts
 

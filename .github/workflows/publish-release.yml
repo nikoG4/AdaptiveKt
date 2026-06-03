@@ -6,13 +6,14 @@ on:
       version:
         description: "Version to publish"
         required: true
+        default: "0.1.0-alpha01"
         type: string
       confirm:
-        description: "Type PUBLISH to confirm"
+        description: "Type DRY_RUN for dry runs or PUBLISH for a guarded Central Portal upload"
         required: true
         type: string
       dryRunOnly:
-        description: "Keep remote publishing disabled"
+        description: "When true, do not contact Maven Central or Central Portal"
         required: true
         default: true
         type: boolean
@@ -21,9 +22,17 @@ permissions:
   contents: read
 
 jobs:
-  publish-local-test:
-    name: Manual local publish preparation
+  publish-release:
+    name: Manual release pipeline
     runs-on: macos-latest
+    env:
+      REQUESTED_VERSION: ${{ inputs.version }}
+      CONFIRM: ${{ inputs.confirm }}
+      DRY_RUN_ONLY: ${{ inputs.dryRunOnly }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNINGINMEMORYKEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNINGINMEMORYKEYPASSWORD }}
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVENCENTRALUSERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVENCENTRALPASSWORD }}
 
     steps:
       - name: Checkout
@@ -41,27 +50,57 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Validate user confirmation
+      - name: Validate release guard inputs
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "PUBLISH" ]; then
-            echo "The confirm input must be exactly PUBLISH to continue."
-            exit 1
+          if [ "$DRY_RUN_ONLY" = "true" ]; then
+            if [ "$CONFIRM" != "DRY_RUN" ] && [ "$CONFIRM" != "PUBLISH" ]; then
+              echo "Dry runs require confirm=DRY_RUN or confirm=PUBLISH."
+              exit 1
+            fi
+          else
+            if [ "$CONFIRM" != "PUBLISH" ]; then
+              echo "Remote upload requires dryRunOnly=false and confirm=PUBLISH."
+              exit 1
+            fi
           fi
 
       - name: Validate requested version matches project version
         run: |
           current=$(./gradlew properties --console=plain 2>/dev/null | grep '^version:' | awk '{print $2}')
           echo "Project version: $current"
-          echo "Requested version: ${{ github.event.inputs.version }}"
-          if [ "${{ github.event.inputs.version }}" != "$current" ]; then
+          echo "Requested version: $REQUESTED_VERSION"
+          if [ "$REQUESTED_VERSION" != "$current" ]; then
             echo "Requested version does not match the project version. Update gradle.properties first."
+            exit 1
+          fi
+
+      - name: Validate release secrets are present
+        run: |
+          missing=0
+          if [ -z "$ORG_GRADLE_PROJECT_signingInMemoryKey" ]; then
+            echo "Missing SIGNINGINMEMORYKEY secret."
+            missing=1
+          fi
+          if [ -z "$ORG_GRADLE_PROJECT_signingInMemoryKeyPassword" ]; then
+            echo "Missing SIGNINGINMEMORYKEYPASSWORD secret."
+            missing=1
+          fi
+          if [ -z "$MAVEN_CENTRAL_USERNAME" ]; then
+            echo "Missing MAVENCENTRALUSERNAME secret."
+            missing=1
+          fi
+          if [ -z "$MAVEN_CENTRAL_PASSWORD" ]; then
+            echo "Missing MAVENCENTRALPASSWORD secret."
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
             exit 1
           fi
 
       - name: Build
         run: ./gradlew build --console=plain --stacktrace
 
-      - name: Publish to local test repository
+      - name: Publish signed artifacts to local test repository
         run: ./gradlew publishAllPublicationsToLocalTestRepository --console=plain --stacktrace
 
       - name: Run consumer smoke verification
@@ -76,6 +115,53 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare Central Portal bundle
+        run: |
+          rm -rf build/central-bundle
+          mkdir -p build/central-bundle
+          cp -R build/local-maven/. build/central-bundle/
+          find build/central-bundle -name 'maven-metadata.xml*' -delete
+
+          missing=0
+          while IFS= read -r file; do
+            if [ ! -f "$file.asc" ]; then
+              echo "Missing signature for ${file#build/central-bundle/}"
+              missing=1
+            fi
+            if [ ! -f "$file.md5" ]; then
+              echo "Missing md5 checksum for ${file#build/central-bundle/}"
+              missing=1
+            fi
+            if [ ! -f "$file.sha1" ]; then
+              echo "Missing sha1 checksum for ${file#build/central-bundle/}"
+              missing=1
+            fi
+          done < <(find build/central-bundle -type f \
+            ! -name '*.asc' \
+            ! -name '*.md5' \
+            ! -name '*.sha1' \
+            ! -name '*.sha256' \
+            ! -name '*.sha512' \
+            | sort)
+
+          if ! find build/central-bundle -name '*-sources.jar' -print -quit | grep -q .; then
+            echo "No sources jars found in Central Portal bundle."
+            missing=1
+          fi
+          if ! find build/central-bundle -name '*-javadoc.jar' -print -quit | grep -q .; then
+            echo "No javadoc jars found in Central Portal bundle."
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+          bundle="build/adaptivekt-${REQUESTED_VERSION}-central-bundle.zip"
+          rm -f "$bundle"
+          (cd build/central-bundle && zip -qr "../adaptivekt-${REQUESTED_VERSION}-central-bundle.zip" .)
+          unzip -t "$bundle"
+          echo "Central Portal bundle prepared at $bundle"
+
       - name: Upload local Maven repository artifact
         uses: actions/upload-artifact@v4
         with:
@@ -84,8 +170,38 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Remote publish disabled
+      - name: Upload Central Portal bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: central-portal-bundle
+          path: build/adaptivekt-${{ inputs.version }}-central-bundle.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Dry run complete
+        if: ${{ inputs.dryRunOnly == true }}
         run: |
-          echo "Remote publishing is intentionally disabled in PUBLISH-1B."
-          echo "This workflow prepares the build and local publishing artifacts, but does not publish to Maven Central."
-          echo "PUBLISH-2 will enable real remote publishing after namespace and secrets are confirmed."
+          echo "Dry run complete. No request was sent to Maven Central or Central Portal."
+
+      - name: Upload bundle to Central Portal
+        if: ${{ inputs.dryRunOnly == false && inputs.confirm == 'PUBLISH' }}
+        run: |
+          token=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
+          response_file="$(mktemp)"
+          status=$(curl --silent --show-error --write-out "%{http_code}" \
+            --output "$response_file" \
+            --request POST \
+            --header "Authorization: Bearer $token" \
+            --form "bundle=@build/adaptivekt-${REQUESTED_VERSION}-central-bundle.zip;type=application/octet-stream" \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=AdaptiveKt-${REQUESTED_VERSION}&publishingType=USER_MANAGED")
+
+          if [ "$status" != "201" ]; then
+            echo "Central Portal upload failed with HTTP status $status."
+            cat "$response_file"
+            exit 1
+          fi
+
+          deployment_id=$(cat "$response_file")
+          echo "Central Portal upload accepted."
+          echo "Deployment ID: $deployment_id"
+          echo "Publishing type: USER_MANAGED. Review and publish the deployment in Central Portal after validation."

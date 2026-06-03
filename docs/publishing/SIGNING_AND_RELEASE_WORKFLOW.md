@@ -6,16 +6,23 @@
 - Consumer smoke test is validated with `tools/verify-local-publishing-consumer.ps1`.
 - macOS/iOS validation is documented and prepared in `docs/publishing/IOS_MACOS_VALIDATION.md`.
 - Conditional signing is prepared in the Gradle build for publishable modules.
-- Remote Maven Central publishing is intentionally disabled for PUBLISH-1B.
+- The manual release workflow can now prepare a signed Central Portal bundle.
+- Remote Central Portal upload is guarded by `dryRunOnly=false` and `confirm=PUBLISH`.
+- Maven Central auto-publishing remains disabled; the workflow uploads with `publishingType=USER_MANAGED`.
 
-## Signing and publishing secrets planned
+## Signing and publishing secrets
 
-Future secrets expected for real remote publishing:
+GitHub Secrets expected by `.github/workflows/publish-release.yml`:
+
+- `SIGNINGINMEMORYKEY`
+- `SIGNINGINMEMORYKEYPASSWORD`
+- `MAVENCENTRALUSERNAME`
+- `MAVENCENTRALPASSWORD`
+
+The workflow maps signing secrets to Gradle properties:
 
 - `ORG_GRADLE_PROJECT_signingInMemoryKey`
 - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword`
-- `ORG_GRADLE_PROJECT_mavenCentralUsername`
-- `ORG_GRADLE_PROJECT_mavenCentralPassword`
 
 These values must not be committed to the repository.
 
@@ -45,7 +52,7 @@ These values must not be committed to the repository.
 
 ## Manual publish workflow
 
-A new workflow file exists at `.github/workflows/publish-release.yml`.
+The manual workflow file exists at `.github/workflows/publish-release.yml`.
 
 It is:
 
@@ -55,32 +62,36 @@ It is:
 - validating a project build
 - publishing all library publications to `build/local-maven`
 - running the consumer smoke verification script
-- listing generated artifacts
-- uploading `build/local-maven` as an inspection artifact
-- explicitly disabled for remote publishing
+- preparing a Central Portal upload bundle
+- verifying required signatures, checksums, sources jars, and javadoc jars in that bundle
+- uploading `build/local-maven` and the Central Portal bundle as inspection artifacts
+- contacting Central Portal only when `dryRunOnly=false` and `confirm=PUBLISH`
 
 ### Workflow inputs
 
 - `version`: requested version to publish
-- `confirm`: must be set to `PUBLISH`
-- `dryRunOnly`: keeps remote publishing disabled
+- `confirm`: `DRY_RUN` for dry runs, `PUBLISH` for guarded remote upload
+- `dryRunOnly`: when `true`, no request is sent to Maven Central or Central Portal
 
 ### What the workflow does not do
 
-- It does not publish to Maven Central.
+- It does not publish to Maven Central automatically.
 - It does not create a GitHub release.
 - It does not create a Git tag.
-- It does not use secrets to publish.
-- It does not call a remote publication repository.
+- It does not run on push or pull request.
+- In dry-run mode, it does not call Central Portal.
+
+When explicitly run with `dryRunOnly=false` and `confirm=PUBLISH`, it uploads the signed bundle to the Central Publisher API with `publishingType=USER_MANAGED`. That creates a Central Portal deployment that must still be reviewed and published manually after validation.
 
 ## Checklist before first real remote publish
 
 - Confirm the Maven Central/Sonatype namespace.
 - Confirm the final `groupId`.
-- Configure and validate signing secrets.
-- Configure and validate Maven Central credentials.
+- Validate signing secrets in the dry-run workflow.
+- Validate Maven Central credentials through a guarded Central Portal upload.
 - Set the final release version.
 - Update `CHANGELOG.md`.
 - Define the tag and release strategy.
 - Confirm `tools/verify-local-publishing-consumer.ps1` passes.
 - Confirm `.github/workflows/publishing-validation.yml` passes.
+- Confirm `.github/workflows/publish-release.yml` passes in dry-run mode.

@@ -1,8 +1,8 @@
 # Local Publishing
 
-PUBLISH-0B adds a local Maven publishing dry-run for AdaptiveKt library modules.
+PUBLISH-0B adds a local Maven publishing dry-run for AdaptiveKt library modules. PUBLISH-4 keeps this dry-run and adds the release-bundle prerequisites needed for Maven Central.
 
-This does not publish to Maven Central, does not publish snapshots remotely, does not sign artifacts, and does not require secrets.
+This does not publish to Maven Central and does not publish snapshots remotely. Local publishing does not require secrets. If signing Gradle properties are supplied, Gradle signs the generated publications; otherwise local artifacts remain unsigned.
 
 ## Coordinates
 
@@ -43,6 +43,17 @@ Output:
 ```text
 build/local-maven/
 ```
+
+Generated publications include:
+
+- main artifacts for Kotlin Multiplatform metadata, JVM, Android release, Wasm JS, and iOS when run on macOS;
+- sources jars;
+- placeholder javadoc jars for the alpha release;
+- POM files;
+- Gradle module metadata;
+- checksums.
+
+Signatures are generated only when `signingInMemoryKey` and `signingInMemoryKeyPassword` are supplied.
 
 ## Consume From The Local Repository
 
@@ -106,7 +117,6 @@ This verifies that the local Maven artifacts are consumable by an external Kotli
 
 - It does not publish to Maven Central.
 - It does not configure Sonatype Central Portal.
-- It does not configure signing.
 - It does not use secrets.
 - It does not create a release or tag.
 - It does not publish `admin-demo` or `docs-site`.
