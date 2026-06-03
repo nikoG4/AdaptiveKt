@@ -50,7 +50,7 @@ These values must not be committed to the repository.
 - Signing is enabled only when both properties are present.
 - If signing keys are missing, local build and local publishing continue to work.
 - The build does not require signing for local `publishAllPublicationsToLocalTestRepository`.
-- The release workflow normalizes `SIGNINGINMEMORYKEY` before invoking Gradle. It accepts an ASCII-armored private key directly, base64-encoded ASCII armor, or a base64-encoded secret keyring that can be imported and re-exported as ASCII armor in the temporary runner environment.
+- The release workflow normalizes `SIGNINGINMEMORYKEY` before invoking Gradle. It accepts an ASCII-armored private key directly, ASCII armor with escaped newlines, base64-encoded ASCII armor, or a base64-encoded secret keyring that can be imported and re-exported as ASCII armor in the temporary runner environment.
 - Gradle receives the normalized ASCII-armored key via `signingInMemoryKeyFile`, avoiding multi-line secret values in `$GITHUB_ENV`.
 
 ## Manual publish workflow

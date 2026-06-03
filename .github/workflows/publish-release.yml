@@ -86,14 +86,38 @@ jobs:
           fi
 
           normalized_key="$RUNNER_TEMP/signing-key.asc"
+          raw_key="$RUNNER_TEMP/signing-key.raw"
           decoded_key="$RUNNER_TEMP/signing-key.decoded"
 
-          if printf '%s' "$SIGNING_KEY_INPUT" | grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----'; then
-            printf '%s' "$SIGNING_KEY_INPUT" > "$normalized_key"
+          python3 <<'PY' > "$raw_key"
+          import os
+
+          value = os.environ["SIGNING_KEY_INPUT"]
+          value = value.replace("\\r\\n", "\n").replace("\\n", "\n")
+          print(value, end="")
+          PY
+
+          if grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$raw_key"; then
+            cp "$raw_key" "$normalized_key"
           else
-            if ! printf '%s' "$SIGNING_KEY_INPUT" | base64 --decode > "$decoded_key" 2>/dev/null; then
-              printf '%s' "$SIGNING_KEY_INPUT" | base64 -D > "$decoded_key"
+            if ! base64 --decode < "$raw_key" > "$decoded_key" 2>/dev/null; then
+              base64 -D < "$raw_key" > "$decoded_key"
             fi
+
+            DECODED_KEY_PATH="$decoded_key" python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["DECODED_KEY_PATH"])
+          data = path.read_bytes()
+          try:
+              text = data.decode()
+          except UnicodeDecodeError:
+              pass
+          else:
+              text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
+              path.write_text(text)
+          PY
 
             if grep -q -- '-----BEGIN PGP PRIVATE KEY BLOCK-----' "$decoded_key"; then
               cp "$decoded_key" "$normalized_key"
