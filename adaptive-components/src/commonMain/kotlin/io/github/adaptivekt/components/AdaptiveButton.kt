@@ -45,6 +45,18 @@ public enum class AdaptiveButtonSize {
     Large,
 }
 
+/**
+ * Renders a themed AdaptiveKt button for primary actions and secondary commands.
+ *
+ * @param text Visible button label.
+ * @param onClick Command invoked when the button is pressed.
+ * @param modifier Modifier applied to the root button container.
+ * @param variant Visual treatment (Primary, Secondary, Ghost, or Danger).
+ * @param size Button height and padding constraints (Small, Medium, Large).
+ * @param enabled Disables click interaction and lowers contrast when false.
+ * @param leadingIcon Optional composable slot for a leading icon.
+ * @param trailingIcon Optional composable slot for a trailing icon.
+ */
 @Composable
 public fun AdaptiveButton(
     text: String,

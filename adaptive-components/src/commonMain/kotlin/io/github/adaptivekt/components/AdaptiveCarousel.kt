@@ -94,6 +94,20 @@ public enum class AdaptiveCarouselTransition {
 }
 
 @OptIn(ExperimentalAnimationApi::class)
+/**
+ * Controlled carousel component that displays a single item with optional transitions and indicators.
+ *
+ * @param items List of items to display.
+ * @param selectedIndex The currently visible item index.
+ * @param onSelectedIndexChange Callback invoked when the user navigates to a new index.
+ * @param modifier Modifier applied to the root carousel container.
+ * @param loop If true, navigation wraps around at the ends.
+ * @param showControls If true, previous/next controls are rendered.
+ * @param showIndicators If true, dot indicators are rendered.
+ * @param transition Visual transition style between items.
+ * @param emptyContent Optional composable rendered when the items list is empty.
+ * @param itemContent Composable slot for rendering a single item.
+ */
 @Composable
 public fun <T> AdaptiveCarousel(
     items: List<T>,

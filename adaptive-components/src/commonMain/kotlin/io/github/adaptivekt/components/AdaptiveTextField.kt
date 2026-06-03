@@ -29,6 +29,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTokens
 
+/**
+ * Foundation text input component with label, placeholder, disabled state and validation message.
+ *
+ * @param value Current text value of the field.
+ * @param onValueChange Callback invoked when the text changes.
+ * @param modifier Modifier applied to the root field container.
+ * @param label Optional text label displayed above the input.
+ * @param placeholder Optional text displayed when the input is empty.
+ * @param enabled Disables input interaction and lowers contrast when false.
+ * @param validationMessage Optional validation message; when present, field renders in error state.
+ * @param leadingIcon Optional composable slot for a leading icon inside the field.
+ * @param trailingIcon Optional composable slot for a trailing icon inside the field.
+ */
 @Composable
 public fun AdaptiveTextField(
     value: String,

@@ -43,6 +43,19 @@ public data class AdaptiveNavigationTreeItem(
     val badge: String? = null,
 )
 
+/**
+ * Controlled hierarchical navigation tree for nested sidebars and settings panels.
+ *
+ * @param items List of root navigation tree items.
+ * @param selectedItemId The currently selected item ID.
+ * @param onItemSelected Callback invoked when an item is selected.
+ * @param expandedItemIds Set of currently expanded parent item IDs.
+ * @param onExpandedItemIdsChange Callback invoked when the expansion state changes.
+ * @param modifier Modifier applied to the root tree container.
+ * @param maxDepth Maximum rendering depth for nested children.
+ * @param itemStyle Visual style for the tree items.
+ * @param density Padding density for the tree items.
+ */
 @Composable
 public fun AdaptiveNavigationTree(
     items: List<AdaptiveNavigationTreeItem>,

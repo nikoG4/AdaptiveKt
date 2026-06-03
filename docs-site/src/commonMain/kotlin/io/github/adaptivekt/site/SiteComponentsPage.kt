@@ -738,10 +738,14 @@ AdaptiveMultiSelect(
             }
         },
         parameters = listOf(
-            ComponentParameter("title", "String?", "required/optional", true, "Accordion title required; Dialog title optional."),
-            ComponentParameter("expanded", "Boolean?", "null", false, "Accordion controlled expanded state."),
-            ComponentParameter("onDismissRequest", "() -> Unit", "required", true, "Dialog dismiss callback."),
-            ComponentParameter("confirmButton", "@Composable () -> Unit", "required", true, "Dialog confirm action slot."),
+            ComponentParameter("title", "String", "required", true, "AdaptiveAccordion required title."),
+            ComponentParameter("subtitle", "String?", "null", false, "AdaptiveAccordion optional subtitle."),
+            ComponentParameter("expanded", "Boolean?", "null", false, "AdaptiveAccordion controlled expanded state."),
+            ComponentParameter("onExpandedChange", "((Boolean) -> Unit)?", "null", false, "AdaptiveAccordion expansion callback."),
+            ComponentParameter("onDismissRequest", "() -> Unit", "required", true, "AdaptiveDialog dismiss callback."),
+            ComponentParameter("title (Dialog)", "String?", "null", false, "AdaptiveDialog optional title."),
+            ComponentParameter("confirmButton", "@Composable () -> Unit", "required", true, "AdaptiveDialog confirm action slot."),
+            ComponentParameter("dismissButton", "@Composable () -> Unit", "{}", false, "AdaptiveDialog dismiss action slot."),
             ComponentParameter("content", "@Composable () -> Unit", "required", true, "Panel or dialog content."),
         ),
         variants = listOf(),

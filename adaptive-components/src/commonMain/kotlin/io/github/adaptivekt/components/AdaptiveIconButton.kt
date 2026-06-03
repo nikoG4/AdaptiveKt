@@ -18,6 +18,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * Renders a compact, rounded icon button for toolbars and concise actions.
+ *
+ * @param onClick Command invoked when the button is pressed.
+ * @param modifier Modifier applied to the root button container.
+ * @param enabled Disables click interaction when false.
+ * @param size Size of the square hit area (default 40.dp).
+ * @param content Composable slot for the icon content, typically [AdaptiveIcons].
+ */
 @Composable
 public fun AdaptiveIconButton(
     onClick: () -> Unit,

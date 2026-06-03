@@ -60,6 +60,16 @@ public interface AdaptiveFormActionsScope {
     public fun danger(content: @Composable () -> Unit)
 }
 
+/**
+ * Responsive form layout component that organizes fields into sections and columns.
+ *
+ * @param modifier Modifier applied to the root form container.
+ * @param columns Configuration for the number of columns at different breakpoints.
+ * @param labelPosition Configuration for placing labels (Top or Inline).
+ * @param stickyActionsOnCompact If true, form actions stay fixed at the bottom on compact screens.
+ * @param maxWidth Maximum width of the form container.
+ * @param content DSL builder block for defining form sections, fields, and actions.
+ */
 @Composable
 public fun AdaptiveFormLayout(
     modifier: Modifier = Modifier,

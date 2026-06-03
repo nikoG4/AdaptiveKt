@@ -22,6 +22,15 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
+/**
+ * Segmented horizontal tabs component with scroll support for compact widths.
+ *
+ * @param tabs List of available tab models.
+ * @param selectedTab The currently selected tab.
+ * @param onTabSelected Callback invoked when a tab is selected.
+ * @param tabLabel Function to resolve the visible text label for a given tab.
+ * @param modifier Modifier applied to the root tabs container.
+ */
 @Composable
 public fun <T> AdaptiveTabs(
     tabs: List<T>,

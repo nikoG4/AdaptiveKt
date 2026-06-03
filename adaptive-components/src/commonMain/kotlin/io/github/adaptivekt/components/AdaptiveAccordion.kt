@@ -31,6 +31,17 @@ import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
+/**
+ * Expandable disclosure component for inline detail or nested settings.
+ *
+ * @param title Primary text label.
+ * @param modifier Modifier applied to the root accordion container.
+ * @param subtitle Optional secondary text label.
+ * @param expanded When non-null, the expansion state is externally controlled.
+ * @param defaultExpanded Initial expansion state when internally controlled.
+ * @param onExpandedChange Optional callback invoked when the user toggles the accordion.
+ * @param content Composable slot for the expandable content area.
+ */
 @Composable
 public fun AdaptiveAccordion(
     modifier: Modifier = Modifier,

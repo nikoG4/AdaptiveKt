@@ -39,6 +39,19 @@ private val NavigationRailWidth: Dp = AdaptiveTokens.PaneWidths.NavigationRail
 private val TopBarHeight: Dp = AdaptiveTokens.Sizes.TopBarHeight
 private val BottomNavigationHeight: Dp = AdaptiveTokens.Sizes.TopBarHeight + AdaptiveTokens.Spacing.Medium
 
+/**
+ * Responsive navigation shell that automatically switches between drawer, bottom bar, rail, and sidebar.
+ *
+ * @param navItems List of top-level navigation items.
+ * @param selectedItemId The currently selected item ID.
+ * @param onItemSelected Callback invoked when a navigation item is selected.
+ * @param modifier Modifier applied to the root scaffold container.
+ * @param preferBottomNavigationOnCompact Forces bottom navigation on compact screens if true.
+ * @param navigationItemStyle Visual style for navigation items (Card, Pill, Minimal).
+ * @param navigationDensity Padding density for navigation items.
+ * @param topBar Optional composable slot for a top app bar.
+ * @param content Screen content with applied scaffold padding.
+ */
 @Composable
 public fun AdaptiveNavigationScaffold(
     navItems: List<AdaptiveNavItem>,

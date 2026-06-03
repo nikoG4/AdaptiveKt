@@ -6,6 +6,15 @@ import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 
+/**
+ * Search input component with built-in search icon and optional clear action.
+ *
+ * @param value Current text value of the search field.
+ * @param onValueChange Callback invoked when the text changes.
+ * @param modifier Modifier applied to the root container.
+ * @param placeholder Optional placeholder text (default "Search").
+ * @param onClear Optional callback for the clear button.
+ */
 @Composable
 public fun AdaptiveSearchField(
     value: String,

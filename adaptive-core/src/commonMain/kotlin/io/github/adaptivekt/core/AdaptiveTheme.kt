@@ -10,6 +10,15 @@ private val LocalAdaptiveShapes = staticCompositionLocalOf { AdaptiveShapeScheme
 private val LocalAdaptiveTypography = staticCompositionLocalOf { AdaptiveTypography.default() }
 private val LocalAdaptiveStates = staticCompositionLocalOf { AdaptiveStateScheme.default() }
 
+/**
+ * Root theme provider that supplies colors, shapes, typography, and state tokens to the composition.
+ *
+ * @param colorScheme Semantic colors for surfaces, text, feedback, selections, and component states.
+ * @param shapes Shape tokens used by cards, buttons, menus, and fields.
+ * @param typography Typography defaults for labels, body text, and headings.
+ * @param states State tokens for hover, pressed, selected, disabled, and focus behaviors.
+ * @param content The UI subtree that consumes the theme values.
+ */
 @Composable
 public fun AdaptiveTheme(
     colorScheme: AdaptiveColorScheme = AdaptiveColorSchemes.defaultLight(),
