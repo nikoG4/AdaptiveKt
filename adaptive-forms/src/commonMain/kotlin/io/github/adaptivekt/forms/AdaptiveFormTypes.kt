@@ -22,12 +22,12 @@ public enum class LabelPosition {
     Start,
 }
 
-public data class ValidationMessage(
+public data class AdaptiveValidationMessage(
     val message: String,
-    val type: ValidationMessageType = ValidationMessageType.Error,
+    val type: AdaptiveValidationMessageType = AdaptiveValidationMessageType.Error,
 )
 
-public enum class ValidationMessageType {
+public enum class AdaptiveValidationMessageType {
     Error,
     Warning,
     Info,

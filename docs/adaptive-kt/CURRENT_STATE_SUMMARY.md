@@ -99,7 +99,7 @@ adaptive-kt
 - [x] AdaptiveFormLayout
 - [x] AdaptiveFormScope, AdaptiveFormSectionScope, AdaptiveFormActionsScope
 - [x] FieldSpan, LabelPosition
-- [x] ValidationMessage, ValidationMessageType
+- [x] AdaptiveValidationMessage, AdaptiveValidationMessageType
 - [x] AdaptiveFormColumns(compact/medium/expanded/large)
 - [x] columnsForBreakpoint(), resolveFieldSpan()
 - [x] Tests: AdaptiveFormHelpersTest

@@ -433,7 +433,7 @@ Implementation:
 
 Public API:
 - No public API changed.
-- Preserved `AdaptiveFormLayout`, `AdaptiveFormScope`, `AdaptiveFormSectionScope`, `AdaptiveFormActionsScope`, `FieldSpan`, `LabelPosition`, and `ValidationMessage`.
+- Preserved `AdaptiveFormLayout`, `AdaptiveFormScope`, `AdaptiveFormSectionScope`, `AdaptiveFormActionsScope`, `FieldSpan`, `LabelPosition`, and `AdaptiveValidationMessage`.
 
 Files modified:
 - adaptive-forms/build.gradle.kts

@@ -48,7 +48,7 @@ public interface AdaptiveFormSectionScope {
     public fun field(
         label: String,
         span: FieldSpan = FieldSpan.Full,
-        validationMessage: ValidationMessage? = null,
+        validationMessage: AdaptiveValidationMessage? = null,
         required: Boolean = false,
         content: @Composable () -> Unit,
     )
@@ -283,11 +283,11 @@ private fun FieldLabel(field: FormFieldModel) {
 }
 
 @Composable
-private fun ValidationMessageView(message: ValidationMessage) {
+private fun ValidationMessageView(message: AdaptiveValidationMessage) {
     val color = when (message.type) {
-        ValidationMessageType.Error -> AdaptiveTheme.colors.danger
-        ValidationMessageType.Warning -> AdaptiveTheme.colors.warning
-        ValidationMessageType.Info -> AdaptiveTheme.colors.info
+        AdaptiveValidationMessageType.Error -> AdaptiveTheme.colors.danger
+        AdaptiveValidationMessageType.Warning -> AdaptiveTheme.colors.warning
+        AdaptiveValidationMessageType.Info -> AdaptiveTheme.colors.info
     }
 
     BasicText(
@@ -334,7 +334,7 @@ private data class FormSectionModel(
 private data class FormFieldModel(
     val label: String,
     val span: FieldSpan,
-    val validationMessage: ValidationMessage?,
+    val validationMessage: AdaptiveValidationMessage?,
     val required: Boolean,
     val content: @Composable () -> Unit,
 )
@@ -384,7 +384,7 @@ private class AdaptiveFormSectionScopeImpl(
     override fun field(
         label: String,
         span: FieldSpan,
-        validationMessage: ValidationMessage?,
+        validationMessage: AdaptiveValidationMessage?,
         required: Boolean,
         content: @Composable () -> Unit,
     ) {

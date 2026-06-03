@@ -69,7 +69,7 @@ This catalog summarizes the public components and primitives that are documented
 - `FieldSpan`
 - `AdaptiveFormColumns`
 - `LabelPosition`
-- `ValidationMessage`
+- `AdaptiveValidationMessage`
 
 ## adaptive-data
 

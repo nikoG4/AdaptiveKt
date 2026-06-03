@@ -41,8 +41,8 @@ import io.github.adaptivekt.forms.AdaptiveFormColumns
 import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.forms.FieldSpan
 import io.github.adaptivekt.forms.LabelPosition
-import io.github.adaptivekt.forms.ValidationMessage
-import io.github.adaptivekt.forms.ValidationMessageType
+import io.github.adaptivekt.forms.AdaptiveValidationMessage
+import io.github.adaptivekt.forms.AdaptiveValidationMessageType
 import io.github.adaptivekt.layout.AdaptiveGrid
 
 @Composable
@@ -470,7 +470,7 @@ internal fun SettingsScreen() {
                 field(label = "Company name", span = FieldSpan.Full, required = true) {
                     AdaptiveTextField(value = companyName, onValueChange = { companyName = it }, placeholder = "Company name")
                 }
-                field(label = "Tax ID", span = FieldSpan.Half, validationMessage = ValidationMessage("Tax ID is required", type = ValidationMessageType.Warning)) {
+                field(label = "Tax ID", span = FieldSpan.Half, validationMessage = AdaptiveValidationMessage("Tax ID is required", type = AdaptiveValidationMessageType.Warning)) {
                     AdaptiveTextField(value = taxId, onValueChange = { taxId = it }, placeholder = "Tax ID")
                 }
                 field(label = "Email", span = FieldSpan.Half, required = true) {

@@ -81,8 +81,8 @@ adaptive-kt/
 | `AdaptiveFormActionsScope` | Scope para acciones |
 | `FieldSpan` | Full, Half, Third, TwoThirds, Columns |
 | `LabelPosition` | Top, Start |
-| `ValidationMessage` | Mensaje de validación |
-| `ValidationMessageType` | Error, Warning, Info |
+| `AdaptiveValidationMessage` | Mensaje de validación |
+| `AdaptiveValidationMessageType` | Error, Warning, Info |
 | `AdaptiveFormColumns` | Helper de columns por breakpoint |
 
 ### :adaptive-data

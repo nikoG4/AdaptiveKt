@@ -45,7 +45,7 @@ interface AdaptiveFormSectionScope {
         label: String,
         fieldSpan: FieldSpan = FieldSpan.Full,
         labelPosition: LabelPosition? = null,
-        validationMessage: ValidationMessage? = null,
+        validationMessage: AdaptiveValidationMessage? = null,
         content: @Composable () -> Unit,
     )
 }
@@ -113,12 +113,12 @@ enum class LabelPosition {
 }
 ```
 
-### ValidationMessage
+### AdaptiveValidationMessage
 
 Encapsulates inline field validation.
 
 ```kotlin
-data class ValidationMessage(
+data class AdaptiveValidationMessage(
     val message: String,
     val isError: Boolean = true,
 )
@@ -199,7 +199,7 @@ AdaptiveFormLayout {
     section(title = "Contacto") {
         field(
             label = "Correo electrónico",
-            validationMessage = ValidationMessage("Formato inválido")
+            validationMessage = AdaptiveValidationMessage("Formato inválido")
         ) {
             TextField(...)
         }

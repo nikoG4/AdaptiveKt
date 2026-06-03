@@ -76,8 +76,8 @@ Documentar todos los componentes, helpers y composites visuales existentes en Ad
 | AdaptiveFormActionsScope | adaptive-forms/AdaptiveFormLayout.kt | adaptive-forms | API Pública (interface) | Scope para acciones | adaptive-forms (quedar) |
 | FieldSpan | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública (enum) | Span para campos (Full/Half/Third/TwoThirds/Columns) | adaptive-forms (quedar) |
 | LabelPosition | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública (enum) | Posición de labels (Top/Start) | adaptive-forms (quedar) |
-| ValidationMessage | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública | Mensaje de validación | adaptive-forms (quedar) |
-| ValidationMessageType | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública (enum) | Tipo de mensaje (Error/Warning/Info) | adaptive-forms (quedar) |
+| AdaptiveValidationMessage | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública | Mensaje de validación | adaptive-forms (quedar) |
+| AdaptiveValidationMessageType | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública (enum) | Tipo de mensaje (Error/Warning/Info) | adaptive-forms (quedar) |
 | AdaptiveFormColumns | adaptive-forms/AdaptiveFormTypes.kt | adaptive-forms | API Pública | Helper de columns por breakpoint | adaptive-forms (quedar) |
 | columnsForBreakpoint | adaptive-forms/AdaptiveFormLayout.kt | adaptive-forms | API Pública | Helper para obtener columns | adaptive-forms (quedar) |
 | resolveFieldSpan | adaptive-forms/AdaptiveFormLayout.kt | adaptive-forms | API Pública | Helper para resolver field span | adaptive-forms (quedar) |

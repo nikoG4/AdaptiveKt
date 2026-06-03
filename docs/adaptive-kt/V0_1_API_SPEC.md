@@ -304,10 +304,10 @@ sealed interface FieldSpan {
 }
 ```
 
-### ValidationMessage
+### AdaptiveValidationMessage
 
 ```kotlin
-data class ValidationMessage(
+data class AdaptiveValidationMessage(
     val message: String,
     val isError: Boolean = true,
 )
@@ -333,7 +333,7 @@ interface AdaptiveFormSectionScope {
         label: String,
         fieldSpan: FieldSpan = FieldSpan.Full,
         labelPosition: LabelPosition? = null,
-        validationMessage: ValidationMessage? = null,
+        validationMessage: AdaptiveValidationMessage? = null,
         content: @Composable () -> Unit,
     )
 }

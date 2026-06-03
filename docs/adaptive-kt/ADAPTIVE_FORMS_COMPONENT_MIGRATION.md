@@ -64,7 +64,7 @@ Preserved:
 - `AdaptiveFormActionsScope`
 - `FieldSpan`
 - `LabelPosition`
-- `ValidationMessage`
+- `AdaptiveValidationMessage`
 
 ## Verification
 

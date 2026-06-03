@@ -97,8 +97,8 @@ Stable for v0.1:
 - `AdaptiveFormActionsScope`
 - `AdaptiveFormColumns`
 - `LabelPosition`
-- `ValidationMessage`
-- `ValidationMessageType`
+- `AdaptiveValidationMessage`
+- `AdaptiveValidationMessageType`
 - `columnsForBreakpoint`
 - `resolveFieldSpan`
 

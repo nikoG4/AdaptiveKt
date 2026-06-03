@@ -18,7 +18,7 @@ AdaptiveFormLayout {
 }
 ```
 
-Advanced example: use `FieldSpan.Half` and `ValidationMessage`.
+Advanced example: use `FieldSpan.Half` and `AdaptiveValidationMessage`.
 
 Responsive notes: compact screens resolve labels to top position.
 

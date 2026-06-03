@@ -67,8 +67,8 @@ import io.github.adaptivekt.feedback.AdaptiveLoadingState
 import io.github.adaptivekt.forms.AdaptiveFormColumns
 import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.forms.FieldSpan
-import io.github.adaptivekt.forms.ValidationMessage
-import io.github.adaptivekt.forms.ValidationMessageType
+import io.github.adaptivekt.forms.AdaptiveValidationMessage
+import io.github.adaptivekt.forms.AdaptiveValidationMessageType
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationItemStyle
@@ -464,7 +464,7 @@ AdaptiveMultiSelect(
                     field("Name", span = FieldSpan.Half, required = true) {
                         AdaptiveTextField(value = name, onValueChange = { name = it })
                     }
-                    field("Plan", span = FieldSpan.Half, validationMessage = ValidationMessage("Preview account", ValidationMessageType.Info)) {
+                    field("Plan", span = FieldSpan.Half, validationMessage = AdaptiveValidationMessage("Preview account", AdaptiveValidationMessageType.Info)) {
                         AdaptiveTextField(value = "Team", onValueChange = {}, enabled = false)
                     }
                 }
