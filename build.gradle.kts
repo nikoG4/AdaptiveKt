@@ -66,12 +66,6 @@ subprojects {
             }
         }
 
-        val javadocJar = tasks.register<Jar>("javadocJar") {
-            archiveClassifier.set("javadoc")
-            dependsOn(writeJavadocPlaceholder)
-            from(layout.buildDirectory.dir("generated/javadoc-placeholder"))
-        }
-
         val signingInMemoryKeyBase64 = providers.gradleProperty("signingInMemoryKeyBase64")
             .map { encoded -> String(Base64.getDecoder().decode(encoded), Charsets.UTF_8) }
         val signingInMemoryKeyFile = providers.gradleProperty("signingInMemoryKeyFile")
@@ -100,8 +94,16 @@ subprojects {
             }
 
             publications.withType<MavenPublication>().configureEach {
+                val publicationName = name
+                val publicationJavadocJar = tasks.register<Jar>("${publicationName}JavadocJar") {
+                    archiveBaseName.set("${project.name}-$publicationName")
+                    archiveClassifier.set("javadoc")
+                    dependsOn(writeJavadocPlaceholder)
+                    from(layout.buildDirectory.dir("generated/javadoc-placeholder"))
+                }
+
                 artifactId = project.name
-                artifact(javadocJar)
+                artifact(publicationJavadocJar)
                 pom {
                     name.set("AdaptiveKt ${project.name}")
                     description.set(publicationDescriptions.getValue(project.name))
