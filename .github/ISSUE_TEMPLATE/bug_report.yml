@@ -1,0 +1,93 @@
+name: Bug report
+description: Report a reproducible AdaptiveKt bug or regression.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please include enough detail for a maintainer to reproduce it.
+  - type: input
+    id: version
+    attributes:
+      label: AdaptiveKt version
+      description: Example: 0.1.0-alpha01
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      options:
+        - adaptive-core
+        - adaptive-components
+        - adaptive-layout
+        - adaptive-feedback
+        - adaptive-navigation
+        - adaptive-forms
+        - adaptive-data
+        - admin-demo
+        - docs-site
+        - unsure
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - Android
+        - Desktop/JVM
+        - Web/Wasm
+        - iOS
+        - Common
+    validations:
+      required: true
+  - type: input
+    id: kotlin-version
+    attributes:
+      label: Kotlin version
+      placeholder: "2.1.21"
+  - type: input
+    id: compose-version
+    attributes:
+      label: Compose Multiplatform version
+      placeholder: "1.8.2"
+  - type: input
+    id: gradle-version
+    attributes:
+      label: Gradle version
+      placeholder: "8.13"
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include a small code snippet or link to a minimal repository.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or logs
+      description: Add screenshots for visual issues and stack traces for build/runtime failures.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Preflight
+      options:
+        - label: I checked the latest README/docs for relevant usage notes.
+        - label: This report does not include secrets or private credentials.

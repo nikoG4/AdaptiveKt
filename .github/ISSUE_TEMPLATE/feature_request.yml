@@ -1,0 +1,59 @@
+name: Feature request
+description: Propose a new component, API, or behavior.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or developer problem should AdaptiveKt solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: Proposed API or behavior
+      description: If you have an API shape in mind, sketch it here.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Likely module
+      options:
+        - adaptive-core
+        - adaptive-components
+        - adaptive-layout
+        - adaptive-feedback
+        - adaptive-navigation
+        - adaptive-forms
+        - adaptive-data
+        - docs/examples
+        - unsure
+  - type: dropdown
+    id: platform-impact
+    attributes:
+      label: Platform impact
+      multiple: true
+      options:
+        - Common/commonMain
+        - Android
+        - Desktop/JVM
+        - Web/Wasm
+        - iOS
+  - type: textarea
+    id: common-main
+    attributes:
+      label: commonMain feasibility
+      description: Can this be implemented as shared Compose Multiplatform code? If not, why?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Scope check
+      options:
+        - label: This request does not require Material 3 or an external icon pack.
+        - label: This request can be documented with examples if accepted.

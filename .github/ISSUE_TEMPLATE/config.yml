@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation site
+    url: https://nikog4.github.io/AdaptiveKt/
+    about: Read the current AdaptiveKt documentation.
+  - name: Security reports
+    url: https://github.com/nikoG4/AdaptiveKt/security/advisories/new
+    about: Please report vulnerabilities privately when possible.

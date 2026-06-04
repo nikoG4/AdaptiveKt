@@ -3,6 +3,15 @@
 ## Unreleased
 
 ### Added
+- Grant readiness documentation, repository community files, GitHub issue templates, and pull request template.
+- README installation guidance for the published Maven Central alpha.
+
+### Changed
+- Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.
+
+## 0.1.0-alpha01
+
+### Added
 - AdaptiveTheme foundation.
 - Light and dark color schemes.
 - Platform theme presets and PlatformDefault.
@@ -17,10 +26,11 @@
 - Docs-site and admin demo.
 - Visual verification tooling.
 - Local Maven publishing dry-run configuration for library modules.
+- Maven Central publication for library modules under `io.github.nikog4.adaptivekt`.
 
 ### Changed
 - Prepared conditional Gradle signing support for future Maven Central release workflows.
-- Added a manual `publish-release.yml` workflow for safe manual publish preparation without remote publishing.
+- Added a guarded manual `publish-release.yml` workflow for release preparation.
 
 ### Fixed
 - Mobile Wasm admin-demo content now scrolls normally on compact/touch viewports.

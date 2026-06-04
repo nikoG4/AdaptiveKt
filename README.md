@@ -5,94 +5,120 @@
 
 # AdaptiveKt
 
-Compose Multiplatform admin UI toolkit for adaptive dashboards, data views, forms, navigation, feedback states, and shared UI components.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.nikog4.adaptivekt/adaptive-components?label=Maven%20Central)](https://central.sonatype.com/search?q=io.github.nikog4.adaptivekt)
+[![CI](https://github.com/nikoG4/AdaptiveKt/actions/workflows/ci.yml/badge.svg)](https://github.com/nikoG4/AdaptiveKt/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/nikoG4/AdaptiveKt)](LICENSE)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-7F52FF)](https://kotlinlang.org/)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-4285F4)](https://www.jetbrains.com/lp/compose-multiplatform/)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-2563EB)](https://nikog4.github.io/AdaptiveKt/)
 
-AdaptiveKt is source-first today. Maven Central publishing is not available yet, so consume it as included Gradle modules or a repository/submodule dependency. A local Maven publishing dry-run is available for release preparation.
+Adaptive UI primitives for Compose Multiplatform.
 
-## Platform Support
+AdaptiveKt is an alpha-stage Kotlin and Compose Multiplatform library for building responsive admin, productivity, and data-heavy interfaces from shared UI code. It focuses on the unglamorous but expensive parts of real app UI: layout breakpoints, dashboard shells, tables that become mobile cards, form sections, feedback states, navigation patterns, and reusable component defaults that look professional without requiring every call site to carry a wall of modifiers.
 
-| Platform | Status |
+The project is published to Maven Central as `0.1.0-alpha01`. It is usable for experimentation, demos, internal tools, and early integration feedback, but it is not a stable 1.0 API yet. APIs may change before beta/stable releases as the library hardens.
+
+## Why AdaptiveKt?
+
+Compose Multiplatform makes it possible to share UI across platforms, but teams still need to solve responsive product UI patterns themselves. A simple admin screen often needs breakpoint rules, navigation mode changes, mobile-friendly data cards, clean action states, form layout decisions, empty/loading/error states, and consistent theme tokens.
+
+AdaptiveKt exists to reduce that friction for Kotlin Multiplatform developers. Its direction is commonMain-first: shared primitives should work across Desktop/JVM, Android, Web/Wasm, and iOS where the underlying Compose Multiplatform tooling supports them.
+
+This is not a replacement for Material, nor a claim to be a complete enterprise design system. AdaptiveKt is a focused toolkit for adaptive app patterns that can complement a product's own brand and component layer.
+
+## What It Includes
+
+| Module | Purpose |
 | --- | --- |
-| Desktop/JVM | Supported and used by `:admin-demo` |
-| Android | Library targets enabled |
-| Web/Wasm | Library targets and demo distribution enabled |
-| iOS | Targets declared; validation requires macOS |
+| `adaptive-core` | Breakpoints, tokens, theme foundation, color schemes, typography, and state tokens. |
+| `adaptive-components` | Buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, fields, menus, select, multi-select, carousel, and embedded functional icons. |
+| `adaptive-layout` | Responsive layout primitives such as `AdaptiveContainer` and `AdaptiveGrid`. |
+| `adaptive-feedback` | Empty, loading, and error state components. |
+| `adaptive-navigation` | Adaptive navigation scaffold, navigation modes, sidebar/rail/bottom navigation defaults, and navigation tree. |
+| `adaptive-forms` | Responsive form sections, field layout, validation messages, and actions. |
+| `adaptive-data` | Responsive data views that switch between desktop table layouts and compact mobile cards. |
 
-## Features
+The repository also contains a docs-site and admin demo used to exercise the library visually. Those demo modules are not Maven artifacts.
 
-- Adaptive breakpoints and responsive helpers in `:adaptive-core`
-- Theme foundation with `AdaptiveTheme`, light/dark color schemes, shapes, typography, and state tokens used across core components and shared modules
-- Layout primitives including `AdaptiveContainer` and `AdaptiveGrid`
-- Navigation scaffold with breakpoint-driven navigation modes and professional pill-style sidebar defaults
-- Data view that switches between mobile cards and wider table layouts
-- Responsive form layout with sections, fields, validation messages, and actions
-- Feedback states for animated loading, empty, and error content
-- Components: buttons, icon buttons, badges, avatars, thumbnails, chips, cards, surfaces, text fields, search fields, menus, dropdowns, select, multi-select, and carousel
-- Hierarchical navigation tree for nested admin sidebars and settings panels
-- Wasm browser demo
-- Public Compose Multiplatform/Wasm documentation site with a product home page, rendered docs pages, live component examples, code snippets, and API tables
-- Visual verification tooling for Desktop and Web
+## Installation
 
-## Quick Start
-
-Use JDK 17 for local development and Gradle builds. AdaptiveKt is validated with Java 17 in CI; newer JDKs can fail in Kotlin/Gradle before project compilation starts.
-
-Windows PowerShell session setup:
-
-```powershell
-$env:JAVA_HOME="C:\Program Files\Java\jdk-17"
-$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-.\tools\check-dev-environment.ps1
-.\gradlew.bat build --console=plain --stacktrace
-```
-
-Add the modules you need as source dependencies:
+AdaptiveKt is available from Maven Central.
 
 ```kotlin
-// settings.gradle.kts
-include(":adaptive-core")
-include(":adaptive-components")
-include(":adaptive-layout")
-include(":adaptive-navigation")
-include(":adaptive-forms")
-include(":adaptive-data")
-include(":adaptive-feedback")
-```
+repositories {
+    google()
+    mavenCentral()
+}
 
-Then depend on the modules from your Compose Multiplatform target:
-
-```kotlin
 dependencies {
-    implementation(project(":adaptive-core"))
-    implementation(project(":adaptive-components"))
-    implementation(project(":adaptive-layout"))
+    implementation("io.github.nikog4.adaptivekt:adaptive-components:0.1.0-alpha01")
 }
 ```
 
-## Examples
+Use only the modules your app needs:
 
 ```kotlin
-AdaptiveTheme {
-    AdaptiveGrid(columns = 12) {
-        item(span = 6) { AdaptiveCard { /* content */ } }
-        item(span = 6) { AdaptiveCard { /* content */ } }
+dependencies {
+    implementation("io.github.nikog4.adaptivekt:adaptive-core:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-components:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-layout:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-feedback:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-navigation:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-forms:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-data:0.1.0-alpha01")
+}
+```
+
+## Quick Start
+
+```kotlin
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.layout.AdaptiveGrid
+
+@Composable
+fun DashboardSummary() {
+    AdaptiveTheme {
+        AdaptiveGrid(columns = 12) {
+            item(span = 6) {
+                AdaptiveCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        BasicText("Revenue")
+                        BasicText("\$42,800")
+                        AdaptiveButton(
+                            text = "View report",
+                            onClick = { /* navigate */ },
+                        )
+                    }
+                }
+            }
+
+            item(span = 6) {
+                AdaptiveCard {
+                    BasicText("Open invoices")
+                    BasicText("18")
+                }
+            }
+        }
     }
 }
 ```
 
-```kotlin
-AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) {
-    AdminApp()
-}
-```
+Select-style components expose controlled state:
 
 ```kotlin
-var selected by remember { mutableStateOf<String?>(null) }
+var status by remember { mutableStateOf<String?>(null) }
 
 AdaptiveSelect(
     options = listOf("Open", "Pending", "Closed"),
-    selectedOption = selected,
-    onSelectedOptionChange = { selected = it },
+    selectedOption = status,
+    onSelectedOptionChange = { status = it },
     optionLabel = { it },
     label = "Status",
     searchable = true,
@@ -100,127 +126,93 @@ AdaptiveSelect(
 )
 ```
 
-```kotlin
-var teams by remember { mutableStateOf(listOf("Operations", "Finance")) }
+## Platform Support
 
-AdaptiveMultiSelect(
-    options = listOf("Operations", "Finance", "Support", "Sales"),
-    selectedOptions = teams,
-    onSelectedOptionsChange = { teams = it },
-    optionLabel = { it },
-    label = "Teams",
-    searchable = true,
-    maxVisibleChips = 2,
-)
-```
+| Platform | Status |
+| --- | --- |
+| Desktop/JVM | Library and admin demo build/run on JVM. |
+| Android | Library targets are enabled and built through the Android target. |
+| Web/Wasm | Library targets and demo/docs distributions are enabled. |
+| iOS | Library targets are declared; final iOS validation depends on macOS and Compose Multiplatform/iOS tooling maturity. |
 
-```kotlin
-var slide by remember { mutableStateOf(0) }
-
-AdaptiveCarousel(
-    items = dashboardCards,
-    selectedIndex = slide,
-    onSelectedIndexChange = { slide = it },
-    transition = AdaptiveCarouselTransition.Slide,
-) { card, index ->
-    SummaryPanel(card, index)
-}
-```
-
-## Run The Demo
-
-Desktop:
-
-```powershell
-.\gradlew.bat :admin-demo:run
-```
-
-Wasm development:
-
-```powershell
-.\gradlew.bat :admin-demo:wasmJsBrowserDevelopmentRun
-```
-
-Wasm production distribution:
-
-```powershell
-.\gradlew.bat :admin-demo:wasmJsBrowserDistribution
-```
-
-Output: `admin-demo/build/dist/wasmJs/productionExecutable/`
-
-## Run The Documentation Site
-
-The public documentation site is implemented in `:docs-site` with Compose Multiplatform/Wasm. It includes a product landing page, a documentation overview, and a live component catalog rendered with real AdaptiveKt APIs.
-
-```powershell
-.\gradlew.bat :docs-site:wasmJsBrowserDevelopmentRun
-.\gradlew.bat :docs-site:wasmJsBrowserDistribution
-```
-
-The generated Pages artifact also includes the admin demo under `/demo/app/`.
-
-## Visual Capture
-
-Desktop screenshots use Robot/AWT and require an active graphical session:
-
-```powershell
-.\tools\capture-admin-demo.ps1
-```
-
-Web screenshots use Playwright against the Wasm distribution:
-
-```powershell
-.\tools\capture-admin-demo-web.ps1
-```
-
-Docs-site screenshots use Playwright against `site-dist/`:
-
-```powershell
-.\tools\capture-docs-site-web.ps1
-```
-
-Basic generated-site link check:
-
-```powershell
-.\tools\check-site-links.ps1
-```
+AdaptiveKt is designed for Compose Multiplatform commonMain usage. Platform-specific screenshot tooling, Robot/AWT capture helpers, and demo image loading stay outside the library modules.
 
 ## Documentation
 
-- Component docs: `docs/components/`
-- Guides: `docs/guides/`
-- Development notes: `docs/development/`
-- Local setup: `docs/development/setup.md`
-- Local publishing dry-run: `docs/publishing/LOCAL_PUBLISHING.md`
-- Signing and release workflow preparation: `docs/publishing/SIGNING_AND_RELEASE_WORKFLOW.md`
-- Roadmap: `docs/roadmap/`
-- Historical project docs: `docs/adaptive-kt/`
+- Docs site: https://nikog4.github.io/AdaptiveKt/
+- Component docs: [docs/components](docs/components)
+- Development setup: [docs/development/setup.md](docs/development/setup.md)
+- Local publishing notes: [docs/publishing/LOCAL_PUBLISHING.md](docs/publishing/LOCAL_PUBLISHING.md)
+- Maven Central readiness notes: [docs/publishing/MAVEN_CENTRAL_READINESS.md](docs/publishing/MAVEN_CENTRAL_READINESS.md)
 
-## GitHub Pages
+## Examples
 
-The Pages artifact is prepared by:
+- `admin-demo`: responsive admin dashboard demo for Desktop and Web/Wasm.
+- `docs-site`: public Compose Multiplatform/Wasm documentation site and component catalog.
+- `examples/`: example work may be developed separately from the core library and is not required to consume the published artifacts.
 
-```powershell
-.\tools\prepare-pages-site.ps1
-```
-
-This builds `:docs-site` as the site root and copies `:admin-demo` under `site-dist/demo/app/`. The older `site/` static HTML is kept as a temporary fallback and is not the primary Pages output.
-
-Serve the generated site locally:
+Run the admin demo:
 
 ```powershell
-.\tools\serve-site-dist.ps1
+.\gradlew.bat :admin-demo:run
+.\gradlew.bat :admin-demo:wasmJsBrowserDevelopmentRun
 ```
+
+Run the docs site:
+
+```powershell
+.\gradlew.bat :docs-site:wasmJsBrowserDevelopmentRun
+```
+
+## Project Status
+
+Current published version: `0.1.0-alpha01`.
+
+AdaptiveKt is alpha software. The current focus is to validate the API surface, improve documentation and examples, harden accessibility and keyboard/focus behavior, expand visual regression coverage, and gather feedback before stabilizing a beta API.
+
+## Why This Matters For The Kotlin Ecosystem
+
+Kotlin Multiplatform adoption improves when developers can see credible paths for real user interfaces, not only small samples. AdaptiveKt targets a practical gap: shared responsive UI patterns for dashboards, internal tools, data workflows, and product admin screens.
+
+The project can help:
+
+- Kotlin Multiplatform developers prototype and ship shared UI faster.
+- Compose Multiplatform adopters evaluate desktop, Android, Web/Wasm, and iOS UI from one codebase.
+- Students, indie developers, and small teams learn commonMain-first UI architecture.
+- Internal tool builders avoid rebuilding the same admin patterns from scratch.
 
 ## Roadmap
 
-- Validate iOS targets on macOS
-- Publish artifacts to Maven Central
-- Expand visual regression coverage
-- Evaluate platform/brand presets
-- Add async/server search patterns for select-style components
+Short-term alpha hardening:
+
+- Stabilize core public APIs and document migration rules.
+- Improve accessibility, keyboard navigation, focus, and pointer behavior.
+- Expand visual regression and screenshot testing across Desktop and Web/Wasm.
+- Add richer examples for admin, productivity, and ecommerce-style workflows.
+- Validate iOS artifacts and demos on macOS.
+- Continue theme/token work for light and dark modes.
+- Build a contributor feedback loop through issues, templates, and documented governance.
+
+See [ROADMAP.md](ROADMAP.md) for the longer plan.
+
+## Contributing
+
+Contributions, bug reports, docs improvements, and API feedback are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and please keep changes commonMain-first unless a platform-specific boundary is intentional and documented.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for supported versions and private vulnerability reporting guidance.
+
+## Code Of Conduct
+
+AdaptiveKt follows a contributor code of conduct. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Grant Readiness And Sustainability
+
+AdaptiveKt is seeking support to mature from an alpha Compose Multiplatform UI toolkit into a more reliable, documented, and tested library for the Kotlin ecosystem. Grant funding would be directed toward API stabilization, accessibility work, cross-platform examples, visual regression coverage, iOS validation, and sustained maintenance.
+
+See [docs/grants/GRANT_PROPOSAL_DRAFT.md](docs/grants/GRANT_PROPOSAL_DRAFT.md) for a draft proposal.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+AdaptiveKt is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
