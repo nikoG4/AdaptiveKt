@@ -207,11 +207,6 @@ See [SECURITY.md](SECURITY.md) for supported versions and private vulnerability 
 
 AdaptiveKt follows a contributor code of conduct. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## Grant Readiness And Sustainability
-
-AdaptiveKt is seeking support to mature from an alpha Compose Multiplatform UI toolkit into a more reliable, documented, and tested library for the Kotlin ecosystem. Grant funding would be directed toward API stabilization, accessibility work, cross-platform examples, visual regression coverage, iOS validation, and sustained maintenance.
-
-See [docs/grants/GRANT_PROPOSAL_DRAFT.md](docs/grants/GRANT_PROPOSAL_DRAFT.md) for a draft proposal.
 
 ## License
 
