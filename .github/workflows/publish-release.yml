@@ -68,7 +68,7 @@ jobs:
 
       - name: Validate requested version matches project version
         run: |
-          current=$(./gradlew properties --console=plain 2>/dev/null | grep '^version:' | awk '{print $2}')
+          current=$(grep '^VERSION_NAME=' gradle.properties | cut -d= -f2- | tr -d '\r')
           echo "Project version: $current"
           echo "Requested version: $REQUESTED_VERSION"
           if [ "$REQUESTED_VERSION" != "$current" ]; then
