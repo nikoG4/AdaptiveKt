@@ -8,7 +8,9 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
+        if (providers.gradleProperty("useMavenLocalFallback").getOrElse("false").toBoolean()) {
+            mavenLocal()
+        }
         google()
         mavenCentral()
     }

@@ -21,7 +21,21 @@ It showcases the core promise of AdaptiveKt: a single, unified UI codebase in `c
 ## Limitations
 
 - **Frontend Only**: Contains mocked authentication and checkout flows. There is no real backend, database, or API integration.
-- **Dependencies**: Resolves `io.github.nikog4.adaptivekt:*:0.1.0-alpha01` from Maven Central. (Note: A temporary fallback to `mavenLocal()` may be present if Maven Central indexing was delayed during development).
+- **Dependencies**: Resolves `io.github.nikog4.adaptivekt:*:0.1.0-alpha01` from Maven Central.
+
+### Troubleshooting: Maven Central Delay
+If Maven Central has not yet indexed the `0.1.0-alpha01` artifacts, you may encounter the following error:
+```
+Could not resolve all dependencies for configuration ':wasmJsNpmAggregated'.
+> Could not find io.github.nikog4.adaptivekt:adaptive-core:0.1.0-alpha01.
+  Searched in the following locations:
+    - https://dl.google.com/...
+    - https://repo.maven.apache.org/...
+```
+As a temporary workaround, if you have built and published the artifacts to your local Maven repository (`./gradlew publishToMavenLocal`), you can run the demo builds by passing the `useMavenLocalFallback` property:
+```bash
+./gradlew -p examples/ecommerce-demo -PuseMavenLocalFallback=true desktopRun
+```
 
 ## Running the App
 

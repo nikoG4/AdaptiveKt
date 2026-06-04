@@ -14,8 +14,15 @@ import io.github.adaptivekt.examples.ecommerce.ui.auth.RegisterScreen
 import io.github.adaptivekt.examples.ecommerce.ui.home.HomeScreen
 import io.github.adaptivekt.examples.ecommerce.ui.products.ProductListScreen
 import io.github.adaptivekt.examples.ecommerce.ui.products.ProductDetailScreen
+import io.github.adaptivekt.examples.ecommerce.ui.products.WishlistScreen
 import io.github.adaptivekt.examples.ecommerce.ui.cart.CartScreen
 import io.github.adaptivekt.examples.ecommerce.ui.account.AccountScreen
+import io.github.adaptivekt.examples.ecommerce.ui.auth.ForgotPasswordScreen
+import io.github.adaptivekt.examples.ecommerce.ui.account.OrdersScreen
+import io.github.adaptivekt.examples.ecommerce.ui.account.SettingsScreen
+import io.github.adaptivekt.examples.ecommerce.ui.cart.CheckoutScreen
+import io.github.adaptivekt.examples.ecommerce.ui.cart.OrderSuccessScreen
+import io.github.adaptivekt.examples.ecommerce.ui.states.UiStatesScreen
 
 @Composable
 fun EcommerceApp() {
@@ -27,22 +34,22 @@ fun EcommerceApp() {
             when (val screen = storeState.currentScreen) {
                 is Screen.AuthLogin -> LoginScreen(storeState, modifier)
                 is Screen.AuthRegister -> RegisterScreen(storeState, modifier)
-                is Screen.AuthForgotPassword -> LoginScreen(storeState, modifier) // Placeholder
+                is Screen.AuthForgotPassword -> ForgotPasswordScreen(storeState, modifier)
                 
                 is Screen.Home -> HomeScreen(storeState, modifier)
                 is Screen.Products -> ProductListScreen(storeState, modifier)
                 is Screen.ProductDetail -> ProductDetailScreen(storeState, screen.productId, modifier)
                 
-                is Screen.Wishlist -> AccountScreen(storeState, modifier) // Placeholder
+                is Screen.Wishlist -> WishlistScreen(storeState, modifier)
                 is Screen.Cart -> CartScreen(storeState, modifier)
-                is Screen.Checkout -> CartScreen(storeState, modifier) // Placeholder
-                is Screen.OrderSuccess -> CartScreen(storeState, modifier) // Placeholder
+                is Screen.Checkout -> CheckoutScreen(storeState, modifier)
+                is Screen.OrderSuccess -> OrderSuccessScreen(storeState, screen.orderId, modifier)
                 
                 is Screen.Account -> AccountScreen(storeState, modifier)
-                is Screen.Orders -> AccountScreen(storeState, modifier) // Placeholder
-                is Screen.Settings -> AccountScreen(storeState, modifier) // Placeholder
+                is Screen.Orders -> OrdersScreen(storeState, modifier)
+                is Screen.Settings -> SettingsScreen(storeState, modifier)
                 
-                is Screen.UiStates -> HomeScreen(storeState, modifier) // Placeholder
+                is Screen.UiStates -> UiStatesScreen(storeState, modifier)
             }
         }
     }
