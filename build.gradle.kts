@@ -2,6 +2,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
+import java.util.Base64
 
 plugins {
     kotlin("multiplatform") version "2.1.21" apply false
@@ -71,9 +72,12 @@ subprojects {
             from(layout.buildDirectory.dir("generated/javadoc-placeholder"))
         }
 
+        val signingInMemoryKeyBase64 = providers.gradleProperty("signingInMemoryKeyBase64")
+            .map { encoded -> String(Base64.getDecoder().decode(encoded), Charsets.UTF_8) }
         val signingInMemoryKeyFile = providers.gradleProperty("signingInMemoryKeyFile")
-        val signingInMemoryKey = signingInMemoryKeyFile
             .map { file(it).readText() }
+        val signingInMemoryKey = signingInMemoryKeyBase64
+            .orElse(signingInMemoryKeyFile)
             .orElse(providers.gradleProperty("signingInMemoryKey"))
         val signingInMemoryKeyPassword = providers.gradleProperty("signingInMemoryKeyPassword")
         val hasSigningKeys = signingInMemoryKey.isPresent && signingInMemoryKeyPassword.isPresent

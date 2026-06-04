@@ -14,14 +14,14 @@
 
 GitHub Secrets expected by `.github/workflows/publish-release.yml`:
 
-- `SIGNINGINMEMORYKEY`
+- `SIGNINGINMEMORYKEYBASE64`
 - `SIGNINGINMEMORYKEYPASSWORD`
 - `MAVENCENTRALUSERNAME`
 - `MAVENCENTRALPASSWORD`
 
 The workflow maps signing secrets to Gradle properties:
 
-- `ORG_GRADLE_PROJECT_signingInMemoryKey`
+- `ORG_GRADLE_PROJECT_signingInMemoryKeyBase64`
 - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword`
 
 These values must not be committed to the repository.
@@ -37,21 +37,21 @@ These values must not be committed to the repository.
 ## How the PGP key is generated and used
 
 1. Generate the PGP key outside the repository on a secure machine.
-2. Export it in a format compatible with Gradle Signing `useInMemoryPgpKeys`.
-3. Store the exported key material in a GitHub Secret, not in source control.
-4. Provide the key material through `ORG_GRADLE_PROJECT_signingInMemoryKey`.
+2. Export the ASCII-armored private key and Base64-encode the exported text.
+3. Store the Base64 key material in a GitHub Secret, not in source control.
+4. Provide the key material through `ORG_GRADLE_PROJECT_signingInMemoryKeyBase64`.
 5. Provide the key password through `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword`.
 6. Never version the key material or passwords in the repository.
 
 ## How signing is activated
 
-- The Gradle build reads `signingInMemoryKey` and `signingInMemoryKeyPassword`.
-- The Gradle build can also read `signingInMemoryKeyFile` and load the ASCII-armored key from that temporary file.
+- The Gradle build reads `signingInMemoryKeyBase64` and `signingInMemoryKeyPassword`.
+- The Gradle build decodes `signingInMemoryKeyBase64` to the ASCII-armored private key expected by Gradle Signing.
+- The Gradle build can also read `signingInMemoryKeyFile` or `signingInMemoryKey` as compatibility fallbacks.
 - Signing is enabled only when both properties are present.
 - If signing keys are missing, local build and local publishing continue to work.
 - The build does not require signing for local `publishAllPublicationsToLocalTestRepository`.
-- The release workflow normalizes `SIGNINGINMEMORYKEY` before invoking Gradle. It accepts an ASCII-armored private key directly, ASCII armor with escaped newlines, base64-encoded ASCII armor, or a base64-encoded secret keyring that can be imported and re-exported as ASCII armor in the temporary runner environment.
-- Gradle receives the normalized ASCII-armored key via `signingInMemoryKeyFile`, avoiding multi-line secret values in `$GITHUB_ENV`.
+- The release workflow uses `SIGNINGINMEMORYKEYBASE64` directly, avoiding multi-line PGP key handling in GitHub Actions.
 
 ## Manual publish workflow
 
