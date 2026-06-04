@@ -198,7 +198,17 @@ Write-Host "Consuming coordinates:"
     Write-Host ("  {0}:{1}:{2}" -f $groupId, $_, $versionName)
 }
 
-$gradlew = Join-Path $repoRoot "gradlew.bat"
+$isWindowsHost = [System.IO.Path]::DirectorySeparatorChar -eq "\"
+$gradlew = if ($isWindowsHost) {
+    Join-Path $repoRoot "gradlew.bat"
+} else {
+    Join-Path $repoRoot "gradlew"
+}
+
+if (-not $isWindowsHost) {
+    & chmod +x $gradlew
+}
+
 & $gradlew -p $smokeFullPath compileKotlinJvm compileKotlinWasmJs --console=plain --stacktrace
 if ($LASTEXITCODE -ne 0) {
     throw "Local consumer smoke build failed with exit code $LASTEXITCODE."
