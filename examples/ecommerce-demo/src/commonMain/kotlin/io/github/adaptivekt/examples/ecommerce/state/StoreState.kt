@@ -4,14 +4,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.derivedStateOf
 import io.github.adaptivekt.examples.ecommerce.model.*
 import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 
 class StoreState {
     var currentScreen by mutableStateOf<Screen>(Screen.Home)
         private set
-    var backStack = mutableStateListOf<Screen>()
-        private set
+    val backStack = mutableStateListOf<Screen>()
+    
+    val canGoBack by derivedStateOf { backStack.isNotEmpty() }
         
     var isLoggedIn by mutableStateOf(false)
         private set
@@ -20,6 +22,7 @@ class StoreState {
         
     var searchQuery by mutableStateOf("")
     var selectedCategoryId by mutableStateOf<String?>(null)
+    var selectedCollectionId by mutableStateOf<String?>(null)
     var selectedTags = mutableStateListOf<String>()
     var sortOption by mutableStateOf("Popular")
     
@@ -27,19 +30,29 @@ class StoreState {
     var cartItems = mutableStateListOf<CartItem>()
         private set
         
-    fun navigateTo(screen: Screen) {
+    var onNavigate: ((Screen) -> Unit)? = null
+        
+    fun navigateTo(screen: Screen, addToBackStack: Boolean = true) {
         if (currentScreen != screen) {
-            backStack.add(currentScreen)
+            if (addToBackStack) {
+                backStack.add(currentScreen)
+            }
             currentScreen = screen
+            onNavigate?.invoke(screen)
         }
     }
     
     fun goBack() {
         if (backStack.isNotEmpty()) {
             currentScreen = backStack.removeLast()
-        } else {
-            // Can't go back further
+            onNavigate?.invoke(currentScreen)
         }
+    }
+    
+    fun resetToHome() {
+        backStack.clear()
+        currentScreen = Screen.Home
+        onNavigate?.invoke(currentScreen)
     }
     
     fun loginDemo() {
@@ -57,8 +70,9 @@ class StoreState {
     fun logout() {
         isLoggedIn = false
         currentUser = null
-        navigateTo(Screen.AuthLogin)
         backStack.clear()
+        currentScreen = Screen.AuthLogin
+        onNavigate?.invoke(currentScreen)
     }
     
     fun addToCart(productId: String, variantId: String?, quantity: Int) {
@@ -98,16 +112,20 @@ class StoreState {
     fun clearFilters() {
         searchQuery = ""
         selectedCategoryId = null
+        selectedCollectionId = null
         selectedTags.clear()
     }
     
     fun filteredProducts(): List<Product> {
         var list = MockData.products
         if (searchQuery.isNotBlank()) {
-            list = list.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            list = list.filter { it.name.contains(searchQuery, ignoreCase = true) || it.shortDescription.contains(searchQuery, ignoreCase = true) }
         }
         if (selectedCategoryId != null) {
             list = list.filter { it.categoryId == selectedCategoryId }
+        }
+        if (selectedCollectionId != null) {
+            list = list.filter { it.collectionId == selectedCollectionId }
         }
         if (selectedTags.isNotEmpty()) {
             list = list.filter { it.tags.any { tag -> selectedTags.contains(tag) } }

@@ -1,10 +1,11 @@
 package io.github.adaptivekt.examples.ecommerce.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +17,9 @@ import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 import io.github.adaptivekt.examples.ecommerce.state.StoreState
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.navigation.AdaptiveNavItem
+import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveButtonVariant
+import io.github.adaptivekt.components.AdaptiveTextField
 
 @Composable
 fun AppShell(
@@ -33,25 +37,27 @@ fun AppShell(
     } else {
         val selectedId = when (state.currentScreen) {
             is Screen.Home -> "home"
-            is Screen.Products, is Screen.ProductDetail -> "products"
+            is Screen.Products, is Screen.ProductDetail -> "shop"
+            is Screen.Wishlist -> "wishlist"
             is Screen.Cart, is Screen.Checkout, is Screen.OrderSuccess -> "cart"
-            is Screen.Account, is Screen.Orders, is Screen.Settings, is Screen.Wishlist -> "account"
+            is Screen.Account, is Screen.Orders, is Screen.Settings -> "account"
             else -> "home"
         }
 
         AdaptiveNavigationScaffold(
             navItems = listOf(
-                AdaptiveNavItem("home", "Home", icon = { Text("🏠", fontSize = 20.sp) }),
-                AdaptiveNavItem("products", "Products", icon = { Text("📋", fontSize = 20.sp) }),
+                AdaptiveNavItem("home", "Home", icon = { AppIcon(AppIcons.Home, tint = Color.Unspecified) }),
+                AdaptiveNavItem("shop", "Shop", icon = { AppIcon(AppIcons.Search, tint = Color.Unspecified) }),
+                AdaptiveNavItem("wishlist", "Wishlist", icon = { AppIcon(AppIcons.Heart, tint = Color.Unspecified) }),
                 AdaptiveNavItem("cart", "Cart", icon = { 
                     Box {
-                        Text("🛒", fontSize = 20.sp)
+                        AppIcon(AppIcons.ShoppingBag, tint = Color.Unspecified)
                         if (state.cartItems.isNotEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .size(16.dp)
                                     .offset(x = 12.dp, y = (-4).dp)
-                                    .background(Color.Red, CircleShape),
+                                    .background(Color(0xFFEF4444), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -64,13 +70,14 @@ fun AppShell(
                         }
                     }
                 }),
-                AdaptiveNavItem("account", "Account", icon = { Text("👤", fontSize = 20.sp) })
+                AdaptiveNavItem("account", "Account", icon = { AppIcon(AppIcons.User, tint = Color.Unspecified) })
             ),
             selectedItemId = selectedId,
             onItemSelected = { id ->
                 when (id) {
                     "home" -> state.navigateTo(Screen.Home)
-                    "products" -> state.navigateTo(Screen.Products)
+                    "shop" -> state.navigateTo(Screen.Products)
+                    "wishlist" -> state.navigateTo(Screen.Wishlist)
                     "cart" -> state.navigateTo(Screen.Cart)
                     "account" -> if (state.isLoggedIn) state.navigateTo(Screen.Account) else state.navigateTo(Screen.AuthLogin)
                 }
@@ -80,35 +87,82 @@ fun AppShell(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(72.dp)
                         .background(Color.White)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "Adaptive Store", 
-                        fontSize = 20.sp, 
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF1E293B)
-                    )
+                    // Logo
+                    Row(
+                        modifier = Modifier
+                            .clickable { state.resetToHome() }
+                            .padding(end = 32.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(Color(0xFF3B82F6), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("A", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            "Adaptive Store", 
+                            fontSize = 20.sp, 
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF0F172A)
+                        )
+                    }
                     
+                    // Desktop Search
+                    Box(modifier = Modifier.weight(1f).padding(horizontal = 32.dp)) {
+                        AdaptiveTextField(
+                            value = state.searchQuery,
+                            onValueChange = { state.searchQuery = it },
+                            placeholder = "Search products...",
+                            modifier = Modifier.widthIn(max = 500.dp)
+                        )
+                    }
+                    
+                    // Action Icons
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (state.isLoggedIn) {
-                            Box(
+                            Row(
                                 modifier = Modifier
-                                    .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFE2E8F0)),
-                                contentAlignment = Alignment.Center
+                                    .clickable { state.navigateTo(Screen.Account) }
+                                    .background(Color(0xFFF1F5F9))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(state.currentUser?.name?.take(1)?.uppercase() ?: "U", fontWeight = FontWeight.Bold)
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF3B82F6)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        state.currentUser?.name?.take(1)?.uppercase() ?: "U", 
+                                        color = Color.White, 
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    state.currentUser?.name?.split(" ")?.first() ?: "User",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
                         } else {
-                            io.github.adaptivekt.components.AdaptiveButton(
+                            AdaptiveButton(
                                 text = "Sign In",
                                 onClick = { state.navigateTo(Screen.AuthLogin) },
-                                variant = io.github.adaptivekt.components.AdaptiveButtonVariant.Ghost
+                                variant = AdaptiveButtonVariant.Ghost
                             )
                         }
                     }

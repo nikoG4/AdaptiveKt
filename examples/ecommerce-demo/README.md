@@ -1,73 +1,70 @@
-# Adaptive Store Ecommerce Demo
+# Adaptive Store
 
-Adaptive Store is a complete, multiplatform ecommerce frontend demonstration built exclusively with Kotlin Multiplatform and **AdaptiveKt** (`0.1.0-alpha01`).
+A premium tech gear storefront built with [AdaptiveKt](https://github.com/nikoG4/AdaptiveKt) and Compose Multiplatform.
 
-It showcases the core promise of AdaptiveKt: a single, unified UI codebase in `commonMain` that seamlessly adapts to Android, Desktop (JVM), Web (Wasm), and iOS, feeling native and responsive across all device sizes.
+This demo showcases a modern, responsive e-commerce experience using AdaptiveKt's core components and layout system. It targets Web (Wasm), Android, Desktop, and iOS with a single shared codebase.
 
-## Features & Implementation
+## Key Features
 
-- **Fully Multiplatform Frontend**: No platform-specific UI. 100% of the UI (screens, navigation, styling) resides in `commonMain`.
-- **Adaptive Components**: Utilizes `AdaptiveNavigationScaffold`, `AdaptiveCard`, `AdaptiveGrid`, `AdaptiveButton`, and `AdaptiveEmptyState` directly from the AdaptiveKt Maven Central artifacts.
-- **Responsive Layout**: Adjusts flawlessly from compact mobile screens to expanded desktop layouts using AdaptiveKt's built-in grid and container logic.
-- **Demo State Management**: Includes localized mock state for Auth, Cart, Wishlist, Products, and Orders. No backend is required.
+- **Premium UI:** A modern, visual-first design inspired by top-tier tech storefronts.
+- **Rich Content:** 40+ products, multiple categories, and curated collections with realistic metadata.
+- **Advanced Navigation:** Internal back stack management and browser history synchronization for a seamless Web experience.
+- **Responsive Layout:** Adaptive grid and container systems that look great on both desktop monitors and mobile screens.
+- **E-commerce Flow:** Full shopping experience from landing page to product detail, cart, and checkout.
+- **Vector Icons:** High-quality SVG icons using Compose's `ImageVector` API to ensure crisp rendering on all platforms.
 
-## Platforms Supported
+## Multiplatform Support
 
-- **Desktop (JVM)**: Full support
-- **Web (Wasm)**: Full support
-- **Android**: Full support
-- **iOS**: Configured and supported (Requires macOS/Xcode host to compile and link the binary).
+- **Web (Wasm):** High-performance rendering using Kotlin/Wasm and Skia.
+- **Android:** Native performance with a modern Material 3 look and feel.
+- **Desktop:** Standalone application for Windows, macOS, and Linux.
+- **iOS:** Shared UI components running natively on iOS devices.
 
-## Limitations
+## Getting Started
 
-- **Frontend Only**: Contains mocked authentication and checkout flows. There is no real backend, database, or API integration.
-- **Dependencies**: Resolves `io.github.nikog4.adaptivekt:*:0.1.0-alpha01` from Maven Central.
+### Prerequisites
 
-### Troubleshooting: Maven Central Delay
-If Maven Central has not yet indexed the `0.1.0-alpha01` artifacts, you may encounter the following error:
+- Kotlin 2.1.21+
+- Java 17+
+- Android Studio / IntelliJ IDEA
+- Node.js (for E2E tests)
+
+### Build and Run
+
+To run the Wasm version locally:
+
+```powershell
+# From project root
+.\gradlew.bat -p examples\ecommerce-demo wasmJsBrowserRun
 ```
-Could not resolve all dependencies for configuration ':wasmJsNpmAggregated'.
-> Could not find io.github.nikog4.adaptivekt:adaptive-core:0.1.0-alpha01.
-  Searched in the following locations:
-    - https://dl.google.com/...
-    - https://repo.maven.apache.org/...
-```
-As a temporary workaround, if you have built and published the artifacts to your local Maven repository (`./gradlew publishToMavenLocal`), you can run the demo builds by passing the `useMavenLocalFallback` property:
-```bash
-./gradlew -p examples/ecommerce-demo -PuseMavenLocalFallback=true desktopRun
+
+To build the Wasm distribution:
+
+```powershell
+.\gradlew.bat -p examples\ecommerce-demo wasmJsBrowserDistribution
 ```
 
-## Running the App
+## Testing
 
-### Desktop
-```bash
-./gradlew -p examples/ecommerce-demo desktopRun
+This project uses [Playwright](https://playwright.dev/) for end-to-end testing of the Wasm version.
+
+```powershell
+cd examples/ecommerce-demo
+npm install
+npx playwright install chromium
+npm run test:e2e
 ```
-*Compiles and runs the standalone desktop JVM application.*
 
-### Web / Wasm
-```bash
-./gradlew -p examples/ecommerce-demo wasmJsBrowserDistribution
+To generate visual screenshots of the current build:
+
+```powershell
+npm run screenshots
 ```
-*Generates the Wasm artifacts. You can then serve them using your preferred local server.*
 
-### Android
-```bash
-./gradlew -p examples/ecommerce-demo assembleDebug
-```
-*Builds the Android debug APK. Alternatively, open the project in Android Studio and hit "Run".*
+## Attributions
 
-### iOS
-```bash
-./gradlew -p examples/ecommerce-demo linkDebugFrameworkIosSimulatorArm64
-```
-*Note: iOS target is fully configured. Full iOS binary verification requires a macOS host environment with Xcode installed.*
+See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md) for details on icons and images used in this demo.
 
-## AdaptiveKt Usage
+## Library Backlog
 
-This demo leverages the following AdaptiveKt packages:
-- `adaptive-core`: Theming and tokens (`AdaptiveTheme`).
-- `adaptive-components`: Reusable primitives (`AdaptiveButton`, `AdaptiveCard`).
-- `adaptive-layout`: Grids and containers (`AdaptiveContainer`, `AdaptiveGrid`).
-- `adaptive-navigation`: Responsive routing scaffolding (`AdaptiveNavigationScaffold`, `AdaptiveNavItem`).
-- `adaptive-feedback`: Status UI elements (`AdaptiveEmptyState`).
+See [ADAPTIVEKT_LIBRARY_BACKLOG.md](./ADAPTIVEKT_LIBRARY_BACKLOG.md) for features identified during this demo that are planned for the core AdaptiveKt library.

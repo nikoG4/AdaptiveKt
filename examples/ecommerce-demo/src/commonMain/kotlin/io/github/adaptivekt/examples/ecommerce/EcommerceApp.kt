@@ -25,9 +25,7 @@ import io.github.adaptivekt.examples.ecommerce.ui.cart.OrderSuccessScreen
 import io.github.adaptivekt.examples.ecommerce.ui.states.UiStatesScreen
 
 @Composable
-fun EcommerceApp() {
-    val storeState = remember { StoreState() }
-
+fun EcommerceApp(storeState: StoreState = remember { StoreState() }) {
     AdaptiveTheme {
         AppShell(state = storeState) { paddingValues ->
             val modifier = Modifier.padding(paddingValues)
