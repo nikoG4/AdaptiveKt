@@ -2,6 +2,7 @@ param(
     [string]$DistDir = "site-dist",
     [string]$DocsSiteDist = "docs-site/build/dist/wasmJs/productionExecutable",
     [string]$AdminDemoDist = "admin-demo/build/dist/wasmJs/productionExecutable",
+    [string]$EcommerceDemoDist = "examples/ecommerce-demo/build/dist/wasmJs/productionExecutable",
     [switch]$SkipBuild
 )
 
@@ -16,12 +17,18 @@ if (-not $SkipBuild) {
 
     Write-Host "Building admin-demo Wasm distribution..." -ForegroundColor Cyan
     .\gradlew.bat :admin-demo:wasmJsBrowserDistribution --console=plain --stacktrace
+
+    Write-Host "Building ecommerce-demo Wasm distribution..." -ForegroundColor Cyan
+    .\gradlew.bat -p examples/ecommerce-demo wasmJsBrowserDistribution --console=plain --stacktrace
 }
 
 $distPath = Join-Path $root $DistDir
 $docsPath = Join-Path $root $DocsSiteDist
 $demoPath = Join-Path $root $AdminDemoDist
+$ecommercePath = Join-Path $root $EcommerceDemoDist
+
 $demoTarget = Join-Path $distPath "demo\app"
+$ecommerceTarget = Join-Path $distPath "examples\ecommerce"
 
 if (-not (Test-Path $docsPath)) {
     throw "Docs site distribution not found: $docsPath"
@@ -29,6 +36,10 @@ if (-not (Test-Path $docsPath)) {
 
 if (-not (Test-Path $demoPath)) {
     throw "Admin demo distribution not found: $demoPath"
+}
+
+if (-not (Test-Path $ecommercePath)) {
+    throw "Ecommerce demo distribution not found: $ecommercePath"
 }
 
 if (Test-Path $distPath) {
@@ -45,6 +56,9 @@ Copy-Item -Path (Join-Path $docsPath "*") -Destination $distPath -Recurse -Force
 
 New-Item -ItemType Directory -Force -Path $demoTarget | Out-Null
 Copy-Item -Path (Join-Path $demoPath "*") -Destination $demoTarget -Recurse -Force
+
+New-Item -ItemType Directory -Force -Path $ecommerceTarget | Out-Null
+Copy-Item -Path (Join-Path $ecommercePath "*") -Destination $ecommerceTarget -Recurse -Force
 
 New-Item -ItemType File -Force -Path (Join-Path $distPath ".nojekyll") | Out-Null
 
@@ -84,3 +98,4 @@ foreach ($route in @("components", "docs", "demo")) {
 Write-Host "Prepared Pages site: $distPath" -ForegroundColor Green
 Write-Host "Docs site copied from: $docsPath" -ForegroundColor Green
 Write-Host "Admin demo copied to: $demoTarget" -ForegroundColor Green
+Write-Host "Ecommerce showcase copied to: $ecommerceTarget" -ForegroundColor Green

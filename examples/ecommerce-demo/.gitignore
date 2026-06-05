@@ -1,0 +1,6 @@
+/build/
+/.gradle/
+/kotlin-js-store/
+/node_modules/
+/playwright-report/
+/test-results/

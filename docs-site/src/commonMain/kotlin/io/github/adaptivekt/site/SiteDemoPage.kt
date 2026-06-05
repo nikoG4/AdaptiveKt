@@ -25,19 +25,40 @@ internal fun SiteDemoPage() {
             .verticalScroll(rememberScrollState())
     ) {
         PageHeader(
-            eyebrow = "Demo",
-            title = "Admin demo stays separate",
-            description = "The docs site is the landing and component catalog. The full admin application remains published as its own Wasm app under /demo/app/.",
+            eyebrow = "Demos",
+            title = "Showcase Applications",
+            description = "Explore full applications built with AdaptiveKt to see how components, layout, and theming come together in production-like scenarios.",
         )
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
+        
+        // Ecommerce Showcase
+        AdaptiveCard {
+            AdaptiveBadge("ecommerce-demo", tone = AdaptiveBadgeTone.Success)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
+            SiteText("Adaptive Store", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+            SiteText("A full frontend-only AdaptiveKt ecommerce showcase built in commonMain for Android, Desktop, Web/Wasm and iOS.", color = SiteMuted, maxLines = 3)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
+            AdaptiveButton(
+                text = "Open Adaptive Store",
+                onClick = { openSiteUrl("examples/ecommerce/") },
+            )
+        }
+        
+        Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
+
+        // Admin Demo
         AdaptiveCard {
             AdaptiveBadge("admin-demo", tone = AdaptiveBadgeTone.Info)
             Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-            SiteText("Open the complete adaptive admin app.", fontWeight = FontWeight.Bold)
+            SiteText("Admin Dashboard", fontWeight = FontWeight.Bold)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+            SiteText("The complete adaptive admin application with charts, tables, and complex forms.", color = SiteMuted, maxLines = 2)
             Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
             AdaptiveButton(
-                text = "Open /demo/app/",
+                text = "Open Admin Demo",
                 onClick = { openSiteUrl("demo/app/") },
+                variant = AdaptiveButtonVariant.Secondary
             )
         }
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
@@ -53,7 +74,7 @@ internal fun SiteDemoPage() {
                             Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
                             AdaptiveButton(
                                 text = "Open",
-                                variant = AdaptiveButtonVariant.Secondary,
+                                variant = AdaptiveButtonVariant.Ghost,
                                 onClick = { openSiteUrl("demo/app/?screen=${screen.lowercase().replace(" ", "-")}") },
                             )
                         }

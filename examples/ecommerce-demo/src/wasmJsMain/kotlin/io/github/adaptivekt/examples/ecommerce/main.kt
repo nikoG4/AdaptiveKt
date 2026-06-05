@@ -12,27 +12,34 @@ fun main() {
     println("APP_STARTED")
     
     val storeState = StoreState()
+    var isNavigatingFromHistory = false
     
     // Sync browser history with app state
     storeState.onNavigate = { screen ->
-        val path = when (screen) {
-            is Screen.Home -> "/"
-            is Screen.Products -> "/shop"
-            is Screen.ProductDetail -> "/product/${screen.productId}"
-            is Screen.Cart -> "/cart"
-            is Screen.Checkout -> "/checkout"
-            is Screen.Account -> "/account"
-            else -> "/${screen::class.simpleName?.lowercase() ?: ""}"
+        if (!isNavigatingFromHistory) {
+            val path = when (screen) {
+                is Screen.Home -> "/"
+                is Screen.Products -> "/shop"
+                is Screen.ProductDetail -> "/product/${screen.productId}"
+                is Screen.Cart -> "/cart"
+                is Screen.Checkout -> "/checkout"
+                is Screen.Account -> "/account"
+                else -> "/${screen::class.simpleName?.lowercase() ?: ""}"
+            }
+            window.history.pushState(null, "", path)
         }
-        window.history.pushState(null, "", path)
     }
     
     window.onpopstate = {
+        isNavigatingFromHistory = true
         if (storeState.canGoBack) {
             storeState.goBack()
         } else {
-            // Handle root level back
+            // Reached root
+            storeState.resetToHome()
         }
+        isNavigatingFromHistory = false
+        null
     }
 
     ComposeViewport(document.body!!) {
