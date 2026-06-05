@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveSelect
@@ -38,9 +39,10 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
     }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        LazyColumn(contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 Text("Shopping Cart", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
             }
 
             state.cartItems.forEach { item ->
@@ -49,20 +51,34 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                     item {
                         AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(modifier = Modifier.size(80.dp).background(Color(0xFFE5E7EB), RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .background(Color(0xFFF3F4F6), RoundedCornerShape(8.dp)), 
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Text(MockData.categories.find { it.id == product.categoryId }?.iconSymbol ?: "📦", fontSize = 32.sp)
                                 }
                                 Spacer(Modifier.width(16.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(product.name, fontWeight = FontWeight.Bold)
-                                    Text("\$${product.price}", color = Color.DarkGray)
+                                    Text(product.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("\$${product.price}", color = Color(0xFF2563EB), fontWeight = FontWeight.SemiBold)
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    AdaptiveButton(text = "-", onClick = { state.updateCartQuantity(product.id, item.quantity - 1) })
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("${item.quantity}")
-                                    Spacer(Modifier.width(8.dp))
-                                    AdaptiveButton(text = "+", onClick = { state.updateCartQuantity(product.id, item.quantity + 1) })
+                                    AdaptiveButton(
+                                        text = "-", 
+                                        onClick = { state.updateCartQuantity(product.id, item.quantity - 1) },
+                                        variant = AdaptiveButtonVariant.Secondary
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Text("${item.quantity}", fontWeight = FontWeight.Bold)
+                                    Spacer(Modifier.width(12.dp))
+                                    AdaptiveButton(
+                                        text = "+", 
+                                        onClick = { state.updateCartQuantity(product.id, item.quantity + 1) },
+                                        variant = AdaptiveButtonVariant.Secondary
+                                    )
                                 }
                             }
                         }
@@ -71,6 +87,7 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
             }
 
             item {
+                Spacer(Modifier.height(16.dp))
                 AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
                     Column {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -84,13 +101,15 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                         }
                         Spacer(Modifier.height(16.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            Text("\$${((state.cartTotal() * 100.0).toInt() / 100.0)}", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            Text("Total", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                            Text("\$${((state.cartTotal() * 100.0).toInt() / 100.0)}", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = Color(0xFF2563EB))
                         }
                         Spacer(Modifier.height(24.dp))
-                        AdaptiveButton(text = "Proceed to Checkout", onClick = { 
-                            state.navigateTo(Screen.Checkout)
-                        }, modifier = Modifier.fillMaxWidth())
+                        AdaptiveButton(
+                            text = "Proceed to Checkout", 
+                            onClick = { state.navigateTo(Screen.Checkout) }, 
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -113,13 +132,17 @@ fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
     var selectedShipping by remember { mutableStateOf<String?>(shippingMethods[0]) }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        LazyColumn(contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    AdaptiveButton(text = "← Back to Cart", onClick = { state.goBack() })
-                    Spacer(Modifier.width(16.dp))
-                    Text("Checkout", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    AdaptiveButton(
+                        text = "← Back to Cart", 
+                        onClick = { state.goBack() },
+                        variant = AdaptiveButtonVariant.Ghost
+                    )
                 }
+                Spacer(Modifier.height(8.dp))
+                Text("Checkout", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
 
             item {
@@ -166,10 +189,14 @@ fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
 
                     actions {
                         primary {
-                            AdaptiveButton(text = "Place Order - \$${((state.cartTotal() * 100.0).toInt() / 100.0)}", onClick = {
-                                val orderId = state.placeOrder()
-                                state.navigateTo(Screen.OrderSuccess(orderId))
-                            }, modifier = Modifier.fillMaxWidth())
+                            AdaptiveButton(
+                                text = "Place Order - \$${((state.cartTotal() * 100.0).toInt() / 100.0)}", 
+                                onClick = {
+                                    val orderId = state.placeOrder()
+                                    state.navigateTo(Screen.OrderSuccess(orderId))
+                                }, 
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
@@ -183,15 +210,21 @@ fun OrderSuccessScreen(state: StoreState, orderId: String, modifier: Modifier = 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(80.dp).background(Color(0xFF10B981), RoundedCornerShape(40.dp)), contentAlignment = Alignment.Center) {
-                    Text("✓", fontSize = 40.sp, color = Color.White)
+                Box(
+                    modifier = Modifier.size(100.dp).background(Color(0xFF10B981), RoundedCornerShape(50.dp)), 
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("✓", fontSize = 50.sp, color = Color.White)
                 }
-                Spacer(Modifier.height(24.dp))
-                Text("Order Confirmed!", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text("Your order $orderId has been placed.", color = Color.DarkGray)
                 Spacer(Modifier.height(32.dp))
-                AdaptiveButton(text = "Continue Shopping", onClick = { state.navigateTo(Screen.Home) })
+                Text("Order Confirmed!", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(12.dp))
+                Text("Your order #$orderId has been placed.", color = Color.DarkGray, fontSize = 16.sp)
+                Spacer(Modifier.height(48.dp))
+                AdaptiveButton(
+                    text = "Continue Shopping", 
+                    onClick = { state.navigateTo(Screen.Home) }
+                )
             }
         }
     }
