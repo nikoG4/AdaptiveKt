@@ -15,7 +15,11 @@ public fun main() {
 }
 
 internal actual fun openSiteUrl(url: String) {
-    window.open(url, target = "_self")
+    if (url.startsWith("http")) {
+        window.open(url, target = "_self")
+    } else {
+        window.open(siteBasePath() + url.removePrefix("/"), target = "_self")
+    }
 }
 
 internal actual fun initialSiteRoute(): SiteRoute {
