@@ -4,6 +4,7 @@ interface PlatformHistoryTracker {
     val initialPath: String?
     fun push(path: String)
     fun replace(path: String)
+    fun goBack()
     fun onPopState(listener: (String) -> Unit)
 }
 

@@ -36,7 +36,7 @@ interface AdaptiveNavigator<R> {
 }
 
 class DefaultAdaptiveNavigator<R>(
-    initialRoute: R,
+    private val initialRoute: R,
     private val codec: AdaptiveRouteCodec<R>,
     private val historyTracker: PlatformHistoryTracker?
 ) : AdaptiveNavigator<R> {
@@ -50,14 +50,23 @@ class DefaultAdaptiveNavigator<R>(
         get() = backStack.size > 1
 
     init {
-        // Initialize from history tracker if available, otherwise use provided initialRoute
         val initialPath = historyTracker?.initialPath
-        val routeToStart = if (!initialPath.isNullOrEmpty()) {
-            codec.decode(initialPath) ?: initialRoute
-        } else {
-            initialRoute
+        var routeToStart = initialRoute
+        var needsReplace = false
+        
+        if (!initialPath.isNullOrEmpty()) {
+            val decoded = codec.decode(initialPath)
+            if (decoded != null) {
+                routeToStart = decoded
+            } else {
+                needsReplace = true
+            }
         }
         backStack.add(routeToStart)
+        
+        if (needsReplace) {
+            historyTracker?.replace(codec.encode(routeToStart))
+        }
     }
 
     override fun navigate(route: R) {
@@ -78,25 +87,25 @@ class DefaultAdaptiveNavigator<R>(
     override fun goBack() {
         if (canGoBack) {
             backStack.removeLast()
-            // The history tracker sync happens mostly onPopState, but if triggered programmatically
-            // it doesn't automatically call the browser's back button. However, typically back()
-            // is triggered BY the browser back button, which fires onPopState.
-            // If called manually, we'd need historyTracker?.goBack(), but for simplicity
-            // and avoiding infinite loops, we assume browser handles its own back state,
-            // or we just reflect the new top state to the URL.
-            historyTracker?.replace(codec.encode(currentRoute)) // Update URL to reflect new current state
+            historyTracker?.goBack()
         }
     }
 
     internal fun syncFromBrowser(path: String) {
         val decoded = codec.decode(path)
-        if (decoded != null && decoded != currentRoute) {
-            // Check if it's a back navigation
-            if (backStack.size > 1 && backStack[backStack.size - 2] == decoded) {
-                backStack.removeLast()
-            } else {
-                backStack.add(decoded)
+        if (decoded != null) {
+            if (decoded != currentRoute) {
+                if (backStack.size > 1 && backStack[backStack.size - 2] == decoded) {
+                    backStack.removeLast()
+                } else {
+                    backStack.add(decoded)
+                }
             }
+        } else {
+            if (currentRoute != initialRoute) {
+                backStack.add(initialRoute)
+            }
+            historyTracker?.replace(codec.encode(initialRoute))
         }
     }
 }

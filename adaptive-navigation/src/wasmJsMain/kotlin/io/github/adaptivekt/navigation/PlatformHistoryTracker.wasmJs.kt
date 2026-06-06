@@ -73,6 +73,15 @@ class WasmPlatformHistoryTracker(private val options: AdaptiveNavigationOptions)
         }
     }
 
+    override fun goBack() {
+        isNavigatingInternally = true
+        try {
+            window.history.back()
+        } finally {
+            isNavigatingInternally = false
+        }
+    }
+
     override fun onPopState(listener: (String) -> Unit) {
         if (options.webMode == AdaptiveWebNavigationMode.Hash) {
             window.onhashchange = {
