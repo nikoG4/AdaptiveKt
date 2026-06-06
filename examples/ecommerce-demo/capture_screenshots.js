@@ -4,55 +4,56 @@ const path = require('path');
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  const resultsDir = path.join(__dirname, 'tests', 'screenshots');
-  
+  const mobileViewport = { width: 390, height: 844 };
+  const desktopViewport = { width: 1440, height: 900 };
+
+  const resultsDir = path.join(__dirname, 'test-results', 'visual-after');
   if (!fs.existsSync(resultsDir)) {
     fs.mkdirSync(resultsDir, { recursive: true });
   }
 
   try {
-    console.log('Navigating to app...');
-    await page.goto('http://127.0.0.1:4173');
-    await page.waitForSelector('canvas', { timeout: 30000 });
-    await page.waitForTimeout(5000);
-    
-    await page.screenshot({ path: path.join(resultsDir, 'desktop-home.png') });
-    console.log('Saved: desktop-home.png');
+    const mPage = await browser.newPage({ viewport: mobileViewport });
 
-    // Mobile view
-    const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await mobilePage.goto('http://127.0.0.1:4173');
-    await mobilePage.waitForTimeout(5000);
-    await mobilePage.screenshot({ path: path.join(resultsDir, 'mobile-home.png') });
-    console.log('Saved: mobile-home.png');
-    await mobilePage.close();
+    const capture = async (route, name) => {
+      try {
+        console.log(`Mobile: Navigating to ${route}...`);
+        await mPage.goto(`http://127.0.0.1:4173${route}`);
+        await mPage.waitForSelector('canvas', { timeout: 15000 });
+        await mPage.waitForTimeout(4000);
+        await mPage.screenshot({ path: path.join(resultsDir, `${name}.png`) });
+        console.log(`Saved: ${name}.png`);
+      } catch (e) {
+         console.error(`Error capturing ${name}:`, e.message);
+      }
+    };
 
-    // Navigation to Products
-    await page.click('text=Shop new arrivals');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: path.join(resultsDir, 'product-listing.png') });
-    console.log('Saved: product-listing.png');
+    await capture('/', 'mobile-home');
+    await capture('/shop', 'mobile-products');
+    await capture('/product/p1', 'mobile-detail');
+    await capture('/cart', 'mobile-cart');
+    await capture('/checkout', 'mobile-checkout');
+    await capture('/login', 'mobile-login');
+    await capture('/account', 'mobile-account');
 
-    // Navigation to Product Detail
-    await page.click('text=NovaBook Pro 14');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: path.join(resultsDir, 'product-detail.png') });
-    console.log('Saved: product-detail.png');
+    await mPage.close();
 
-    // Navigation to Cart
-    await page.click('text=Add to Cart');
-    await page.waitForTimeout(1000);
-    await page.click('text=Cart');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: path.join(resultsDir, 'cart.png') });
-    console.log('Saved: cart.png');
-
-    // Checkout
-    await page.click('text=Checkout');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: path.join(resultsDir, 'checkout.png') });
-    console.log('Saved: checkout.png');
+    const dPage = await browser.newPage({ viewport: desktopViewport });
+    const captureDesktop = async (route, name) => {
+        try {
+          console.log(`Desktop: Navigating to ${route}...`);
+          await dPage.goto(`http://127.0.0.1:4173${route}`);
+          await dPage.waitForSelector('canvas', { timeout: 15000 });
+          await dPage.waitForTimeout(4000);
+          await dPage.screenshot({ path: path.join(resultsDir, `${name}.png`) });
+          console.log(`Saved: ${name}.png`);
+        } catch (e) {
+           console.error(`Error capturing ${name}:`, e.message);
+        }
+      };
+    await captureDesktop('/', 'desktop-home');
+    await captureDesktop('/shop', 'desktop-products');
+    await dPage.close();
 
   } catch (e) {
     console.error('Error during capture:', e);

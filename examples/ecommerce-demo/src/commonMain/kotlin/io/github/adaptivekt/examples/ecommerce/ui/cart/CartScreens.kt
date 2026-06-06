@@ -42,85 +42,178 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
     }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        Row(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
-            // Cart Items
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.weight(1.5f)) {
-                item {
-                    Text("Shopping Bag", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
-                    Spacer(Modifier.height(8.dp))
-                    Text("${state.cartItems.sumOf { it.quantity }} items in your bag", color = Color(0xFF64748B), fontSize = 14.sp)
-                }
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val compact = maxWidth < 800.dp
+            val sectionPadding = if (compact) 16.dp else 24.dp
 
-                state.cartItems.forEach { item ->
-                    val product = MockData.products.find { it.id == item.productId }
-                    if (product != null) {
-                        item {
-                            AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFF1F5F9)), 
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text("📷", fontSize = 32.sp)
+            if (compact) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(sectionPadding),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    item {
+                        Text("My Bag", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                        Spacer(Modifier.height(8.dp))
+                        Text("${state.cartItems.sumOf { it.quantity }} items", color = Color(0xFF64748B), fontSize = 14.sp)
+                    }
+
+                    state.cartItems.forEach { item ->
+                        val product = MockData.products.find { it.id == item.productId }
+                        if (product != null) {
+                            item {
+                                AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(80.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(Color(0xFFF1F5F9)), 
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("📷", fontSize = 24.sp)
+                                            }
+                                            Spacer(Modifier.width(16.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(product.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF0F172A))
+                                                Spacer(Modifier.height(4.dp))
+                                                Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "", color = Color(0xFF64748B), fontSize = 14.sp)
+                                                Spacer(Modifier.height(8.dp))
+                                                Text("\$${product.price}", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                        Spacer(Modifier.height(16.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                            // Quantity Stepper
+                                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp)).padding(4.dp)) {
+                                                IconButton(AppIcons.Minus) { state.updateCartQuantity(product.id, item.quantity - 1) }
+                                                Text("${item.quantity}", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold)
+                                                IconButton(AppIcons.Plus) { state.updateCartQuantity(product.id, item.quantity + 1) }
+                                            }
+                                            IconButton(AppIcons.Trash, tint = Color(0xFFEF4444)) { state.removeFromCart(product.id) }
+                                        }
                                     }
-                                    Spacer(Modifier.width(24.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(product.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF0F172A))
-                                        Spacer(Modifier.height(4.dp))
-                                        Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "", color = Color(0xFF64748B), fontSize = 14.sp)
-                                        Spacer(Modifier.height(8.dp))
-                                        Text("\$${product.price}", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold)
-                                    }
-                                    
-                                    // Quantity Stepper
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp)).padding(4.dp)) {
-                                        IconButton(AppIcons.Minus) { state.updateCartQuantity(product.id, item.quantity - 1) }
-                                        Text("${item.quantity}", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold)
-                                        IconButton(AppIcons.Plus) { state.updateCartQuantity(product.id, item.quantity + 1) }
-                                    }
-                                    
-                                    Spacer(Modifier.width(24.dp))
-                                    IconButton(AppIcons.Trash, tint = Color(0xFFEF4444)) { state.removeFromCart(product.id) }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
+                            Column {
+                                Text("Order Summary", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                Spacer(Modifier.height(16.dp))
+                                
+                                SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
+                                SummaryRow("Shipping", "Calculated at checkout")
+                                SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
+                                
+                                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 16.dp))
+                                
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color(0xFF0F172A))
+                                    Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color(0xFF3B82F6))
+                                }
+                                
+                                Spacer(Modifier.height(24.dp))
+                                AdaptiveButton(
+                                    text = "Checkout", 
+                                    onClick = { state.navigateTo(Screen.Checkout) }, 
+                                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                                )
+                                
+                                Spacer(Modifier.height(16.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                                    AppIcon(AppIcons.Shield, modifier = Modifier.size(16.dp), tint = Color(0xFF64748B))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Secure Checkout", color = Color(0xFF64748B), fontSize = 12.sp)
                                 }
                             }
                         }
                     }
                 }
-            }
-
-            // Order Summary
-            Column(modifier = Modifier.weight(1f)) {
-                AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(24.dp)) {
-                    Column {
-                        Text("Order Summary", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-                        Spacer(Modifier.height(24.dp))
-                        
-                        SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
-                        SummaryRow("Shipping", "Calculated at checkout")
-                        SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
-                        
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 24.dp))
-                        
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color(0xFF0F172A))
-                            Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color(0xFF3B82F6))
+            } else {
+                Row(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
+                    // Cart Items Desktop
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.weight(1.5f)) {
+                        item {
+                            Text("Shopping Bag", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                            Spacer(Modifier.height(8.dp))
+                            Text("${state.cartItems.sumOf { it.quantity }} items in your bag", color = Color(0xFF64748B), fontSize = 14.sp)
                         }
-                        
-                        Spacer(Modifier.height(32.dp))
-                        AdaptiveButton(
-                            text = "Checkout", 
-                            onClick = { state.navigateTo(Screen.Checkout) }, 
-                            modifier = Modifier.fillMaxWidth().height(56.dp)
-                        )
-                        
-                        Spacer(Modifier.height(16.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                            AppIcon(AppIcons.Shield, modifier = Modifier.size(16.dp), tint = Color(0xFF64748B))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Secure Checkout", color = Color(0xFF64748B), fontSize = 12.sp)
+
+                        state.cartItems.forEach { item ->
+                            val product = MockData.products.find { it.id == item.productId }
+                            if (product != null) {
+                                item {
+                                    AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(100.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(Color(0xFFF1F5F9)), 
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("📷", fontSize = 32.sp)
+                                            }
+                                            Spacer(Modifier.width(24.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(product.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF0F172A))
+                                                Spacer(Modifier.height(4.dp))
+                                                Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "", color = Color(0xFF64748B), fontSize = 14.sp)
+                                                Spacer(Modifier.height(8.dp))
+                                                Text("\$${product.price}", color = Color(0xFF0F172A), fontWeight = FontWeight.Bold)
+                                            }
+                                            
+                                            // Quantity Stepper
+                                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp)).padding(4.dp)) {
+                                                IconButton(AppIcons.Minus) { state.updateCartQuantity(product.id, item.quantity - 1) }
+                                                Text("${item.quantity}", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold)
+                                                IconButton(AppIcons.Plus) { state.updateCartQuantity(product.id, item.quantity + 1) }
+                                            }
+                                            
+                                            Spacer(Modifier.width(24.dp))
+                                            IconButton(AppIcons.Trash, tint = Color(0xFFEF4444)) { state.removeFromCart(product.id) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Order Summary Desktop
+                    Column(modifier = Modifier.weight(1f)) {
+                        AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(24.dp)) {
+                            Column {
+                                Text("Order Summary", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                Spacer(Modifier.height(24.dp))
+                                
+                                SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
+                                SummaryRow("Shipping", "Calculated at checkout")
+                                SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
+                                
+                                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 24.dp))
+                                
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color(0xFF0F172A))
+                                    Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = Color(0xFF3B82F6))
+                                }
+                                
+                                Spacer(Modifier.height(32.dp))
+                                AdaptiveButton(
+                                    text = "Checkout", 
+                                    onClick = { state.navigateTo(Screen.Checkout) }, 
+                                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                                )
+                                
+                                Spacer(Modifier.height(16.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                                    AppIcon(AppIcons.Shield, modifier = Modifier.size(16.dp), tint = Color(0xFF64748B))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Secure Checkout", color = Color(0xFF64748B), fontSize = 12.sp)
+                                }
+                            }
                         }
                     }
                 }
@@ -147,96 +240,196 @@ fun IconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Colo
 @Composable
 fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-            Text("Checkout", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
-            Spacer(Modifier.height(32.dp))
-            
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
-                // Checkout Form
-                Column(modifier = Modifier.weight(1.5f)) {
-                    AdaptiveFormLayout {
-                        section(title = "Contact Information") {
-                            field(label = "Email Address", required = true) {
-                                AdaptiveTextField(value = "", onValueChange = {}, placeholder = "alex@example.com")
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val compact = maxWidth < 800.dp
+            val sectionPadding = if (compact) 16.dp else 24.dp
+
+            if (compact) {
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(sectionPadding), verticalArrangement = Arrangement.spacedBy(32.dp)) {
+                    item {
+                        Text("Checkout", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    }
+                    
+                    item {
+                        AdaptiveFormLayout {
+                            section(title = "Contact Information") {
+                                field(label = "Email Address", required = true) {
+                                    AdaptiveTextField(value = "", onValueChange = {}, placeholder = "alex@example.com")
+                                }
                             }
-                        }
-                        
-                        section(title = "Shipping Address") {
-                            field(label = "Full Name", required = true) {
-                                AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Alex Developer")
+                            
+                            section(title = "Shipping Address") {
+                                field(label = "Full Name", required = true) {
+                                    AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Alex Developer")
+                                }
+                                field(label = "Street Address", required = true) {
+                                    AdaptiveTextField(value = "", onValueChange = {}, placeholder = "123 Tech Lane")
+                                }
+                                field(label = "City", span = FieldSpan.Half) { 
+                                    AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Innovation") 
+                                }
+                                field(label = "ZIP Code", span = FieldSpan.Half) { 
+                                    AdaptiveTextField(value = "", onValueChange = {}, placeholder = "12345") 
+                                }
                             }
-                            field(label = "Street Address", required = true) {
-                                AdaptiveTextField(value = "", onValueChange = {}, placeholder = "123 Tech Lane")
-                            }
-                            field(label = "City", span = FieldSpan.Half) { 
-                                AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Innovation") 
-                            }
-                            field(label = "ZIP Code", span = FieldSpan.Half) { 
-                                AdaptiveTextField(value = "", onValueChange = {}, placeholder = "12345") 
-                            }
-                        }
-                        
-                        section(title = "Payment Method (Mock)") {
-                            field(label = "Payment") {
-                                AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(Color(0xFF3B82F6)))
-                                        Spacer(Modifier.width(16.dp))
-                                        Text("Credit Card (Demo Only)", fontWeight = FontWeight.Bold)
-                                        Spacer(Modifier.weight(1f))
-                                        Text("**** 4242", color = Color(0xFF64748B))
+                            
+                            section(title = "Payment Method (Mock)") {
+                                field(label = "Payment") {
+                                    AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(Color(0xFF3B82F6)))
+                                            Spacer(Modifier.width(16.dp))
+                                            Text("Credit Card", fontWeight = FontWeight.Bold)
+                                            Spacer(Modifier.weight(1f))
+                                            Text("**** 4242", color = Color(0xFF64748B))
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    
+                    item {
+                        AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(16.dp)) {
+                            Column {
+                                Text("Your Order", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                Spacer(Modifier.height(16.dp))
+                                
+                                state.cartItems.take(3).forEach { item ->
+                                    val product = MockData.products.find { it.id == item.productId }
+                                    if (product != null) {
+                                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
+                                                Text("📷", fontSize = 16.sp)
+                                            }
+                                            Spacer(Modifier.width(12.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(product.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                                Text("Qty: ${item.quantity}", fontSize = 12.sp, color = Color(0xFF64748B))
+                                            }
+                                            Text("\$${(product.price * item.quantity).toPriceString()}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                                
+                                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 16.dp))
+                                
+                                SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
+                                SummaryRow("Shipping", "FREE")
+                                SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
+                                
+                                Spacer(Modifier.height(16.dp))
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                                    Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color(0xFF3B82F6))
+                                }
+                                
+                                Spacer(Modifier.height(24.dp))
+                                AdaptiveButton(
+                                    text = "Place Order", 
+                                    onClick = { 
+                                        val id = state.placeOrder()
+                                        state.navigateTo(Screen.OrderSuccess(id))
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                                )
+                            }
+                        }
+                    }
                 }
-                
-                // Sidebar Summary
-                Column(modifier = Modifier.weight(1f)) {
-                    AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(24.dp)) {
-                        Column {
-                            Text("Your Order", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-                            Spacer(Modifier.height(24.dp))
-                            
-                            state.cartItems.take(3).forEach { item ->
-                                val product = MockData.products.find { it.id == item.productId }
-                                if (product != null) {
-                                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
-                                            Text("📷", fontSize = 16.sp)
+            } else {
+                Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                    Text("Checkout", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Spacer(Modifier.height(32.dp))
+                    
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
+                        // Checkout Form
+                        Column(modifier = Modifier.weight(1.5f)) {
+                            AdaptiveFormLayout {
+                                section(title = "Contact Information") {
+                                    field(label = "Email Address", required = true) {
+                                        AdaptiveTextField(value = "", onValueChange = {}, placeholder = "alex@example.com")
+                                    }
+                                }
+                                
+                                section(title = "Shipping Address") {
+                                    field(label = "Full Name", required = true) {
+                                        AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Alex Developer")
+                                    }
+                                    field(label = "Street Address", required = true) {
+                                        AdaptiveTextField(value = "", onValueChange = {}, placeholder = "123 Tech Lane")
+                                    }
+                                    field(label = "City", span = FieldSpan.Half) { 
+                                        AdaptiveTextField(value = "", onValueChange = {}, placeholder = "Innovation") 
+                                    }
+                                    field(label = "ZIP Code", span = FieldSpan.Half) { 
+                                        AdaptiveTextField(value = "", onValueChange = {}, placeholder = "12345") 
+                                    }
+                                }
+                                
+                                section(title = "Payment Method (Mock)") {
+                                    field(label = "Payment") {
+                                        AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(Color(0xFF3B82F6)))
+                                                Spacer(Modifier.width(16.dp))
+                                                Text("Credit Card (Demo Only)", fontWeight = FontWeight.Bold)
+                                                Spacer(Modifier.weight(1f))
+                                                Text("**** 4242", color = Color(0xFF64748B))
+                                            }
                                         }
-                                        Spacer(Modifier.width(12.dp))
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(product.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                            Text("Qty: ${item.quantity}", fontSize = 12.sp, color = Color(0xFF64748B))
-                                        }
-                                        Text("\$${(product.price * item.quantity).toPriceString()}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
-                            
-                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 16.dp))
-                            
-                            SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
-                            SummaryRow("Shipping", "FREE")
-                            SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
-                            
-                            Spacer(Modifier.height(16.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                                Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color(0xFF3B82F6))
+                        }
+                        
+                        // Sidebar Summary
+                        Column(modifier = Modifier.weight(1f)) {
+                            AdaptiveCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(24.dp)) {
+                                Column {
+                                    Text("Your Order", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                    Spacer(Modifier.height(24.dp))
+                                    
+                                    state.cartItems.take(3).forEach { item ->
+                                        val product = MockData.products.find { it.id == item.productId }
+                                        if (product != null) {
+                                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
+                                                    Text("📷", fontSize = 16.sp)
+                                                }
+                                                Spacer(Modifier.width(12.dp))
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(product.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                                    Text("Qty: ${item.quantity}", fontSize = 12.sp, color = Color(0xFF64748B))
+                                                }
+                                                Text("\$${(product.price * item.quantity).toPriceString()}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    }
+                                    
+                                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)).padding(vertical = 16.dp))
+                                    
+                                    SummaryRow("Subtotal", "\$${state.cartSubtotal().toPriceString()}")
+                                    SummaryRow("Shipping", "FREE")
+                                    SummaryRow("Tax", "\$${(state.cartSubtotal() * 0.1).toPriceString()}")
+                                    
+                                    Spacer(Modifier.height(16.dp))
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text("Total", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                                        Text("\$${state.cartTotal().toPriceString()}", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = Color(0xFF3B82F6))
+                                    }
+                                    
+                                    Spacer(Modifier.height(32.dp))
+                                    AdaptiveButton(
+                                        text = "Place Order", 
+                                        onClick = { 
+                                            val id = state.placeOrder()
+                                            state.navigateTo(Screen.OrderSuccess(id))
+                                        },
+                                        modifier = Modifier.fillMaxWidth().height(56.dp)
+                                    )
+                                }
                             }
-                            
-                            Spacer(Modifier.height(32.dp))
-                            AdaptiveButton(
-                                text = "Place Order", 
-                                onClick = { 
-                                    val id = state.placeOrder()
-                                    state.navigateTo(Screen.OrderSuccess(id))
-                                },
-                                modifier = Modifier.fillMaxWidth().height(56.dp)
-                            )
                         }
                     }
                 }

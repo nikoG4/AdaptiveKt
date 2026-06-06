@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build:wasm": "..\\..\\gradlew.bat wasmJsBrowserDistribution -p .",
-    "serve:wasm": "serve build/dist/wasmJs/productionExecutable -l 4173",
+    "serve:wasm": "serve -s build/dist/wasmJs/productionExecutable -l 4173",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "screenshots": "node capture_screenshots.js"

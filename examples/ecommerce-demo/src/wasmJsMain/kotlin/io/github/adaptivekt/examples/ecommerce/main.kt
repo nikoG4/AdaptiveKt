@@ -14,10 +14,20 @@ fun main() {
     val storeState = StoreState()
     var isNavigatingFromHistory = false
     
+    // Support deep linking for tests
+    val path = window.location.pathname
+    if (path.contains("/shop")) storeState.navigateTo(Screen.Products, false)
+    else if (path.contains("/cart")) storeState.navigateTo(Screen.Cart, false)
+    else if (path.contains("/checkout")) storeState.navigateTo(Screen.Checkout, false)
+    else if (path.contains("/login")) storeState.navigateTo(Screen.AuthLogin, false)
+    else if (path.contains("/product")) {
+        storeState.navigateTo(Screen.ProductDetail(io.github.adaptivekt.examples.ecommerce.model.MockData.products.first().id), false)
+    }
+
     // Sync browser history with app state
     storeState.onNavigate = { screen ->
         if (!isNavigatingFromHistory) {
-            val path = when (screen) {
+            val newPath = when (screen) {
                 is Screen.Home -> "/"
                 is Screen.Products -> "/shop"
                 is Screen.ProductDetail -> "/product/${screen.productId}"
@@ -26,7 +36,7 @@ fun main() {
                 is Screen.Account -> "/account"
                 else -> "/${screen::class.simpleName?.lowercase() ?: ""}"
             }
-            window.history.pushState(null, "", path)
+            window.history.pushState(null, "", newPath)
         }
     }
     
