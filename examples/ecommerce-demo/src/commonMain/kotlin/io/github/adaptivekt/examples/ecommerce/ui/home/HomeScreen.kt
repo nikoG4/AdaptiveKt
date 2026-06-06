@@ -23,18 +23,24 @@ import io.github.adaptivekt.examples.ecommerce.model.MockData
 import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.layout.AdaptiveContainer
+
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcons
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
 import io.github.adaptivekt.examples.ecommerce.ui.components.CategoryVisual
 import io.github.adaptivekt.examples.ecommerce.ui.components.CollectionVisual
 import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveBreakpoint
+import io.github.adaptivekt.core.breakpointForWidth
 
 @Composable
 fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 600.dp
+            val breakpoint = breakpointForWidth(maxWidth)
+            val compact = breakpoint == AdaptiveBreakpoint.Compact
+            val medium = breakpoint == AdaptiveBreakpoint.Medium
+            val expanded = breakpoint == AdaptiveBreakpoint.Expanded || breakpoint == AdaptiveBreakpoint.Large
             val sectionHorizontalPadding = if (compact) 16.dp else 24.dp
 
             LazyColumn(
@@ -46,7 +52,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = if (compact) 350.dp else 450.dp)
+                            .heightIn(min = if (compact) 260.dp else if (medium) 320.dp else 360.dp)
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
@@ -71,11 +77,11 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                             Spacer(Modifier.height(16.dp))
                             Text(
                                 "Build your perfect setup", 
-                                fontSize = if (compact) 36.sp else 56.sp, 
+                                fontSize = if (compact) 30.sp else if (medium) 40.sp else 46.sp, 
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color.White,
                                 textAlign = TextAlign.Center,
-                                lineHeight = if (compact) 44.sp else 64.sp
+                                lineHeight = if (compact) 36.sp else if (medium) 46.sp else 52.sp
                             )
                             Spacer(Modifier.height(16.dp))
                             Text(
@@ -197,7 +203,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                             )
                         }
                         Spacer(Modifier.height(16.dp))
-                        AdaptiveGrid(columns = if (compact) 2 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
+                        AdaptiveGrid(columns = if (compact) 2 else if (medium) 3 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
                             MockData.products.filter { it.isFeatured }.take(4).forEach { prod ->
                                 item(span = 1) {
                                     ProductCard(prod, compact = compact, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })
@@ -270,7 +276,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                     Column(modifier = Modifier.padding(horizontal = sectionHorizontalPadding)) {
                         Text("Shop by category", fontSize = if (compact) 24.sp else 24.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(16.dp))
-                        AdaptiveGrid(columns = if (compact) 2 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
+                        AdaptiveGrid(columns = if (compact) 2 else if (medium) 3 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
                             MockData.categories.forEach { cat ->
                                 item(span = 1) {
                                     AdaptiveCard(
@@ -361,15 +367,15 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, com
                 )
                 
                 // Badges
-                Row(
-                    modifier = Modifier.fillMaxSize().padding(8.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.Top
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    contentAlignment = Alignment.TopStart
                 ) {
-                    if (prod.isNew) {
-                        Badge("NEW", Color(0xFF10B981))
-                    } else if (prod.isSale) {
-                        Badge("SALE", Color(0xFFEF4444))
+                    when {
+                        prod.isNew -> Badge("NEW", Color(0xFF10B981))
+                        prod.isSale -> Badge("SALE", Color(0xFFEF4444))
                     }
                 }
             }
@@ -402,10 +408,16 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, com
 fun Badge(text: String, color: Color) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(999.dp))
             .background(color)
-            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
-        Text(text, color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.ExtraBold,
+            lineHeight = 10.sp
+        )
     }
 }

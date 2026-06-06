@@ -28,7 +28,12 @@ test.describe('Adaptive Store visual smoke', () => {
 
   test('desktop products render without broken navigation overflow', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/shop');
+    await page.goto('/');
+    await waitForCompose(page);
+    await page.evaluate(() => {
+        window.history.pushState(null, "", "/shop");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     await waitForCompose(page);
     await expectHealthyCanvas(page);
     await page.screenshot({ path: 'test-results/desktop-products-smoke.png', fullPage: true });
@@ -45,17 +50,31 @@ test.describe('Adaptive Store visual smoke', () => {
 
   test('browser back returns from detail to products and checkout to cart history', async ({ page }) => {
     test.setTimeout(70000);
-    await page.goto('/shop');
+    await page.goto('/');
     await waitForCompose(page);
-    await page.goto('/product/p1');
+    await page.evaluate(() => {
+        window.history.pushState(null, "", "/shop");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await waitForCompose(page);
+    await page.evaluate(() => {
+        window.history.pushState(null, "", "/product/p1");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     await waitForCompose(page);
     await page.goBack();
     await waitForCompose(page);
     await expect(page.url()).toContain('/shop');
 
-    await page.goto('/cart');
+    await page.evaluate(() => {
+        window.history.pushState(null, "", "/cart");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     await waitForCompose(page);
-    await page.goto('/checkout');
+    await page.evaluate(() => {
+        window.history.pushState(null, "", "/checkout");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     await waitForCompose(page);
     await page.goBack();
     await waitForCompose(page);

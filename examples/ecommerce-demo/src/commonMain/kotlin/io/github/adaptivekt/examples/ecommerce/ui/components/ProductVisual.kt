@@ -66,20 +66,6 @@ fun ProductVisual(
                 modifier = Modifier.size(if (compact) 42.dp else 64.dp),
             )
         }
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(if (compact) 10.dp else 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = product.name.take(2).uppercase(),
-                color = Color.White.copy(alpha = 0.88f),
-                fontSize = if (compact) 10.sp else 12.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
     }
 }
 
@@ -107,11 +93,10 @@ fun CollectionVisual(
                 .offset(x = (-90).dp, y = 58.dp)
                 .background(Color.White.copy(alpha = 0.13f), RoundedCornerShape(30.dp)),
         )
-        Text(
-            text = title.split(" ").mapNotNull { it.firstOrNull()?.uppercaseChar() }.take(2).joinToString(""),
-            color = Color.White.copy(alpha = 0.82f),
-            fontSize = 56.sp,
-            fontWeight = FontWeight.ExtraBold,
+        AppIcon(
+            imageVector = collectionIcon(title),
+            tint = Color.White.copy(alpha = 0.82f),
+            modifier = Modifier.size(56.dp)
         )
     }
 }
@@ -162,5 +147,13 @@ private fun productIcon(categoryId: String): ImageVector = when (categoryId) {
     "cat-smart-home" -> AppIcons.Shield
     "cat-cameras" -> AppIcons.Package
     "cat-wearables" -> AppIcons.Heart
+    else -> AppIcons.Package
+}
+
+private fun collectionIcon(title: String): ImageVector = when {
+    title.contains("New", ignoreCase = true) -> AppIcons.Star
+    title.contains("Best", ignoreCase = true) -> AppIcons.Heart
+    title.contains("Work", ignoreCase = true) -> AppIcons.Settings
+    title.contains("Gaming", ignoreCase = true) -> AppIcons.Package
     else -> AppIcons.Package
 }

@@ -26,7 +26,23 @@ async function assertNoHorizontalOverflow(page, name) {
 
 async function capture(page, route, name) {
   console.log(`Capture ${name}: ${route}`);
-  await page.goto(`${BASE_URL}${route}`);
+  if (page.url() === 'about:blank' || page.url() === `${BASE_URL}/`) {
+    if (route === '/') {
+        await page.goto(`${BASE_URL}${route}`);
+    } else {
+        await page.goto(`${BASE_URL}/`);
+        await waitForCompose(page);
+        await page.evaluate((r) => {
+          window.history.pushState(null, "", r);
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }, route);
+    }
+  } else {
+    await page.evaluate((r) => {
+      window.history.pushState(null, "", r);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }, route);
+  }
   await waitForCompose(page);
   await assertNoHorizontalOverflow(page, name);
   await page.screenshot({ path: path.join(resultsDir, `${name}.png`), fullPage: true });
