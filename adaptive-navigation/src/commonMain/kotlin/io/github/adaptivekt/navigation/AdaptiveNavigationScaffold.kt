@@ -47,6 +47,8 @@ private val BottomNavigationHeight: Dp = AdaptiveTokens.Sizes.TopBarHeight + Ada
  * @param onItemSelected Callback invoked when a navigation item is selected.
  * @param modifier Modifier applied to the root scaffold container.
  * @param preferBottomNavigationOnCompact Forces bottom navigation on compact screens if true.
+ * @param navigationBehavior Optional responsive placement behavior. When null, the legacy
+ * preferBottomNavigationOnCompact mapping is preserved.
  * @param navigationItemStyle Visual style for navigation items (Card, Pill, Minimal).
  * @param navigationDensity Padding density for navigation items.
  * @param topBar Optional composable slot for a top app bar.
@@ -59,6 +61,7 @@ public fun AdaptiveNavigationScaffold(
     onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     preferBottomNavigationOnCompact: Boolean = false,
+    navigationBehavior: AdaptiveNavigationBehavior? = null,
     navigationItemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     navigationDensity: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     topBar: (@Composable () -> Unit)? = null,
@@ -66,21 +69,27 @@ public fun AdaptiveNavigationScaffold(
 ) {
     AdaptiveContent(modifier = modifier) {
         val adaptiveInfo = rememberAdaptiveInfo()
-        val mode = navigationModeForBreakpoint(adaptiveInfo.breakpoint, preferBottomNavigationOnCompact)
+        val effectiveBehavior = navigationBehavior ?: if (preferBottomNavigationOnCompact) {
+            AdaptiveNavigationDefaults.compactBottomBarBehavior()
+        } else {
+            AdaptiveNavigationDefaults.adminBehavior()
+        }
+        val placement = resolveAdaptiveNavigationPlacement(adaptiveInfo.breakpoint, effectiveBehavior)
         var drawerOpen by remember { mutableStateOf(false) }
-        val showGlobalTopBar = mode == AdaptiveNavigationMode.Drawer ||
-            (mode == AdaptiveNavigationMode.BottomNavigation && topBar != null)
+        val showGlobalTopBar = placement == AdaptiveNavigationPlacement.Drawer ||
+            (placement == AdaptiveNavigationPlacement.Hidden && topBar != null) ||
+            (placement == AdaptiveNavigationPlacement.BottomBar && topBar != null)
         val showContentTopBar = topBar != null &&
-            (mode == AdaptiveNavigationMode.NavigationRail || mode == AdaptiveNavigationMode.Sidebar)
+            (placement == AdaptiveNavigationPlacement.Rail || placement == AdaptiveNavigationPlacement.Sidebar)
         val contentPadding = PaddingValues(
             top = if (showGlobalTopBar || showContentTopBar) TopBarHeight else 0.dp,
-            bottom = if (mode == AdaptiveNavigationMode.BottomNavigation) BottomNavigationHeight else 0.dp,
+            bottom = if (placement == AdaptiveNavigationPlacement.BottomBar) BottomNavigationHeight else 0.dp,
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxSize()) {
-                when (mode) {
-                    AdaptiveNavigationMode.Drawer -> {
+                when (placement) {
+                    AdaptiveNavigationPlacement.Drawer -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 content(contentPadding)
@@ -114,7 +123,7 @@ public fun AdaptiveNavigationScaffold(
                             }
                         }
                     }
-                    AdaptiveNavigationMode.BottomNavigation -> {
+                    AdaptiveNavigationPlacement.BottomBar -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 content(contentPadding)
@@ -132,12 +141,14 @@ public fun AdaptiveNavigationScaffold(
                                     modifier = Modifier.fillMaxWidth(),
                                     itemStyle = navigationItemStyle,
                                     density = navigationDensity,
+                                    overflowBehavior = effectiveBehavior.overflowBehavior,
+                                    visibleItemCount = effectiveBehavior.bottomBarVisibleItemCount,
                                     onItemSelected = onItemSelected,
                                 )
                             }
                         }
                     }
-                    AdaptiveNavigationMode.NavigationRail -> {
+                    AdaptiveNavigationPlacement.Rail -> {
                         Row(modifier = Modifier.fillMaxSize()) {
                             NavigationRail(
                                 items = navItems,
@@ -148,6 +159,8 @@ public fun AdaptiveNavigationScaffold(
                                     .background(AdaptiveTheme.colors.surfaceMuted),
                                 itemStyle = navigationItemStyle,
                                 density = navigationDensity,
+                                overflowBehavior = effectiveBehavior.overflowBehavior,
+                                visibleItemCount = effectiveBehavior.railVisibleItemCount,
                                 onItemSelected = onItemSelected,
                             )
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -158,7 +171,7 @@ public fun AdaptiveNavigationScaffold(
                             }
                         }
                     }
-                    AdaptiveNavigationMode.Sidebar -> {
+                    AdaptiveNavigationPlacement.Sidebar -> {
                         Row(modifier = Modifier.fillMaxSize()) {
                             Sidebar(
                                 items = navItems,
@@ -179,13 +192,18 @@ public fun AdaptiveNavigationScaffold(
                             }
                         }
                     }
+                    AdaptiveNavigationPlacement.Hidden -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            content(contentPadding)
+                        }
+                    }
                 }
             }
 
             if (showGlobalTopBar) {
                 CompactTopBar(
                     drawerOpen = drawerOpen,
-                    showMenu = mode == AdaptiveNavigationMode.Drawer,
+                    showMenu = placement == AdaptiveNavigationPlacement.Drawer,
                     onMenuClick = { drawerOpen = !drawerOpen },
                     topBar = topBar,
                 )

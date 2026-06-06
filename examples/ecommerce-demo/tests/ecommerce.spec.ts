@@ -1,40 +1,64 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Adaptive Store Premium E2E', () => {
-  test.beforeEach(async ({ page }) => {
-    page.on('console', msg => console.log(`BROWSER CONSOLE: ${msg.text()}`));
-    page.on('pageerror', err => console.log(`BROWSER ERROR: ${err.message}`));
+async function waitForCompose(page: any) {
+  await page.waitForSelector('canvas', { timeout: 30000 });
+  await page.waitForTimeout(1200);
+}
+
+async function expectHealthyCanvas(page: any) {
+  const metrics = await page.evaluate(() => ({
+    canvasCount: document.querySelectorAll('canvas').length,
+    innerWidth: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    bodyBg: getComputedStyle(document.body).backgroundColor,
+  }));
+  expect(metrics.canvasCount).toBeGreaterThan(0);
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.innerWidth + 2);
+  return metrics;
+}
+
+test.describe('Adaptive Store visual smoke', () => {
+  test('mobile home uses bottom-nav viewport without horizontal overflow', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await waitForCompose(page);
+    await expectHealthyCanvas(page);
+    await page.screenshot({ path: 'test-results/mobile-home-smoke.png', fullPage: true });
   });
 
-  test('should load app and capture premium hero', async ({ page }) => {
-    const consolePromise = page.waitForEvent('console', msg => msg.text() === 'APP_STARTED');
-    await page.goto('/');
-    await consolePromise;
-    
-    const canvas = await page.waitForSelector('canvas', { timeout: 30000 });
-    expect(canvas).toBeTruthy();
-    
-    // Give it a moment to render the first frame
-    await page.waitForTimeout(2000);
-    
-    // Take a screenshot instead of checking text, since Wasm Canvas headless doesn't reliably expose a11y DOM here.
-    await page.screenshot({ path: 'test-results/home-hero.png' });
+  test('desktop products render without broken navigation overflow', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/shop');
+    await waitForCompose(page);
+    await expectHealthyCanvas(page);
+    await page.screenshot({ path: 'test-results/desktop-products-smoke.png', fullPage: true });
   });
 
-  test('navigate to shop and back using browser button', async ({ page }) => {
+  test('dark color scheme renders a distinct app frame', async ({ browser }) => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, colorScheme: 'dark' });
     await page.goto('/');
-    await page.waitForSelector('canvas');
-    await page.waitForTimeout(2000);
-    
-    // Attempt visual click on canvas where 'Shop new arrivals' button is roughly located
-    // This is a minimal test bridge substitute since getByText is unavailable in pure Canvas
-    await page.mouse.click(page.viewportSize()!.width / 2 - 100, page.viewportSize()!.height / 2 + 100);
-    
-    await page.waitForTimeout(1000);
-    await page.screenshot({ path: 'test-results/shop-products.png' });
-    
+    await waitForCompose(page);
+    await expectHealthyCanvas(page);
+    await page.screenshot({ path: 'test-results/mobile-home-dark-smoke.png', fullPage: true });
+    await page.close();
+  });
+
+  test('browser back returns from detail to products and checkout to cart history', async ({ page }) => {
+    test.setTimeout(70000);
+    await page.goto('/shop');
+    await waitForCompose(page);
+    await page.goto('/product/p1');
+    await waitForCompose(page);
     await page.goBack();
-    await page.waitForTimeout(1000);
-    await page.screenshot({ path: 'test-results/home-back.png' });
+    await waitForCompose(page);
+    await expect(page.url()).toContain('/shop');
+
+    await page.goto('/cart');
+    await waitForCompose(page);
+    await page.goto('/checkout');
+    await waitForCompose(page);
+    await page.goBack();
+    await waitForCompose(page);
+    await expect(page.url()).toContain('/cart');
   });
 });

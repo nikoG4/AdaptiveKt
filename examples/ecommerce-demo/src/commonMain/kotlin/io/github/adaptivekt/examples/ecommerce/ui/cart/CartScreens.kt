@@ -26,6 +26,7 @@ import io.github.adaptivekt.forms.AdaptiveFormLayout
 import io.github.adaptivekt.forms.FieldSpan
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcons
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
+import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
 
 @Composable
 fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
@@ -68,10 +69,10 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                                                 modifier = Modifier
                                                     .size(80.dp)
                                                     .clip(RoundedCornerShape(12.dp))
-                                                    .background(Color(0xFFF1F5F9)), 
+                                                    .background(Color(0xFFF1F5F9)),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Text("📷", fontSize = 24.sp)
+                                                ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                             }
                                             Spacer(Modifier.width(16.dp))
                                             Column(modifier = Modifier.weight(1f)) {
@@ -152,10 +153,10 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                                                 modifier = Modifier
                                                     .size(100.dp)
                                                     .clip(RoundedCornerShape(12.dp))
-                                                    .background(Color(0xFFF1F5F9)), 
+                                                    .background(Color(0xFFF1F5F9)),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Text("📷", fontSize = 32.sp)
+                                                ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                             }
                                             Spacer(Modifier.width(24.dp))
                                             Column(modifier = Modifier.weight(1f)) {
@@ -300,7 +301,7 @@ fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     if (product != null) {
                                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                                             Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
-                                                Text("📷", fontSize = 16.sp)
+                                                ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                             }
                                             Spacer(Modifier.width(12.dp))
                                             Column(modifier = Modifier.weight(1f)) {
@@ -395,7 +396,7 @@ fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
                                         if (product != null) {
                                             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                                                 Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
-                                                    Text("📷", fontSize = 16.sp)
+                                                    ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                                 }
                                                 Spacer(Modifier.width(12.dp))
                                                 Column(modifier = Modifier.weight(1f)) {

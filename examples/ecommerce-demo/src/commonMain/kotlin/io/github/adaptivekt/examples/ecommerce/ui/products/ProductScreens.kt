@@ -25,9 +25,11 @@ import io.github.adaptivekt.layout.AdaptiveContainer
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcons
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
+import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
 import io.github.adaptivekt.examples.ecommerce.ui.home.ProductCard
 import io.github.adaptivekt.examples.ecommerce.ui.home.Badge
 import io.github.adaptivekt.examples.ecommerce.ui.cart.toPriceString
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
@@ -46,13 +48,13 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
                         modifier = Modifier
                             .width(280.dp)
                             .fillMaxHeight()
-                            .background(Color(0xFFF8FAFC))
+                            .background(AdaptiveTheme.colors.surfaceMuted)
                             .padding(24.dp)
                     ) {
-                        Text("Filters", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text("Filters", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(24.dp))
                         
-                        Text("Category", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
+                        Text("Category", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AdaptiveTheme.colors.textSecondary)
                         Spacer(Modifier.height(12.dp))
                         categories.forEach { cat ->
                             Row(
@@ -67,18 +69,18 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     modifier = Modifier
                                         .size(18.dp)
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(if (isSelected) Color(0xFF3B82F6) else Color(0xFFE2E8F0)),
+                                        .background(if (isSelected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.disabledBackground),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (isSelected) AppIcon(AppIcons.Check, modifier = Modifier.size(12.dp), tint = Color.White)
                                 }
                                 Spacer(Modifier.width(12.dp))
-                                Text(cat.name, fontSize = 14.sp, color = if (isSelected) Color(0xFF0F172A) else Color(0xFF475569))
+                                Text(cat.name, fontSize = 14.sp, color = if (isSelected) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textSecondary)
                             }
                         }
                         
                         Spacer(Modifier.height(32.dp))
-                        Text("Sort By", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
+                        Text("Sort By", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AdaptiveTheme.colors.textSecondary)
                         Spacer(Modifier.height(12.dp))
                         val sortOptions = listOf("Popular", "Price: Low to High", "Price: High to Low", "Newest", "Best Rated")
                         AdaptiveSelect(
@@ -112,9 +114,9 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
                                 state.searchQuery.isNotBlank() -> "Search results for \"${state.searchQuery}\""
                                 else -> "All Products"
                             }
-                            Text(title, fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                            Text(title, fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
                             Spacer(Modifier.height(4.dp))
-                            Text("${products.size} products found", color = Color(0xFF64748B), fontSize = 14.sp)
+                            Text("${products.size} products found", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
                             
                             if (compact) {
                                 Spacer(Modifier.height(16.dp))
@@ -185,12 +187,12 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
             ) {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Shop", color = Color(0xFF64748B), fontSize = 14.sp, modifier = Modifier.clickable { state.navigateTo(Screen.Products) })
-                        Text(" / ", color = Color(0xFFCBD5E1), fontSize = 14.sp)
-                        Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "Category", color = Color(0xFF64748B), fontSize = 14.sp)
+                        Text("Shop", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp, modifier = Modifier.clickable { state.navigateTo(Screen.Products) })
+                        Text(" / ", color = AdaptiveTheme.colors.border, fontSize = 14.sp)
+                        Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "Category", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
                         if (!compact) {
                             Text(" / ", color = Color(0xFFCBD5E1), fontSize = 14.sp)
-                            Text(product.name, color = Color(0xFF0F172A), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text(product.name, color = AdaptiveTheme.colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
@@ -204,11 +206,9 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(300.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(Color(0xFFF1F5F9)), 
-                                    contentAlignment = Alignment.Center
+                                        .clip(RoundedCornerShape(16.dp)),
                                 ) {
-                                    Text("📷", fontSize = 64.sp)
+                                    ProductVisual(product = product, modifier = Modifier.fillMaxSize())
                                 }
                                 Spacer(Modifier.height(12.dp))
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -217,11 +217,10 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                             modifier = Modifier
                                                 .size(60.dp)
                                                 .clip(RoundedCornerShape(8.dp))
-                                                .background(Color(0xFFF1F5F9))
                                                 .clickable { },
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text("📷", fontSize = 16.sp)
+                                            ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                         }
                                     }
                                 }
@@ -233,7 +232,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                 else if (product.isSale) Badge("SPECIAL OFFER", Color(0xFFEF4444))
                                 
                                 Spacer(Modifier.height(12.dp))
-                                Text(product.name, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A), lineHeight = 34.sp)
+                                Text(product.name, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary, lineHeight = 34.sp)
                                 
                                 Spacer(Modifier.height(12.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -243,12 +242,12 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                         }
                                     }
                                     Spacer(Modifier.width(8.dp))
-                                    Text("${product.rating} (${product.reviewCount})", color = Color(0xFF64748B), fontSize = 14.sp)
+                                    Text("${product.rating} (${product.reviewCount})", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
                                 }
                                 
                                 Spacer(Modifier.height(24.dp))
                                 Row(verticalAlignment = Alignment.Bottom) {
-                                    Text("\$${product.price.toPriceString()}", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                    Text("\$${product.price.toPriceString()}", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                                     if (product.oldPrice != null) {
                                         Spacer(Modifier.width(12.dp))
                                         Text("\$${product.oldPrice.toPriceString()}", color = Color(0xFF94A3B8), fontSize = 18.sp, textDecoration = TextDecoration.LineThrough, modifier = Modifier.padding(bottom = 2.dp))
@@ -256,7 +255,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                 }
                                 
                                 Spacer(Modifier.height(24.dp))
-                                Text(product.shortDescription, color = Color(0xFF475569), fontSize = 16.sp, lineHeight = 24.sp)
+                                Text(product.shortDescription, color = AdaptiveTheme.colors.textSecondary, fontSize = 16.sp, lineHeight = 24.sp)
                                 
                                 Spacer(Modifier.height(32.dp))
                                 Text("Color", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -306,11 +305,9 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(500.dp)
-                                        .clip(RoundedCornerShape(24.dp))
-                                        .background(Color(0xFFF1F5F9)), 
-                                    contentAlignment = Alignment.Center
+                                        .clip(RoundedCornerShape(24.dp)),
                                 ) {
-                                    Text("📷", fontSize = 120.sp)
+                                    ProductVisual(product = product, modifier = Modifier.fillMaxSize())
                                 }
                                 Spacer(Modifier.height(16.dp))
                                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -319,11 +316,10 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                             modifier = Modifier
                                                 .size(100.dp)
                                                 .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFF1F5F9))
                                             .clickable { },
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text("📷", fontSize = 24.sp)
+                                        ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
                                         }
                                     }
                                 }
@@ -335,7 +331,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                 else if (product.isSale) Badge("SPECIAL OFFER", Color(0xFFEF4444))
                                 
                                 Spacer(Modifier.height(16.dp))
-                                Text(product.name, fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A), lineHeight = 56.sp)
+                                Text(product.name, fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary, lineHeight = 56.sp)
                                 
                                 Spacer(Modifier.height(16.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -345,12 +341,12 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                         }
                                     }
                                     Spacer(Modifier.width(12.dp))
-                                    Text("${product.rating} (${product.reviewCount} reviews)", color = Color(0xFF64748B), fontSize = 14.sp)
+                                    Text("${product.rating} (${product.reviewCount} reviews)", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
                                 }
                                 
                                 Spacer(Modifier.height(32.dp))
                                 Row(verticalAlignment = Alignment.Bottom) {
-                                    Text("\$${product.price.toPriceString()}", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                    Text("\$${product.price.toPriceString()}", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                                     if (product.oldPrice != null) {
                                         Spacer(Modifier.width(16.dp))
                                         Text("\$${product.oldPrice.toPriceString()}", color = Color(0xFF94A3B8), fontSize = 24.sp, textDecoration = TextDecoration.LineThrough, modifier = Modifier.padding(bottom = 4.dp))
@@ -360,7 +356,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                                 }
                                 
                                 Spacer(Modifier.height(32.dp))
-                                Text(product.shortDescription, color = Color(0xFF475569), fontSize = 18.sp, lineHeight = 28.sp)
+                                Text(product.shortDescription, color = AdaptiveTheme.colors.textSecondary, fontSize = 18.sp, lineHeight = 28.sp)
                                 
                                 Spacer(Modifier.height(40.dp))
                                 
@@ -417,16 +413,16 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                 
                 item {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text("Product Specifications", fontSize = if (compact) 20.sp else 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                        Text("Product Specifications", fontSize = if (compact) 20.sp else 24.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(16.dp))
                         AdaptiveGrid(columns = if (compact) 1 else 2, horizontalGap = if (compact) 16.dp else 48.dp, verticalGap = 16.dp) {
                             product.specs.forEach { spec ->
                                 item(span = 1) {
                                     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        Text(spec.name, color = Color(0xFF64748B), fontWeight = FontWeight.Medium)
-                                        Text(spec.value, color = Color(0xFF0F172A), fontWeight = FontWeight.Bold)
+                                        Text(spec.name, color = AdaptiveTheme.colors.textSecondary, fontWeight = FontWeight.Medium)
+                                        Text(spec.value, color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
                                     }
-                                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF1F5F9)))
+                                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(AdaptiveTheme.colors.border))
                                 }
                             }
                         }
@@ -435,7 +431,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                 
                 item {
                     Column {
-                        Text("You might also like", fontSize = if (compact) 20.sp else 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                        Text("You might also like", fontSize = if (compact) 20.sp else 24.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(16.dp))
                         AdaptiveGrid(columns = if (compact) 2 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
                             MockData.products.filter { it.categoryId == product.categoryId && it.id != product.id }.take(4).forEach { related ->
@@ -465,9 +461,9 @@ fun WishlistScreen(state: StoreState, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(if (compact) 16.dp else 24.dp)
             ) {
                 item {
-                    Text("Your Wishlist", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Text("Your Wishlist", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
                     Spacer(Modifier.height(8.dp))
-                    Text("${products.size} items saved", color = Color(0xFF64748B), fontSize = 14.sp)
+                    Text("${products.size} items saved", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
                 }
 
                 if (products.isEmpty()) {

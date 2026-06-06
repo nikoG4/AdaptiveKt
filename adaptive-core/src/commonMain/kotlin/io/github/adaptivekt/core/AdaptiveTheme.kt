@@ -1,5 +1,6 @@
 package io.github.adaptivekt.core
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -13,22 +14,30 @@ private val LocalAdaptiveStates = staticCompositionLocalOf { AdaptiveStateScheme
 /**
  * Root theme provider that supplies colors, shapes, typography, and state tokens to the composition.
  *
- * @param colorScheme Semantic colors for surfaces, text, feedback, selections, and component states.
+ * @param colorScheme Optional semantic colors for surfaces, text, feedback, selections, and component states.
  * @param shapes Shape tokens used by cards, buttons, menus, and fields.
  * @param typography Typography defaults for labels, body text, and headings.
  * @param states State tokens for hover, pressed, selected, disabled, and focus behaviors.
+ * @param mode Theme mode used when colorScheme is not provided. System follows the platform color scheme.
  * @param content The UI subtree that consumes the theme values.
  */
 @Composable
 public fun AdaptiveTheme(
-    colorScheme: AdaptiveColorScheme = AdaptiveColorSchemes.defaultLight(),
+    colorScheme: AdaptiveColorScheme? = null,
     shapes: AdaptiveShapeScheme = AdaptiveShapeScheme.default(),
     typography: AdaptiveTypography = AdaptiveTypography.default(),
     states: AdaptiveStateScheme = AdaptiveStateScheme.default(),
+    mode: AdaptiveThemeMode = AdaptiveThemeMode.System,
     content: @Composable () -> Unit,
 ) {
+    val resolvedColorScheme = colorScheme ?: if (resolveAdaptiveThemeDarkMode(mode, isSystemInDarkTheme())) {
+        AdaptiveColorSchemes.defaultDark()
+    } else {
+        AdaptiveColorSchemes.defaultLight()
+    }
+
     CompositionLocalProvider(
-        LocalAdaptiveColors provides colorScheme,
+        LocalAdaptiveColors provides resolvedColorScheme,
         LocalAdaptiveShapes provides shapes,
         LocalAdaptiveTypography provides typography,
         LocalAdaptiveStates provides states,

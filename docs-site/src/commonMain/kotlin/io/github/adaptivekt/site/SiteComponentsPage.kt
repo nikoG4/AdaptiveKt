@@ -51,8 +51,8 @@ import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
-import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.data.AdaptiveActionPriority
 import io.github.adaptivekt.data.AdaptiveDataAction
@@ -71,7 +71,11 @@ import io.github.adaptivekt.forms.AdaptiveValidationMessage
 import io.github.adaptivekt.forms.AdaptiveValidationMessageType
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.navigation.AdaptiveNavItem
+import io.github.adaptivekt.navigation.AdaptiveNavigationBehavior
+import io.github.adaptivekt.navigation.AdaptiveNavigationDefaults
 import io.github.adaptivekt.navigation.AdaptiveNavigationItemStyle
+import io.github.adaptivekt.navigation.AdaptiveNavigationOverflowBehavior
+import io.github.adaptivekt.navigation.AdaptiveNavigationPlacement
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.navigation.AdaptiveNavigationTree
 import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
@@ -119,14 +123,14 @@ private fun componentDocs(): List<ComponentDoc> = listOf(
         usage = "Wrap application content once near the root so AdaptiveKt primitives share consistent visual defaults.",
         basicExample = DocsExample(
             "Default theme",
-            "Use the light or dark color scheme as the root for your Compose content.",
+            "Use system theme detection by default, or force light/dark when needed.",
             """
-AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
+AdaptiveTheme(mode = AdaptiveThemeMode.System) {
     App()
 }
             """,
         ) {
-            AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
+            AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                 AdaptiveCard {
                     SiteText("Themed surface", fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -135,7 +139,8 @@ AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
             }
         },
         parameters = listOf(
-            ComponentParameter("colorScheme", "AdaptiveColorScheme", "AdaptiveColorSchemes.defaultLight()", false, "Semantic colors for surfaces, text, feedback, selections and component states."),
+            ComponentParameter("mode", "AdaptiveThemeMode", "System", false, "System follows the platform color scheme; Light and Dark force defaults."),
+            ComponentParameter("colorScheme", "AdaptiveColorScheme?", "null", false, "Optional explicit scheme. When null, mode selects light or dark defaults."),
             ComponentParameter("shapes", "AdaptiveShapeScheme", "AdaptiveShapeScheme.default()", false, "Shape tokens used by cards, buttons, menus and fields."),
             ComponentParameter("typography", "AdaptiveTypography", "AdaptiveTypography.default()", false, "Typography defaults for labels, body text and headings."),
             ComponentParameter("states", "AdaptiveStateScheme", "AdaptiveStateScheme.default()", false, "State tokens for hover, pressed, selected, disabled and focus behavior."),
@@ -145,9 +150,9 @@ AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
             DocsExample(
                 "Dark scheme",
                 "Switch the color scheme at the root. Components keep their contrast tokens.",
-                """AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) { App() }""",
+                """AdaptiveTheme(mode = AdaptiveThemeMode.Dark) { App() }""",
             ) {
-                AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultDark()) {
+                AdaptiveTheme(mode = AdaptiveThemeMode.Dark) {
                     AdaptiveCard {
                         SiteText("Dark themed card", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -528,12 +533,19 @@ AdaptiveMultiSelect(
         id = "adaptive-navigation-scaffold",
         family = "Navigation",
         title = "AdaptiveNavigationScaffold",
-        summary = "Responsive navigation shell that switches between sidebar, rail, drawer and bottom navigation modes.",
-        usage = "Use for admin shells where navigation should adapt by breakpoint without rewriting the screen.",
+        summary = "Responsive navigation shell with configurable sidebar, rail, drawer, bottom bar or hidden placements.",
+        usage = "Use for admin shells, storefronts and custom layouts where navigation should adapt by breakpoint without duplicating screen logic.",
         basicExample = DocsExample(
             "Navigation shell preview",
-            "The scaffold computes navigation mode from available width.",
-            """AdaptiveNavigationScaffold(navItems, selectedItemId, onItemSelected) { padding -> Content(padding) }""",
+            "The scaffold resolves placement from breakpoint and AdaptiveNavigationBehavior.",
+            """
+AdaptiveNavigationScaffold(
+    navItems = navItems,
+    selectedItemId = selected,
+    onItemSelected = { selected = it },
+    navigationBehavior = AdaptiveNavigationDefaults.adminBehavior(),
+) { padding -> Content(padding) }
+            """,
         ) {
             var selected by remember { mutableStateOf("dashboard") }
             Box(modifier = Modifier.fillMaxWidth().height(260.dp).border(1.dp, SiteLine)) {
@@ -541,6 +553,7 @@ AdaptiveMultiSelect(
                     navItems = listOf(AdaptiveNavItem("dashboard", "Dashboard"), AdaptiveNavItem("orders", "Orders"), AdaptiveNavItem("settings", "Settings")),
                     selectedItemId = selected,
                     onItemSelected = { selected = it },
+                    navigationBehavior = AdaptiveNavigationDefaults.adminBehavior(),
                     navigationItemStyle = AdaptiveNavigationItemStyle.Pill,
                 ) { padding ->
                     Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
@@ -554,11 +567,57 @@ AdaptiveMultiSelect(
             ComponentParameter("selectedItemId", "String", "required", true, "Selected item id."),
             ComponentParameter("onItemSelected", "(String) -> Unit", "required", true, "Selection callback."),
             ComponentParameter("topBar", "(@Composable () -> Unit)?", "null", false, "Optional top bar slot."),
-            ComponentParameter("navigationItemStyle", "AdaptiveNavigationItemStyle", "Card", false, "Card, Pill or Minimal item style."),
+            ComponentParameter("navigationBehavior", "AdaptiveNavigationBehavior?", "null", false, "Breakpoint placement and overflow behavior. Null preserves legacy preferBottomNavigationOnCompact mapping."),
+            ComponentParameter("preferBottomNavigationOnCompact", "Boolean", "false", false, "Legacy compact mapping retained for compatibility."),
+            ComponentParameter("navigationItemStyle", "AdaptiveNavigationItemStyle", "Pill", false, "Card, Pill or Minimal item style."),
             ComponentParameter("content", "@Composable (PaddingValues) -> Unit", "required", true, "Screen content with scaffold padding."),
         ),
+        variants = listOf(
+            DocsExample(
+                "Storefront bottom navigation",
+                "Use the storefront preset for bottom navigation on compact and medium breakpoints, then render a custom top/header area on larger screens.",
+                """
+AdaptiveNavigationScaffold(
+    navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
+    navItems = items,
+    selectedItemId = selected,
+    onItemSelected = { selected = it },
+) { padding -> StoreContent(padding) }
+                """,
+            ) {
+                AdaptiveCard {
+                    SiteText("Preset: storefrontBehavior()", fontWeight = FontWeight.Bold)
+                    SiteText("Compact/Medium -> BottomBar, Expanded/Large -> Hidden, overflow -> MoreMenu.", color = SiteMuted, maxLines = 3)
+                }
+            },
+            DocsExample(
+                "Custom placements",
+                "Choose placements per breakpoint and use MoreMenu or Scroll when navigation grows.",
+                """
+AdaptiveNavigationBehavior(
+    compact = AdaptiveNavigationPlacement.Drawer,
+    medium = AdaptiveNavigationPlacement.Rail,
+    expanded = AdaptiveNavigationPlacement.Sidebar,
+    large = AdaptiveNavigationPlacement.Sidebar,
+    overflowBehavior = AdaptiveNavigationOverflowBehavior.MoreMenu,
+)
+                """,
+            ) {
+                val behavior = AdaptiveNavigationBehavior(
+                    compact = AdaptiveNavigationPlacement.Drawer,
+                    medium = AdaptiveNavigationPlacement.Rail,
+                    expanded = AdaptiveNavigationPlacement.Sidebar,
+                    large = AdaptiveNavigationPlacement.Sidebar,
+                    overflowBehavior = AdaptiveNavigationOverflowBehavior.MoreMenu,
+                )
+                AdaptiveSurface(contentPadding = PaddingValues(12.dp)) {
+                    SiteText("Compact: ${behavior.compact} | Medium: ${behavior.medium}", fontWeight = FontWeight.Bold)
+                    SiteText("Overflow: ${behavior.overflowBehavior}", color = SiteMuted)
+                }
+            },
+        ),
         themingNotes = commonNotes("AdaptiveNavigationScaffold"),
-        responsiveNotes = listOf("Compact uses drawer/bottom patterns; medium can use rail; large uses sidebar."),
+        responsiveNotes = listOf("Configure compact, medium, expanded and large placements independently. MoreMenu and Scroll keep dense bottom/rail navigation usable."),
         accessibilityNotes = listOf("Provide short labels that remain legible in rail and bottom modes."),
         limitations = listOf("Deep nested sidebar hierarchy is handled by AdaptiveNavigationTree, not the scaffold itself."),
     ),

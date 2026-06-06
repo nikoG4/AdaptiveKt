@@ -234,30 +234,23 @@ private fun HomeProductPreview() {
 @Composable
 private fun HomeInstallSection(compact: Boolean) {
     DocsSection(
-        title = "Use it locally while Maven Central is prepared",
-        description = "AdaptiveKt is not published to Maven Central yet. The current verified path is local publishing from this repository, followed by consuming the generated Maven artifacts from another project.",
+        title = "Install the published alpha",
+        description = "AdaptiveKt 0.1.0-alpha01 is available from Maven Central. Local publishing remains available for dry-run verification and contribution work.",
     ) {
         AdaptiveGrid(columns = 12, horizontalGap = 18.dp, verticalGap = 18.dp) {
             item(span = if (compact) 12 else 5) {
                 DocsCallout(
-                    title = "Current status",
-                    body = "Local publishing is available and smoke-tested. Planned Maven Central coordinates are documented, but remote publication is intentionally blocked until namespace verification is complete.",
-                    tone = AdaptiveBadgeTone.Warning,
+                    title = "Published alpha",
+                    body = "Use the Maven Central coordinates below for experiments, demos and early integration feedback. The API is alpha and can still change before beta/stable releases.",
+                    tone = AdaptiveBadgeTone.Success,
                 )
             }
             item(span = if (compact) 12 else 7) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     DocsCodeBlock(
-                        title = "Publish locally",
-                        code = "./gradlew publishAllPublicationsToLocalTestRepository",
-                    )
-                    DocsCodeBlock(
-                        title = "Consume local artifacts",
+                        title = "Consume from Maven Central",
                         code = """
 repositories {
-    maven {
-        url = uri("path/to/AdaptiveKt/build/local-maven")
-    }
     mavenCentral()
     google()
 }
@@ -273,14 +266,14 @@ dependencies {
         Spacer(modifier = Modifier.height(16.dp))
         AdaptiveSurface(contentPadding = PaddingValues(16.dp)) {
             Column {
-                SiteText("Planned Maven Central coordinates", fontWeight = FontWeight.Bold)
+                SiteText("Local dry-run remains available", fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 DocsCodeBlock(
-                    title = "Planned after publication",
-                    code = """implementation("io.github.nikog4.adaptivekt:adaptive-components:0.1.0-alpha01")""",
+                    title = "Verify publication artifacts locally",
+                    code = "./gradlew publishAllPublicationsToLocalTestRepository",
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                SiteText("These coordinates are planned and will become available only after Maven Central publication.", color = SiteMuted, maxLines = 4)
+                SiteText("This local repository is for maintainers and contributors; consumers can use Maven Central directly.", color = SiteMuted, maxLines = 4)
             }
         }
     }

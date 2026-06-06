@@ -44,4 +44,43 @@ class NavigationModeTest {
             navigationModeForBreakpoint(AdaptiveBreakpoint.Large),
         )
     }
+
+    @Test
+    fun `admin behavior resolves classic responsive placements`() {
+        val behavior = AdaptiveNavigationDefaults.adminBehavior()
+
+        assertEquals(AdaptiveNavigationPlacement.Drawer, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Compact, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Rail, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Medium, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Sidebar, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Expanded, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Sidebar, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Large, behavior))
+    }
+
+    @Test
+    fun `storefront behavior keeps mobile and medium on bottom bar`() {
+        val behavior = AdaptiveNavigationDefaults.storefrontBehavior()
+
+        assertEquals(AdaptiveNavigationPlacement.BottomBar, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Compact, behavior))
+        assertEquals(AdaptiveNavigationPlacement.BottomBar, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Medium, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Hidden, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Expanded, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Hidden, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Large, behavior))
+        assertEquals(AdaptiveNavigationOverflowBehavior.MoreMenu, behavior.overflowBehavior)
+        assertEquals(5, behavior.bottomBarVisibleItemCount)
+    }
+
+    @Test
+    fun `custom behavior resolves configured placements`() {
+        val behavior = AdaptiveNavigationBehavior(
+            compact = AdaptiveNavigationPlacement.Hidden,
+            medium = AdaptiveNavigationPlacement.BottomBar,
+            expanded = AdaptiveNavigationPlacement.Drawer,
+            large = AdaptiveNavigationPlacement.Rail,
+            overflowBehavior = AdaptiveNavigationOverflowBehavior.Scroll,
+        )
+
+        assertEquals(AdaptiveNavigationPlacement.Hidden, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Compact, behavior))
+        assertEquals(AdaptiveNavigationPlacement.BottomBar, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Medium, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Drawer, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Expanded, behavior))
+        assertEquals(AdaptiveNavigationPlacement.Rail, resolveAdaptiveNavigationPlacement(AdaptiveBreakpoint.Large, behavior))
+        assertEquals(AdaptiveNavigationOverflowBehavior.Scroll, behavior.overflowBehavior)
+    }
 }

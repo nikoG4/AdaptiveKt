@@ -9,9 +9,10 @@ This demo showcases a modern, responsive e-commerce experience using AdaptiveKt'
 - **Premium UI:** A modern, visual-first design inspired by top-tier tech storefronts.
 - **Rich Content:** 40+ products, multiple categories, and curated collections with realistic metadata.
 - **Advanced Navigation:** Internal back stack management and browser history synchronization for a seamless Web experience.
-- **Responsive Layout:** Adaptive grid and container systems that look great on both desktop monitors and mobile screens.
+- **Responsive Layout:** Adaptive grid/container systems plus `AdaptiveNavigationDefaults.storefrontBehavior()` for bottom navigation on compact and medium screens.
+- **System Theme:** The demo uses `AdaptiveTheme(mode = AdaptiveThemeMode.System)` by default, with a mock System/Light/Dark selector in Settings.
 - **E-commerce Flow:** Full shopping experience from landing page to product detail, cart, and checkout.
-- **Vector Icons:** High-quality SVG icons using Compose's `ImageVector` API to ensure crisp rendering on all platforms.
+- **Vector Visuals:** Product cards use Compose vector/gradient visuals so the demo remains polished on Wasm without remote image loading.
 
 ## Multiplatform Support
 
@@ -64,6 +65,8 @@ npm run screenshots
 ## Attributions
 
 See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md) for details on icons and images used in this demo.
+
+Remote product image URLs remain in mock data for future loader experiments, but the current UI renders local Compose visuals as stable fallbacks across Web, Android, Desktop and iOS.
 
 ## Library Backlog
 

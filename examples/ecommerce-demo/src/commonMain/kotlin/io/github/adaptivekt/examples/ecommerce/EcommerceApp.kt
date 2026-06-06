@@ -26,7 +26,7 @@ import io.github.adaptivekt.examples.ecommerce.ui.states.UiStatesScreen
 
 @Composable
 fun EcommerceApp(storeState: StoreState = remember { StoreState() }) {
-    AdaptiveTheme {
+    AdaptiveTheme(mode = storeState.themeMode) {
         AppShell(state = storeState) { paddingValues ->
             val modifier = Modifier.padding(paddingValues)
             when (val screen = storeState.currentScreen) {

@@ -24,6 +24,7 @@ import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.layout.AdaptiveGrid
 
@@ -69,25 +70,37 @@ private fun docsTopics(): List<DocsTopic> = listOf(
         id = "getting-started",
         family = "Getting started",
         title = "Getting started",
-        summary = "Set up AdaptiveKt from locally published artifacts while Maven Central is pending.",
+        summary = "Set up the published AdaptiveKt alpha from Maven Central.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
             DocsCallout(
-                title = "Current status",
-                body = "AdaptiveKt is not published to Maven Central yet. Use local publishing while the namespace is being verified. The planned coordinates are documented so the migration to Maven Central is straightforward later.",
-                tone = AdaptiveBadgeTone.Warning,
+                title = "Alpha available",
+                body = "AdaptiveKt 0.1.0-alpha01 is published on Maven Central. The APIs are intended for early adoption and feedback while the toolkit moves toward a stable 0.1 line.",
+                tone = AdaptiveBadgeTone.Success,
             )
             DocsExampleBlock(
                 DocsExample(
-                    title = "Publish local Maven artifacts",
-                    description = "Run this from the AdaptiveKt repository. It writes artifacts to build/local-maven and does not publish anything remotely.",
-                    code = "./gradlew publishAllPublicationsToLocalTestRepository",
+                    title = "Install from Maven Central",
+                    description = "Add the modules you need. Demo apps and docs-site are intentionally not published as library artifacts.",
+                    code = """
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation("io.github.nikog4.adaptivekt:adaptive-core:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-components:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-layout:0.1.0-alpha01")
+    implementation("io.github.nikog4.adaptivekt:adaptive-navigation:0.1.0-alpha01")
+}
+                    """,
                 ) {
                     AdaptiveSurface(contentPadding = PaddingValues(16.dp)) {
                         Column {
-                            SiteText("Local publishing / dry-run", fontWeight = FontWeight.Bold)
+                            SiteText("Maven Central alpha", fontWeight = FontWeight.Bold)
                             Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
-                            SiteText("Outputs: build/local-maven", color = SiteMuted)
+                            SiteText("Group: io.github.nikog4.adaptivekt", color = SiteMuted)
                         }
                     }
                 },
@@ -112,9 +125,9 @@ dependencies {
             )
             DocsParameterTable(
                 listOf(
-                    ComponentParameter("GROUP", "Gradle property", "io.github.nikog4.adaptivekt", true, "The Maven group configured once in gradle.properties."),
-                    ComponentParameter("VERSION_NAME", "Gradle property", "0.1.0-alpha01", true, "The current local publishing version."),
-                    ComponentParameter("build/local-maven", "Directory", "generated", true, "The local repository consumed by smoke tests and external projects."),
+                    ComponentParameter("groupId", "Maven coordinate", "io.github.nikog4.adaptivekt", true, "The published Maven Central group."),
+                    ComponentParameter("version", "Maven coordinate", "0.1.0-alpha01", true, "The current published alpha version."),
+                    ComponentParameter("artifacts", "Maven modules", "adaptive-core, adaptive-components, ...", true, "Library modules are published independently."),
                 ),
             )
         }
@@ -131,14 +144,12 @@ dependencies {
                     title = "Wrap your app",
                     description = "AdaptiveTheme provides the tokens used by buttons, cards, forms, data views and navigation.",
                     code = """
-AdaptiveTheme(
-    colorScheme = AdaptiveColorSchemes.defaultLight(),
-) {
+AdaptiveTheme(mode = AdaptiveThemeMode.System) {
     App()
 }
                     """,
                 ) {
-                    AdaptiveTheme(colorScheme = AdaptiveColorSchemes.defaultLight()) {
+                    AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                         AdaptiveCard {
                             SiteText("Theme preview", fontWeight = FontWeight.Bold)
                             Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
@@ -149,13 +160,61 @@ AdaptiveTheme(
             )
             DocsParameterTable(
                 listOf(
-                    ComponentParameter("colorScheme", "AdaptiveColorScheme", "AdaptiveColorSchemes.defaultLight()", false, "Semantic colors for surfaces, text, feedback tones and component states."),
+                    ComponentParameter("mode", "AdaptiveThemeMode", "System", false, "System follows the platform color scheme; Light and Dark force a scheme."),
+                    ComponentParameter("colorScheme", "AdaptiveColorScheme?", "null", false, "Optional explicit scheme. If null, mode selects light or dark defaults."),
                     ComponentParameter("shapes", "AdaptiveShapeScheme", "AdaptiveShapeScheme.default()", false, "Shape tokens such as medium, large and pill."),
                     ComponentParameter("typography", "AdaptiveTypography", "AdaptiveTypography.default()", false, "Text styles shared by the toolkit."),
                     ComponentParameter("states", "AdaptiveStateScheme", "AdaptiveStateScheme.default()", false, "Interaction state tokens for hover, pressed, selected and disabled states."),
                 ),
             )
-            DocsCallout("Dark mode", "Use AdaptiveColorSchemes.defaultDark() at the theme root. Components read tokens instead of hardcoded colors.", AdaptiveBadgeTone.Info)
+            DocsCallout("System theme detection", "Consumers can use AdaptiveTheme { App() } or AdaptiveTheme(mode = AdaptiveThemeMode.System) without writing platform expect/actual code.", AdaptiveBadgeTone.Info)
+        }
+    },
+    DocsTopic(
+        id = "responsive-navigation-behavior",
+        family = "Navigation",
+        title = "Responsive navigation behavior",
+        summary = "Configure whether navigation becomes a sidebar, rail, bottom bar, drawer or hidden custom surface per breakpoint.",
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
+            DocsCodeBlock(
+                title = "Storefront preset",
+                code = """
+AdaptiveNavigationScaffold(
+    navItems = items,
+    selectedItemId = selected,
+    onItemSelected = { id -> select(id) },
+    navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
+) { padding ->
+    StoreContent(Modifier.padding(padding))
+}
+                """,
+            )
+            DocsCodeBlock(
+                title = "Custom placements",
+                code = """
+AdaptiveNavigationScaffold(
+    navigationBehavior = AdaptiveNavigationBehavior(
+        compact = AdaptiveNavigationPlacement.Drawer,
+        medium = AdaptiveNavigationPlacement.Rail,
+        expanded = AdaptiveNavigationPlacement.Sidebar,
+        large = AdaptiveNavigationPlacement.Sidebar,
+        overflowBehavior = AdaptiveNavigationOverflowBehavior.MoreMenu
+    ),
+    navItems = items,
+    selectedItemId = selected,
+    onItemSelected = { id -> select(id) },
+) { padding -> AppContent(padding) }
+                """,
+            )
+            DocsParameterTable(
+                listOf(
+                    ComponentParameter("AdaptiveNavigationPlacement", "Enum", "Drawer/Rail/Sidebar/BottomBar/Hidden", true, "Placement chosen independently for each breakpoint."),
+                    ComponentParameter("AdaptiveNavigationOverflowBehavior", "Enum", "MoreMenu", false, "MoreMenu or Scroll keep dense navigation usable when item counts grow."),
+                    ComponentParameter("AdaptiveNavigationDefaults.adminBehavior()", "Preset", "Drawer/Rail/Sidebar", false, "Classic admin kit behavior."),
+                    ComponentParameter("AdaptiveNavigationDefaults.storefrontBehavior()", "Preset", "BottomBar/Hidden", false, "Storefront behavior used by the ecommerce demo."),
+                ),
+            )
         }
     },
     DocsTopic(
@@ -205,16 +264,16 @@ AdaptiveGrid(columns = 12) {
         id = "publishing",
         family = "Publishing",
         title = "Publishing status",
-        summary = "Local publishing is configured and verified; Maven Central is intentionally not active yet.",
+        summary = "AdaptiveKt 0.1.0-alpha01 is published to Maven Central; local dry-runs remain available.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
             DocsCallout(
-                title = "No remote publish",
-                body = "The repository has local publishing and consumer smoke tests. Maven Central release workflows are guarded and should not run until namespace, signing and release policy are finalized.",
-                tone = AdaptiveBadgeTone.Danger,
+                title = "Published alpha",
+                body = "The first alpha is available from Maven Central. Future releases remain manual and guarded; local publishing and consumer smoke tests are kept for preflight verification.",
+                tone = AdaptiveBadgeTone.Success,
             )
             DocsCodeBlock(
-                title = "Local dry-run",
+                title = "Local dry-run for maintainers",
                 code = """
 ./gradlew publishAllPublicationsToLocalTestRepository
 ./tools/verify-local-publishing-consumer.ps1
@@ -222,8 +281,8 @@ AdaptiveGrid(columns = 12) {
             )
             DocsParameterTable(
                 listOf(
-                    ComponentParameter("adaptive-core", "Artifact", "published locally", true, "Core breakpoints, tokens and theme foundation."),
-                    ComponentParameter("adaptive-components", "Artifact", "published locally", true, "Reusable UI primitives."),
+                    ComponentParameter("adaptive-core", "Artifact", "published alpha", true, "Core breakpoints, tokens and theme foundation."),
+                    ComponentParameter("adaptive-components", "Artifact", "published alpha", true, "Reusable UI primitives."),
                     ComponentParameter("admin-demo", "Demo module", "not published", true, "Demo app remains in the build but excluded from Maven publishing."),
                     ComponentParameter("docs-site", "Site module", "not published", true, "GitHub Pages docs site remains in the build but excluded from Maven publishing."),
                 ),

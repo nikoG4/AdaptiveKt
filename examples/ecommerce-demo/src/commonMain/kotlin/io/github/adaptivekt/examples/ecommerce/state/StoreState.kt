@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.derivedStateOf
+import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.examples.ecommerce.model.*
 import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 
@@ -25,6 +26,7 @@ class StoreState {
     var selectedCollectionId by mutableStateOf<String?>(null)
     var selectedTags = mutableStateListOf<String>()
     var sortOption by mutableStateOf("Popular")
+    var themeMode by mutableStateOf(AdaptiveThemeMode.System)
     
     val wishlistIds = mutableStateListOf<String>()
     var cartItems = mutableStateListOf<CartItem>()

@@ -25,6 +25,10 @@ import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.layout.AdaptiveContainer
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcons
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
+import io.github.adaptivekt.examples.ecommerce.ui.components.CategoryVisual
+import io.github.adaptivekt.examples.ecommerce.ui.components.CollectionVisual
+import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
@@ -142,7 +146,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                 // Featured Collections
                 item {
                     Column(modifier = Modifier.padding(horizontal = sectionHorizontalPadding)) {
-                        Text("Featured Collections", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                        Text("Featured Collections", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(16.dp))
                         AdaptiveGrid(columns = if (compact) 1 else 2, horizontalGap = 16.dp, verticalGap = 16.dp) {
                             MockData.collections.forEach { col ->
@@ -156,9 +160,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                         contentPadding = PaddingValues(0.dp)
                                     ) {
                                         Box(modifier = Modifier.fillMaxSize()) {
-                                            Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF1F5F9)), contentAlignment = Alignment.Center) {
-                                                Text(col.name.take(1), fontSize = 64.sp, color = Color(0xFFCBD5E1), fontWeight = FontWeight.Bold)
-                                            }
+                                            CollectionVisual(title = col.name, modifier = Modifier.fillMaxSize())
                                             Box(
                                                 modifier = Modifier
                                                     .fillMaxSize()
@@ -168,7 +170,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                                 Column(modifier = Modifier.padding(16.dp)) {
                                                     Text(col.name, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                                     Spacer(Modifier.height(4.dp))
-                                                    Text("Browse collection →", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+                                                    Text("Browse collection", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
                                                 }
                                             }
                                         }
@@ -187,7 +189,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Trending now", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                            Text("Trending now", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
                             AdaptiveButton(
                                 text = "View all", 
                                 onClick = { state.navigateTo(Screen.Products) },
@@ -212,7 +214,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                             .fillMaxWidth()
                             .padding(horizontal = sectionHorizontalPadding)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Color(0xFFEFF6FF))
+                            .background(AdaptiveTheme.colors.primary.copy(alpha = 0.12f))
                             .padding(if (compact) 24.dp else 48.dp)
                     ) {
                         if (compact) {
@@ -224,7 +226,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     modifier = Modifier
                                         .size(100.dp)
                                         .clip(RoundedCornerShape(16.dp))
-                                        .background(Color.White),
+                                        .background(AdaptiveTheme.colors.surfaceRaised),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     AppIcon(AppIcons.Package, modifier = Modifier.size(50.dp), tint = Color(0xFFDBEAFE))
@@ -232,7 +234,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                 Spacer(Modifier.height(24.dp))
                                 Text("Spring setup sale", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6))
                                 Spacer(Modifier.height(8.dp))
-                                Text("Save up to 25% on workspace gear.", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E3A8A), lineHeight = 36.sp, textAlign = TextAlign.Center)
+                                Text("Save up to 25% on workspace gear.", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary, lineHeight = 36.sp, textAlign = TextAlign.Center)
                                 Spacer(Modifier.height(24.dp))
                                 AdaptiveButton(text = "Shop the sale", onClick = { state.navigateTo(Screen.Products) }, modifier = Modifier.fillMaxWidth())
                             }
@@ -253,7 +255,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     modifier = Modifier
                                         .size(200.dp)
                                         .clip(RoundedCornerShape(24.dp))
-                                        .background(Color.White),
+                                        .background(AdaptiveTheme.colors.surfaceRaised),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     AppIcon(AppIcons.Package, modifier = Modifier.size(100.dp), tint = Color(0xFFDBEAFE))
@@ -266,7 +268,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                 // Category Grid
                 item {
                     Column(modifier = Modifier.padding(horizontal = sectionHorizontalPadding)) {
-                        Text("Shop by category", fontSize = if (compact) 24.sp else 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                        Text("Shop by category", fontSize = if (compact) 24.sp else 24.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
                         Spacer(Modifier.height(16.dp))
                         AdaptiveGrid(columns = if (compact) 2 else 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
                             MockData.categories.forEach { cat ->
@@ -281,9 +283,9 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier.fillMaxWidth().padding(if (compact) 8.dp else 16.dp)
                                         ) {
-                                            Text(cat.iconSymbol, fontSize = if (compact) 32.sp else 40.sp)
+                                            CategoryVisual(categoryId = cat.id, modifier = Modifier.size(if (compact) 56.dp else 64.dp))
                                             Spacer(Modifier.height(8.dp))
-                                            Text(cat.name, fontWeight = FontWeight.Bold, fontSize = if (compact) 14.sp else 16.sp)
+                                            Text(cat.name, fontWeight = FontWeight.Bold, fontSize = if (compact) 14.sp else 16.sp, color = AdaptiveTheme.colors.textPrimary)
                                         }
                                     }
                                 }
@@ -297,7 +299,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFF8FAFC))
+                            .background(AdaptiveTheme.colors.surfaceMuted)
                             .padding(vertical = if (compact) 40.dp else 64.dp, horizontal = sectionHorizontalPadding),
                         contentAlignment = Alignment.Center
                     ) {
@@ -305,12 +307,12 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.widthIn(max = 600.dp)
                         ) {
-                            Text("Why Adaptive Store?", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                            Text("Why Adaptive Store?", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
                             Spacer(Modifier.height(16.dp))
                             Text(
                                 "This showcase is built entirely with AdaptiveKt, a premium UI toolkit for Compose Multiplatform. It demonstrates responsive layouts, shared state, and advanced navigation across Web, Mobile, and Desktop.", 
                                 textAlign = TextAlign.Center,
-                                color = Color(0xFF475569),
+                                color = AdaptiveTheme.colors.textSecondary,
                                 lineHeight = if (compact) 24.sp else 28.sp,
                                 fontSize = if (compact) 14.sp else 16.sp
                             )
@@ -349,12 +351,14 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, com
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(if (compact) 140.dp else 200.dp)
-                    .background(Color(0xFFF1F5F9)),
+                    .height(if (compact) 150.dp else 210.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Image placeholder
-                Text("📷", fontSize = if (compact) 32.sp else 48.sp)
+                ProductVisual(
+                    product = prod,
+                    compact = compact,
+                    modifier = Modifier.fillMaxSize(),
+                )
                 
                 // Badges
                 Row(
@@ -370,10 +374,10 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, com
                 }
             }
             Column(modifier = Modifier.padding(if (compact) 12.dp else 16.dp)) {
-                Text(prod.name, fontWeight = FontWeight.Bold, fontSize = if (compact) 14.sp else 16.sp, maxLines = 1)
+                Text(prod.name, fontWeight = FontWeight.Bold, fontSize = if (compact) 14.sp else 16.sp, maxLines = 1, color = AdaptiveTheme.colors.textPrimary)
                 if (!compact) {
                     Spacer(Modifier.height(4.dp))
-                    Text(prod.shortDescription, fontSize = 12.sp, color = Color(0xFF64748B), maxLines = 2)
+                    Text(prod.shortDescription, fontSize = 12.sp, color = AdaptiveTheme.colors.textSecondary, maxLines = 2)
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(
@@ -382,9 +386,9 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, com
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("\$${prod.price}", color = Color(0xFF0F172A), fontWeight = FontWeight.ExtraBold, fontSize = if (compact) 14.sp else 18.sp)
+                        Text("\$${prod.price}", color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.ExtraBold, fontSize = if (compact) 14.sp else 18.sp)
                         if (prod.oldPrice != null && !compact) {
-                            Text("\$${prod.oldPrice}", color = Color(0xFF94A3B8), fontSize = 12.sp, style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
+                            Text("\$${prod.oldPrice}", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp, style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
                         }
                     }
                     AppIcon(AppIcons.Plus, modifier = Modifier.size(if (compact) 16.dp else 20.dp), tint = Color(0xFF3B82F6))

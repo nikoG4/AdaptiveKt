@@ -3,10 +3,14 @@
 ## Unreleased
 
 ### Added
+- Configurable responsive navigation behavior with placements for sidebar, rail, bottom bar, drawer and hidden custom navigation.
+- `AdaptiveThemeMode` with System, Light and Dark modes; `AdaptiveTheme {}` now follows the platform color scheme by default when no explicit color scheme is provided.
+- Storefront navigation preset for demos and ecommerce-style apps.
 - Grant readiness documentation, repository community files, GitHub issue templates, and pull request template.
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- Improved ecommerce showcase navigation, theme handling and product visuals.
 - Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.
 
 ## 0.1.0-alpha01

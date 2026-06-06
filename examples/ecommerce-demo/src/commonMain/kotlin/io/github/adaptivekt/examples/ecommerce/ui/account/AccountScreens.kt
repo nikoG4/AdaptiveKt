@@ -17,7 +17,10 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.components.AdaptiveChip
+import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveSelect
+import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.examples.ecommerce.state.StoreState
 import io.github.adaptivekt.examples.ecommerce.model.MockData
 import io.github.adaptivekt.examples.ecommerce.model.OrderStatus
@@ -79,7 +82,7 @@ fun OrdersScreen(state: StoreState, modifier: Modifier = Modifier) {
         LazyColumn(contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    AdaptiveButton(text = "←", onClick = { state.goBack() })
+                    AdaptiveButton(text = "Back", onClick = { state.goBack() })
                     Spacer(Modifier.width(16.dp))
                     Text("My Orders", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }
@@ -117,9 +120,7 @@ fun OrdersScreen(state: StoreState, modifier: Modifier = Modifier) {
 fun SettingsScreen(state: StoreState, modifier: Modifier = Modifier) {
     var pushEnabled by remember { mutableStateOf(true) }
     var emailEnabled by remember { mutableStateOf(false) }
-    var darkTheme by remember { mutableStateOf(false) }
-    
-    val currencies = listOf("USD (\$)", "EUR (€)", "GBP (£)", "JPY (¥)")
+    val currencies = listOf("USD ($)", "EUR (EUR)", "GBP (GBP)", "JPY (JPY)")
     var selectedCurrency by remember { mutableStateOf<String?>(currencies[0]) }
 
     val languages = listOf("English", "Spanish", "French", "German")
@@ -129,7 +130,7 @@ fun SettingsScreen(state: StoreState, modifier: Modifier = Modifier) {
         LazyColumn(contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    AdaptiveButton(text = "←", onClick = { state.goBack() })
+                    AdaptiveButton(text = "Back", onClick = { state.goBack() })
                     Spacer(Modifier.width(16.dp))
                     Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }
@@ -172,10 +173,24 @@ fun SettingsScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
 
                     section(title = "Appearance") {
-                        field(label = "Dark Theme") {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("Enable dark mode (mock)")
-                                Switch(checked = darkTheme, onCheckedChange = { darkTheme = it })
+                        field(label = "Theme") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                listOf(
+                                    AdaptiveThemeMode.System to "System",
+                                    AdaptiveThemeMode.Light to "Light",
+                                    AdaptiveThemeMode.Dark to "Dark",
+                                ).forEach { (mode, label) ->
+                                    AdaptiveChip(
+                                        text = label,
+                                        selected = state.themeMode == mode,
+                                        tone = if (mode == AdaptiveThemeMode.System) AdaptiveChipTone.Primary else AdaptiveChipTone.Neutral,
+                                        onClick = { state.themeMode = mode },
+                                    )
+                                }
                             }
                         }
                     }

@@ -3,6 +3,7 @@ package io.github.adaptivekt.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -23,7 +24,9 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +37,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
+import io.github.adaptivekt.components.AdaptiveDropdownPlacement
+import io.github.adaptivekt.components.AdaptiveMenuItem
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
@@ -154,23 +161,60 @@ public fun BottomNavigation(
     modifier: Modifier = Modifier,
     itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
+    overflowBehavior: AdaptiveNavigationOverflowBehavior = AdaptiveNavigationOverflowBehavior.MoreMenu,
+    visibleItemCount: Int = 4,
     onItemSelected: (String) -> Unit,
 ) {
+    if (items.isEmpty()) return
+    val maxVisible = visibleItemCount.coerceAtLeast(2)
+    val useMoreMenu = overflowBehavior == AdaptiveNavigationOverflowBehavior.MoreMenu && items.size > maxVisible
+    val visibleItems = when {
+        useMoreMenu -> items.take(maxVisible - 1)
+        overflowBehavior == AdaptiveNavigationOverflowBehavior.Clip -> items.take(maxVisible)
+        else -> items
+    }
+    val overflowItems = if (useMoreMenu) items.drop(maxVisible - 1) else emptyList()
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(AdaptiveTheme.colors.surface)
             .border(width = 1.dp, color = AdaptiveTheme.colors.border)
+            .then(
+                if (overflowBehavior == AdaptiveNavigationOverflowBehavior.Scroll && items.size > maxVisible) {
+                    Modifier.horizontalScroll(rememberScrollState())
+                } else {
+                    Modifier
+                }
+            )
             .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.Small),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (items.isEmpty()) return@Row
-
-        items.forEach { item ->
+        visibleItems.forEach { item ->
             NavigationItem(
                 item = item,
                 selected = item.id == selectedItemId,
+                modifier = Modifier
+                    .then(
+                        if (overflowBehavior == AdaptiveNavigationOverflowBehavior.Scroll && items.size > maxVisible) {
+                            Modifier.width(74.dp)
+                        } else {
+                            Modifier.weight(1f)
+                        }
+                    )
+                    .padding(horizontal = AdaptiveTokens.Spacing.Small),
+                onItemSelected = onItemSelected,
+                layout = NavigationItemLayout.BottomNavigation,
+                itemStyle = itemStyle,
+                density = density,
+            )
+        }
+
+        if (useMoreMenu) {
+            MoreNavigationItem(
+                overflowItems = overflowItems,
+                selectedItemId = selectedItemId,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = AdaptiveTokens.Spacing.Small),
@@ -190,20 +234,53 @@ public fun NavigationRail(
     modifier: Modifier = Modifier,
     itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
+    overflowBehavior: AdaptiveNavigationOverflowBehavior = AdaptiveNavigationOverflowBehavior.MoreMenu,
+    visibleItemCount: Int = 6,
     onItemSelected: (String) -> Unit,
 ) {
+    if (items.isEmpty()) return
+    val maxVisible = visibleItemCount.coerceAtLeast(2)
+    val useMoreMenu = overflowBehavior == AdaptiveNavigationOverflowBehavior.MoreMenu && items.size > maxVisible
+    val visibleItems = when {
+        useMoreMenu -> items.take(maxVisible - 1)
+        overflowBehavior == AdaptiveNavigationOverflowBehavior.Clip -> items.take(maxVisible)
+        else -> items
+    }
+    val overflowItems = if (useMoreMenu) items.drop(maxVisible - 1) else emptyList()
+
     Column(
         modifier = modifier
             .fillMaxHeight()
             .background(AdaptiveTheme.colors.surfaceMuted)
+            .then(
+                if (overflowBehavior == AdaptiveNavigationOverflowBehavior.Scroll && items.size > maxVisible) {
+                    Modifier.verticalScroll(rememberScrollState())
+                } else {
+                    Modifier
+                }
+            )
             .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.Large),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        items.forEach { item ->
+        visibleItems.forEach { item ->
             NavigationItem(
                 item = item,
                 selected = item.id == selectedItemId,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = if (density == AdaptiveNavigationDensity.Compact) 2.dp else 4.dp),
+                onItemSelected = onItemSelected,
+                layout = NavigationItemLayout.NavigationRail,
+                itemStyle = itemStyle,
+                density = density,
+            )
+        }
+
+        if (useMoreMenu) {
+            MoreNavigationItem(
+                overflowItems = overflowItems,
+                selectedItemId = selectedItemId,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = if (density == AdaptiveNavigationDensity.Compact) 2.dp else 4.dp),
@@ -220,6 +297,59 @@ private enum class NavigationItemLayout {
     Sidebar,
     NavigationRail,
     BottomNavigation,
+}
+
+@Composable
+private fun MoreNavigationItem(
+    overflowItems: List<AdaptiveNavItem>,
+    selectedItemId: String?,
+    modifier: Modifier,
+    onItemSelected: (String) -> Unit,
+    layout: NavigationItemLayout,
+    itemStyle: AdaptiveNavigationItemStyle,
+    density: AdaptiveNavigationDensity,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val moreSelected = overflowItems.any { it.id == selectedItemId }
+    val moreItem = AdaptiveNavItem(
+        id = "__adaptive_more__",
+        label = "More",
+        icon = {
+            AdaptiveIcons.MoreVertical(
+                tint = if (moreSelected) AdaptiveTheme.colors.primaryText else AdaptiveTheme.colors.textMuted,
+                contentDescription = "More navigation",
+            )
+        },
+    )
+
+    AdaptiveAnchoredDropdownMenu(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        matchAnchorWidth = false,
+        placement = AdaptiveDropdownPlacement.TopEnd,
+        anchor = { _, toggle ->
+            NavigationItem(
+                item = moreItem,
+                selected = moreSelected,
+                modifier = modifier,
+                onItemSelected = { toggle() },
+                layout = layout,
+                itemStyle = itemStyle,
+                density = density,
+            )
+        },
+    ) {
+        overflowItems.forEach { item ->
+            AdaptiveMenuItem(
+                text = item.label,
+                onClick = {
+                    expanded = false
+                    onItemSelected(item.id)
+                },
+                leadingIcon = item.icon,
+            )
+        }
+    }
 }
 
 @Composable

@@ -17,9 +17,11 @@ import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 import io.github.adaptivekt.examples.ecommerce.state.StoreState
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.navigation.AdaptiveNavItem
+import io.github.adaptivekt.navigation.AdaptiveNavigationDefaults
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 fun AppShell(
@@ -46,23 +48,23 @@ fun AppShell(
 
         AdaptiveNavigationScaffold(
             navItems = listOf(
-                AdaptiveNavItem("home", "Home", icon = { AppIcon(AppIcons.Home, tint = Color.Unspecified) }),
-                AdaptiveNavItem("shop", "Shop", icon = { AppIcon(AppIcons.Search, tint = Color.Unspecified) }),
-                AdaptiveNavItem("wishlist", "Saved", icon = { AppIcon(AppIcons.Heart, tint = Color.Unspecified) }),
+                AdaptiveNavItem("home", "Home", icon = { AppIcon(AppIcons.Home, tint = AdaptiveTheme.colors.textMuted) }),
+                AdaptiveNavItem("shop", "Shop", icon = { AppIcon(AppIcons.Search, tint = AdaptiveTheme.colors.textMuted) }),
+                AdaptiveNavItem("wishlist", "Saved", icon = { AppIcon(AppIcons.Heart, tint = AdaptiveTheme.colors.textMuted) }),
                 AdaptiveNavItem("cart", "Cart", icon = { 
                     Box {
-                        AppIcon(AppIcons.ShoppingBag, tint = Color.Unspecified)
+                        AppIcon(AppIcons.ShoppingBag, tint = AdaptiveTheme.colors.textMuted)
                         if (state.cartItems.isNotEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .size(16.dp)
                                     .offset(x = 12.dp, y = (-4).dp)
-                                    .background(Color(0xFFEF4444), CircleShape),
+                                    .background(AdaptiveTheme.colors.danger, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     "${state.cartItems.sumOf { it.quantity }}", 
-                                    color = Color.White, 
+                                    color = AdaptiveTheme.colors.textInverse,
                                     fontSize = 10.sp, 
                                     fontWeight = FontWeight.Bold
                                 )
@@ -70,7 +72,7 @@ fun AppShell(
                         }
                     }
                 }),
-                AdaptiveNavItem("account", "Me", icon = { AppIcon(AppIcons.User, tint = Color.Unspecified) })
+                AdaptiveNavItem("account", "Me", icon = { AppIcon(AppIcons.User, tint = AdaptiveTheme.colors.textMuted) })
             ),
             selectedItemId = selectedId,
             onItemSelected = { id ->
@@ -82,7 +84,7 @@ fun AppShell(
                     "account" -> if (state.isLoggedIn) state.navigateTo(Screen.Account) else state.navigateTo(Screen.AuthLogin)
                 }
             },
-            preferBottomNavigationOnCompact = true,
+            navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
             topBar = {
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                     val compact = maxWidth < 800.dp
@@ -91,7 +93,7 @@ fun AppShell(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(72.dp)
-                            .background(Color.White)
+                            .background(AdaptiveTheme.colors.surface)
                             .padding(horizontal = if (compact) 16.dp else 24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -105,17 +107,17 @@ fun AppShell(
                             Box(
                                 modifier = Modifier
                                     .size(32.dp)
-                                    .background(Color(0xFF3B82F6), CircleShape),
+                                    .background(AdaptiveTheme.colors.primary, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("A", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("A", color = AdaptiveTheme.colors.textInverse, fontWeight = FontWeight.Bold)
                             }
                             Spacer(Modifier.width(12.dp))
                             Text(
                                 "Adaptive Store", 
                                 fontSize = if (compact) 18.sp else 20.sp, 
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFF0F172A)
+                                color = AdaptiveTheme.colors.textPrimary
                             )
                         }
                         
@@ -139,7 +141,7 @@ fun AppShell(
                                         modifier = Modifier
                                             .clip(CircleShape)
                                             .clickable { state.navigateTo(Screen.Account) }
-                                            .background(Color(0xFFF1F5F9))
+                                            .background(AdaptiveTheme.colors.surfaceRaised)
                                             .padding(horizontal = 12.dp, vertical = 6.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -147,12 +149,12 @@ fun AppShell(
                                             modifier = Modifier
                                                 .size(28.dp)
                                                 .clip(CircleShape)
-                                                .background(Color(0xFF3B82F6)),
+                                                .background(AdaptiveTheme.colors.primary),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
                                                 state.currentUser?.name?.take(1)?.uppercase() ?: "U", 
-                                                color = Color.White, 
+                                                color = AdaptiveTheme.colors.textInverse,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 12.sp
                                             )
@@ -161,7 +163,8 @@ fun AppShell(
                                         Text(
                                             state.currentUser?.name?.split(" ")?.first() ?: "User",
                                             fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium
+                                            fontWeight = FontWeight.Medium,
+                                            color = AdaptiveTheme.colors.textPrimary,
                                         )
                                     }
                                 } else {
@@ -185,7 +188,15 @@ fun AppShell(
                     }
                 }
             },
-            content = content
+            content = { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(AdaptiveTheme.colors.background)
+                ) {
+                    content(paddingValues)
+                }
+            }
         )
     }
 }
