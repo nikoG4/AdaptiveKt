@@ -28,12 +28,7 @@ test.describe('Adaptive Store visual smoke', () => {
 
   test('desktop products render without broken navigation overflow', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/');
-    await waitForCompose(page);
-    await page.evaluate(() => {
-        window.history.pushState(null, "", "/shop");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    await page.goto('/#/shop');
     await waitForCompose(page);
     await expectHealthyCanvas(page);
     await page.screenshot({ path: 'test-results/desktop-products-smoke.png', fullPage: true });
@@ -52,32 +47,31 @@ test.describe('Adaptive Store visual smoke', () => {
     test.setTimeout(70000);
     await page.goto('/');
     await waitForCompose(page);
-    await page.evaluate(() => {
-        window.history.pushState(null, "", "/shop");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    
+    // Navigate to shop
+    await page.goto('/#/shop');
     await waitForCompose(page);
-    await page.evaluate(() => {
-        window.history.pushState(null, "", "/product/p1");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    
+    // Navigate to product detail
+    await page.goto('/#/product/p1');
     await waitForCompose(page);
+    
+    // Browser back to shop
     await page.goBack();
     await waitForCompose(page);
-    await expect(page.url()).toContain('/shop');
+    await expect(page.url()).toContain('#/shop');
 
-    await page.evaluate(() => {
-        window.history.pushState(null, "", "/cart");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    // Navigate to cart
+    await page.goto('/#/cart');
     await waitForCompose(page);
-    await page.evaluate(() => {
-        window.history.pushState(null, "", "/checkout");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    
+    // Navigate to checkout
+    await page.goto('/#/checkout');
     await waitForCompose(page);
+    
+    // Browser back to cart
     await page.goBack();
     await waitForCompose(page);
-    await expect(page.url()).toContain('/cart');
+    await expect(page.url()).toContain('#/cart');
   });
 });

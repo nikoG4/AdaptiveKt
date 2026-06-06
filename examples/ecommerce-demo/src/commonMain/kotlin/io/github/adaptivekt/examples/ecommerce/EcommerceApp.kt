@@ -2,6 +2,7 @@ package io.github.adaptivekt.examples.ecommerce
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -24,8 +25,41 @@ import io.github.adaptivekt.examples.ecommerce.ui.cart.CheckoutScreen
 import io.github.adaptivekt.examples.ecommerce.ui.cart.OrderSuccessScreen
 import io.github.adaptivekt.examples.ecommerce.ui.states.UiStatesScreen
 
+import io.github.adaptivekt.navigation.rememberAdaptiveNavigator
+import io.github.adaptivekt.navigation.AdaptiveNavigationOptions
+import io.github.adaptivekt.navigation.AdaptiveWebNavigationMode
+import io.github.adaptivekt.examples.ecommerce.navigation.StoreRouteCodec
+
 @Composable
 fun EcommerceApp(storeState: StoreState = remember { StoreState() }) {
+    val navigator = rememberAdaptiveNavigator(
+        initialRoute = Screen.Home,
+        codec = StoreRouteCodec,
+        options = AdaptiveNavigationOptions(
+            webMode = AdaptiveWebNavigationMode.Hash
+        )
+    )
+    
+    LaunchedEffect(navigator) {
+        storeState.navigator = navigator
+    }
+    
+    LaunchedEffect(navigator.currentRoute) {
+        val route = navigator.currentRoute
+        if (route is Screen.Cart || route is Screen.Checkout) {
+            if (storeState.cartItems.isEmpty()) {
+                val product = io.github.adaptivekt.examples.ecommerce.model.MockData.products.firstOrNull()
+                if (product != null) {
+                    storeState.addToCart(
+                        productId = product.id,
+                        variantId = product.variants.firstOrNull()?.id,
+                        quantity = 1
+                    )
+                }
+            }
+        }
+    }
+
     AdaptiveTheme(mode = storeState.themeMode) {
         AppShell(state = storeState) { paddingValues ->
             val modifier = Modifier.padding(paddingValues)

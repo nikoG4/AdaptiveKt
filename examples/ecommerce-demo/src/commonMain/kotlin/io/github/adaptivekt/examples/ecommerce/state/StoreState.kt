@@ -6,15 +6,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.derivedStateOf
 import io.github.adaptivekt.core.AdaptiveThemeMode
+import io.github.adaptivekt.navigation.AdaptiveNavigator
 import io.github.adaptivekt.examples.ecommerce.model.*
 import io.github.adaptivekt.examples.ecommerce.navigation.Screen
 
 class StoreState {
-    var currentScreen by mutableStateOf<Screen>(Screen.Home)
-        private set
-    val backStack = mutableStateListOf<Screen>()
-    
-    val canGoBack by derivedStateOf { backStack.isNotEmpty() }
+    var navigator: AdaptiveNavigator<Screen>? = null
+        
+    val currentScreen: Screen
+        get() = navigator?.currentRoute ?: Screen.Home
+        
+    val canGoBack: Boolean
+        get() = navigator?.canGoBack ?: false
         
     var isLoggedIn by mutableStateOf(false)
         private set
@@ -35,26 +38,22 @@ class StoreState {
     var onNavigate: ((Screen) -> Unit)? = null
         
     fun navigateTo(screen: Screen, addToBackStack: Boolean = true) {
-        if (currentScreen != screen) {
-            if (addToBackStack) {
-                backStack.add(currentScreen)
-            }
-            currentScreen = screen
-            onNavigate?.invoke(screen)
+        if (addToBackStack) {
+            navigator?.navigate(screen)
+        } else {
+            navigator?.replace(screen)
         }
+        onNavigate?.invoke(screen)
     }
     
     fun goBack() {
-        if (backStack.isNotEmpty()) {
-            currentScreen = backStack.removeLast()
-            onNavigate?.invoke(currentScreen)
-        }
+        navigator?.goBack()
+        onNavigate?.invoke(currentScreen)
     }
     
     fun resetToHome() {
-        backStack.clear()
-        currentScreen = Screen.Home
-        onNavigate?.invoke(currentScreen)
+        navigator?.navigate(Screen.Home)
+        onNavigate?.invoke(Screen.Home)
     }
     
     fun loginDemo() {
@@ -72,9 +71,7 @@ class StoreState {
     fun logout() {
         isLoggedIn = false
         currentUser = null
-        backStack.clear()
-        currentScreen = Screen.AuthLogin
-        onNavigate?.invoke(currentScreen)
+        navigateTo(Screen.AuthLogin)
     }
     
     fun addToCart(productId: String, variantId: String?, quantity: Int) {

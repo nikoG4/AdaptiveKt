@@ -26,23 +26,7 @@ async function assertNoHorizontalOverflow(page, name) {
 
 async function capture(page, route, name) {
   console.log(`Capture ${name}: ${route}`);
-  if (page.url() === 'about:blank' || page.url() === `${BASE_URL}/`) {
-    if (route === '/') {
-        await page.goto(`${BASE_URL}${route}`);
-    } else {
-        await page.goto(`${BASE_URL}/`);
-        await waitForCompose(page);
-        await page.evaluate((r) => {
-          window.history.pushState(null, "", r);
-          window.dispatchEvent(new PopStateEvent("popstate"));
-        }, route);
-    }
-  } else {
-    await page.evaluate((r) => {
-      window.history.pushState(null, "", r);
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    }, route);
-  }
+  await page.goto(`${BASE_URL}${route}`);
   await waitForCompose(page);
   await assertNoHorizontalOverflow(page, name);
   await page.screenshot({ path: path.join(resultsDir, `${name}.png`), fullPage: true });
@@ -60,10 +44,10 @@ async function capture(page, route, name) {
   try {
     const mobileLight = await browser.newPage({ viewport: mobileViewport, colorScheme: 'light' });
     await capture(mobileLight, '/', 'mobile-home-light');
-    await capture(mobileLight, '/shop', 'mobile-products-light');
-    await capture(mobileLight, '/product/p1', 'mobile-detail-light');
-    await capture(mobileLight, '/cart', 'mobile-cart-light');
-    await capture(mobileLight, '/checkout', 'mobile-checkout-light');
+    await capture(mobileLight, '/#/shop', 'mobile-products-light');
+    await capture(mobileLight, '/#/product/p1', 'mobile-detail-light');
+    await capture(mobileLight, '/#/cart', 'mobile-cart-light');
+    await capture(mobileLight, '/#/checkout', 'mobile-checkout-light');
     await mobileLight.screenshot({ path: path.join(resultsDir, 'navigation-resize-mobile.png'), fullPage: true });
     await mobileLight.close();
 
@@ -73,7 +57,7 @@ async function capture(page, route, name) {
 
     const desktopLight = await browser.newPage({ viewport: desktopViewport, colorScheme: 'light' });
     await capture(desktopLight, '/', 'desktop-home-light');
-    await capture(desktopLight, '/shop', 'desktop-products-light');
+    await capture(desktopLight, '/#/shop', 'desktop-products-light');
     await desktopLight.screenshot({ path: path.join(resultsDir, 'navigation-resize-desktop.png'), fullPage: true });
     await desktopLight.close();
 
