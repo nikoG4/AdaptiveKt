@@ -68,13 +68,25 @@ public fun AdaptiveNavigationScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     AdaptiveContent(modifier = modifier) {
-        val adaptiveInfo = rememberAdaptiveInfo()
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
         val effectiveBehavior = navigationBehavior ?: if (preferBottomNavigationOnCompact) {
             AdaptiveNavigationDefaults.compactBottomBarBehavior()
         } else {
             AdaptiveNavigationDefaults.adminBehavior()
         }
-        val placement = resolveAdaptiveNavigationPlacement(adaptiveInfo.breakpoint, effectiveBehavior)
+        
+        // If navigationBehavior is provided, use it for backwards compatibility/custom behavior.
+        // Otherwise, use the layoutInfo.navigationMode.
+        val placement = if (navigationBehavior != null) {
+            resolveAdaptiveNavigationPlacement(layoutInfo.breakpoint, effectiveBehavior)
+        } else {
+            when (layoutInfo.navigationMode) {
+                AdaptiveNavigationMode.Drawer -> AdaptiveNavigationPlacement.Drawer
+                AdaptiveNavigationMode.BottomNavigation -> AdaptiveNavigationPlacement.BottomBar
+                AdaptiveNavigationMode.NavigationRail -> AdaptiveNavigationPlacement.Rail
+                AdaptiveNavigationMode.Sidebar -> AdaptiveNavigationPlacement.Sidebar
+            }
+        }
         var drawerOpen by remember { mutableStateOf(false) }
         val showGlobalTopBar = placement == AdaptiveNavigationPlacement.Drawer ||
             (placement == AdaptiveNavigationPlacement.Hidden && topBar != null) ||
