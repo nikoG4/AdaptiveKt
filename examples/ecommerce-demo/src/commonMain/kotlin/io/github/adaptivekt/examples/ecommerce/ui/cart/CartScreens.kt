@@ -43,9 +43,9 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
     }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 800.dp
-            val sectionPadding = if (compact) 16.dp else 24.dp
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val sectionPadding = if (compact) 16.dp else 24.dp
 
             if (compact) {
                 LazyColumn(
@@ -219,7 +219,6 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
     }
 }
 
@@ -241,9 +240,9 @@ fun IconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Colo
 @Composable
 fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 800.dp
-            val sectionPadding = if (compact) 16.dp else 24.dp
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val sectionPadding = if (compact) 16.dp else 24.dp
 
             if (compact) {
                 LazyColumn(modifier = Modifier.fillMaxSize().padding(sectionPadding), verticalArrangement = Arrangement.spacedBy(32.dp)) {
@@ -435,7 +434,6 @@ fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
     }
 }
 

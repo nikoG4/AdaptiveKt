@@ -82,9 +82,11 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.layout.AdaptiveGrid
 
+import io.github.adaptivekt.core.AdaptiveApp
+
 @Composable
 fun DashboardSummary() {
-    AdaptiveTheme {
+    AdaptiveApp {
         AdaptiveGrid(columns = 12) {
             item(span = 6) {
                 AdaptiveCard {
@@ -139,7 +141,7 @@ AdaptiveKt is designed for Compose Multiplatform commonMain usage. Platform-spec
 
 ## Documentation
 
-- Docs site: https://nikog4.github.io/AdaptiveKt/
+- Docs site & Demo Gallery: https://nikog4.github.io/AdaptiveKt/
 - Component docs: [docs/components](docs/components)
 - Development setup: [docs/development/setup.md](docs/development/setup.md)
 - Local publishing notes: [docs/publishing/LOCAL_PUBLISHING.md](docs/publishing/LOCAL_PUBLISHING.md)
@@ -148,20 +150,38 @@ AdaptiveKt is designed for Compose Multiplatform commonMain usage. Platform-spec
 ## Examples
 
 - `admin-demo`: responsive admin dashboard demo for Desktop and Web/Wasm.
+- `ai-workspace-demo`: complex SaaS/internal-tool showcase demonstrating advanced list/detail patterns, chat workspaces, prompt libraries, and form configurations.
+- `ecommerce-demo`: complete frontend storefront demonstrating product grids, checkout, and layout primitives.
 - `docs-site`: public Compose Multiplatform/Wasm documentation site and component catalog.
-- `examples/`: example work may be developed separately from the core library and is not required to consume the published artifacts.
 
-Run the admin demo:
+**Demo Gallery / Live Site:**
+You can view the interactive demo gallery at the [AdaptiveKt GitHub Pages site](https://nikog4.github.io/AdaptiveKt/).
 
+**How to run core validation:**
 ```powershell
-.\gradlew.bat :admin-demo:run
-.\gradlew.bat :admin-demo:wasmJsBrowserDevelopmentRun
+.\gradlew.bat build
+.\gradlew.bat :adaptive-core:jvmTest
+.\gradlew.bat :adaptive-layout:jvmTest
+.\gradlew.bat :adaptive-navigation:jvmTest
 ```
 
-Run the docs site:
-
+**How to run `ecommerce-demo`:**
 ```powershell
-.\gradlew.bat :docs-site:wasmJsBrowserDevelopmentRun
+.\gradlew.bat :examples:ecommerce-demo:desktopRun
+.\gradlew.bat -p examples/ecommerce-demo wasmJsBrowserDevelopmentRun
+```
+
+**How to run `ai-workspace-demo`:**
+```powershell
+.\gradlew.bat -p examples/ai-workspace-demo desktopRun
+.\gradlew.bat -p examples/ai-workspace-demo wasmJsBrowserDevelopmentRun
+```
+
+**How to prepare Pages locally:**
+The GitHub Pages deployment merges Wasm distributions across modules into a single `site-dist` envelope.
+To build and stage this locally without committing the binary artifacts (which are git-ignored):
+```powershell
+.\tools\prepare-pages-site.ps1
 ```
 
 ## Project Status

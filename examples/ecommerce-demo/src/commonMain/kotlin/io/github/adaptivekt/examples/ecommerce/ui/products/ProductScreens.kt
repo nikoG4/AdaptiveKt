@@ -37,9 +37,9 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
     val categories = MockData.categories
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 800.dp
-            val sectionPadding = if (compact) 16.dp else 24.dp
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val sectionPadding = if (compact) 16.dp else 24.dp
 
             Row(modifier = Modifier.fillMaxSize()) {
                 // Filters Sidebar (hidden on mobile)
@@ -160,7 +160,6 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
     }
 }
 
@@ -177,9 +176,9 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
     }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 800.dp
-            val sectionPadding = if (compact) 16.dp else 24.dp
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val sectionPadding = if (compact) 16.dp else 24.dp
 
             LazyColumn(
                 contentPadding = PaddingValues(sectionPadding), 
@@ -443,7 +442,6 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                     }
                 }
             }
-        }
     }
 }
 
@@ -452,9 +450,9 @@ fun WishlistScreen(state: StoreState, modifier: Modifier = Modifier) {
     val products = MockData.products.filter { state.wishlistIds.contains(it.id) }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val compact = maxWidth < 800.dp
-            val sectionPadding = if (compact) 16.dp else 24.dp
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val sectionPadding = if (compact) 16.dp else 24.dp
 
             LazyColumn(
                 contentPadding = PaddingValues(sectionPadding),
@@ -489,6 +487,5 @@ fun WishlistScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
     }
 }
