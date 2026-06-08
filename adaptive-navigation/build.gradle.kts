@@ -22,7 +22,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":adaptive-core"))
+                api(project(":adaptive-core"))
                 implementation(project(":adaptive-components"))
                 implementation(compose.foundation)
             }
