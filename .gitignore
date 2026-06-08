@@ -19,3 +19,6 @@ local.properties
 
 *.class
 *.jar
+
+# Generated GH Pages
+tmp-gh-pages-root/
