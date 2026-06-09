@@ -86,99 +86,80 @@ fun AppShell(
             },
             navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
             topBar = {
-                Box(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth().background(AdaptiveTheme.colors.surface)) {
                     val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
-                    val compact = layoutInfo.isCompact
                     
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(72.dp)
-                            .background(AdaptiveTheme.colors.surface)
-                            .padding(horizontal = layoutInfo.pagePadding),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Logo
-                        Row(
-                            modifier = Modifier
-                                .clickable { state.resetToHome() }
-                                .padding(end = layoutInfo.pagePadding),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(AdaptiveTheme.colors.primary, CircleShape),
-                                contentAlignment = Alignment.Center
+                    io.github.adaptivekt.layout.AdaptiveActionBar(
+                        modifier = Modifier.padding(
+                            horizontal = layoutInfo.pagePadding,
+                            vertical = 12.dp
+                        ),
+                        leadingContent = {
+                            // Logo
+                            Row(
+                                modifier = Modifier.clickable { state.resetToHome() },
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("A", color = AdaptiveTheme.colors.textInverse, fontWeight = FontWeight.Bold)
-                            }
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                "Adaptive Store", 
-                                fontSize = if (compact) 18.sp else 20.sp, 
-                                fontWeight = FontWeight.ExtraBold,
-                                color = AdaptiveTheme.colors.textPrimary
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.weight(1f))
-                        
-                        if (!compact) {
-                            // Desktop Search
-                            Box(modifier = Modifier.weight(2f).padding(horizontal = 32.dp)) {
-                                AdaptiveTextField(
-                                    value = state.searchQuery,
-                                    onValueChange = { state.searchQuery = it },
-                                    placeholder = "Search products...",
-                                    modifier = Modifier.widthIn(max = 500.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .background(AdaptiveTheme.colors.primary, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("A", color = AdaptiveTheme.colors.textInverse, fontWeight = FontWeight.Bold)
+                                }
+                                Spacer(Modifier.width(12.dp))
+                                Text(
+                                    "Adaptive Store", 
+                                    fontSize = 20.sp, 
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = AdaptiveTheme.colors.textPrimary
                                 )
                             }
                             
-                            // Action Icons
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (state.isLoggedIn) {
-                                    Row(
+                            Spacer(Modifier.width(24.dp))
+                            
+                            // Search
+                            AdaptiveTextField(
+                                value = state.searchQuery,
+                                onValueChange = { state.searchQuery = it },
+                                placeholder = "Search products...",
+                                modifier = Modifier.widthIn(max = 500.dp)
+                            )
+                        },
+                        primaryAction = {
+                            if (state.isLoggedIn) {
+                                Row(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable { state.navigateTo(Screen.Account) }
+                                        .background(AdaptiveTheme.colors.surfaceRaised)
+                                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
                                         modifier = Modifier
+                                            .size(28.dp)
                                             .clip(CircleShape)
-                                            .clickable { state.navigateTo(Screen.Account) }
-                                            .background(AdaptiveTheme.colors.surfaceRaised)
-                                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                            .background(AdaptiveTheme.colors.primary),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(28.dp)
-                                                .clip(CircleShape)
-                                                .background(AdaptiveTheme.colors.primary),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                state.currentUser?.name?.take(1)?.uppercase() ?: "U", 
-                                                color = AdaptiveTheme.colors.textInverse,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 12.sp
-                                            )
-                                        }
-                                        Spacer(Modifier.width(8.dp))
                                         Text(
-                                            state.currentUser?.name?.split(" ")?.first() ?: "User",
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = AdaptiveTheme.colors.textPrimary,
+                                            state.currentUser?.name?.take(1)?.uppercase() ?: "U", 
+                                            color = AdaptiveTheme.colors.textInverse,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp
                                         )
                                     }
-                                } else {
-                                    AdaptiveButton(
-                                        text = "Sign In",
-                                        onClick = { state.navigateTo(Screen.AuthLogin) },
-                                        variant = AdaptiveButtonVariant.Ghost
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        state.currentUser?.name?.split(" ")?.first() ?: "User",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = AdaptiveTheme.colors.textPrimary,
                                     )
                                 }
-                            }
-                        } else {
-                            // On mobile, just show an icon for search if needed, or let bottom nav handle it
-                            if (!state.isLoggedIn) {
+                            } else {
                                 AdaptiveButton(
                                     text = "Sign In",
                                     onClick = { state.navigateTo(Screen.AuthLogin) },
@@ -186,7 +167,7 @@ fun AppShell(
                                 )
                             }
                         }
-                    }
+                    )
                 }
             },
             content = { paddingValues ->
