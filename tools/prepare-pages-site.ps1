@@ -79,11 +79,12 @@ $routeTemplate = @"
 <!doctype html>
 <html lang="en">
 <head>
+  <base href="/AdaptiveKt/">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AdaptiveKt - Compose Multiplatform Admin UI Toolkit</title>
   <meta name="description" content="AdaptiveKt documentation site rendered with Compose Multiplatform and real AdaptiveKt components.">
-  <link rel="icon" type="image/svg+xml" href="../assets/brand/adaptivekt-symbol.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/brand/adaptivekt-symbol.svg">
   <meta name="theme-color" content="#2563EB">
   <style>
     html, body, #webApp {
@@ -97,7 +98,7 @@ $routeTemplate = @"
 </head>
 <body>
   <div id="webApp"></div>
-  <script src="../docs-site.js"></script>
+  <script src="docs-site.js"></script>
 </body>
 </html>
 "@
@@ -107,6 +108,20 @@ foreach ($route in @("components", "docs", "demo")) {
     New-Item -ItemType Directory -Force -Path $routeDir | Out-Null
     Set-Content -Path (Join-Path $routeDir "index.html") -Value $routeTemplate -Encoding UTF8
 }
+
+function Inject-BaseHref {
+    param([string]$FilePath, [string]$BaseHref)
+    $content = Get-Content $FilePath -Raw
+    if ($content -notmatch "<base href=") {
+        $content = $content -replace "(?i)(<head.*?>)", "`$1`n  <base href=`"$BaseHref`">"
+        Set-Content -Path $FilePath -Value $content -Encoding UTF8
+    }
+}
+
+Inject-BaseHref -FilePath (Join-Path $distPath "index.html") -BaseHref "/AdaptiveKt/"
+Inject-BaseHref -FilePath (Join-Path $demoTarget "index.html") -BaseHref "/AdaptiveKt/demo/app/"
+Inject-BaseHref -FilePath (Join-Path $ecommerceTarget "index.html") -BaseHref "/AdaptiveKt/examples/ecommerce/"
+Inject-BaseHref -FilePath (Join-Path $aiWorkspaceTarget "index.html") -BaseHref "/AdaptiveKt/examples/ai-workspace/"
 
 Write-Host "Prepared Pages site: $distPath" -ForegroundColor Green
 Write-Host "Docs site copied from: $docsPath" -ForegroundColor Green
