@@ -2,270 +2,74 @@
 
 ## Purpose
 
-`AdaptiveDataView` is a responsive component that displays tabular data, adapting its layout between table mode (large screens) and card mode (mobile screens). It supports filtering, sorting, row selection, and custom actions.
+`AdaptiveDataView` displays structured records as tables or cards. `AdaptiveCollectionView` displays generic item collections as list, grid or cards.
 
-## When to Use
+## When To Use
 
-Use `AdaptiveDataView` when:
-- Displaying lists of structured data (users, products, orders, etc.)
-- You need responsive table/card switching
-- Supporting filtering, sorting, or bulk actions
-- Handling loading, empty, and error states
-- You want row selection and actions
+Use `AdaptiveDataView` for invoices, users, orders and other column-oriented data.
 
-## API Signature
+Use `AdaptiveCollectionView` for product grids, content cards, media collections and storefront browsing.
+
+## Display Modes
 
 ```kotlin
-@Composable
-fun <T> AdaptiveDataView(
-    items: List<T>,
-    columns: List<DataColumn<T>>,
-    modifier: Modifier = Modifier,
-    selectedIds: Set<String> = emptySet(),
-    onSelectionChange: (Set<String>) -> Unit = {},
-    onAction: (action: String, itemId: String) -> Unit = { _, _ -> },
-    state: DataState<T> = DataState.Content(items),
-    filterSlot: (@Composable () -> Unit)? = null,
-    actionSlot: (@Composable (T) -> Unit)? = null,
-)
+AdaptiveDataDisplayMode.Auto
+AdaptiveDataDisplayMode.Table
+AdaptiveDataDisplayMode.Cards
+AdaptiveDataDisplayMode.List
+AdaptiveDataDisplayMode.Grid
 ```
 
-## Simple Example
+`Auto` preserves the default table-to-card behavior. Use `Table` or `Cards` to force one presentation.
 
 ```kotlin
-data class User(val id: String, val name: String, val email: String)
-
-@Composable
-fun UsersDataView() {
-    val users by remember { mutableStateOf(listOf(
-        User("1", "Alice", "alice@example.com"),
-        User("2", "Bob", "bob@example.com"),
-    )) }
-    
-    AdaptiveDataView(
-        items = users,
-        columns = listOf(
-            DataColumn("Name") { user -> user.name },
-            DataColumn("Email") { user -> user.email },
-        ),
-        state = DataState.Content(users),
-    )
-}
+AdaptiveCollectionDisplayMode.Auto
+AdaptiveCollectionDisplayMode.List
+AdaptiveCollectionDisplayMode.Grid
+AdaptiveCollectionDisplayMode.Cards
+AdaptiveCollectionDisplayMode.Table
 ```
 
-## Advanced Example
+## Query Controls
+
+Shared query controls use `AdaptiveQueryState` and `onQueryChange`.
 
 ```kotlin
-@Composable
-fun ProductsScreen() {
-    var products by remember { mutableStateOf(listOf(...)) }
-    var selectedIds by remember { mutableStateOf(setOf<String>()) }
-    var isLoading by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    
-    AdaptiveDataView(
-        items = products.filter { it.name.contains(searchQuery) },
-        columns = listOf(
-            DataColumn("SKU") { product -> product.sku },
-            DataColumn("Name") { product -> product.name },
-            DataColumn("Price") { product -> "$${product.price}" },
-            DataColumn("Stock") { product -> "${product.stock} units" },
-        ),
-        selectedIds = selectedIds,
-        onSelectionChange = { selectedIds = it },
-        onAction = { action, productId ->
-            when (action) {
-                "edit" -> navigateToEdit(productId)
-                "delete" -> deleteProduct(productId)
-                "duplicate" -> duplicateProduct(productId)
-            }
-        },
-        state = when {
-            isLoading -> DataState.Loading("Fetching products...")
-            products.isEmpty() -> DataState.Empty(
-                title = "No products",
-                description = "Create your first product to get started.",
-                action = "New Product",
-                onAction = { navigateToCreate() },
-            )
-            else -> DataState.Content(products)
-        },
-        filterSlot = {
-            AdaptiveSearchField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = "Search products...",
-            )
-        },
-    )
-}
-```
-
-## Data States
-
-### Loading State
-
-```kotlin
-AdaptiveDataView(
-    items = emptyList(),
-    columns = columns,
-    state = DataState.Loading("Fetching data..."),
-)
-```
-
-### Empty State
-
-```kotlin
-AdaptiveDataView(
-    items = emptyList(),
-    columns = columns,
-    state = DataState.Empty(
-        title = "No items",
-        description = "Create your first item to get started.",
-        icon = Icons.Filled.Inbox,
-        action = "Create Item",
-        onAction = { navigate() },
+AdaptiveCollectionView(
+    items = pageItems,
+    displayMode = AdaptiveCollectionDisplayMode.Grid,
+    queryState = queryState,
+    onQueryChange = { queryState = it },
+    pagination = AdaptivePaginationState(
+        page = queryState.page,
+        pageSize = queryState.pageSize,
+        totalItems = totalItems,
     ),
+    searchEnabled = true,
+    filters = filters,
+    sortOptions = sortOptions,
+    listItemContent = { ProductCard(it) },
+    gridItemContent = { ProductCard(it) },
 )
 ```
 
-### Error State
+## Data View Example
 
 ```kotlin
 AdaptiveDataView(
-    items = emptyList(),
+    state = AdaptiveDataContent(items),
     columns = columns,
-    state = DataState.Error(
-        title = "Failed to load",
-        description = "Please check your connection and try again.",
-        action = "Retry",
-        onAction = { retry() },
-    ),
+    displayMode = AdaptiveDataDisplayMode.Auto,
+    rowActions = actions,
 )
-```
-
-### Content State
-
-```kotlin
-AdaptiveDataView(
-    items = myItems,
-    columns = columns,
-    state = DataState.Content(myItems),
-)
-```
-
-## Responsive Behavior
-
-On **Compact** and **Medium** screens, the view switches to card layout:
-
-```
-┌─────────────────────┐
-│ Name: Alice         │
-│ Email: alice@ex...  │
-│ [Edit] [Delete]     │
-└─────────────────────┘
-```
-
-On **Expanded** and **Large** screens, it displays as a table:
-
-```
-┌──────────────┬──────────────────┐
-│ Name         │ Email            │
-├──────────────┼──────────────────┤
-│ Alice        │ alice@example... │
-│ Bob          │ bob@example...   │
-└──────────────┴──────────────────┘
 ```
 
 ## Multiplatform Notes
 
-| Platform | Notes |
-|----------|-------|
-| **JVM/Desktop** | Full table and card modes |
-| **Android** | Card mode by default due to narrow viewports |
-| **iOS** | Target declared; needs macOS validation |
-| **Wasm** | Full support; table on desktop, cards on mobile |
+The implementation lives in `commonMain` and uses Compose Foundation plus AdaptiveKt components.
 
-## Column Definition
+## Limitations
 
-```kotlin
-data class Product(
-    val id: String,
-    val name: String,
-    val category: String,
-    val price: Double,
-)
-
-val columns = listOf(
-    DataColumn("Product Name") { product -> product.name },
-    DataColumn("Category") { product -> product.category },
-    DataColumn("Price") { product -> String.format("$%.2f", product.price) },
-)
-```
-
-## Selection and Actions
-
-```kotlin
-var selectedIds by remember { mutableStateOf(setOf<String>()) }
-
-AdaptiveDataView(
-    items = items,
-    columns = columns,
-    selectedIds = selectedIds,
-    onSelectionChange = { newSelection ->
-        selectedIds = newSelection
-    },
-    onAction = { action, itemId ->
-        when (action) {
-            "view" -> viewItem(itemId)
-            "edit" -> editItem(itemId)
-            "delete" -> deleteItem(itemId)
-        }
-    },
-)
-```
-
-## Filter Integration
-
-```kotlin
-AdaptiveDataView(
-    items = filteredItems,
-    columns = columns,
-    filterSlot = {
-        Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            AdaptiveTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = "Search",
-                modifier = Modifier.weight(1f),
-            )
-            AdaptiveButton(
-                text = "Filter",
-                onClick = { applyFilters() },
-                variant = Secondary,
-            )
-        }
-    },
-)
-```
-
-## Known Limitations
-
-- ⚠️ Server-side pagination not yet supported
-- ⚠️ Sorting API in development
-- ⚠️ Column resizing not supported
-- ⚠️ Horizontal scroll on mobile not fully optimized
-- ⚠️ Inline editing cells not yet available
-
-## Related Components
-
-- [`AdaptiveCard`](./adaptive-card.md) — Individual item card display
-- [`AdaptiveButton`](./adaptive-button.md) — Action buttons
-- [`AdaptiveFormLayout`](../forms/adaptive-form-layout.md) — Create/edit forms
-- [`AdaptiveEmptyState`, `AdaptiveLoadingState`, `AdaptiveErrorState`](../feedback/adaptive-feedback-states.md)
-
-## See Also
-
-- [Admin Demo Products Screen](../../admin-demo/src/commonMain/kotlin/io/github/adaptivekt/admin/demo/screens/ProductsScreen.kt)
-- [Data View Design](../../adaptive-kt/ADAPTIVE_DATA_VIEW.md)
-- [Responsive Tables Guide](../../guides/responsive-data.md)
+- Query controls are state-hoisted; apps own local filtering or server requests.
+- `AdaptiveDataView` currently renders `List` and `Grid` requests through the card path.
+- `AdaptiveCollectionView.Table` falls back to list because generic collections do not define columns.

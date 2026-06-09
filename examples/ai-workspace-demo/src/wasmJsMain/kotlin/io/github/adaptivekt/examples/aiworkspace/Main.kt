@@ -3,7 +3,6 @@ package io.github.adaptivekt.examples.aiworkspace
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import io.github.adaptivekt.navigation.PlatformHistoryTracker
-import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.Event
 
@@ -36,7 +35,7 @@ fun main() {
         }
     }
 
-    ComposeViewport(document.body!!) {
+    ComposeViewport(viewportContainerId = "webApp") {
         AiWorkspaceApp(platformHistoryTracker = historyTracker)
     }
 }

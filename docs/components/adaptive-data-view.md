@@ -1,24 +1,40 @@
-# AdaptiveDataView
+# AdaptiveDataView And AdaptiveCollectionView
 
-Purpose: responsive data presentation.
+Purpose: responsive data and collection presentation.
 
-Use it for admin lists that should become cards on compact screens and tables on larger screens.
+Use `AdaptiveDataView` for structured records with columns and row actions. Use `AdaptiveCollectionView` for generic item collections such as product grids, media cards and searchable lists.
 
-Primary API: `AdaptiveDataView(state, columns, filterSlot, actions, rowActions, onItemClick)`.
+Primary APIs:
 
-Simple example:
+- `AdaptiveDataView(state, columns, displayMode, queryState, pagination, filters, sortOptions, rowActions, onItemClick)`
+- `AdaptiveCollectionView(items, displayMode, queryState, pagination, filters, sortOptions, listItemContent, gridItemContent)`
+
+Simple table/card example:
 
 ```kotlin
 AdaptiveDataView(
     state = AdaptiveDataContent(items),
     columns = columns,
+    displayMode = AdaptiveDataDisplayMode.Auto,
 )
 ```
 
-Advanced example: pass `AdaptiveDataAction` values for primary, secondary, and overflow row actions.
+Simple collection grid example:
 
-Responsive notes: compact and medium use cards; expanded and large use table layout.
+```kotlin
+AdaptiveCollectionView(
+    items = products,
+    displayMode = AdaptiveCollectionDisplayMode.Grid,
+    searchEnabled = true,
+    queryState = queryState,
+    onQueryChange = { queryState = it },
+    listItemContent = { ProductCard(it) },
+    gridItemContent = { ProductCard(it) },
+)
+```
+
+Responsive notes: `AdaptiveDataDisplayMode.Auto` preserves compact/medium cards and expanded/large tables. `AdaptiveCollectionDisplayMode.Auto` uses list on compact and grid on larger breakpoints.
 
 Multiplatform notes: common Compose implementation.
 
-Limitations: no virtualization or server-side sorting.
+Limitations: query controls are state-hoisted; apps own local filtering or server calls.

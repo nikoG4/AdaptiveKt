@@ -42,7 +42,7 @@ jobs:
     
     - name: Prepare Pages site
       shell: pwsh
-      run: .\tools\prepare-pages-site.ps1
+      run: .\tools\prepare-pages-site.ps1 -BasePath "/AdaptiveKt/"
     
     - name: List public directory
       shell: pwsh

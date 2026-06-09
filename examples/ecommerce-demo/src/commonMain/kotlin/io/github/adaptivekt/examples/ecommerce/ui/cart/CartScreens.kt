@@ -29,6 +29,7 @@ import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcons
 import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
 import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 
 @Composable
 fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
@@ -45,6 +46,10 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
     }
 
     AdaptiveScrollablePage(modifier = modifier.fillMaxSize()) {
+        val layoutInfo = LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+
+        Spacer(Modifier.height(12.dp))
         Text("Shopping Bag", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
         Spacer(Modifier.height(8.dp))
         Text("${state.cartItems.sumOf { it.quantity }} items in your bag", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
@@ -60,34 +65,68 @@ fun CartScreen(state: StoreState, modifier: Modifier = Modifier) {
                         val product = MockData.products.find { it.id == item.productId }
                         if (product != null) {
                             AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFF1F5F9)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
+                                if (compact) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            CartProductVisual(product = product, size = 88.dp)
+                                            Spacer(Modifier.width(16.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    product.name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp,
+                                                    lineHeight = 22.sp,
+                                                    color = AdaptiveTheme.colors.textPrimary,
+                                                )
+                                                Spacer(Modifier.height(4.dp))
+                                                Text(
+                                                    MockData.categories.find { it.id == product.categoryId }?.name ?: "",
+                                                    color = AdaptiveTheme.colors.textSecondary,
+                                                    fontSize = 14.sp,
+                                                )
+                                                Spacer(Modifier.height(6.dp))
+                                                Text(
+                                                    "\$${product.price.toPriceString()}",
+                                                    color = AdaptiveTheme.colors.textPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                            }
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                        ) {
+                                            QuantityStepper(
+                                                quantity = item.quantity,
+                                                onDecrease = { state.updateCartQuantity(product.id, item.quantity - 1) },
+                                                onIncrease = { state.updateCartQuantity(product.id, item.quantity + 1) },
+                                            )
+                                            IconButton(AppIcons.Trash, tint = AdaptiveTheme.colors.danger) { state.removeFromCart(product.id) }
+                                        }
                                     }
-                                    Spacer(Modifier.width(24.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(product.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = AdaptiveTheme.colors.textPrimary)
-                                        Spacer(Modifier.height(4.dp))
-                                        Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
-                                        Spacer(Modifier.height(8.dp))
-                                        Text("\$${product.price}", color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
+                                } else {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        CartProductVisual(product = product, size = 100.dp)
+                                        Spacer(Modifier.width(24.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(product.name, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = AdaptiveTheme.colors.textPrimary)
+                                            Spacer(Modifier.height(4.dp))
+                                            Text(MockData.categories.find { it.id == product.categoryId }?.name ?: "", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
+                                            Spacer(Modifier.height(8.dp))
+                                            Text("\$${product.price.toPriceString()}", color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
+                                        }
+
+                                        QuantityStepper(
+                                            quantity = item.quantity,
+                                            onDecrease = { state.updateCartQuantity(product.id, item.quantity - 1) },
+                                            onIncrease = { state.updateCartQuantity(product.id, item.quantity + 1) },
+                                        )
+
+                                        Spacer(Modifier.width(24.dp))
+                                        IconButton(AppIcons.Trash, tint = AdaptiveTheme.colors.danger) { state.removeFromCart(product.id) }
                                     }
-                                    
-                                    // Quantity Stepper
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(Color(0xFFF1F5F9), RoundedCornerShape(8.dp)).padding(4.dp)) {
-                                        IconButton(AppIcons.Minus) { state.updateCartQuantity(product.id, item.quantity - 1) }
-                                        Text("${item.quantity}", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold)
-                                        IconButton(AppIcons.Plus) { state.updateCartQuantity(product.id, item.quantity + 1) }
-                                    }
-                                    
-                                    Spacer(Modifier.width(24.dp))
-                                    IconButton(AppIcons.Trash, tint = Color(0xFFEF4444)) { state.removeFromCart(product.id) }
                                 }
                             }
                         }
@@ -147,8 +186,48 @@ fun IconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Colo
 }
 
 @Composable
+private fun CartProductVisual(
+    product: io.github.adaptivekt.examples.ecommerce.model.Product,
+    size: androidx.compose.ui.unit.Dp,
+) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(RoundedCornerShape(12.dp))
+            .background(AdaptiveTheme.colors.surfaceMuted),
+        contentAlignment = Alignment.Center,
+    ) {
+        ProductVisual(product = product, compact = true, modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun QuantityStepper(
+    quantity: Int,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(AdaptiveTheme.colors.surfaceMuted, RoundedCornerShape(8.dp))
+            .padding(4.dp),
+    ) {
+        IconButton(AppIcons.Minus, tint = AdaptiveTheme.colors.textPrimary, onClick = onDecrease)
+        Text(
+            "$quantity",
+            modifier = Modifier.padding(horizontal = 16.dp),
+            fontWeight = FontWeight.Bold,
+            color = AdaptiveTheme.colors.textPrimary,
+        )
+        IconButton(AppIcons.Plus, tint = AdaptiveTheme.colors.textPrimary, onClick = onIncrease)
+    }
+}
+
+@Composable
 fun CheckoutScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveScrollablePage(modifier = modifier.fillMaxSize()) {
+        Spacer(Modifier.height(12.dp))
         Text("Checkout", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
         Spacer(Modifier.height(32.dp))
         

@@ -1,152 +1,135 @@
-# AdaptiveKt — Adaptive Data View
+# AdaptiveKt - Adaptive Data And Collection Views
 
 ## Purpose
-Adaptive data views let apps reuse the same data model across desktop table and mobile card presentations.
 
-v0.1-alpha focuses on a simple adaptive data wrapper with state-aware rendering and content slots.
+`adaptive-data` provides reusable Compose Multiplatform primitives for structured data and generic item collections.
 
-## Size taxonomy
+- `AdaptiveDataView` is best for table-like records with columns, row actions and mobile card roles.
+- `AdaptiveCollectionView` is best for storefronts, product grids, media lists and generic card/list/grid collections.
 
-Adaptive rendering is driven by `AdaptiveBreakpoint`:
+Both components can use shared state-hoisted query controls.
 
-- `Compact` -> card list
-- `Medium` -> card list or compact table
-- `Expanded`, `Large` -> table
-
-## Core types
-
-### AdaptiveDataState
+## Display Modes
 
 ```kotlin
-sealed interface AdaptiveDataState<out T>
+enum class AdaptiveDataDisplayMode {
+    Auto,
+    Table,
+    Cards,
+    List,
+    Grid,
+}
 
-object AdaptiveDataLoading : AdaptiveDataState<Nothing>
-
-data class AdaptiveDataError(
-    val message: String,
-) : AdaptiveDataState<Nothing>
-
-data class AdaptiveDataLoaded<T>(
-    val items: List<T>,
-    val emptyMessage: String? = null,
-) : AdaptiveDataState<T>
+enum class AdaptiveCollectionDisplayMode {
+    Auto,
+    List,
+    Grid,
+    Cards,
+    Table,
+}
 ```
 
-### AdaptiveDataColumn
+`AdaptiveDataView(displayMode = Auto, autoSwitchToCards = true)` preserves the original behavior:
+
+- Compact and Medium -> cards.
+- Expanded and Large -> table.
+
+Set `autoSwitchToCards = false` to keep auto mode table-only. Set `displayMode = Cards` to force cards at every breakpoint.
+
+## Query State
 
 ```kotlin
-data class AdaptiveDataColumn<T>(
-    val id: String,
-    val header: String,
-    val cell: @Composable (T) -> Unit,
-    val minBreakpoint: AdaptiveBreakpoint = AdaptiveBreakpoint.Expanded,
+data class AdaptiveQueryState(
+    val search: String = "",
+    val filters: Map<String, Set<String>> = emptyMap(),
+    val sortKey: String? = null,
+    val sortDirection: AdaptiveSortDirection = AdaptiveSortDirection.Ascending,
+    val page: Int = 1,
+    val pageSize: Int = 20,
 )
 ```
 
-### AdaptiveSortState
+Related types:
+
+- `AdaptivePaginationState`
+- `AdaptiveSortOption`
+- `AdaptiveFilterOption`
+- `AdaptiveFilterValue`
+- `AdaptiveSortDirection`
+
+The data module does not fetch data. Apps own loading and server callbacks through `onQueryChange`.
+
+## AdaptiveCollectionView
 
 ```kotlin
-data class AdaptiveSortState(
-    val sortedColumn: String,
-    val ascending: Boolean,
+AdaptiveCollectionView(
+    items = products,
+    displayMode = AdaptiveCollectionDisplayMode.Grid,
+    gridColumns = 4,
+    queryState = queryState,
+    onQueryChange = { queryState = it },
+    pagination = AdaptivePaginationState(
+        page = queryState.page,
+        pageSize = queryState.pageSize,
+        totalItems = totalCount,
+    ),
+    searchEnabled = true,
+    filters = productFilters,
+    sortOptions = sortOptions,
+    listItemContent = { ProductCard(it) },
+    gridItemContent = { ProductCard(it) },
 )
 ```
 
-### AdaptiveSelectionState
+Use it for:
 
-```kotlin
-data class AdaptiveSelectionState<T>(
-    val selectedItems: Set<T>,
-)
-```
-
-### AdaptivePaginationState
-
-```kotlin
-data class AdaptivePaginationState(
-    val currentPage: Int,
-    val pageSize: Int,
-    val totalItems: Int,
-)
-```
-
-### AdaptiveFilterSlot
-
-```kotlin
-typealias AdaptiveFilterSlot = @Composable () -> Unit
-```
+- product grids;
+- collection cards;
+- search/filter/sort/pagination surfaces;
+- list/grid/cards mode switching.
 
 ## AdaptiveDataView
 
 ```kotlin
-@Composable
-fun <T> AdaptiveDataView(
-    modifier: Modifier = Modifier,
-    state: AdaptiveDataState<T>,
-    columns: List<AdaptiveDataColumn<T>>,
-    cardContent: @Composable (item: T) -> Unit,
-    filterSlot: AdaptiveFilterSlot = {},
-    actions: @Composable () -> Unit = {},
-    rowActions: @Composable (item: T) -> Unit = {},
-    onItemClick: ((T) -> Unit)? = null,
+AdaptiveDataView(
+    state = AdaptiveDataContent(rows),
+    columns = columns,
+    displayMode = AdaptiveDataDisplayMode.Auto,
+    autoSwitchToCards = true,
+    queryState = queryState,
+    onQueryChange = { queryState = it },
+    pagination = pagination,
+    searchEnabled = true,
+    sortOptions = sortOptions,
+    filters = filters,
+    rowActions = rowActions,
 )
 ```
 
-### v0.1-alpha behavior
-
-This version supports:
-
-- `state` for loading, empty, error, and loaded items,
-- `columns` for table headers,
-- `cardContent` for mobile card rendering,
-- `filterSlot` for filter UI,
-- `actions` for toolbar/action surface insertion,
-- `rowActions` for per-item contextual actions,
-- `onItemClick` for item selection.
-
-### v0.2 planned extensions
-
-The following concepts are defined but not required for v0.1-alpha:
-
-- `AdaptiveSortState` for sortable columns,
-- `AdaptiveSelectionState<T>` for bulk selection,
-- `AdaptivePaginationState` for paged data,
-- advanced filter panels and column visibility.
-
-## Example usage
+Force cards only:
 
 ```kotlin
 AdaptiveDataView(
-    state = dataState,
-    columns = listOf(
-        AdaptiveDataColumn(
-            id = "name",
-            header = "Empleado",
-            cell = { Text(it.name) },
-        ),
-        AdaptiveDataColumn(
-            id = "department",
-            header = "Departamento",
-            cell = { Text(it.department) },
-        ),
-    ),
-    cardContent = { employee -> EmployeeCard(employee) },
-    filterSlot = { EmployeeFilterControls() },
-    actions = { EmployeeToolbar() },
-    rowActions = { employee -> EmployeeRowActions(employee) },
-    onItemClick = { employee -> onEmployeeSelected(employee) }
+    state = AdaptiveDataContent(rows),
+    columns = columns,
+    displayMode = AdaptiveDataDisplayMode.Cards,
+    cardContent = { row -> RowCard(row) },
 )
 ```
 
-## Developer guidance
+Force table only:
 
-- Use `AdaptiveDataState` to centralize loading and error handling.
-- Keep table cell rendering simple by using `AdaptiveDataColumn<T>`.
-- Use `cardContent` to define the mobile card appearance while preserving row actions on desktop.
-- `filterSlot` may render either a sidebar panel or a sheet/dialog depending on breakpoint.
+```kotlin
+AdaptiveDataView(
+    state = AdaptiveDataContent(rows),
+    columns = columns,
+    displayMode = AdaptiveDataDisplayMode.Table,
+)
+```
 
-## Compose Multiplatform considerations
+## Compatibility Notes
 
-- Desktop and Web table interactions may need separate tuning in the demo.
-- Web/WASM card rendering should remain lightweight to avoid excessive DOM complexity.
-- Sorting, selection, and pagination are explicitly left for v0.2 to keep the first release small.
+- Existing `AdaptiveDataView` callers continue to compile.
+- Query controls render only when `queryState` and `onQueryChange` are provided.
+- `List` and `Grid` display modes on `AdaptiveDataView` currently render through the card path; they are reserved for future structured-data renderers.
+- `AdaptiveCollectionView.Table` falls back to list rendering because generic collections do not provide columns.

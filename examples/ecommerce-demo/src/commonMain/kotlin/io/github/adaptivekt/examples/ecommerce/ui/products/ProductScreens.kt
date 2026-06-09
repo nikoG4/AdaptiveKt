@@ -16,6 +16,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import io.github.adaptivekt.components.*
+import io.github.adaptivekt.data.AdaptiveCollectionDisplayMode
+import io.github.adaptivekt.data.AdaptiveCollectionView
+import io.github.adaptivekt.data.AdaptiveFilterOption
+import io.github.adaptivekt.data.AdaptiveFilterValue
+import io.github.adaptivekt.data.AdaptivePaginationState
+import io.github.adaptivekt.data.AdaptiveQueryState
+import io.github.adaptivekt.data.AdaptiveSortOption
+import io.github.adaptivekt.data.coerceAdaptivePage
 import io.github.adaptivekt.examples.ecommerce.state.StoreState
 import io.github.adaptivekt.examples.ecommerce.model.MockData
 import io.github.adaptivekt.examples.ecommerce.navigation.Screen
@@ -37,102 +45,82 @@ import io.github.adaptivekt.core.AdaptiveTheme
 fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
     val products = state.filteredProducts()
     val categories = MockData.categories
+    var collectionPage by remember { mutableStateOf(1) }
+    var collectionPageSize by remember { mutableStateOf(10) }
+    val sortOptions = listOf(
+        AdaptiveSortOption("popular", "Popular"),
+        AdaptiveSortOption("price-asc", "Price: Low to High"),
+        AdaptiveSortOption("price-desc", "Price: High to Low"),
+        AdaptiveSortOption("newest", "Newest"),
+        AdaptiveSortOption("rated", "Best Rated"),
+    )
+    val queryState = AdaptiveQueryState(
+        search = state.searchQuery,
+        filters = state.selectedCategoryId?.let { mapOf("category" to setOf(it)) }.orEmpty(),
+        sortKey = sortOptions.firstOrNull { it.label == state.sortOption }?.key ?: "popular",
+        page = collectionPage,
+        pageSize = collectionPageSize,
+    )
+    val safePage = coerceAdaptivePage(collectionPage, products.size, collectionPageSize)
+    val pageItems = products
+        .drop((safePage - 1) * collectionPageSize)
+        .take(collectionPageSize)
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
         val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
-        val compact = layoutInfo.isCompact
+        val productColumns = when {
+            layoutInfo.isCompact -> 2
+            layoutInfo.isMedium -> 3
+            layoutInfo.isExpanded -> 4
+            else -> 5
+        }
 
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Filters Sidebar (hidden on mobile)
-            // Justification: A proper responsive sidebar/drawer pattern requires a Scaffold with a drawer slot.
-            // Until AdaptiveScaffold introduces a drawer, we hide the inline sidebar on compact screens.
-            if (!compact) {
-                Column(
-                    modifier = Modifier
-                        .width(280.dp)
-                        .fillMaxHeight()
-                        .background(AdaptiveTheme.colors.surfaceMuted)
-                        .padding(24.dp)
-                ) {
-                    Text("Filters", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = AdaptiveTheme.colors.textPrimary)
-                    Spacer(Modifier.height(24.dp))
-                    
-                    Text("Category", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AdaptiveTheme.colors.textSecondary)
-                    Spacer(Modifier.height(12.dp))
-                    categories.forEach { cat ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { state.selectedCategoryId = if (state.selectedCategoryId == cat.id) null else cat.id }
-                                .padding(vertical = 8.dp)
-                        ) {
-                            val isSelected = state.selectedCategoryId == cat.id
-                            Box(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(if (isSelected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.disabledBackground),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isSelected) AppIcon(AppIcons.Check, modifier = Modifier.size(12.dp), tint = Color.White)
-                            }
-                            Spacer(Modifier.width(12.dp))
-                            Text(cat.name, fontSize = 14.sp, color = if (isSelected) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textSecondary)
-                        }
-                    }
-                    
-                    Spacer(Modifier.height(32.dp))
-                    Text("Sort By", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AdaptiveTheme.colors.textSecondary)
-                    Spacer(Modifier.height(12.dp))
-                    val sortOptions = listOf("Popular", "Price: Low to High", "Price: High to Low", "Newest", "Best Rated")
-                    AdaptiveSelect(
-                        options = sortOptions,
-                        selectedOption = state.sortOption,
-                        onSelectedOptionChange = { state.sortOption = it ?: "Popular" },
-                        optionLabel = { it }
-                    )
-                    
-                    Spacer(Modifier.weight(1f))
-                    AdaptiveButton(
-                        text = "Clear All Filters", 
-                        onClick = { state.clearFilters() },
-                        variant = AdaptiveButtonVariant.Ghost,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+        AdaptiveScrollablePage(modifier = Modifier.fillMaxSize()) {
+            val title = when {
+                state.selectedCategoryId != null -> categories.find { it.id == state.selectedCategoryId }?.name ?: "Products"
+                state.selectedCollectionId != null -> MockData.collections.find { it.id == state.selectedCollectionId }?.name ?: "Products"
+                state.searchQuery.isNotBlank() -> "Search results for \"${state.searchQuery}\""
+                else -> "All Products"
             }
+            Text(title, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
+            Spacer(Modifier.height(4.dp))
+            Text("${products.size} products found", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
+            Spacer(Modifier.height(24.dp))
 
-            // Product Grid
-            AdaptiveScrollablePage(modifier = Modifier.weight(1f)) {
-                Column {
-                    val title = when {
-                        state.selectedCategoryId != null -> categories.find { it.id == state.selectedCategoryId }?.name ?: "Products"
-                        state.selectedCollectionId != null -> MockData.collections.find { it.id == state.selectedCollectionId }?.name ?: "Products"
-                        state.searchQuery.isNotBlank() -> "Search results for \"${state.searchQuery}\""
-                        else -> "All Products"
-                    }
-                    Text(title, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = AdaptiveTheme.colors.textPrimary)
-                    Spacer(Modifier.height(4.dp))
-                    Text("${products.size} products found", color = AdaptiveTheme.colors.textSecondary, fontSize = 14.sp)
-                    
-                    if (compact) {
-                        Spacer(Modifier.height(16.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (state.selectedCategoryId != null) {
-                                Badge(categories.find { it.id == state.selectedCategoryId }?.name ?: "Category", Color(0xFF3B82F6))
-                            }
-                            if (state.selectedCollectionId != null) {
-                                Badge("Collection", Color(0xFF8B5CF6))
-                            }
-                            if (state.sortOption != "Popular") {
-                                Badge(state.sortOption, Color(0xFF10B981))
-                            }
-                        }
-                    }
-                }
-
-                if (products.isEmpty()) {
+            AdaptiveCollectionView(
+                items = pageItems,
+                displayMode = AdaptiveCollectionDisplayMode.Grid,
+                gridColumns = productColumns,
+                queryState = queryState,
+                onQueryChange = { next ->
+                    state.searchQuery = next.search
+                    state.selectedCategoryId = next.filters["category"]?.firstOrNull()
+                    state.sortOption = sortOptions.firstOrNull { it.key == next.sortKey }?.label ?: "Popular"
+                    collectionPage = next.page.coerceAtLeast(1)
+                    collectionPageSize = next.pageSize.coerceAtLeast(1)
+                },
+                pagination = AdaptivePaginationState(
+                    page = safePage,
+                    pageSize = collectionPageSize,
+                    totalItems = products.size,
+                    pageSizeOptions = listOf(10, 20, 40),
+                ),
+                searchEnabled = true,
+                filters = listOf(
+                    AdaptiveFilterOption(
+                        key = "category",
+                        label = "Category",
+                        options = categories.map { category ->
+                            AdaptiveFilterValue(
+                                value = category.id,
+                                label = category.name,
+                                count = MockData.products.count { it.categoryId == category.id },
+                            )
+                        },
+                    ),
+                ),
+                sortOptions = sortOptions,
+                emptyContent = {
                     AdaptiveEmptyState(
                         title = "No products found",
                         description = "We couldn't find any products matching your current filters.",
@@ -141,16 +129,14 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
                         },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp)
                     )
-                } else {
-                    AdaptiveGrid {
-                        products.forEach { prod ->
-                            item(span = 1) {
-                                ProductCard(prod, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })
-                            }
-                        }
-                    }
-                }
-            }
+                },
+                listItemContent = { prod ->
+                    ProductCard(prod, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })
+                },
+                gridItemContent = { prod ->
+                    ProductCard(prod, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })
+                },
+            )
         }
     }
 }
@@ -158,6 +144,13 @@ fun ProductListScreen(state: StoreState, modifier: Modifier = Modifier) {
 @Composable
 fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier = Modifier) {
     val product = MockData.products.find { it.id == productId }
+    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+    val compact = layoutInfo.isCompact
+    val productColumns = when {
+        layoutInfo.isCompact -> 2
+        layoutInfo.isMedium -> 3
+        else -> 4
+    }
     if (product == null) {
         AdaptiveContainer(modifier = modifier.fillMaxSize()) {
             AdaptiveEmptyState(title = "Product not found", description = "We couldn't find the product you're looking for.")
@@ -190,7 +183,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                         ProductVisual(product = product, modifier = Modifier.fillMaxSize())
                     }
                     Spacer(Modifier.height(16.dp))
-                    AdaptiveGrid(horizontalGap = 16.dp, verticalGap = 16.dp) {
+                    AdaptiveGrid(columns = 4, horizontalGap = 16.dp, verticalGap = 16.dp) {
                         repeat(4) {
                             item(span = 1) {
                                 Box(
@@ -294,7 +287,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
         )
         
         AdaptiveSection(title = "Product Specifications") {
-            AdaptiveGrid {
+            AdaptiveGrid(columns = if (compact) 1 else 2, horizontalGap = 24.dp, verticalGap = 8.dp) {
                 product.specs.forEach { spec ->
                     item(span = 1) {
                         Column {
@@ -310,7 +303,7 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
         }
         
         AdaptiveSection(title = "You might also like") {
-            AdaptiveGrid {
+            AdaptiveGrid(columns = productColumns, horizontalGap = 16.dp, verticalGap = 18.dp) {
                 MockData.products.filter { it.categoryId == product.categoryId && it.id != product.id }.take(4).forEach { related ->
                     item(span = 1) {
                         ProductCard(related, onClick = { state.navigateTo(Screen.ProductDetail(related.id)) })
@@ -324,6 +317,13 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
 @Composable
 fun WishlistScreen(state: StoreState, modifier: Modifier = Modifier) {
     val products = MockData.products.filter { state.wishlistIds.contains(it.id) }
+    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+    val productColumns = when {
+        layoutInfo.isCompact -> 2
+        layoutInfo.isMedium -> 3
+        layoutInfo.isExpanded -> 4
+        else -> 5
+    }
 
     AdaptiveScrollablePage(modifier = modifier.fillMaxSize()) {
         Column {
@@ -342,7 +342,7 @@ fun WishlistScreen(state: StoreState, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp)
             )
         } else {
-            AdaptiveGrid {
+            AdaptiveGrid(columns = productColumns, horizontalGap = 16.dp, verticalGap = 18.dp) {
                 products.forEach { prod ->
                     item(span = 1) {
                         ProductCard(prod, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })

@@ -65,6 +65,10 @@ import io.github.adaptivekt.feedback.AdaptiveLoadingState
  * @param onItemClick Optional click handler for row/card items.
  * @param cardContent Optional composable rendering a single item in card mode. When null, a default
  * mobile card is generated from column metadata and heuristics.
+ * @param displayMode Explicit display mode. [AdaptiveDataDisplayMode.Auto] preserves the original
+ * responsive table-to-card behavior.
+ * @param autoSwitchToCards When false, [AdaptiveDataDisplayMode.Auto] stays in table mode even on
+ * compact breakpoints.
  */
 @Composable
 public fun <T> AdaptiveDataView(
@@ -76,11 +80,36 @@ public fun <T> AdaptiveDataView(
     rowActions: List<AdaptiveDataAction<T>> = emptyList(),
     onItemClick: ((T) -> Unit)? = null,
     cardContent: (@Composable (T) -> Unit)? = null,
+    displayMode: AdaptiveDataDisplayMode = AdaptiveDataDisplayMode.Auto,
+    autoSwitchToCards: Boolean = true,
+    queryState: AdaptiveQueryState? = null,
+    onQueryChange: ((AdaptiveQueryState) -> Unit)? = null,
+    pagination: AdaptivePaginationState? = null,
+    searchEnabled: Boolean = false,
+    filters: List<AdaptiveFilterOption> = emptyList(),
+    sortOptions: List<AdaptiveSortOption> = emptyList(),
 ) {
     AdaptiveContent(modifier = modifier) {
         val adaptiveInfo = rememberAdaptiveInfo()
+        val resolvedDisplayMode = resolveAdaptiveDataDisplayMode(
+            breakpoint = adaptiveInfo.breakpoint,
+            displayMode = displayMode,
+            autoSwitchToCards = autoSwitchToCards,
+        )
 
         Column(modifier = Modifier.fillMaxWidth()) {
+            if (queryState != null && onQueryChange != null) {
+                AdaptiveDataQueryControls(
+                    queryState = queryState,
+                    onQueryChange = onQueryChange,
+                    searchEnabled = searchEnabled,
+                    filters = filters,
+                    sortOptions = sortOptions,
+                    pagination = pagination,
+                )
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+            }
+
             if (filterSlot != null || actions != null) {
                 DataToolbar(filterSlot = filterSlot, actions = actions)
                 Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
@@ -102,7 +131,7 @@ public fun <T> AdaptiveDataView(
                             title = "No data available",
                             description = "Try adjusting filters or create a new record.",
                         )
-                    } else if (shouldUseTableLayout(adaptiveInfo.breakpoint)) {
+                    } else if (resolvedDisplayMode == AdaptiveDataDisplayMode.Table) {
                         AdaptiveDataTable(
                             items = state.items,
                             columns = columns,
