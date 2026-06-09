@@ -32,6 +32,20 @@ internal fun SiteDemoPage() {
         )
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
         
+        // AI Workspace Showcase
+        AdaptiveCard {
+            AdaptiveBadge("ai-workspace-demo", tone = AdaptiveBadgeTone.Info)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
+            SiteText("AI Workspace", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+            SiteText("A complex SaaS/product layout demonstrating chat workspaces, prompt libraries, knowledge bases, and multi-pane AdaptiveListDetailScaffold.", color = SiteMuted, maxLines = 3)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
+            AdaptiveButton(
+                text = "Open AI Workspace",
+                onClick = { openSiteUrl("examples/ai-workspace/") },
+            )
+        }
+        
         // Ecommerce Showcase
         AdaptiveCard {
             AdaptiveBadge("ecommerce-demo", tone = AdaptiveBadgeTone.Success)

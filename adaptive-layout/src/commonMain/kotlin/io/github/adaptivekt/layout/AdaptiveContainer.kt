@@ -15,19 +15,22 @@ import io.github.adaptivekt.core.AdaptiveTokens
 @Composable
 fun AdaptiveContainer(
     modifier: Modifier = Modifier,
-    maxWidth: Dp = AdaptiveTokens.Widths.Page,
-    contentPadding: PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Large),
+    maxWidth: Dp = Dp.Unspecified,
+    contentPadding: PaddingValues? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+    val effectiveMaxWidth = if (maxWidth == Dp.Unspecified) layoutInfo.contentMaxWidth else maxWidth
+    val effectivePadding = contentPadding ?: PaddingValues(layoutInfo.pagePadding)
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = maxWidth)
+                .widthIn(max = effectiveMaxWidth)
                 .fillMaxWidth()
-                .padding(contentPadding),
+                .padding(effectivePadding),
             content = content
         )
     }

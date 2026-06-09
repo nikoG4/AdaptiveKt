@@ -56,29 +56,31 @@ interface AdaptiveGridScope {
 @Composable
 fun AdaptiveGrid(
     modifier: Modifier = Modifier,
-    columns: Int = 12,
+    columns: Int? = null, // null means use AdaptiveLayoutInfo
     horizontalGap: Dp = AdaptiveTokens.Spacing.Medium,
     verticalGap: Dp = AdaptiveTokens.Spacing.Medium,
     content: AdaptiveGridScope.() -> Unit,
 ) {
+    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+    val effectiveColumns = columns ?: layoutInfo.columns
     val items = mutableListOf<GridItem>()
 
     val scope = object : AdaptiveGridScope {
         override fun item(span: Int, content: @Composable () -> Unit) {
-            items.add(GridItem(span = coerceSpan(span, columns), content = content))
+            items.add(GridItem(span = coerceSpan(span, effectiveColumns), content = content))
         }
     }
 
     scope.content()
 
-    val rows = groupGridItemsIntoRows(items, columns)
+    val rows = groupGridItemsIntoRows(items, effectiveColumns)
 
     Column(modifier = modifier.fillMaxWidth()) {
         rows.forEachIndexed { rowIndex, row ->
             AdaptiveGridRow(
                 modifier = Modifier.fillMaxWidth(),
                 row = row,
-                columns = columns,
+                columns = effectiveColumns,
                 horizontalGap = horizontalGap,
             )
 

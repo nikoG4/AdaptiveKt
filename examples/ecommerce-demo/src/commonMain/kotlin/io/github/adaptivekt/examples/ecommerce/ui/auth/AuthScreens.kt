@@ -26,35 +26,33 @@ fun LoginScreen(state: StoreState, modifier: Modifier = Modifier) {
     var showErrors by remember { mutableStateOf(false) }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF8FAFC)), 
             contentAlignment = Alignment.Center
         ) {
-            val compact = maxWidth < 600.dp
-            
             AdaptiveCard(
                 modifier = Modifier
                     .widthIn(max = 480.dp)
                     .fillMaxWidth()
-                    .padding(if (compact) 16.dp else 24.dp),
-                contentPadding = PaddingValues(if (compact) 24.dp else 40.dp)
+                    .padding(16.dp),
+                contentPadding = PaddingValues(32.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
-                            .size(if (compact) 40.dp else 48.dp)
+                            .size(48.dp)
                             .background(Color(0xFF3B82F6), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("A", color = Color.White, fontWeight = FontWeight.Bold, fontSize = if (compact) 20.sp else 24.sp)
+                        Text("A", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     }
                     Spacer(Modifier.height(16.dp))
-                    Text("Welcome back", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Text("Welcome back", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
                     Spacer(Modifier.height(8.dp))
-                    Text("Enter your details to access your account", color = Color(0xFF64748B), fontSize = if (compact) 14.sp else 16.sp)
-                    Spacer(Modifier.height(if (compact) 24.dp else 40.dp))
+                    Text("Enter your details to access your account", color = Color(0xFF64748B), fontSize = 16.sp)
+                    Spacer(Modifier.height(32.dp))
 
                     AdaptiveFormLayout(modifier = Modifier.fillMaxWidth()) {
                         section {
@@ -131,26 +129,24 @@ fun RegisterScreen(state: StoreState, modifier: Modifier = Modifier) {
     var showErrors by remember { mutableStateOf(false) }
 
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF8FAFC)), 
             contentAlignment = Alignment.Center
         ) {
-            val compact = maxWidth < 600.dp
-            
             AdaptiveCard(
                 modifier = Modifier
                     .widthIn(max = 480.dp)
                     .fillMaxWidth()
-                    .padding(if (compact) 16.dp else 24.dp),
-                contentPadding = PaddingValues(if (compact) 24.dp else 40.dp)
+                    .padding(16.dp),
+                contentPadding = PaddingValues(32.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Create Account", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Text("Create Account", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
                     Spacer(Modifier.height(8.dp))
-                    Text("Join Adaptive Store today", color = Color(0xFF64748B), fontSize = if (compact) 14.sp else 16.sp)
-                    Spacer(Modifier.height(if (compact) 24.dp else 40.dp))
+                    Text("Join Adaptive Store today", color = Color(0xFF64748B), fontSize = 16.sp)
+                    Spacer(Modifier.height(32.dp))
 
                     AdaptiveFormLayout(modifier = Modifier.fillMaxWidth()) {
                         section {
@@ -189,14 +185,13 @@ fun RegisterScreen(state: StoreState, modifier: Modifier = Modifier) {
 @Composable
 fun ForgotPasswordScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFC)), contentAlignment = Alignment.Center) {
-            val compact = maxWidth < 600.dp
+        Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFC)), contentAlignment = Alignment.Center) {
             AdaptiveCard(
-                modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(if (compact) 16.dp else 24.dp), 
-                contentPadding = PaddingValues(if (compact) 24.dp else 40.dp)
+                modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(16.dp), 
+                contentPadding = PaddingValues(32.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Reset Password", fontSize = if (compact) 24.sp else 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Text("Reset Password", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
                     Spacer(Modifier.height(24.dp))
                     AdaptiveFormLayout {
                         section {

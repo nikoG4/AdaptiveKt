@@ -60,28 +60,30 @@ fun EcommerceApp(storeState: StoreState = remember { StoreState() }) {
         }
     }
 
-    AdaptiveTheme(mode = storeState.themeMode) {
-        AppShell(state = storeState) { paddingValues ->
-            val modifier = Modifier.padding(paddingValues)
-            when (val screen = storeState.currentScreen) {
-                is Screen.AuthLogin -> LoginScreen(storeState, modifier)
-                is Screen.AuthRegister -> RegisterScreen(storeState, modifier)
-                is Screen.AuthForgotPassword -> ForgotPasswordScreen(storeState, modifier)
-                
-                is Screen.Home -> HomeScreen(storeState, modifier)
-                is Screen.Products -> ProductListScreen(storeState, modifier)
-                is Screen.ProductDetail -> ProductDetailScreen(storeState, screen.productId, modifier)
-                
-                is Screen.Wishlist -> WishlistScreen(storeState, modifier)
-                is Screen.Cart -> CartScreen(storeState, modifier)
-                is Screen.Checkout -> CheckoutScreen(storeState, modifier)
-                is Screen.OrderSuccess -> OrderSuccessScreen(storeState, screen.orderId, modifier)
-                
-                is Screen.Account -> AccountScreen(storeState, modifier)
-                is Screen.Orders -> OrdersScreen(storeState, modifier)
-                is Screen.Settings -> SettingsScreen(storeState, modifier)
-                
-                is Screen.UiStates -> UiStatesScreen(storeState, modifier)
+    io.github.adaptivekt.core.AdaptiveApp {
+        AdaptiveTheme(mode = storeState.themeMode) {
+            AppShell(state = storeState) { paddingValues ->
+                val modifier = Modifier.padding(paddingValues)
+                when (val screen = storeState.currentScreen) {
+                    is Screen.AuthLogin -> LoginScreen(storeState, modifier)
+                    is Screen.AuthRegister -> RegisterScreen(storeState, modifier)
+                    is Screen.AuthForgotPassword -> ForgotPasswordScreen(storeState, modifier)
+                    
+                    is Screen.Home -> HomeScreen(storeState, modifier)
+                    is Screen.Products -> ProductListScreen(storeState, modifier)
+                    is Screen.ProductDetail -> ProductDetailScreen(storeState, screen.productId, modifier)
+                    
+                    is Screen.Wishlist -> WishlistScreen(storeState, modifier)
+                    is Screen.Cart -> CartScreen(storeState, modifier)
+                    is Screen.Checkout -> CheckoutScreen(storeState, modifier)
+                    is Screen.OrderSuccess -> OrderSuccessScreen(storeState, screen.orderId, modifier)
+                    
+                    is Screen.Account -> AccountScreen(storeState, modifier)
+                    is Screen.Orders -> OrdersScreen(storeState, modifier)
+                    is Screen.Settings -> SettingsScreen(storeState, modifier)
+                    
+                    is Screen.UiStates -> UiStatesScreen(storeState, modifier)
+                }
             }
         }
     }

@@ -31,16 +31,14 @@ import io.github.adaptivekt.examples.ecommerce.ui.components.CollectionVisual
 import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveBreakpoint
-import io.github.adaptivekt.core.breakpointForWidth
 
 @Composable
 fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveContainer(modifier = modifier.fillMaxSize()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val breakpoint = breakpointForWidth(maxWidth)
-            val compact = breakpoint == AdaptiveBreakpoint.Compact
-            val medium = breakpoint == AdaptiveBreakpoint.Medium
-            val expanded = breakpoint == AdaptiveBreakpoint.Expanded || breakpoint == AdaptiveBreakpoint.Large
+        val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val medium = layoutInfo.isMedium
+        val expanded = layoutInfo.isExpanded || layoutInfo.isLarge
             val sectionHorizontalPadding = if (compact) 16.dp else 24.dp
 
             LazyColumn(
@@ -333,7 +331,6 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-        }
     }
 }
 

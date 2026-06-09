@@ -3,6 +3,7 @@ param(
     [string]$DocsSiteDist = "docs-site/build/dist/wasmJs/productionExecutable",
     [string]$AdminDemoDist = "admin-demo/build/dist/wasmJs/productionExecutable",
     [string]$EcommerceDemoDist = "examples/ecommerce-demo/build/dist/wasmJs/productionExecutable",
+    [string]$AiWorkspaceDemoDist = "examples/ai-workspace-demo/build/dist/wasmJs/productionExecutable",
     [switch]$SkipBuild
 )
 
@@ -20,15 +21,20 @@ if (-not $SkipBuild) {
 
     Write-Host "Building ecommerce-demo Wasm distribution..." -ForegroundColor Cyan
     .\gradlew.bat -p examples/ecommerce-demo wasmJsBrowserDistribution --console=plain --stacktrace
+
+    Write-Host "Building ai-workspace-demo Wasm distribution..." -ForegroundColor Cyan
+    .\gradlew.bat -p examples/ai-workspace-demo wasmJsBrowserDistribution --console=plain --stacktrace
 }
 
 $distPath = Join-Path $root $DistDir
 $docsPath = Join-Path $root $DocsSiteDist
 $demoPath = Join-Path $root $AdminDemoDist
 $ecommercePath = Join-Path $root $EcommerceDemoDist
+$aiWorkspacePath = Join-Path $root $AiWorkspaceDemoDist
 
 $demoTarget = Join-Path $distPath "demo\app"
 $ecommerceTarget = Join-Path $distPath "examples\ecommerce"
+$aiWorkspaceTarget = Join-Path $distPath "examples\ai-workspace"
 
 if (-not (Test-Path $docsPath)) {
     throw "Docs site distribution not found: $docsPath"
@@ -40,6 +46,10 @@ if (-not (Test-Path $demoPath)) {
 
 if (-not (Test-Path $ecommercePath)) {
     throw "Ecommerce demo distribution not found: $ecommercePath"
+}
+
+if (-not (Test-Path $aiWorkspacePath)) {
+    throw "AI Workspace demo distribution not found: $aiWorkspacePath"
 }
 
 if (Test-Path $distPath) {
@@ -59,6 +69,9 @@ Copy-Item -Path (Join-Path $demoPath "*") -Destination $demoTarget -Recurse -For
 
 New-Item -ItemType Directory -Force -Path $ecommerceTarget | Out-Null
 Copy-Item -Path (Join-Path $ecommercePath "*") -Destination $ecommerceTarget -Recurse -Force
+
+New-Item -ItemType Directory -Force -Path $aiWorkspaceTarget | Out-Null
+Copy-Item -Path (Join-Path $aiWorkspacePath "*") -Destination $aiWorkspaceTarget -Recurse -Force
 
 New-Item -ItemType File -Force -Path (Join-Path $distPath ".nojekyll") | Out-Null
 
@@ -99,3 +112,4 @@ Write-Host "Prepared Pages site: $distPath" -ForegroundColor Green
 Write-Host "Docs site copied from: $docsPath" -ForegroundColor Green
 Write-Host "Admin demo copied to: $demoTarget" -ForegroundColor Green
 Write-Host "Ecommerce showcase copied to: $ecommerceTarget" -ForegroundColor Green
+Write-Host "AI Workspace showcase copied to: $aiWorkspaceTarget" -ForegroundColor Green

@@ -86,22 +86,23 @@ fun AppShell(
             },
             navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
             topBar = {
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val compact = maxWidth < 800.dp
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
+                    val compact = layoutInfo.isCompact
                     
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(72.dp)
                             .background(AdaptiveTheme.colors.surface)
-                            .padding(horizontal = if (compact) 16.dp else 24.dp),
+                            .padding(horizontal = layoutInfo.pagePadding),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Logo
                         Row(
                             modifier = Modifier
                                 .clickable { state.resetToHome() }
-                                .padding(end = if (compact) 16.dp else 32.dp),
+                                .padding(end = layoutInfo.pagePadding),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
