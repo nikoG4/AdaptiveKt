@@ -28,7 +28,7 @@ internal fun SiteDemoPage() {
         PageHeader(
             eyebrow = "Demos",
             title = "Showcase Applications",
-            description = "Explore full applications built with AdaptiveKt to see how components, layout, and theming come together in production-like scenarios.",
+            description = "Explore full applications built with AdaptiveKt to see how components, layout, theming, and validation come together in production-like scenarios.",
         )
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
         
