@@ -60,6 +60,8 @@ public fun Sidebar(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    navigationTitle: String = "AdaptiveKt Admin",
+    navigationSubtitle: String? = "Workspace overview",
     itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
@@ -74,7 +76,7 @@ public fun Sidebar(
         horizontalAlignment = Alignment.Start,
     ) {
         BasicText(
-            text = "AdaptiveKt Admin",
+            text = navigationTitle,
             style = AdaptiveTheme.typography.subtitle.copy(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -83,12 +85,14 @@ public fun Sidebar(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        BasicText(
-            text = "Workspace overview",
-            style = AdaptiveTheme.typography.caption.copy(color = AdaptiveTheme.colors.textMuted),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        if (!navigationSubtitle.isNullOrBlank()) {
+            BasicText(
+                text = navigationSubtitle,
+                style = AdaptiveTheme.typography.caption.copy(color = AdaptiveTheme.colors.textMuted),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XLarge))
 
         items.forEach { item ->
@@ -112,6 +116,8 @@ public fun Drawer(
     items: List<AdaptiveNavItem>,
     selectedItemId: String?,
     modifier: Modifier = Modifier,
+    navigationTitle: String = "AdaptiveKt Admin",
+    navigationSubtitle: String? = "Workspace overview",
     itemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     density: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     onItemSelected: (String) -> Unit,
@@ -127,7 +133,7 @@ public fun Drawer(
         horizontalAlignment = Alignment.Start,
     ) {
         BasicText(
-            text = "AdaptiveKt Admin Demo",
+            text = navigationTitle,
             style = AdaptiveTheme.typography.subtitle.copy(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -136,6 +142,14 @@ public fun Drawer(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (!navigationSubtitle.isNullOrBlank()) {
+            BasicText(
+                text = navigationSubtitle,
+                style = AdaptiveTheme.typography.caption.copy(color = AdaptiveTheme.colors.textMuted),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
 
         items.forEach { item ->
@@ -547,6 +561,5 @@ private fun NavigationGlyph(
 
 private fun compactNavigationLabel(label: String): String {
     val firstWord = label.trim().split(' ').firstOrNull().orEmpty()
-    val source = firstWord.ifBlank { label.trim() }
-    return if (source.length <= 6) source else source.take(6)
+    return firstWord.ifBlank { label.trim() }
 }

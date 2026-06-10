@@ -27,9 +27,11 @@ echo "============================================================"
 echo " PHASE 4: LAYOUT GUARDS"
 echo "============================================================"
 cd "$ROOT_DIR"
-if [ -f "./examples/ai-workspace-demo/scripts/check-ai-workspace-layout-guards.ps1" ]; then
+if [ -f "./scripts/check-ai-workspace-layout-guards.sh" ]; then
+    ./scripts/check-ai-workspace-layout-guards.sh
+elif [ -f "./scripts/check-ai-workspace-layout-guards.ps1" ]; then
     if command -v pwsh &> /dev/null; then
-        pwsh -ExecutionPolicy Bypass -File "./examples/ai-workspace-demo/scripts/check-ai-workspace-layout-guards.ps1"
+        pwsh -ExecutionPolicy Bypass -File "./scripts/check-ai-workspace-layout-guards.ps1"
     else
         echo "pwsh not found, skipping powershell layout guards."
     fi

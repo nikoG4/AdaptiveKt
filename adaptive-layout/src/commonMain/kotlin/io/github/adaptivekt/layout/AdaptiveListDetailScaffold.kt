@@ -1,9 +1,14 @@
 package io.github.adaptivekt.layout
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveBreakpoint
+import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 
 /**
@@ -34,6 +41,56 @@ public data class AdaptivePaneSpec(
     val preferredWidth: Dp = Dp.Unspecified,
     val maxWidth: Dp = Dp.Unspecified
 )
+
+/**
+ * Sizing policy for [AdaptiveListDetailScaffold] when list and detail panes are rendered side-by-side.
+ *
+ * The list pane receives a resolved width between [listMinWidth], [listPreferredWidth], and
+ * [listMaxWidth]. The detail pane is then given the remaining horizontal space, which prevents
+ * the common desktop failure mode where a narrow list floats beside a detail pane with a large
+ * empty gap between them.
+ *
+ * @param listMinWidth Minimum width for the list pane.
+ * @param listPreferredWidth Preferred width for the list pane.
+ * @param listMaxWidth Maximum width for the list pane.
+ * @param detailMinWidth Minimum width reserved for the detail pane before the list can grow.
+ * @param detailPreferredWidth Preferred detail width used when [fillAvailableWidth] is false.
+ * @param detailMaxWidth Optional maximum width for detail content.
+ * @param gap Space between the list and detail panes.
+ * @param maxContentWidth Optional maximum width for the full side-by-side layout.
+ * @param fillAvailableWidth Whether the full side-by-side layout should consume all available width.
+ */
+public data class AdaptiveListDetailPanePolicy(
+    val listMinWidth: Dp = 280.dp,
+    val listPreferredWidth: Dp = 360.dp,
+    val listMaxWidth: Dp = 420.dp,
+    val detailMinWidth: Dp = 420.dp,
+    val detailPreferredWidth: Dp = 720.dp,
+    val detailMaxWidth: Dp = Dp.Unspecified,
+    val gap: Dp = AdaptiveTokens.Spacing.Large,
+    val maxContentWidth: Dp = Dp.Unspecified,
+    val fillAvailableWidth: Boolean = true,
+) {
+    public companion object {
+        public fun fromPaneSpecs(
+            listPaneSpec: AdaptivePaneSpec,
+            detailPaneSpec: AdaptivePaneSpec,
+            gap: Dp = AdaptiveTokens.Spacing.Large,
+            maxContentWidth: Dp = Dp.Unspecified,
+            fillAvailableWidth: Boolean = true,
+        ): AdaptiveListDetailPanePolicy = AdaptiveListDetailPanePolicy(
+            listMinWidth = listPaneSpec.minWidth.orDefault(280.dp),
+            listPreferredWidth = listPaneSpec.preferredWidth.orDefault(360.dp),
+            listMaxWidth = listPaneSpec.maxWidth.orDefault(420.dp),
+            detailMinWidth = detailPaneSpec.minWidth.orDefault(420.dp),
+            detailPreferredWidth = detailPaneSpec.preferredWidth.orDefault(720.dp),
+            detailMaxWidth = detailPaneSpec.maxWidth,
+            gap = gap,
+            maxContentWidth = maxContentWidth,
+            fillAvailableWidth = fillAvailableWidth,
+        )
+    }
+}
 
 /**
  * Defines the compact-screen routing behavior for the list and detail panes.
@@ -109,6 +166,43 @@ private fun AdaptiveListDetailPaneMode.toResolvedMode(): AdaptiveListDetailResol
     AdaptiveListDetailPaneMode.ListAndDetail -> AdaptiveListDetailResolvedMode.ListAndDetail
 }
 
+internal data class AdaptiveListDetailPaneWidths(
+    val rowWidth: Dp,
+    val listWidth: Dp,
+)
+
+internal fun resolveAdaptiveListDetailPaneWidths(
+    containerWidth: Dp,
+    policy: AdaptiveListDetailPanePolicy,
+): AdaptiveListDetailPaneWidths {
+    val safeContainerWidth = containerWidth.coerceAtLeastDp(0.dp)
+    val listMinWidth = policy.listMinWidth.orDefault(280.dp).coerceAtLeastDp(0.dp)
+    val listPreferredWidth = policy.listPreferredWidth.orDefault(360.dp).coerceAtLeastDp(listMinWidth)
+    val listMaxWidth = policy.listMaxWidth.orDefault(420.dp).coerceAtLeastDp(listMinWidth)
+    val detailMinWidth = policy.detailMinWidth.orDefault(420.dp).coerceAtLeastDp(0.dp)
+    val detailPreferredWidth = policy.detailPreferredWidth.orDefault(720.dp).coerceAtLeastDp(detailMinWidth)
+    val gap = policy.gap.coerceAtLeastDp(0.dp)
+    val maxAllowedWidth = if (policy.maxContentWidth.isUsable()) {
+        minDp(safeContainerWidth, policy.maxContentWidth.coerceAtLeastDp(0.dp))
+    } else {
+        safeContainerWidth
+    }
+    val preferredRowWidth = listPreferredWidth + gap + detailPreferredWidth
+    val rowWidth = if (policy.fillAvailableWidth) {
+        maxAllowedWidth
+    } else {
+        minDp(maxAllowedWidth, preferredRowWidth)
+    }
+    val availableForList = (rowWidth - gap - detailMinWidth).coerceAtLeastDp(listMinWidth)
+    val listUpperBound = minDp(listMaxWidth, availableForList).coerceAtLeastDp(listMinWidth)
+    val listWidth = listPreferredWidth.coerceInDp(listMinWidth, listUpperBound)
+
+    return AdaptiveListDetailPaneWidths(
+        rowWidth = rowWidth,
+        listWidth = listWidth,
+    )
+}
+
 internal fun Modifier.applyPaneSpec(spec: AdaptivePaneSpec): Modifier {
     var mod = this
     if (spec.minWidth != Dp.Unspecified || spec.maxWidth != Dp.Unspecified) {
@@ -120,6 +214,30 @@ internal fun Modifier.applyPaneSpec(spec: AdaptivePaneSpec): Modifier {
     return mod
 }
 
+private fun Modifier.applyDetailPolicy(policy: AdaptiveListDetailPanePolicy): Modifier {
+    val detailMinWidth = policy.detailMinWidth.orDefault(0.dp).coerceAtLeastDp(0.dp)
+    return if (policy.detailMaxWidth.isUsable()) {
+        widthIn(min = detailMinWidth, max = policy.detailMaxWidth)
+    } else if (detailMinWidth > 0.dp) {
+        widthIn(min = detailMinWidth)
+    } else {
+        this
+    }
+}
+
+private fun Dp.isUsable(): Boolean = this != Dp.Unspecified
+
+private fun Dp.orDefault(default: Dp): Dp = if (isUsable()) this else default
+
+private fun Dp.coerceAtLeastDp(minimumValue: Dp): Dp = if (this < minimumValue) minimumValue else this
+
+private fun Dp.coerceInDp(minimumValue: Dp, maximumValue: Dp): Dp =
+    maxDp(minimumValue, minDp(this, maximumValue))
+
+private fun minDp(first: Dp, second: Dp): Dp = if (first < second) first else second
+
+private fun maxDp(first: Dp, second: Dp): Dp = if (first > second) first else second
+
 @Composable
 internal fun DefaultEmptyDetail() {
     Box(
@@ -130,6 +248,22 @@ internal fun DefaultEmptyDetail() {
             BasicText("Select an item", style = TextStyle(fontWeight = FontWeight.Bold))
             BasicText("Choose an item from the list to view its details.")
         }
+    }
+}
+
+@Composable
+private fun EmptyDetailPane(
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AdaptiveTheme.colors.surface, shape = AdaptiveTheme.shapes.medium)
+            .border(width = 1.dp, color = AdaptiveTheme.colors.border, shape = AdaptiveTheme.shapes.medium)
+            .padding(AdaptiveTokens.Spacing.Large),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
 }
 
@@ -157,6 +291,7 @@ internal fun DefaultCompactDetailHeader(onBackToList: () -> Unit) {
  * @param modifier Applied to the root container.
  * @param listPaneSpec Size and weight definitions for the list pane.
  * @param detailPaneSpec Size and weight definitions for the detail pane.
+ * @param panePolicy Side-by-side pane sizing policy.
  * @param behavior Configuration policy determining pane modes per breakpoint.
  * @param listPane The composable slot for the list content.
  * @param detailPane The composable slot for the detail content.
@@ -170,6 +305,10 @@ public fun <T> AdaptiveListDetailScaffold(
     modifier: Modifier = Modifier,
     listPaneSpec: AdaptivePaneSpec = AdaptivePaneSpec(weight = 0.35f),
     detailPaneSpec: AdaptivePaneSpec = AdaptivePaneSpec(weight = 0.65f),
+    panePolicy: AdaptiveListDetailPanePolicy = AdaptiveListDetailPanePolicy.fromPaneSpecs(
+        listPaneSpec = listPaneSpec,
+        detailPaneSpec = detailPaneSpec,
+    ),
     behavior: AdaptiveListDetailBehavior = AdaptiveListDetailBehavior(),
     listPane: @Composable () -> Unit,
     detailPane: @Composable (T) -> Unit,
@@ -204,33 +343,48 @@ public fun <T> AdaptiveListDetailScaffold(
                         if (selectedItem != null) {
                             detailPane(selectedItem)
                         } else {
-                            emptyDetail()
+                            EmptyDetailPane(emptyDetail)
                         }
                     }
                 }
             }
         }
         AdaptiveListDetailResolvedMode.ListAndDetail -> {
-            AdaptiveTwoPane(
-                modifier = modifier,
-                primaryWeight = listPaneSpec.weight,
-                secondaryWeight = detailPaneSpec.weight,
-                collapseOnCompact = false, // The list/detail specific compact logic overrides standard stacking
-                primary = {
-                    Box(modifier = Modifier.fillMaxSize().applyPaneSpec(listPaneSpec)) {
-                        listPane()
-                    }
-                },
-                secondary = {
-                    Box(modifier = Modifier.fillMaxSize().applyPaneSpec(detailPaneSpec)) {
-                        if (selectedItem != null) {
-                            detailPane(selectedItem)
-                        } else {
-                            emptyDetail()
+            BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+                val paneWidths = resolveAdaptiveListDetailPaneWidths(maxWidth, panePolicy)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .width(paneWidths.rowWidth)
+                            .fillMaxHeight(),
+                        horizontalArrangement = Arrangement.spacedBy(panePolicy.gap),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(paneWidths.listWidth)
+                                .fillMaxHeight(),
+                        ) {
+                            listPane()
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f, fill = true)
+                                .fillMaxHeight()
+                                .applyDetailPolicy(panePolicy),
+                        ) {
+                            if (selectedItem != null) {
+                                detailPane(selectedItem)
+                            } else {
+                                EmptyDetailPane(emptyDetail)
+                            }
                         }
                     }
                 }
-            )
+            }
         }
     }
 }

@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +15,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveButtonSize
+import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.layout.*
 import io.github.adaptivekt.examples.aiworkspace.model.*
 import io.github.adaptivekt.examples.aiworkspace.navigation.AiRoute
@@ -47,9 +51,12 @@ public fun ToolsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigator<AiR
                 AdaptiveActionBar(
                     leadingContent = { Text(tool.name, style = MaterialTheme.typography.titleLarge) },
                     primaryAction = {
-                        Button(onClick = { store.toggleToolEnabled(tool.id) }) {
-                            Text(if (tool.enabled) "Disable" else "Enable")
-                        }
+                        AdaptiveButton(
+                            text = if (tool.enabled) "Disable" else "Enable",
+                            onClick = { store.toggleToolEnabled(tool.id) },
+                            size = AdaptiveButtonSize.Small,
+                            variant = if (tool.enabled) AdaptiveButtonVariant.Secondary else AdaptiveButtonVariant.Primary,
+                        )
                     }
                 )
 

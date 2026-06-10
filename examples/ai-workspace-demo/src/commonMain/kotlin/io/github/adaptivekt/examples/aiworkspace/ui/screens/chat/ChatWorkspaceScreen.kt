@@ -2,147 +2,333 @@ package io.github.adaptivekt.examples.aiworkspace.ui.screens.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-// removed icon
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.github.adaptivekt.examples.aiworkspace.ui.components.AiGlyph
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.adaptivekt.layout.*
-import io.github.adaptivekt.examples.aiworkspace.model.*
+import io.github.adaptivekt.components.AdaptiveAvatar
+import io.github.adaptivekt.components.AdaptiveBadge
+import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveButtonSize
+import io.github.adaptivekt.components.AdaptiveButtonVariant
+import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.components.AdaptiveDivider
+import io.github.adaptivekt.components.AdaptiveSurface
+import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.examples.aiworkspace.model.ChatMessage
+import io.github.adaptivekt.examples.aiworkspace.model.Conversation
+import io.github.adaptivekt.examples.aiworkspace.model.MessagePart
+import io.github.adaptivekt.examples.aiworkspace.model.MessageRole
+import io.github.adaptivekt.examples.aiworkspace.model.MessageStatus
+import io.github.adaptivekt.examples.aiworkspace.model.ToolCallStatus
 import io.github.adaptivekt.examples.aiworkspace.navigation.AiRoute
 import io.github.adaptivekt.examples.aiworkspace.state.AiWorkspaceStore
+import io.github.adaptivekt.examples.aiworkspace.ui.components.AiGlyph
+import io.github.adaptivekt.feedback.AdaptiveEmptyState
+import io.github.adaptivekt.layout.AdaptiveActionBar
+import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
+import io.github.adaptivekt.layout.AdaptiveScrollablePage
 import io.github.adaptivekt.navigation.AdaptiveNavigator
 
 @Composable
-public fun ChatWorkspaceScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigator<AiRoute>, selectedId: String?) {
+public fun ChatWorkspaceScreen(
+    store: AiWorkspaceStore,
+    navigator: AdaptiveNavigator<AiRoute>,
+    selectedId: String?,
+) {
     val selectedItem = store.conversations.find { it.id == selectedId }
 
     AdaptiveListDetailScaffold(
         selectedItem = selectedItem,
         onBackToList = { navigator.navigate(AiRoute.Chats) },
         listPane = {
-            AdaptivePage {
-                AdaptiveActionBar(leadingContent = { Text("Conversations", style = MaterialTheme.typography.titleLarge) })
-                LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                    items(store.conversations) { conv ->
-                        ConversationListItem(
-                            conversation = conv,
-                            isSelected = conv.id == selectedId,
-                            onClick = { navigator.navigate(AiRoute.Chat(conv.id)) }
-                        )
-                    }
-                }
-            }
+            ConversationListPane(
+                conversations = store.conversations,
+                selectedId = selectedId,
+                onNewChat = { navigator.navigate(AiRoute.Chats) },
+                onOpenConversation = { navigator.navigate(AiRoute.Chat(it.id)) },
+            )
         },
-        detailPane = { conv ->
-            ChatRoom(
-                conversation = conv,
-                onSendMessage = { text ->
-                    store.sendMessage(conv.id, text)
-                }
+        detailPane = { conversation ->
+            ChatDetailPane(
+                conversation = conversation,
+                onSendMessage = { text -> store.sendMessage(conversation.id, text) },
+                onOpenPrompts = { navigator.navigate(AiRoute.Prompts) },
             )
         },
         emptyDetail = {
-            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text("Select a conversation to start chatting")
-            }
-        }
+            AdaptiveEmptyState(
+                title = "Select a conversation",
+                description = "Open an active thread or start a new chat to review AdaptiveListDetailScaffold in action.",
+                icon = {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(AdaptiveTheme.shapes.large)
+                            .background(AdaptiveTheme.colors.primarySubtle),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AiGlyph("AI", modifier = Modifier.size(40.dp))
+                    }
+                },
+                action = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+                        AdaptiveButton(
+                            text = "New chat",
+                            onClick = { navigator.navigate(AiRoute.Chats) },
+                            leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
+                        )
+                        AdaptiveButton(
+                            text = "Prompts",
+                            onClick = { navigator.navigate(AiRoute.Prompts) },
+                            variant = AdaptiveButtonVariant.Secondary,
+                        )
+                    }
+                },
+            )
+        },
+        compactDetailHeader = { conversation ->
+            AdaptiveActionBar(
+                leadingContent = {
+                    Column {
+                        Text(
+                            text = conversation.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = AdaptiveTheme.colors.textPrimary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = "Tap back to return to conversations",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AdaptiveTheme.colors.textMuted,
+                        )
+                    }
+                },
+                secondaryActions = {
+                    AdaptiveButton(
+                        text = "Back",
+                        onClick = { navigator.navigate(AiRoute.Chats) },
+                        variant = AdaptiveButtonVariant.Secondary,
+                        size = AdaptiveButtonSize.Small,
+                    )
+                },
+            )
+        },
     )
 }
 
 @Composable
-private fun ConversationListItem(
-    conversation: Conversation,
-    isSelected: Boolean,
-    onClick: () -> Unit
+private fun ConversationListPane(
+    conversations: List<Conversation>,
+    selectedId: String?,
+    onNewChat: () -> Unit,
+    onOpenConversation: (Conversation) -> Unit,
 ) {
-    val bgColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(16.dp)
+    AdaptiveScrollablePage(
+        verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(conversation.title, style = MaterialTheme.typography.titleMedium, color = contentColor, modifier = Modifier.weight(1f, fill = false))
-                if (conversation.unread) {
-                    Spacer(Modifier.width(8.dp))
-                    Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.primary))
+        AdaptiveActionBar(
+            leadingContent = {
+                Column {
+                    Text(
+                        text = "Conversations",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = AdaptiveTheme.colors.textPrimary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "${conversations.size} active threads",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AdaptiveTheme.colors.textSecondary,
+                    )
                 }
-                if (conversation.pinned) {
-                    Spacer(Modifier.width(8.dp))
-                    AiGlyph("P", modifier = Modifier.size(16.dp))
+            },
+            primaryAction = {
+                AdaptiveButton(
+                    text = "New",
+                    onClick = onNewChat,
+                    size = AdaptiveButtonSize.Small,
+                    leadingIcon = { AdaptiveIcons.Plus(size = 14.dp, tint = AdaptiveTheme.colors.textInverse) },
+                )
+            },
+        )
+
+        AdaptiveSurface(contentPadding = PaddingValues(AdaptiveTokens.Spacing.Small)) {
+            Column {
+                conversations.forEachIndexed { index, conversation ->
+                    ConversationListRow(
+                        conversation = conversation,
+                        selected = conversation.id == selectedId,
+                        onClick = { onOpenConversation(conversation) },
+                    )
+                    if (index < conversations.lastIndex) {
+                        AdaptiveDivider()
+                    }
                 }
             }
-            Spacer(Modifier.height(4.dp))
-            val lastMsg = conversation.messages.lastOrNull()?.parts?.firstOrNull() as? MessagePart.Text
-            Text(
-                lastMsg?.value ?: "No messages",
-                style = MaterialTheme.typography.bodySmall,
-                color = contentColor.copy(alpha = 0.7f),
-                maxLines = 1
-            )
         }
     }
 }
 
 @Composable
-private fun ChatRoom(
+private fun ConversationListRow(
     conversation: Conversation,
-    onSendMessage: (String) -> Unit
+    selected: Boolean,
+    onClick: () -> Unit,
 ) {
-    var inputText by remember { mutableStateOf("") }
-    
-    Column(Modifier.fillMaxSize()) {
-        AdaptiveActionBar(leadingContent = { Text(conversation.title, style = MaterialTheme.typography.titleLarge) })
-        
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(conversation.messages) { msg ->
-                MessageBubble(msg)
-                Spacer(Modifier.height(16.dp))
+    val rowShape = AdaptiveTheme.shapes.medium
+    val rowBackground = if (selected) AdaptiveTheme.colors.primarySubtle else AdaptiveTheme.colors.surface
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(rowShape)
+            .background(rowBackground, rowShape)
+            .clickable(onClick = onClick)
+            .padding(AdaptiveTokens.Spacing.Medium),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+    ) {
+        AdaptiveAvatar(name = conversation.title, size = 36.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = conversation.title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = AdaptiveTheme.colors.textPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (conversation.unread) {
+                    AdaptiveBadge(text = "New", tone = AdaptiveBadgeTone.Warning)
+                }
+            }
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+            Text(
+                text = conversation.previewText(),
+                style = MaterialTheme.typography.bodySmall,
+                color = AdaptiveTheme.colors.textSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.XSmall)) {
+                conversation.tags.take(2).forEach { tag ->
+                    AdaptiveBadge(text = tag, tone = AdaptiveBadgeTone.Neutral)
+                }
+                AdaptiveBadge(text = conversation.updatedAt, tone = AdaptiveBadgeTone.Info)
             }
         }
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Message...") }
-            )
-            Spacer(Modifier.width(8.dp))
-            IconButton(
-                onClick = { 
-                    if (inputText.isNotBlank()) {
-                        onSendMessage(inputText)
-                        inputText = ""
-                    }
-                },
-                colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun ChatDetailPane(
+    conversation: Conversation,
+    onSendMessage: (String) -> Unit,
+    onOpenPrompts: () -> Unit,
+) {
+    var inputText by remember(conversation.id) { mutableStateOf("") }
+
+    AdaptiveScrollablePage(
+        verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Large),
+    ) {
+        AdaptiveCard {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
             ) {
-                AiGlyph("→")
+                AdaptiveAvatar(name = conversation.title, size = 44.dp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = conversation.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = AdaptiveTheme.colors.textPrimary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Model: Gemini 1.5 Pro | Updated ${conversation.updatedAt}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AdaptiveTheme.colors.textSecondary,
+                    )
+                }
+                AdaptiveBadge(
+                    text = if (conversation.unread) "Needs review" else "Synced",
+                    tone = if (conversation.unread) AdaptiveBadgeTone.Warning else AdaptiveBadgeTone.Success,
+                )
             }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium)) {
+            conversation.messages.forEach { message ->
+                MessageBubble(message)
+            }
+        }
+
+        AdaptiveCard {
+            Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+                AdaptiveBadge(text = "Summarize", tone = AdaptiveBadgeTone.Info)
+                AdaptiveBadge(text = "Find sources", tone = AdaptiveBadgeTone.Neutral)
+                AdaptiveBadge(text = "Draft next step", tone = AdaptiveBadgeTone.Neutral)
+            }
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+            ) {
+                AdaptiveTextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    placeholder = "Ask for a summary, source check or next action...",
+                    modifier = Modifier.weight(1f),
+                )
+                AdaptiveButton(
+                    text = "Send",
+                    onClick = {
+                        if (inputText.isNotBlank()) {
+                            onSendMessage(inputText)
+                            inputText = ""
+                        }
+                    },
+                    enabled = inputText.isNotBlank(),
+                    trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
+                )
+            }
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            AdaptiveButton(
+                text = "Browse reusable prompts",
+                onClick = onOpenPrompts,
+                variant = AdaptiveButtonVariant.Ghost,
+                size = AdaptiveButtonSize.Small,
+            )
         }
     }
 }
@@ -151,62 +337,118 @@ private fun ChatRoom(
 private fun MessageBubble(message: ChatMessage) {
     val isUser = message.role == MessageRole.User
     val alignment = if (isUser) Alignment.End else Alignment.Start
-    val bgColor = if (isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val contentColor = if (isUser) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-    val shape = RoundedCornerShape(16.dp)
-    
+    val background = if (isUser) AdaptiveTheme.colors.primarySubtle else AdaptiveTheme.colors.surfaceRaised
+    val label = when (message.role) {
+        MessageRole.User -> "You"
+        MessageRole.Assistant -> "Assistant"
+        MessageRole.System -> "System"
+        MessageRole.Tool -> "Tool"
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = alignment
+        horizontalAlignment = alignment,
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 600.dp)
-                .clip(shape)
-                .background(bgColor)
-                .padding(16.dp)
+        AdaptiveCard(
+            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
         ) {
-            Column {
-                message.parts.forEach { part ->
-                    when (part) {
-                        is MessagePart.Text -> Text(part.value, color = contentColor)
-                        is MessagePart.CodeBlock -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(8.dp)
-                            ) {
-                                Text(part.code, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                            }
-                        }
-                        is MessagePart.ToolCall -> {
-                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), modifier = Modifier.padding(vertical = 4.dp)) {
-                                Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    AiGlyph("T", modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("${part.name} - ${part.summary}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                                }
-                            }
-                        }
-                        is MessagePart.Source -> {
-                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), modifier = Modifier.padding(vertical = 4.dp)) {
-                                Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    AiGlyph("K", modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(part.title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                    }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+            ) {
+                AdaptiveAvatar(name = label, size = 28.dp)
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AdaptiveTheme.colors.textPrimary,
+                    fontWeight = FontWeight.Bold,
+                )
+                AdaptiveBadge(text = "${message.tokenCount} tok", tone = AdaptiveBadgeTone.Neutral)
+                if (message.status == MessageStatus.Streaming) {
+                    AdaptiveBadge(text = "Streaming", tone = AdaptiveBadgeTone.Info)
                 }
             }
-        }
-        if (message.status == MessageStatus.Streaming) {
-            Text("Typing...", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 4.dp))
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Column(
+                modifier = Modifier
+                    .clip(AdaptiveTheme.shapes.medium)
+                    .background(background)
+                    .padding(AdaptiveTokens.Spacing.Medium),
+                verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+            ) {
+                message.parts.forEach { part ->
+                    MessagePartView(part)
+                }
+            }
         }
     }
 }
 
+@Composable
+private fun MessagePartView(part: MessagePart) {
+    when (part) {
+        is MessagePart.Text -> Text(
+            text = part.value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = AdaptiveTheme.colors.textPrimary,
+        )
+        is MessagePart.CodeBlock -> AdaptiveCard(
+            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+        ) {
+            AdaptiveBadge(text = part.language, tone = AdaptiveBadgeTone.Info)
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+            Text(
+                text = part.code,
+                style = MaterialTheme.typography.bodySmall,
+                color = AdaptiveTheme.colors.textPrimary,
+            )
+        }
+        is MessagePart.ToolCall -> AdaptiveCard(
+            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+            ) {
+                AiGlyph("T", modifier = Modifier.size(24.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(part.name, style = MaterialTheme.typography.titleSmall, color = AdaptiveTheme.colors.textPrimary)
+                    Text(part.summary, style = MaterialTheme.typography.bodySmall, color = AdaptiveTheme.colors.textSecondary)
+                }
+                AdaptiveBadge(
+                    text = part.status.name,
+                    tone = when (part.status) {
+                        ToolCallStatus.Pending -> AdaptiveBadgeTone.Warning
+                        ToolCallStatus.Success -> AdaptiveBadgeTone.Success
+                        ToolCallStatus.Failed -> AdaptiveBadgeTone.Danger
+                    },
+                )
+            }
+        }
+        is MessagePart.Source -> AdaptiveCard(
+            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+            ) {
+                AiGlyph("K", modifier = Modifier.size(24.dp))
+                Column {
+                    Text(part.title, style = MaterialTheme.typography.titleSmall, color = AdaptiveTheme.colors.textPrimary)
+                    Text(part.description, style = MaterialTheme.typography.bodySmall, color = AdaptiveTheme.colors.textSecondary)
+                }
+            }
+        }
+    }
+}
+
+private fun Conversation.previewText(): String {
+    return messages.lastOrNull()?.parts?.firstOrNull()?.let { part ->
+        when (part) {
+            is MessagePart.Text -> part.value
+            is MessagePart.CodeBlock -> "Code block: ${part.language}"
+            is MessagePart.ToolCall -> "Tool call: ${part.name}"
+            is MessagePart.Source -> "Source: ${part.title}"
+        }
+    } ?: "No messages yet"
+}

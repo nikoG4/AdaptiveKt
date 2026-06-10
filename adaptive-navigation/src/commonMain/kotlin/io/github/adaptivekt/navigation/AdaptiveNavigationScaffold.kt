@@ -49,6 +49,8 @@ private val BottomNavigationHeight: Dp = AdaptiveTokens.Sizes.TopBarHeight + Ada
  * @param preferBottomNavigationOnCompact Forces bottom navigation on compact screens if true.
  * @param navigationBehavior Optional responsive placement behavior. When null, the legacy
  * preferBottomNavigationOnCompact mapping is preserved.
+ * @param navigationTitle Title shown in sidebar and drawer navigation surfaces.
+ * @param navigationSubtitle Optional subtitle shown below [navigationTitle].
  * @param navigationItemStyle Visual style for navigation items (Card, Pill, Minimal).
  * @param navigationDensity Padding density for navigation items.
  * @param topBar Optional composable slot for a top app bar.
@@ -62,12 +64,14 @@ public fun AdaptiveNavigationScaffold(
     modifier: Modifier = Modifier,
     preferBottomNavigationOnCompact: Boolean = false,
     navigationBehavior: AdaptiveNavigationBehavior? = null,
+    navigationTitle: String = "AdaptiveKt Admin",
+    navigationSubtitle: String? = "Workspace overview",
     navigationItemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     navigationDensity: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     topBar: (@Composable () -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    AdaptiveContent(modifier = modifier) {
+    AdaptiveContent(modifier = modifier.background(AdaptiveTheme.colors.background)) {
         val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
         val effectiveBehavior = navigationBehavior ?: if (preferBottomNavigationOnCompact) {
             AdaptiveNavigationDefaults.compactBottomBarBehavior()
@@ -98,7 +102,7 @@ public fun AdaptiveNavigationScaffold(
             bottom = if (placement == AdaptiveNavigationPlacement.BottomBar) BottomNavigationHeight else 0.dp,
         )
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().background(AdaptiveTheme.colors.background)) {
             Box(modifier = Modifier.fillMaxSize()) {
                 when (placement) {
                     AdaptiveNavigationPlacement.Drawer -> {
@@ -124,6 +128,8 @@ public fun AdaptiveNavigationScaffold(
                                         items = navItems,
                                         selectedItemId = selectedItemId,
                                         modifier = Modifier.fillMaxSize(),
+                                        navigationTitle = navigationTitle,
+                                        navigationSubtitle = navigationSubtitle,
                                         itemStyle = navigationItemStyle,
                                         density = navigationDensity,
                                         onItemSelected = {
@@ -192,6 +198,8 @@ public fun AdaptiveNavigationScaffold(
                                     .width(NavigationSurfaceWidth)
                                     .fillMaxHeight()
                                     .background(AdaptiveTheme.colors.surfaceMuted),
+                                navigationTitle = navigationTitle,
+                                navigationSubtitle = navigationSubtitle,
                                 itemStyle = navigationItemStyle,
                                 density = navigationDensity,
                                 onItemSelected = onItemSelected,

@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- `AdaptiveListDetailPanePolicy` for predictable list/detail pane sizing without app-level width patches.
+- Configurable navigation surface title/subtitle on `AdaptiveNavigationScaffold`, `Sidebar`, and `Drawer`.
 - `AdaptiveCollectionView` for generic list/grid/card collections.
 - Shared `AdaptiveQueryState`, filter, sort and pagination controls for data and collection views.
 - Explicit `AdaptiveDataDisplayMode` and `AdaptiveCollectionDisplayMode` resolvers.
@@ -13,6 +15,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- AI Workspace showcase now consumes AdaptiveKt list/detail and navigation layout policy instead of local width hacks.
 - Ecommerce product listing now dogfoods `AdaptiveCollectionView` with search, category filters, sorting and pagination.
 - Improved ecommerce showcase navigation, theme handling and product visuals.
 - Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.

@@ -17,7 +17,8 @@ $broken = New-Object System.Collections.Generic.List[string]
 function Test-InternalTarget {
     param(
         [string]$SourceFile,
-        [string]$Href
+        [string]$Href,
+        [string]$BaseHref
     )
 
     $target = $Href.Split('#')[0].Split('?')[0]
@@ -36,13 +37,27 @@ function Test-InternalTarget {
         return
     }
 
-    $candidate = if ($target.StartsWith("/")) {
-        Join-Path $distPath.Path $target.TrimStart("/")
-    } else {
-        Join-Path (Split-Path $SourceFile -Parent) $target
+    $effectiveTarget = $target
+    $normalizedBaseHref = if ([string]::IsNullOrWhiteSpace($BaseHref)) { "/" } else { $BaseHref.Trim() }
+    if (-not $normalizedBaseHref.EndsWith("/")) {
+        $normalizedBaseHref = "$normalizedBaseHref/"
     }
 
-    if ($target.EndsWith("/")) {
+    if (-not $target.StartsWith("/") -and $normalizedBaseHref.StartsWith("/")) {
+        $effectiveTarget = "$normalizedBaseHref$target"
+    }
+
+    $candidate = if ($effectiveTarget.StartsWith("/")) {
+        $localTarget = $effectiveTarget
+        if ($normalizedBaseHref -ne "/" -and $localTarget.StartsWith($normalizedBaseHref, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $localTarget = $localTarget.Substring($normalizedBaseHref.Length)
+        }
+        Join-Path $distPath.Path $localTarget.TrimStart("/")
+    } else {
+        Join-Path (Split-Path $SourceFile -Parent) $effectiveTarget
+    }
+
+    if ($effectiveTarget.EndsWith("/")) {
         $candidate = Join-Path $candidate "index.html"
     } elseif (-not [System.IO.Path]::HasExtension($candidate)) {
         $asDirectoryIndex = Join-Path $candidate "index.html"
@@ -60,8 +75,10 @@ function Test-InternalTarget {
 
 foreach ($file in $htmlFiles) {
     $content = Get-Content -Raw -Path $file.FullName
+    $baseMatch = [regex]::Match($content, '<base\s+href\s*=\s*["'']([^"'']+)["'']', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    $baseHref = if ($baseMatch.Success) { $baseMatch.Groups[1].Value } else { "/" }
     foreach ($match in [regex]::Matches($content, $hrefPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
-        Test-InternalTarget -SourceFile $file.FullName -Href $match.Groups[1].Value
+        Test-InternalTarget -SourceFile $file.FullName -Href $match.Groups[1].Value -BaseHref $baseHref
     }
 }
 
