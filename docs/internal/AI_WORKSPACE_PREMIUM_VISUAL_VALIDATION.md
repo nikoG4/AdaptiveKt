@@ -37,7 +37,9 @@ The capture script validates:
 | settings | 768x1024 | light | `tablet-settings-light.png` | 0 | 0 | no | pass | Dense form content uses available width. |
 | dashboard | 1280x800 | light | `desktop-dashboard-light.png` | 0 | 0 | no | pass | Metric grid and main cards use the desktop canvas. |
 | chats | 1280x800 | light | `desktop-chats-light.png` | 0 | 0 | no | pass | Conversation list is a dense inbox-style list; detail pane fills remaining width. |
+| chat-detail | 1280x800 | light | `desktop-chat-detail-light.png` | 0 | 0 | no | pass | Selected conversation row and detail content both fill their panes without manual width hacks. |
 | prompts | 1280x800 | light | `desktop-prompts-light.png` | 0 | 0 | no | pass | Prompt list and empty detail pane are aligned. |
+| prompt-detail | 1280x800 | light | `desktop-prompt-detail-light.png` | 0 | 0 | no | pass | Selected prompt list item fills the side pane and the detail pane stays full-width. |
 | settings | 1280x800 | light | `desktop-settings-light.png` | 0 | 0 | no | pass | Settings page is composed, not a narrow column. |
 | dashboard | 1440x900 | light | `large-dashboard-light.png` | 0 | 0 | no | pass | Large viewport has no abandoned canvas. |
 | chats | 1440x900 | light | `large-chats-light.png` | 0 | 0 | no | pass | List/detail policy fills the available work area. |
@@ -53,7 +55,9 @@ The capture script validates:
 | settings | 768x1024 | dark | `tablet-settings-dark.png` | 0 | 0 | no | pass | Settings controls remain legible. |
 | dashboard | 1280x800 | dark | `desktop-dashboard-dark.png` | 0 | 0 | no | pass | Desktop dark dashboard uses full width. |
 | chats | 1280x800 | dark | `desktop-chats-dark.png` | 0 | 0 | no | pass | No huge white/dark gap between list and detail. |
+| chat-detail | 1280x800 | dark | `desktop-chat-detail-dark.png` | 0 | 0 | no | pass | Dark selected conversation state remains legible and pane-filling. |
 | prompts | 1280x800 | dark | `desktop-prompts-dark.png` | 0 | 0 | no | pass | Empty prompt detail appears inside a full detail pane. |
+| prompt-detail | 1280x800 | dark | `desktop-prompt-detail-dark.png` | 0 | 0 | no | pass | Dark selected prompt state remains legible and pane-filling. |
 | settings | 1280x800 | dark | `desktop-settings-dark.png` | 0 | 0 | no | pass | Settings layout remains structured. |
 | dashboard | 1440x900 | dark | `large-dashboard-dark.png` | 0 | 0 | no | pass | Large dark view looks intentionally composed. |
 | chats | 1440x900 | dark | `large-chats-dark.png` | 0 | 0 | no | pass | Detail pane fills remaining width. |
@@ -75,6 +79,8 @@ The capture script validates:
 ## Notes
 
 - Screenshots are generated artifacts and should not be committed.
+- Pane-list contact sheet: `artifacts/screenshots/ai-workspace-premium-refactor/contact-sheet-pane-lists.png`.
 - `AdaptiveListDetailPanePolicy` is the library-level fix for desktop list/detail sizing.
+- `AdaptivePaneList`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` are the library-level fix for content width inside list/detail side panes.
 - AI Workspace no longer passes local `listPaneSpec`, `detailPaneSpec`, `BoxWithConstraints`, `breakpointForWidth`, or `widthIn` hacks for the primary chat/prompt layout.
 - AI Workspace uses configurable `AdaptiveNavigationScaffold` title/subtitle parameters so the sidebar branding is app-specific rather than inherited admin-demo copy.

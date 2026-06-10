@@ -11,6 +11,7 @@ The AI Workspace demo is intended to demonstrate AdaptiveKt as the main UI vocab
 | `AdaptiveNavigationScaffold` | App shell | Responsive sidebar/rail/bottom navigation with overflow. | dashboard, all routes |
 | `AdaptiveActionBar` | Shell and pages | Page-level context, badges, primary actions. | dashboard, chats, prompts, settings |
 | `AdaptiveScrollablePage` | Dashboard, chats, prompts, settings, secondary routes | Page-level scroll and spacing. | all required routes |
+| `AdaptivePaneList` / `AdaptivePaneListGroup` / `AdaptivePaneListItem` | Chats and Prompt Library list panes | Pane-aware list containers that fill the useful side-pane width without page padding or app-level width hacks. | chats, prompts |
 | `AdaptiveSection` | Dashboard, prompts, settings, secondary routes | Semantic sections for admin/SaaS density. | dashboard, prompts, settings |
 | `AdaptiveGrid` | Dashboard metrics/content, settings, prompts variables/runs | Responsive cards that avoid narrow desktop stacks. | dashboard, settings, prompts |
 | `AdaptiveTwoPane` | Playground and internal list/detail implementation | Wide productivity layout and split workflows. | playground |
@@ -52,3 +53,5 @@ The guard scripts warn and count generic primitives so future changes can be rev
 AI Workspace consumes the scaffold defaults instead of passing manual `listPaneSpec`, `detailPaneSpec`, `BoxWithConstraints`, `breakpointForWidth`, or local width calculations.
 
 `AdaptiveNavigationScaffold`, `Sidebar`, and `Drawer` now expose configurable navigation title/subtitle text. AI Workspace declares its shell branding through those parameters instead of inheriting the default admin-demo copy from the library.
+
+`AdaptivePaneList`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` cover the side-pane list case inside `AdaptiveListDetailScaffold`. They prevent page-style padding and narrow nested cards from making list/detail panes look cramped on desktop and large viewports.

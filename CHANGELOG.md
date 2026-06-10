@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- `AdaptivePaneList`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` for side-pane list content inside list/detail workflows.
 - `AdaptiveListDetailPanePolicy` for predictable list/detail pane sizing without app-level width patches.
 - Configurable navigation surface title/subtitle on `AdaptiveNavigationScaffold`, `Sidebar`, and `Drawer`.
 - `AdaptiveCollectionView` for generic list/grid/card collections.
@@ -15,6 +16,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- AI Workspace Chats and Prompt Library now use pane-aware list primitives so list items fill the useful pane width.
 - AI Workspace showcase now consumes AdaptiveKt list/detail and navigation layout policy instead of local width hacks.
 - Ecommerce product listing now dogfoods `AdaptiveCollectionView` with search, category filters, sorting and pagination.
 - Improved ecommerce showcase navigation, theme handling and product visuals.

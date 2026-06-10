@@ -47,6 +47,8 @@ import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.layout.AdaptiveGrid
 import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
+import io.github.adaptivekt.layout.AdaptivePaneList
+import io.github.adaptivekt.layout.AdaptivePaneListItem
 import io.github.adaptivekt.layout.AdaptiveScrollablePage
 import io.github.adaptivekt.layout.AdaptiveSection
 import io.github.adaptivekt.navigation.AdaptiveNavigator
@@ -147,7 +149,7 @@ private fun PromptBrowserPane(
     selectedId: String?,
     onOpenPrompt: (PromptTemplate) -> Unit,
 ) {
-    AdaptiveScrollablePage(
+    AdaptivePaneList(
         verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Large),
     ) {
         AdaptiveActionBar(
@@ -184,7 +186,7 @@ private fun PromptBrowserPane(
 
         AdaptiveCollectionView(
             items = prompts,
-            displayMode = AdaptiveCollectionDisplayMode.Cards,
+            displayMode = AdaptiveCollectionDisplayMode.List,
             emptyContent = {
                 AdaptiveEmptyState(
                     title = "No prompts in this category",
@@ -192,14 +194,7 @@ private fun PromptBrowserPane(
                 )
             },
             listItemContent = { prompt ->
-                PromptCard(
-                    prompt = prompt,
-                    selected = prompt.id == selectedId,
-                    onClick = { onOpenPrompt(prompt) },
-                )
-            },
-            cardItemContent = { prompt ->
-                PromptCard(
+                PromptListItem(
                     prompt = prompt,
                     selected = prompt.id == selectedId,
                     onClick = { onOpenPrompt(prompt) },
@@ -210,13 +205,13 @@ private fun PromptBrowserPane(
 }
 
 @Composable
-private fun PromptCard(
+private fun PromptListItem(
     prompt: PromptTemplate,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    AdaptiveCard(
-        contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+    AdaptivePaneListItem(
+        selected = selected,
         onClick = onClick,
     ) {
         Row(

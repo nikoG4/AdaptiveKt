@@ -8,7 +8,9 @@ const outputDir = process.argv[3] || 'artifacts/screenshots/ai-workspace-premium
 const routes = [
   { name: 'dashboard', path: '/examples/ai-workspace/' },
   { name: 'chats', path: '/examples/ai-workspace/#/chats' },
+  { name: 'chat-detail', path: '/examples/ai-workspace/#/chats/c1', viewports: ['desktop'], themes: ['light', 'dark'] },
   { name: 'prompts', path: '/examples/ai-workspace/#/prompts' },
+  { name: 'prompt-detail', path: '/examples/ai-workspace/#/prompts/p1', viewports: ['desktop'], themes: ['light', 'dark'] },
   { name: 'settings', path: '/examples/ai-workspace/#/settings' }
 ];
 
@@ -38,6 +40,13 @@ async function capture() {
       });
 
       for (const route of routes) {
+        if (route.viewports && !route.viewports.includes(viewport.name)) {
+          continue;
+        }
+        if (route.themes && !route.themes.includes(theme.name)) {
+          continue;
+        }
+
         const page = await context.newPage();
         const consoleMessages = [];
         const requestFailures = [];

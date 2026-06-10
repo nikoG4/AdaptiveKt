@@ -1,7 +1,6 @@
 package io.github.adaptivekt.examples.aiworkspace.ui.screens.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +33,6 @@ import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveDivider
-import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -51,6 +49,9 @@ import io.github.adaptivekt.examples.aiworkspace.ui.components.AiGlyph
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
+import io.github.adaptivekt.layout.AdaptivePaneList
+import io.github.adaptivekt.layout.AdaptivePaneListGroup
+import io.github.adaptivekt.layout.AdaptivePaneListItem
 import io.github.adaptivekt.layout.AdaptiveScrollablePage
 import io.github.adaptivekt.navigation.AdaptiveNavigator
 
@@ -148,7 +149,7 @@ private fun ConversationListPane(
     onNewChat: () -> Unit,
     onOpenConversation: (Conversation) -> Unit,
 ) {
-    AdaptiveScrollablePage(
+    AdaptivePaneList(
         verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
     ) {
         AdaptiveActionBar(
@@ -177,17 +178,15 @@ private fun ConversationListPane(
             },
         )
 
-        AdaptiveSurface(contentPadding = PaddingValues(AdaptiveTokens.Spacing.Small)) {
-            Column {
-                conversations.forEachIndexed { index, conversation ->
-                    ConversationListRow(
-                        conversation = conversation,
-                        selected = conversation.id == selectedId,
-                        onClick = { onOpenConversation(conversation) },
-                    )
-                    if (index < conversations.lastIndex) {
-                        AdaptiveDivider()
-                    }
+        AdaptivePaneListGroup(contentPadding = PaddingValues(AdaptiveTokens.Spacing.Small)) {
+            conversations.forEachIndexed { index, conversation ->
+                ConversationListRow(
+                    conversation = conversation,
+                    selected = conversation.id == selectedId,
+                    onClick = { onOpenConversation(conversation) },
+                )
+                if (index < conversations.lastIndex) {
+                    AdaptiveDivider()
                 }
             }
         }
@@ -200,49 +199,46 @@ private fun ConversationListRow(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val rowShape = AdaptiveTheme.shapes.medium
-    val rowBackground = if (selected) AdaptiveTheme.colors.primarySubtle else AdaptiveTheme.colors.surface
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(rowShape)
-            .background(rowBackground, rowShape)
-            .clickable(onClick = onClick)
-            .padding(AdaptiveTokens.Spacing.Medium),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+    AdaptivePaneListItem(
+        selected = selected,
+        onClick = onClick,
     ) {
-        AdaptiveAvatar(name = conversation.title, size = 36.dp)
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+        ) {
+            AdaptiveAvatar(name = conversation.title, size = 36.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = conversation.title,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = AdaptiveTheme.colors.textPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (conversation.unread) {
+                        AdaptiveBadge(text = "New", tone = AdaptiveBadgeTone.Warning)
+                    }
+                }
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
                 Text(
-                    text = conversation.title,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = AdaptiveTheme.colors.textPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    text = conversation.previewText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AdaptiveTheme.colors.textSecondary,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (conversation.unread) {
-                    AdaptiveBadge(text = "New", tone = AdaptiveBadgeTone.Warning)
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+                Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.XSmall)) {
+                    conversation.tags.take(2).forEach { tag ->
+                        AdaptiveBadge(text = tag, tone = AdaptiveBadgeTone.Neutral)
+                    }
+                    AdaptiveBadge(text = conversation.updatedAt, tone = AdaptiveBadgeTone.Info)
                 }
-            }
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
-            Text(
-                text = conversation.previewText(),
-                style = MaterialTheme.typography.bodySmall,
-                color = AdaptiveTheme.colors.textSecondary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
-            Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.XSmall)) {
-                conversation.tags.take(2).forEach { tag ->
-                    AdaptiveBadge(text = tag, tone = AdaptiveBadgeTone.Neutral)
-                }
-                AdaptiveBadge(text = conversation.updatedAt, tone = AdaptiveBadgeTone.Info)
             }
         }
     }
