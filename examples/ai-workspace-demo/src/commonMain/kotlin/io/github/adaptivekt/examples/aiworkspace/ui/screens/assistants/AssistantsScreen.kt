@@ -1,8 +1,6 @@
 package io.github.adaptivekt.examples.aiworkspace.ui.screens.assistants
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -13,9 +11,11 @@ import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.layout.*
 import io.github.adaptivekt.examples.aiworkspace.model.*
 import io.github.adaptivekt.examples.aiworkspace.navigation.AiRoute
@@ -31,15 +31,27 @@ public fun AssistantsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigato
         selectedItem = selectedItem,
         onBackToList = { navigator.navigate(AiRoute.Assistants) },
         listPane = {
-            AdaptivePage {
-                AdaptiveActionBar(leadingContent = { Text("Assistants", style = MaterialTheme.typography.titleLarge) })
-                LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                    items(store.assistants) { assistant ->
+            AdaptivePaneList {
+                AdaptiveActionBar(
+                    leadingContent = {
+                        Text(
+                            text = "Assistants",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = AdaptiveTheme.colors.textPrimary,
+                        )
+                    }
+                )
+
+                AdaptivePaneListGroup {
+                    store.assistants.forEachIndexed { index, assistant ->
                         AssistantListItem(
                             assistant = assistant,
                             isSelected = assistant.id == selectedId,
                             onClick = { navigator.navigate(AiRoute.AssistantDetail(assistant.id)) }
                         )
+                        if (index < store.assistants.lastIndex) {
+                            AdaptiveDivider()
+                        }
                     }
                 }
             }
@@ -99,9 +111,11 @@ public fun AssistantsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigato
             }
         },
         emptyDetail = {
-            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text("Select an assistant to configure")
-            }
+            AdaptiveEmptyState(
+                title = "Select an assistant",
+                description = "Choose an agent from the list to review model settings, capabilities and tags.",
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     )
 }
@@ -120,11 +134,14 @@ private fun AssistantListItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    AdaptiveCard(
-        contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+    AdaptivePaneListItem(
+        selected = isSelected,
         onClick = onClick,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AdaptiveAvatar(name = assistant.name, size = 40.dp)
             Spacer(Modifier.width(AdaptiveTokens.Spacing.Medium))
             Column(modifier = Modifier.weight(1f)) {

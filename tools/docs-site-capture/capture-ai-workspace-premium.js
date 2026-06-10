@@ -11,6 +11,7 @@ const routes = [
   { name: 'chat-detail', path: '/examples/ai-workspace/#/chats/c1', viewports: ['desktop'], themes: ['light', 'dark'] },
   { name: 'prompts', path: '/examples/ai-workspace/#/prompts' },
   { name: 'prompt-detail', path: '/examples/ai-workspace/#/prompts/p1', viewports: ['desktop'], themes: ['light', 'dark'] },
+  { name: 'agents', path: '/examples/ai-workspace/#/assistants' },
   { name: 'settings', path: '/examples/ai-workspace/#/settings' }
 ];
 
