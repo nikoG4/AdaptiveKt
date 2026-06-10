@@ -49,10 +49,10 @@ import io.github.adaptivekt.examples.aiworkspace.ui.components.AiGlyph
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
+import io.github.adaptivekt.layout.AdaptivePaneDetail
 import io.github.adaptivekt.layout.AdaptivePaneList
 import io.github.adaptivekt.layout.AdaptivePaneListGroup
 import io.github.adaptivekt.layout.AdaptivePaneListItem
-import io.github.adaptivekt.layout.AdaptiveScrollablePage
 import io.github.adaptivekt.navigation.AdaptiveNavigator
 
 @Composable
@@ -252,8 +252,21 @@ private fun ChatDetailPane(
 ) {
     var inputText by remember(conversation.id) { mutableStateOf("") }
 
-    AdaptiveScrollablePage(
+    AdaptivePaneDetail(
         verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Large),
+        footer = {
+            ChatComposer(
+                inputText = inputText,
+                onInputTextChange = { inputText = it },
+                onSendMessage = {
+                    if (inputText.isNotBlank()) {
+                        onSendMessage(inputText)
+                        inputText = ""
+                    }
+                },
+                onOpenPrompts = onOpenPrompts,
+            )
+        },
     ) {
         AdaptiveCard {
             Row(
@@ -287,45 +300,48 @@ private fun ChatDetailPane(
                 MessageBubble(message)
             }
         }
+    }
+}
 
-        AdaptiveCard {
-            Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
-                AdaptiveBadge(text = "Summarize", tone = AdaptiveBadgeTone.Info)
-                AdaptiveBadge(text = "Find sources", tone = AdaptiveBadgeTone.Neutral)
-                AdaptiveBadge(text = "Draft next step", tone = AdaptiveBadgeTone.Neutral)
-            }
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
-            ) {
-                AdaptiveTextField(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    placeholder = "Ask for a summary, source check or next action...",
-                    modifier = Modifier.weight(1f),
-                )
-                AdaptiveButton(
-                    text = "Send",
-                    onClick = {
-                        if (inputText.isNotBlank()) {
-                            onSendMessage(inputText)
-                            inputText = ""
-                        }
-                    },
-                    enabled = inputText.isNotBlank(),
-                    trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
-                )
-            }
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+@Composable
+private fun ChatComposer(
+    inputText: String,
+    onInputTextChange: (String) -> Unit,
+    onSendMessage: () -> Unit,
+    onOpenPrompts: () -> Unit,
+) {
+    AdaptiveCard {
+        Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+            AdaptiveBadge(text = "Summarize", tone = AdaptiveBadgeTone.Info)
+            AdaptiveBadge(text = "Find sources", tone = AdaptiveBadgeTone.Neutral)
+            AdaptiveBadge(text = "Draft next step", tone = AdaptiveBadgeTone.Neutral)
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+        ) {
+            AdaptiveTextField(
+                value = inputText,
+                onValueChange = onInputTextChange,
+                placeholder = "Ask for a summary, source check or next action...",
+                modifier = Modifier.weight(1f),
+            )
             AdaptiveButton(
-                text = "Browse reusable prompts",
-                onClick = onOpenPrompts,
-                variant = AdaptiveButtonVariant.Ghost,
-                size = AdaptiveButtonSize.Small,
+                text = "Send",
+                onClick = onSendMessage,
+                enabled = inputText.isNotBlank(),
+                trailingIcon = { AdaptiveIcons.ChevronRight(size = 16.dp, tint = AdaptiveTheme.colors.textInverse) },
             )
         }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
+        AdaptiveButton(
+            text = "Browse reusable prompts",
+            onClick = onOpenPrompts,
+            variant = AdaptiveButtonVariant.Ghost,
+            size = AdaptiveButtonSize.Small,
+        )
     }
 }
 

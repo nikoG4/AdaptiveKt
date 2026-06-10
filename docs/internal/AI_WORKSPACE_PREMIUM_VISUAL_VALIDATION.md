@@ -82,5 +82,6 @@ The capture script validates:
 - Pane-list contact sheet: `artifacts/screenshots/ai-workspace-premium-refactor/contact-sheet-pane-lists.png`.
 - `AdaptiveListDetailPanePolicy` is the library-level fix for desktop list/detail sizing.
 - `AdaptivePaneList`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` are the library-level fix for content width inside list/detail side panes.
+- `AdaptivePaneDetail` keeps the chat composer fixed to the bottom of the detail pane while messages scroll above it.
 - AI Workspace no longer passes local `listPaneSpec`, `detailPaneSpec`, `BoxWithConstraints`, `breakpointForWidth`, or `widthIn` hacks for the primary chat/prompt layout.
 - AI Workspace uses configurable `AdaptiveNavigationScaffold` title/subtitle parameters so the sidebar branding is app-specific rather than inherited admin-demo copy.

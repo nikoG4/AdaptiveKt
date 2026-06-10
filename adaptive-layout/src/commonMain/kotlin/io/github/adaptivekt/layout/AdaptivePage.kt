@@ -24,11 +24,14 @@ import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.AdaptiveTheme
 
 public object AdaptivePaneDefaults {
-    public fun contentPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Medium)
+    public fun contentPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Small)
 
-    public fun groupPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Small)
+    public fun groupPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.XSmall)
 
-    public fun itemPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Medium)
+    public fun itemPadding(): PaddingValues = PaddingValues(
+        horizontal = AdaptiveTokens.Spacing.Small,
+        vertical = AdaptiveTokens.Spacing.Medium,
+    )
 }
 
 /**
@@ -130,6 +133,47 @@ public fun AdaptivePaneList(
         horizontalAlignment = horizontalAlignment,
         content = content,
     )
+}
+
+/**
+ * A pane-aware detail layout with scrollable body content and an optional fixed footer.
+ *
+ * This is useful for chat, inspector, and editor panes where the main content should scroll while
+ * actions or compose controls remain anchored to the bottom of the pane.
+ */
+@Composable
+public fun AdaptivePaneDetail(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = AdaptivePaneDefaults.contentPadding(),
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    footer: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .weight(1f, fill = true)
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(contentPadding),
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment,
+            content = content,
+        )
+
+        if (footer != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(contentPadding),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                footer()
+            }
+        }
+    }
 }
 
 /**

@@ -42,10 +42,21 @@ Added pane-list primitives to `adaptive-layout`:
 
 - `AdaptivePaneDefaults`
 - `AdaptivePaneList`
+- `AdaptivePaneDetail`
 - `AdaptivePaneListGroup`
 - `AdaptivePaneListItem`
 
+`AdaptivePaneDefaults` intentionally uses denser side-pane spacing than full-page containers:
+
+- outer pane content padding: `Small`;
+- list group padding: `XSmall`;
+- item padding: `Small` horizontally and `Medium` vertically.
+
+This keeps inbox-style side panes from looking like narrow cards floating inside a larger layout while preserving enough vertical rhythm for scanability.
+
 Chats now uses `AdaptivePaneList` plus `AdaptivePaneListGroup` for the conversation inbox. Each row uses `AdaptivePaneListItem` and fills the useful width.
+
+Chat detail now uses `AdaptivePaneDetail`, which keeps messages and the header in a scrollable body while the composer remains fixed to the bottom of the detail pane.
 
 Prompt Library now uses `AdaptivePaneList` for pane-level scrolling and `AdaptiveCollectionView` in list mode, with each prompt rendered as an `AdaptivePaneListItem`. This removes the narrow card look while preserving selection, tags and detail-pane behavior.
 
