@@ -1,18 +1,21 @@
 package io.github.adaptivekt.examples.aiworkspace.ui.screens.assistants
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.components.AdaptiveAvatar
+import io.github.adaptivekt.components.AdaptiveBadge
+import io.github.adaptivekt.components.AdaptiveBadgeTone
+import io.github.adaptivekt.components.AdaptiveCard
+import io.github.adaptivekt.components.AdaptiveTextField
+import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.layout.*
 import io.github.adaptivekt.examples.aiworkspace.model.*
 import io.github.adaptivekt.examples.aiworkspace.navigation.AiRoute
@@ -47,19 +50,11 @@ public fun AssistantsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigato
 
                 AdaptiveSection {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(assistant.avatarText, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        }
-                        Spacer(Modifier.width(16.dp))
+                        AdaptiveAvatar(name = assistant.name, size = 64.dp)
+                        Spacer(Modifier.width(AdaptiveTokens.Spacing.Medium))
                         Column {
-                            Text(assistant.name, style = MaterialTheme.typography.headlineSmall)
-                            Text(assistant.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(assistant.name, style = MaterialTheme.typography.headlineSmall, color = AdaptiveTheme.colors.textPrimary)
+                            Text(assistant.description, style = MaterialTheme.typography.bodyMedium, color = AdaptiveTheme.colors.textSecondary)
                         }
                     }
                 }
@@ -67,20 +62,20 @@ public fun AssistantsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigato
                 AdaptiveSection(title = "Model Settings") {
                     AdaptiveGrid() {
                         item {
-                            OutlinedTextField(
+                            AdaptiveTextField(
                                 value = assistant.model,
                                 onValueChange = {},
-                                label = { Text("Model") },
-                                readOnly = true,
+                                label = "Model",
+                                enabled = false,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
                         item {
                             var temp by remember(assistant.temperature) { mutableStateOf(assistant.temperature.toString()) }
-                            OutlinedTextField(
+                            AdaptiveTextField(
                                 value = temp,
                                 onValueChange = { temp = it },
-                                label = { Text("Temperature") },
+                                label = "Temperature",
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -113,17 +108,9 @@ public fun AssistantsScreen(store: AiWorkspaceStore, navigator: AdaptiveNavigato
 
 @Composable
 private fun CapabilityCard(title: String, value: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(16.dp)
-    ) {
-        Column {
-            Text(title, style = MaterialTheme.typography.labelMedium)
-            Text(value, style = MaterialTheme.typography.titleLarge)
-        }
+    AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+        Text(title, style = MaterialTheme.typography.labelMedium, color = AdaptiveTheme.colors.textSecondary)
+        Text(value, style = MaterialTheme.typography.titleLarge, color = AdaptiveTheme.colors.textPrimary)
     }
 }
 
@@ -133,36 +120,25 @@ private fun AssistantListItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    AdaptiveCard(
+        contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+        onClick = onClick,
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(assistant.avatarText, color = contentColor, style = MaterialTheme.typography.labelLarge)
-        }
-        Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(assistant.name, style = MaterialTheme.typography.titleMedium, color = contentColor)
-            Text(
-                assistant.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = contentColor.copy(alpha = 0.7f),
-                maxLines = 1
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AdaptiveAvatar(name = assistant.name, size = 40.dp)
+            Spacer(Modifier.width(AdaptiveTokens.Spacing.Medium))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(assistant.name, style = MaterialTheme.typography.titleMedium, color = AdaptiveTheme.colors.textPrimary)
+                Text(
+                    assistant.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AdaptiveTheme.colors.textSecondary,
+                    maxLines = 1
+                )
+            }
+            AdaptiveBadge(
+                text = if (isSelected) "Open" else assistant.model.substringBefore("-"),
+                tone = if (isSelected) AdaptiveBadgeTone.Info else AdaptiveBadgeTone.Neutral,
             )
         }
     }

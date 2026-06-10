@@ -36,8 +36,8 @@ Write-Host "`n============================================================"
 Write-Host " PHASE 4: LAYOUT GUARDS"
 Write-Host "============================================================"
 Set-Location $RootDir
-if (Test-Path ".\examples\ai-workspace-demo\scripts\check-ai-workspace-layout-guards.ps1") {
-    powershell.exe -ExecutionPolicy Bypass -File ".\examples\ai-workspace-demo\scripts\check-ai-workspace-layout-guards.ps1"
+if (Test-Path ".\scripts\check-ai-workspace-layout-guards.ps1") {
+    powershell.exe -ExecutionPolicy Bypass -File ".\scripts\check-ai-workspace-layout-guards.ps1"
     if ($LASTEXITCODE -ne 0) { throw "Layout guards failed." }
 } else {
     Write-Host "Layout guard script not found, skipping."
