@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.core.AdaptiveApp
 import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.layout.AdaptiveContainer
@@ -28,16 +29,18 @@ public fun AdminDemoApp(
     contentScrollEnabled: Boolean = false,
 ) {
     var darkTheme by remember { mutableStateOf(initialDarkTheme) }
-    AdaptiveTheme(
-        colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
-    ) {
-        AdminDemoThemedApp(
-            initialScreen = initialScreen,
-            initialAccountMenuOpen = initialAccountMenuOpen,
-            darkTheme = darkTheme,
-            onThemeToggle = { darkTheme = !darkTheme },
-            contentScrollEnabled = contentScrollEnabled,
-        )
+    AdaptiveApp {
+        AdaptiveTheme(
+            colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
+        ) {
+            AdminDemoThemedApp(
+                initialScreen = initialScreen,
+                initialAccountMenuOpen = initialAccountMenuOpen,
+                darkTheme = darkTheme,
+                onThemeToggle = { darkTheme = !darkTheme },
+                contentScrollEnabled = contentScrollEnabled,
+            )
+        }
     }
 }
 

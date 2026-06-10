@@ -29,11 +29,22 @@ import io.github.adaptivekt.examples.ecommerce.ui.components.AppIcon
 import io.github.adaptivekt.examples.ecommerce.ui.components.CategoryVisual
 import io.github.adaptivekt.examples.ecommerce.ui.components.CollectionVisual
 import io.github.adaptivekt.examples.ecommerce.ui.components.ProductVisual
+import io.github.adaptivekt.examples.ecommerce.ui.cart.toPriceString
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 
 @Composable
 fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
     AdaptiveScrollablePage(modifier = modifier) {
+        val layoutInfo = LocalAdaptiveLayoutInfo.current
+        val compact = layoutInfo.isCompact
+        val collectionColumns = if (compact) 2 else 4
+        val productColumns = when {
+            layoutInfo.isCompact -> 2
+            layoutInfo.isMedium -> 3
+            else -> 4
+        }
+
         // Hero section
         AdaptiveSection(modifier = Modifier.fillMaxWidth()) {
             Box(
@@ -78,15 +89,16 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                         lineHeight = 30.sp
                     )
                     Spacer(Modifier.height(32.dp))
-                    AdaptiveGrid(horizontalGap = 16.dp, verticalGap = 16.dp) {
-                        item(span = 1) {
+                    if (compact) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
                             AdaptiveButton(
                                 text = "Shop new arrivals", 
                                 onClick = { state.navigateTo(Screen.Products) },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             )
-                        }
-                        item(span = 1) {
                             AdaptiveButton(
                                 text = "Explore deals", 
                                 onClick = { 
@@ -94,13 +106,31 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     state.navigateTo(Screen.Products) 
                                 },
                                 variant = AdaptiveButtonVariant.Secondary,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    } else {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            AdaptiveButton(
+                                text = "Shop new arrivals",
+                                onClick = { state.navigateTo(Screen.Products) },
+                            )
+                            AdaptiveButton(
+                                text = "Explore deals",
+                                onClick = {
+                                    state.sortOption = "Best Rated"
+                                    state.navigateTo(Screen.Products)
+                                },
+                                variant = AdaptiveButtonVariant.Secondary,
                             )
                         }
                     }
                     Spacer(Modifier.height(32.dp))
-                    AdaptiveGrid(horizontalGap = 24.dp, verticalGap = 12.dp) {
-                        item(span = 1) { BenefitBadge("Free shipping over $75", AppIcons.Truck) }
+                    AdaptiveGrid(columns = if (compact) 1 else 3, horizontalGap = 24.dp, verticalGap = 12.dp) {
+                        item(span = 1) { BenefitBadge("Free shipping", AppIcons.Truck) }
                         item(span = 1) { BenefitBadge("Secure checkout", AppIcons.Shield) }
                         item(span = 1) { BenefitBadge("Easy returns", AppIcons.Package) }
                     }
@@ -113,7 +143,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
             title = "Featured Collections",
             modifier = Modifier.fillMaxWidth()
         ) {
-            AdaptiveGrid(horizontalGap = 16.dp, verticalGap = 16.dp) {
+            AdaptiveGrid(columns = collectionColumns, horizontalGap = 16.dp, verticalGap = 16.dp) {
                 MockData.collections.forEach { col ->
                     item(span = 1) {
                         AdaptiveCard(
@@ -133,9 +163,16 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                                     contentAlignment = Alignment.BottomStart
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
-                                        Text(col.name, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            col.name,
+                                            color = Color.White,
+                                            fontSize = if (compact) 18.sp else 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            lineHeight = if (compact) 20.sp else 22.sp,
+                                            maxLines = 3,
+                                        )
                                         Spacer(Modifier.height(4.dp))
-                                        Text("Browse collection", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+                                        Text("Browse collection", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp, maxLines = 2)
                                     }
                                 }
                             }
@@ -157,7 +194,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            AdaptiveGrid(horizontalGap = 16.dp, verticalGap = 16.dp) {
+            AdaptiveGrid(columns = productColumns, horizontalGap = 16.dp, verticalGap = 16.dp) {
                 MockData.products.filter { it.isFeatured }.take(4).forEach { prod ->
                     item(span = 1) {
                         ProductCard(prod, onClick = { state.navigateTo(Screen.ProductDetail(prod.id)) })
@@ -175,7 +212,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
                     .background(AdaptiveTheme.colors.primary.copy(alpha = 0.12f))
                     .padding(32.dp)
             ) {
-                AdaptiveGrid(horizontalGap = 32.dp, verticalGap = 32.dp) {
+                AdaptiveGrid(columns = if (compact) 1 else 2, horizontalGap = 32.dp, verticalGap = 32.dp) {
                     item(span = 1) {
                         Column {
                             Text("Spring setup sale", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3B82F6))
@@ -206,7 +243,7 @@ fun HomeScreen(state: StoreState, modifier: Modifier = Modifier) {
             title = "Shop by category",
             modifier = Modifier.fillMaxWidth()
         ) {
-            AdaptiveGrid(horizontalGap = 16.dp, verticalGap = 16.dp) {
+            AdaptiveGrid(columns = productColumns, horizontalGap = 16.dp, verticalGap = 16.dp) {
                 MockData.categories.forEach { cat ->
                     item(span = 1) {
                         AdaptiveCard(
@@ -275,6 +312,8 @@ fun BenefitBadge(text: String, icon: androidx.compose.ui.graphics.vector.ImageVe
 
 @Composable
 fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, onClick: () -> Unit) {
+    val layoutInfo = LocalAdaptiveLayoutInfo.current
+    val compact = layoutInfo.isCompact
     AdaptiveCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -284,12 +323,12 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, onC
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(210.dp),
+                    .height(if (compact) 168.dp else 190.dp),
                 contentAlignment = Alignment.Center
             ) {
                 ProductVisual(
                     product = prod,
-                    compact = false,
+                    compact = compact,
                     modifier = Modifier.fillMaxSize(),
                 )
                 
@@ -307,9 +346,16 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, onC
                 }
             }
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(prod.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1, color = AdaptiveTheme.colors.textPrimary)
+                Text(
+                    prod.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    maxLines = 2,
+                    color = AdaptiveTheme.colors.textPrimary,
+                )
                 Spacer(Modifier.height(4.dp))
-                Text(prod.shortDescription, fontSize = 12.sp, color = AdaptiveTheme.colors.textSecondary, maxLines = 2)
+                Text(prod.shortDescription, fontSize = 12.sp, lineHeight = 15.sp, color = AdaptiveTheme.colors.textSecondary, maxLines = 2)
                 Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -317,9 +363,9 @@ fun ProductCard(prod: io.github.adaptivekt.examples.ecommerce.model.Product, onC
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("\$${prod.price}", color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                        Text("\$${prod.price.toPriceString()}", color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                         if (prod.oldPrice != null) {
-                            Text("\$${prod.oldPrice}", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp, style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
+                            Text("\$${prod.oldPrice.toPriceString()}", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp, style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
                         }
                     }
                     AppIcon(AppIcons.Plus, modifier = Modifier.size(20.dp), tint = Color(0xFF3B82F6))

@@ -22,6 +22,7 @@ import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 
 @Composable
 fun AppShell(
@@ -87,15 +88,16 @@ fun AppShell(
             navigationBehavior = AdaptiveNavigationDefaults.storefrontBehavior(),
             topBar = {
                 Box(modifier = Modifier.fillMaxWidth().background(AdaptiveTheme.colors.surface)) {
-                    val layoutInfo = io.github.adaptivekt.core.LocalAdaptiveLayoutInfo.current
-                    
-                    io.github.adaptivekt.layout.AdaptiveActionBar(
-                        modifier = Modifier.padding(
-                            horizontal = layoutInfo.pagePadding,
-                            vertical = 12.dp
-                        ),
-                        leadingContent = {
-                            // Logo
+                    val layoutInfo = LocalAdaptiveLayoutInfo.current
+                    val compact = layoutInfo.isCompact
+
+                    if (compact) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = layoutInfo.pagePadding, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Row(
                                 modifier = Modifier.clickable { state.resetToHome() },
                                 verticalAlignment = Alignment.CenterVertically
@@ -116,58 +118,96 @@ fun AppShell(
                                     color = AdaptiveTheme.colors.textPrimary
                                 )
                             }
-                            
-                            Spacer(Modifier.width(24.dp))
-                            
-                            // Search
-                            AdaptiveTextField(
-                                value = state.searchQuery,
-                                onValueChange = { state.searchQuery = it },
-                                placeholder = "Search products...",
-                                modifier = Modifier.widthIn(max = 500.dp)
+                            Spacer(Modifier.weight(1f))
+                            AdaptiveButton(
+                                text = "Search",
+                                onClick = { state.navigateTo(Screen.Products) },
+                                variant = AdaptiveButtonVariant.Ghost
                             )
-                        },
-                        primaryAction = {
-                            if (state.isLoggedIn) {
+                        }
+                    } else {
+                        io.github.adaptivekt.layout.AdaptiveActionBar(
+                            modifier = Modifier.padding(
+                                horizontal = layoutInfo.pagePadding,
+                                vertical = 12.dp
+                            ),
+                            leadingContent = {
                                 Row(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { state.navigateTo(Screen.Account) }
-                                        .background(AdaptiveTheme.colors.surfaceRaised)
-                                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    modifier = Modifier.clickable { state.resetToHome() },
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(28.dp)
-                                            .clip(CircleShape)
+                                            .size(32.dp)
                                             .background(AdaptiveTheme.colors.primary),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            state.currentUser?.name?.take(1)?.uppercase() ?: "U", 
+                                            "A",
                                             color = AdaptiveTheme.colors.textInverse,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 12.sp
                                         )
                                     }
-                                    Spacer(Modifier.width(8.dp))
+                                    Spacer(Modifier.width(12.dp))
                                     Text(
-                                        state.currentUser?.name?.split(" ")?.first() ?: "User",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = AdaptiveTheme.colors.textPrimary,
+                                        "Adaptive Store",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AdaptiveTheme.colors.textPrimary
                                     )
                                 }
-                            } else {
-                                AdaptiveButton(
-                                    text = "Sign In",
-                                    onClick = { state.navigateTo(Screen.AuthLogin) },
-                                    variant = AdaptiveButtonVariant.Ghost
+
+                                Spacer(Modifier.width(24.dp))
+
+                                AdaptiveTextField(
+                                    value = state.searchQuery,
+                                    onValueChange = { state.searchQuery = it },
+                                    placeholder = "Search products...",
+                                    modifier = Modifier.weight(1f).widthIn(max = 520.dp)
                                 )
+                            },
+                            primaryAction = {
+                                if (state.isLoggedIn) {
+                                    Row(
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .clickable { state.navigateTo(Screen.Account) }
+                                            .background(AdaptiveTheme.colors.surfaceRaised)
+                                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(28.dp)
+                                                .clip(CircleShape)
+                                                .background(AdaptiveTheme.colors.primary),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                state.currentUser?.name?.take(1)?.uppercase() ?: "U",
+                                                color = AdaptiveTheme.colors.textInverse,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            state.currentUser?.name?.split(" ")?.first() ?: "User",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = AdaptiveTheme.colors.textPrimary,
+                                        )
+                                    }
+                                } else {
+                                    AdaptiveButton(
+                                        text = "Sign In",
+                                        onClick = { state.navigateTo(Screen.AuthLogin) },
+                                        variant = AdaptiveButtonVariant.Ghost
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             },
             content = { paddingValues ->

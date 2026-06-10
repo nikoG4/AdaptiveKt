@@ -8,6 +8,7 @@ tools/docs-site-capture/node_modules/
 build/
 **/build/
 site-dist/
+artifacts/
 
 visual-captures/
 visual-captures-components/

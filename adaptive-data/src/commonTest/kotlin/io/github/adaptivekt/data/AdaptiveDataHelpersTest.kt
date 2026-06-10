@@ -16,6 +16,80 @@ class AdaptiveDataHelpersTest {
     }
 
     @Test
+    fun `data display auto mode preserves table to cards behavior`() {
+        assertEquals(
+            AdaptiveDataDisplayMode.Cards,
+            resolveAdaptiveDataDisplayMode(AdaptiveBreakpoint.Compact),
+        )
+        assertEquals(
+            AdaptiveDataDisplayMode.Table,
+            resolveAdaptiveDataDisplayMode(AdaptiveBreakpoint.Large),
+        )
+        assertEquals(
+            AdaptiveDataDisplayMode.Table,
+            resolveAdaptiveDataDisplayMode(
+                breakpoint = AdaptiveBreakpoint.Compact,
+                autoSwitchToCards = false,
+            ),
+        )
+        assertEquals(
+            AdaptiveDataDisplayMode.Cards,
+            resolveAdaptiveDataDisplayMode(
+                breakpoint = AdaptiveBreakpoint.Large,
+                displayMode = AdaptiveDataDisplayMode.Cards,
+            ),
+        )
+    }
+
+    @Test
+    fun `collection auto mode chooses list on compact and grid otherwise`() {
+        assertEquals(
+            AdaptiveCollectionDisplayMode.List,
+            resolveAdaptiveCollectionDisplayMode(AdaptiveBreakpoint.Compact),
+        )
+        assertEquals(
+            AdaptiveCollectionDisplayMode.Grid,
+            resolveAdaptiveCollectionDisplayMode(AdaptiveBreakpoint.Medium),
+        )
+        assertEquals(
+            AdaptiveCollectionDisplayMode.Cards,
+            resolveAdaptiveCollectionDisplayMode(
+                breakpoint = AdaptiveBreakpoint.Compact,
+                displayMode = AdaptiveCollectionDisplayMode.Cards,
+            ),
+        )
+    }
+
+    @Test
+    fun `pagination helpers clamp bounds`() {
+        assertEquals(1, adaptivePageCount(totalItems = 0, pageSize = 20))
+        assertEquals(3, adaptivePageCount(totalItems = 41, pageSize = 20))
+        assertEquals(1, coerceAdaptivePage(page = -2, totalItems = 41, pageSize = 20))
+        assertEquals(3, coerceAdaptivePage(page = 99, totalItems = 41, pageSize = 20))
+    }
+
+    @Test
+    fun `query helpers reset page when criteria change`() {
+        val query = AdaptiveQueryState(
+            search = "old",
+            filters = mapOf("category" to setOf("audio")),
+            sortKey = "popular",
+            page = 4,
+            pageSize = 20,
+        )
+
+        assertEquals(1, query.withSearch("new").page)
+        assertEquals("new", query.withSearch("new").search)
+        assertEquals(1, query.withFilter("category", setOf("laptops")).page)
+        assertEquals(setOf("laptops"), query.withFilter("category", setOf("laptops")).filters["category"])
+        assertEquals(1, query.withSort("price").page)
+        assertEquals("price", query.withSort("price").sortKey)
+        assertEquals(2, query.withPage(2).page)
+        assertEquals(50, query.withPageSize(50).pageSize)
+        assertEquals(1, query.withPageSize(50).page)
+    }
+
+    @Test
     fun `visible columns respects min breakpoint and falls back when none visible`() {
         val columns = listOf(
             AdaptiveDataColumn<String>(

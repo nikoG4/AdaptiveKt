@@ -4,6 +4,7 @@ param(
     [string]$AdminDemoDist = "admin-demo/build/dist/wasmJs/productionExecutable",
     [string]$EcommerceDemoDist = "examples/ecommerce-demo/build/dist/wasmJs/productionExecutable",
     [string]$AiWorkspaceDemoDist = "examples/ai-workspace-demo/build/dist/wasmJs/productionExecutable",
+    [string]$BasePath = "/",
     [switch]$SkipBuild
 )
 
@@ -35,6 +36,36 @@ $aiWorkspacePath = Join-Path $root $AiWorkspaceDemoDist
 $demoTarget = Join-Path $distPath "demo\app"
 $ecommerceTarget = Join-Path $distPath "examples\ecommerce"
 $aiWorkspaceTarget = Join-Path $distPath "examples\ai-workspace"
+
+function Normalize-BasePath {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return "/"
+    }
+    $normalized = $Path.Trim()
+    if (-not $normalized.StartsWith("/")) {
+        $normalized = "/$normalized"
+    }
+    if (-not $normalized.EndsWith("/")) {
+        $normalized = "$normalized/"
+    }
+    return $normalized
+}
+
+function Join-BasePath {
+    param(
+        [string]$Base,
+        [string]$Route
+    )
+    $normalizedBase = Normalize-BasePath $Base
+    $normalizedRoute = $Route.Trim("/")
+    if ([string]::IsNullOrWhiteSpace($normalizedRoute)) {
+        return $normalizedBase
+    }
+    return "$normalizedBase$normalizedRoute/"
+}
+
+$normalizedBasePath = Normalize-BasePath $BasePath
 
 if (-not (Test-Path $docsPath)) {
     throw "Docs site distribution not found: $docsPath"
@@ -79,7 +110,7 @@ $routeTemplate = @"
 <!doctype html>
 <html lang="en">
 <head>
-  <base href="/AdaptiveKt/">
+  <base href="$normalizedBasePath">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AdaptiveKt - Compose Multiplatform Admin UI Toolkit</title>
@@ -118,12 +149,13 @@ function Inject-BaseHref {
     }
 }
 
-Inject-BaseHref -FilePath (Join-Path $distPath "index.html") -BaseHref "/AdaptiveKt/"
-Inject-BaseHref -FilePath (Join-Path $demoTarget "index.html") -BaseHref "/AdaptiveKt/demo/app/"
-Inject-BaseHref -FilePath (Join-Path $ecommerceTarget "index.html") -BaseHref "/AdaptiveKt/examples/ecommerce/"
-Inject-BaseHref -FilePath (Join-Path $aiWorkspaceTarget "index.html") -BaseHref "/AdaptiveKt/examples/ai-workspace/"
+Inject-BaseHref -FilePath (Join-Path $distPath "index.html") -BaseHref $normalizedBasePath
+Inject-BaseHref -FilePath (Join-Path $demoTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "demo/app")
+Inject-BaseHref -FilePath (Join-Path $ecommerceTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "examples/ecommerce")
+Inject-BaseHref -FilePath (Join-Path $aiWorkspaceTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "examples/ai-workspace")
 
 Write-Host "Prepared Pages site: $distPath" -ForegroundColor Green
+Write-Host "Base path: $normalizedBasePath" -ForegroundColor Green
 Write-Host "Docs site copied from: $docsPath" -ForegroundColor Green
 Write-Host "Admin demo copied to: $demoTarget" -ForegroundColor Green
 Write-Host "Ecommerce showcase copied to: $ecommerceTarget" -ForegroundColor Green
