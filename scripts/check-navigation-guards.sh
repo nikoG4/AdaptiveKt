@@ -1,12 +1,18 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 FAILED=0
 
 echo "Running navigation guards..."
 
-# 1. BackHandler should not be used manually inside demo screens
-find examples -name "*.kt" -type f | grep -v -E "AiWorkspaceApp.kt|EcommerceApp.kt|AdminDemoApp.kt" | while read -r file; do
+# 1. BackHandler should not be used manually inside demo screens.
+while IFS= read -r file; do
+    case "$(basename "$file")" in
+        AiWorkspaceApp.kt|EcommerceApp.kt|AdminDemoApp.kt)
+            continue
+            ;;
+    esac
+
     if grep -q "BackHandler(" "$file"; then
         echo "ERROR: Manual BackHandler found in $file. Use AdaptiveNavigationBackHandler at root instead."
         FAILED=1
@@ -15,19 +21,19 @@ find examples -name "*.kt" -type f | grep -v -E "AiWorkspaceApp.kt|EcommerceApp.
         echo "ERROR: Direct BackHandler import found in $file. Use AdaptiveNavigationBackHandler at root instead."
         FAILED=1
     fi
-done
+done < <(find examples -name "*.kt" -type f)
 
-# 2. Android-only imports in commonMain
-find . -path "*/src/commonMain/*.kt" | while read -r file; do
+# 2. Android-only imports in commonMain.
+while IFS= read -r file; do
     if grep -q "androidx.activity" "$file"; then
         echo "ERROR: Android-only import found in commonMain: $file."
         FAILED=1
     fi
-done
+done < <(find . -path "*/src/commonMain/*.kt" -type f)
 
 if [ "$FAILED" -eq 1 ]; then
     echo "Navigation guard checks FAILED."
     exit 1
-else
-    echo "Navigation guard checks PASSED."
 fi
+
+echo "Navigation guard checks PASSED."
