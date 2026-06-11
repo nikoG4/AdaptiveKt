@@ -70,7 +70,11 @@ try {
     Write-Host "Running AI Workspace Playwright captures..." -ForegroundColor Cyan
     Push-Location tools\docs-site-capture
     node .\capture-ai-workspace-premium.js $captureBaseUrl (Join-Path $root $OutputDir)
+    $captureExitCode = $LASTEXITCODE
     Pop-Location
+    if ($captureExitCode -ne 0) {
+        throw "AI Workspace Playwright capture failed with exit code $captureExitCode."
+    }
 
     $sheetFiles = @(
         "tablet-chats-light.png",
