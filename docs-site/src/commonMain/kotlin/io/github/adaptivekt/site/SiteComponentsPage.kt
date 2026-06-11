@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +45,10 @@ import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveDialog
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveMultiSelect
+import io.github.adaptivekt.components.AdaptiveOverlayDefaults
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
+import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
@@ -86,7 +89,7 @@ internal fun SiteComponentsPage(
     onSelectedHashChange: (String) -> Unit,
 ) {
     val docs = remember { componentDocs() }
-    val selectedId = selectedHash.ifEmpty { docs.first().id }
+    val selectedId = componentDocIdForHash(selectedHash).ifEmpty { docs.first().id }
     val selected = docs.firstOrNull { it.id == selectedId } ?: docs.first()
     val navGroups = docs.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
@@ -105,8 +108,15 @@ internal fun SiteComponentsPage(
         onThisPage = selected.tocItems,
         onTocItemClick = { /* TOC clicks are currently for local focal feedback only; they do not touch the primary route */ },
     ) {
-        ComponentDocArticle(selected)
+        CompositionLocalProvider(LocalDocsVisualState provides selectedHash) {
+            ComponentDocArticle(selected)
+        }
     }
+}
+
+private fun componentDocIdForHash(hash: String): String = when {
+    hash.startsWith("adaptive-accordion-dialog-") -> "adaptive-accordion-dialog"
+    else -> hash
 }
 
 private fun commonNotes(title: String): List<String> = listOf(
@@ -343,6 +353,81 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         responsiveNotes = listOf("Containers fill available width and work inside one-column mobile layouts."),
         accessibilityNotes = listOf("If clickable, make content label text explicit."),
         limitations = listOf("No heavy elevation or shadow system yet."),
+    ),
+    ComponentDoc(
+        id = "adaptive-selection-area",
+        family = "Display",
+        title = "AdaptiveSelectionArea",
+        summary = "Opt-in text selection wrapper for paragraphs, code-like content and read-only details.",
+        usage = "Wrap content-heavy read-only regions when users may need to copy IDs, logs, message text, product descriptions or generated output.",
+        basicExample = DocsExample(
+            "Selectable paragraph",
+            "Selection is opt-in so controls and navigation remain click-first.",
+            """
+AdaptiveSelectionArea {
+    Text("Users can select this paragraph.")
+}
+            """,
+        ) {
+            AdaptiveSelectionArea {
+                SiteText(
+                    text = "This paragraph is selectable. Try dragging across the workspace ID, owner email and generated summary without making nearby controls selectable.",
+                    color = SiteMuted,
+                    maxLines = 5,
+                )
+            }
+        },
+        parameters = listOf(
+            ComponentParameter("enabled", "Boolean", "true", false, "When false, wraps content in DisableSelection to protect nested controls."),
+            ComponentParameter("content", "@Composable () -> Unit", "required", true, "Read-only content that can participate in text selection."),
+        ),
+        variants = listOf(
+            DocsExample(
+                "Selectable card body",
+                "AdaptiveCard can enable body selection while still keeping clickable cards opt-out by default.",
+                """
+AdaptiveCard(contentSelectionEnabled = true) {
+    Text("Selectable card body content")
+}
+                """,
+            ) {
+                AdaptiveCard(contentSelectionEnabled = true) {
+                    SiteText("Run details", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SiteText("run_04J7ZK2A | owner: alicia@adaptivekt.io | status: validated", color = SiteMuted, maxLines = 4)
+                }
+            },
+            DocsExample(
+                "AI message copy",
+                "Use it for chat output, logs and generated text; keep action chips outside the selected area.",
+                """
+AdaptiveSelectionArea {
+    Text("Assistant answer...")
+}
+                """,
+            ) {
+                AdaptiveCard {
+                    AdaptiveBadge("Assistant", tone = AdaptiveBadgeTone.Info)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AdaptiveSelectionArea {
+                        SiteText(
+                            "The assistant found three candidate sources. Copy this explanation without selecting the action buttons below.",
+                            color = SiteMuted,
+                            maxLines = 5,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AdaptiveButton("Summarize", size = AdaptiveButtonSize.Small, onClick = {})
+                        AdaptiveButton("Cite", size = AdaptiveButtonSize.Small, variant = AdaptiveButtonVariant.Secondary, onClick = {})
+                    }
+                }
+            },
+        ),
+        themingNotes = commonNotes("AdaptiveSelectionArea"),
+        responsiveNotes = listOf("Selection does not impose layout; it follows the wrapped content."),
+        accessibilityNotes = listOf("Use selection for read-only copyable content, not for primary controls."),
+        limitations = listOf("Touch text-selection affordances are platform-controlled by Compose."),
     ),
     inputDoc("adaptive-text-field", "AdaptiveTextField", "Foundation text input with label, placeholder, disabled state and validation message.") {
         var value by remember { mutableStateOf("AdaptiveKt Inc.") }
@@ -768,13 +853,27 @@ AdaptiveNavigationBehavior(
         family = "Overlay / Disclosure",
         title = "AdaptiveAccordion and AdaptiveDialog",
         summary = "Disclosure and modal primitives for settings, confirmations and long content.",
-        usage = "Use Accordion for inline detail and Dialog for focused decisions or confirmations.",
+        usage = "Use Accordion for inline detail and Dialog for focused decisions or confirmations. Dialog renders as a modal overlay and does not push page content down.",
         basicExample = DocsExample(
-            "Accordion and dialog",
-            "Both are Foundation-only and use theme surfaces.",
-            """AdaptiveAccordion(title = "Account settings") { ... }""",
+            "Centered modal dialog",
+            "Opening the dialog overlays this page with a theme scrim; the page layout underneath stays fixed.",
+            """
+if (showDialog) {
+    AdaptiveDialog(
+        onDismissRequest = { showDialog = false },
+        title = "Confirm action",
+        dismissButton = { AdaptiveButton("Cancel", onClick = ...) },
+        confirmButton = { AdaptiveButton("Confirm", onClick = ...) },
+    ) {
+        Text("Dialog content")
+    }
+}
+            """,
         ) {
-            var showDialog by remember { mutableStateOf(false) }
+            val visualState = LocalDocsVisualState.current
+            var showDialog by remember(visualState) {
+                mutableStateOf(visualState == "adaptive-accordion-dialog-centered-open")
+            }
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AdaptiveAccordion(
                     title = "Account settings", 
@@ -782,7 +881,7 @@ AdaptiveNavigationBehavior(
                     defaultExpanded = true,
                     modifier = Modifier.docsClickableCursor()
                 ) {
-                    AdaptiveButton("Open dialog", onClick = { showDialog = true }, modifier = Modifier.docsClickableCursor())
+                    AdaptiveButton("Open centered dialog", onClick = { showDialog = true }, modifier = Modifier.docsClickableCursor())
                 }
                 if (showDialog) {
                     AdaptiveDialog(
@@ -791,7 +890,7 @@ AdaptiveNavigationBehavior(
                         dismissButton = { AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDialog = false }, modifier = Modifier.docsClickableCursor()) },
                         confirmButton = { AdaptiveButton("Confirm", onClick = { showDialog = false }, modifier = Modifier.docsClickableCursor()) },
                     ) {
-                        SiteText("Dialog content for confirmation flows.", maxLines = 3)
+                        SiteText("This modal is rendered above the page. Opening it should not shift the accordion, cards or surrounding documentation.", maxLines = 5)
                     }
                 }
             }
@@ -805,13 +904,86 @@ AdaptiveNavigationBehavior(
             ComponentParameter("confirmButton", "@Composable () -> Unit", "required", true, "AdaptiveDialog confirm action slot."),
             ComponentParameter("title (Dialog)", "String?", "null", false, "AdaptiveDialog optional title."),
             ComponentParameter("dismissButton", "@Composable () -> Unit", "{}", false, "AdaptiveDialog dismiss action slot."),
+            ComponentParameter("dismissOnBackdropClick", "Boolean", "true", false, "Requests dismissal when the user clicks the scrim/backdrop."),
+            ComponentParameter("contentSelectionEnabled", "Boolean", "false", false, "Allows text selection in the dialog body only."),
             ComponentParameter("content", "@Composable () -> Unit", "required", true, "Panel or dialog content."),
         ),
-        variants = listOf(),
+        variants = listOf(
+            DocsExample(
+                "Long selectable dialog",
+                "Long content scrolls inside the modal surface and can opt into text selection.",
+                """
+AdaptiveDialog(contentSelectionEnabled = true, ...) {
+    Text("Long generated content...")
+}
+                """,
+            ) {
+                val visualState = LocalDocsVisualState.current
+                var showLongDialog by remember(visualState) {
+                    mutableStateOf(visualState == "adaptive-accordion-dialog-long-open")
+                }
+                AdaptiveButton("Open long content dialog", onClick = { showLongDialog = true }, modifier = Modifier.docsClickableCursor())
+                if (showLongDialog) {
+                    AdaptiveDialog(
+                        onDismissRequest = { showLongDialog = false },
+                        title = "Generated run summary",
+                        contentSelectionEnabled = true,
+                        dismissButton = { AdaptiveButton("Close", variant = AdaptiveButtonVariant.Ghost, onClick = { showLongDialog = false }, modifier = Modifier.docsClickableCursor()) },
+                        confirmButton = { AdaptiveButton("Copy reviewed", onClick = { showLongDialog = false }, modifier = Modifier.docsClickableCursor()) },
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            repeat(8) { index ->
+                                SiteText(
+                                    "Section ${index + 1}: AdaptiveKt keeps this generated explanation selectable while action buttons remain click-first.",
+                                    color = SiteMuted,
+                                    maxLines = 4,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            DocsExample(
+                "Destructive confirmation",
+                "Danger actions stay visually clear while the modal keeps the page underneath stable.",
+                """
+AdaptiveDialog(
+    title = "Archive workspace",
+    confirmButton = { AdaptiveButton("Archive", variant = AdaptiveButtonVariant.Danger, ...) },
+)
+                """,
+            ) {
+                val visualState = LocalDocsVisualState.current
+                var showDestructiveDialog by remember(visualState) {
+                    mutableStateOf(visualState == "adaptive-accordion-dialog-destructive-open")
+                }
+                AdaptiveButton("Open destructive dialog", variant = AdaptiveButtonVariant.Danger, onClick = { showDestructiveDialog = true }, modifier = Modifier.docsClickableCursor())
+                if (showDestructiveDialog) {
+                    AdaptiveDialog(
+                        onDismissRequest = { showDestructiveDialog = false },
+                        title = "Archive workspace",
+                        dismissButton = { AdaptiveButton("Cancel", variant = AdaptiveButtonVariant.Ghost, onClick = { showDestructiveDialog = false }, modifier = Modifier.docsClickableCursor()) },
+                        confirmButton = { AdaptiveButton("Archive", variant = AdaptiveButtonVariant.Danger, onClick = { showDestructiveDialog = false }, modifier = Modifier.docsClickableCursor()) },
+                    ) {
+                        SiteText("This action cannot be undone. The dialog is an overlay and should remain above navigation, cards and dropdowns.", color = SiteMuted, maxLines = 4)
+                    }
+                }
+            },
+            DocsExample(
+                "Overlay defaults",
+                "Dialog sizing and scrim behavior are centralized through AdaptiveOverlayDefaults.",
+                """AdaptiveOverlayDefaults.DialogMaxWidth""",
+            ) {
+                AdaptiveSurface(contentPadding = PaddingValues(12.dp)) {
+                    SiteText("Max width: ${AdaptiveOverlayDefaults.DialogMaxWidth}", fontWeight = FontWeight.Bold)
+                    SiteText("Max height: ${AdaptiveOverlayDefaults.DialogMaxHeight}", color = SiteMuted)
+                }
+            },
+        ),
         themingNotes = commonNotes("Overlay and disclosure"),
-        responsiveNotes = listOf("Dialog constrains height and scrolls content to avoid infinite desktop height."),
-        accessibilityNotes = listOf("Use descriptive titles and clear confirm/dismiss actions."),
-        limitations = listOf("Focus trapping and advanced keyboard management can be expanded later."),
+        responsiveNotes = listOf("Dialog constrains width on desktop and uses compact margins on small screens while remaining an overlay."),
+        accessibilityNotes = listOf("Use descriptive titles and clear confirm/dismiss actions. Back/escape dismissal is delegated to Compose Dialog where supported."),
+        limitations = listOf("Advanced focus trapping can be expanded later; current behavior follows Compose Multiplatform Dialog."),
     ),
 )
 

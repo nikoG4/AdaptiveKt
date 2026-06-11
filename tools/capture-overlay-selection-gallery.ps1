@@ -1,5 +1,5 @@
 param(
-    [string]$OutputDir = "artifacts\screenshots\ai-workspace-premium-refactor",
+    [string]$OutputDir = "artifacts\screenshots\overlay-selection-gallery",
     [string]$BaseUrl = "",
     [switch]$SkipBuild
 )
@@ -41,8 +41,8 @@ if (-not $SkipBuild) {
     .\tools\prepare-pages-site.ps1
 }
 
-if (-not (Test-Path "site-dist\examples\ai-workspace\index.html")) {
-    throw "site-dist AI Workspace route is missing. Run tools\prepare-pages-site.ps1 first or omit -SkipBuild."
+if (-not (Test-Path "site-dist\components\index.html")) {
+    throw "site-dist components route is missing. Run tools\prepare-pages-site.ps1 first or omit -SkipBuild."
 }
 
 Write-Host "Installing Playwright dependencies..." -ForegroundColor Cyan
@@ -58,7 +58,7 @@ if ([string]::IsNullOrWhiteSpace($captureBaseUrl)) {
     $captureBaseUrl = "http://localhost:8080"
     Write-Host "Starting local site-dist server at $captureBaseUrl..." -ForegroundColor Cyan
     $serverProcess = Start-Process -FilePath python -ArgumentList @("-m", "http.server", "8080", "-d", "site-dist") -WindowStyle Hidden -PassThru
-    Wait-LocalSite -Url "$captureBaseUrl/"
+    Wait-LocalSite -Url "$captureBaseUrl/components/"
 }
 
 try {
@@ -67,39 +67,20 @@ try {
     }
     New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
-    Write-Host "Running AI Workspace Playwright captures..." -ForegroundColor Cyan
+    Write-Host "Running overlay and selection Playwright captures..." -ForegroundColor Cyan
     Push-Location tools\docs-site-capture
-    node .\capture-ai-workspace-premium.js $captureBaseUrl (Join-Path $root $OutputDir)
+    node .\capture-overlay-selection-gallery.js $captureBaseUrl (Join-Path $root $OutputDir)
     $captureExitCode = $LASTEXITCODE
     Pop-Location
     if ($captureExitCode -ne 0) {
-        throw "AI Workspace Playwright capture failed with exit code $captureExitCode."
+        throw "Overlay selection Playwright capture failed with exit code $captureExitCode."
     }
 
-    $sheetFiles = @(
-        "tablet-chats-light.png",
-        "tablet-chats-dark.png",
-        "desktop-chats-light.png",
-        "desktop-chats-dark.png",
-        "large-chats-light.png",
-        "large-chats-dark.png",
-        "desktop-chat-detail-light.png",
-        "desktop-chat-detail-dark.png",
-        "tablet-prompts-light.png",
-        "tablet-prompts-dark.png",
-        "desktop-prompts-light.png",
-        "desktop-prompts-dark.png",
-        "large-prompts-light.png",
-        "large-prompts-dark.png",
-        "desktop-prompt-detail-light.png",
-        "desktop-prompt-detail-dark.png"
-    )
-
     $resolvedOutputDir = Resolve-Path $OutputDir
-    $sheetPath = Join-Path $resolvedOutputDir "contact-sheet-pane-lists.png"
-    $existingFiles = $sheetFiles |
-        ForEach-Object { Join-Path $resolvedOutputDir $_ } |
-        Where-Object { Test-Path $_ }
+    $sheetPath = Join-Path $resolvedOutputDir "contact-sheet-overlay-selection-gallery.png"
+    $existingFiles = Get-ChildItem -LiteralPath $resolvedOutputDir -Filter "*.png" | Where-Object {
+        $_.Name -ne "contact-sheet-overlay-selection-gallery.png"
+    } | Sort-Object Name
 
     if ($existingFiles.Count -gt 0) {
         Add-Type -AssemblyName System.Drawing
@@ -111,12 +92,12 @@ try {
         $items = @()
 
         foreach ($file in $existingFiles) {
-            $image = [System.Drawing.Image]::FromFile($file)
+            $image = [System.Drawing.Image]::FromFile($file.FullName)
             $scale = $thumbWidth / [double]$image.Width
             $thumbHeight = [int][Math]::Round($image.Height * $scale)
             $items += [pscustomobject]@{
-                File = $file
-                Name = Split-Path $file -Leaf
+                File = $file.FullName
+                Name = $file.Name
                 Image = $image
                 Width = $thumbWidth
                 Height = $thumbHeight
@@ -163,7 +144,7 @@ try {
             $item.Image.Dispose()
         }
 
-        Write-Host "Pane list contact sheet saved at $sheetPath" -ForegroundColor Green
+        Write-Host "Overlay selection contact sheet saved at $sheetPath" -ForegroundColor Green
     }
 }
 finally {
@@ -176,4 +157,5 @@ finally {
     }
 }
 
-Write-Host "AI Workspace captures saved in $OutputDir" -ForegroundColor Green
+Write-Host "Overlay selection captures saved in $OutputDir" -ForegroundColor Green
+
