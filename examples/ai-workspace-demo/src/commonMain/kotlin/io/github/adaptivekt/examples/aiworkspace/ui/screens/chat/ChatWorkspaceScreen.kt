@@ -33,6 +33,7 @@ import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveDivider
+import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -399,13 +400,16 @@ private fun MessageBubble(message: ChatMessage) {
 @Composable
 private fun MessagePartView(part: MessagePart) {
     when (part) {
-        is MessagePart.Text -> Text(
-            text = part.value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = AdaptiveTheme.colors.textPrimary,
-        )
+        is MessagePart.Text -> AdaptiveSelectionArea {
+            Text(
+                text = part.value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AdaptiveTheme.colors.textPrimary,
+            )
+        }
         is MessagePart.CodeBlock -> AdaptiveCard(
             contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+            contentSelectionEnabled = true,
         ) {
             AdaptiveBadge(text = part.language, tone = AdaptiveBadgeTone.Info)
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))

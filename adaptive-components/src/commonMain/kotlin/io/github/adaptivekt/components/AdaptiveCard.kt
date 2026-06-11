@@ -21,6 +21,7 @@ public fun AdaptiveCard(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Large),
     onClick: (() -> Unit)? = null,
+    contentSelectionEnabled: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = AdaptiveComponentDefaults.MediumShape
@@ -41,6 +42,13 @@ public fun AdaptiveCard(
             .border(1.dp, AdaptiveComponentDefaults.Border, shape)
             .then(clickableModifier)
             .padding(contentPadding),
-        content = content,
-    )
+    ) {
+        if (contentSelectionEnabled && onClick == null) {
+            AdaptiveSelectionArea {
+                content()
+            }
+        } else {
+            content()
+        }
+    }
 }

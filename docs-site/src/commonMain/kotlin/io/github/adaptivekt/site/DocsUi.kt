@@ -49,13 +49,17 @@ import io.github.adaptivekt.components.AdaptiveChip
 import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveIconButton
+import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.delay
+
+internal val LocalDocsVisualState = staticCompositionLocalOf { "" }
 
 @Composable
 internal fun DocsShell(
@@ -416,16 +420,18 @@ internal fun DocsCodeBlock(
                 .horizontalScroll(rememberScrollState())
                 .padding(14.dp),
         ) {
-            BasicText(
-                text = code.trimIndent(),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp,
-                    color = Color(0xFFE2E8F0),
-                    fontFamily = FontFamily.Monospace,
-                ),
-                softWrap = false,
-            )
+            AdaptiveSelectionArea {
+                BasicText(
+                    text = code.trimIndent(),
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                        color = Color(0xFFE2E8F0),
+                        fontFamily = FontFamily.Monospace,
+                    ),
+                    softWrap = false,
+                )
+            }
         }
     }
 }
@@ -509,7 +515,7 @@ private fun ParameterRow(values: List<String>, header: Boolean = false) {
 @Composable
 internal fun ComponentDocArticle(doc: ComponentDoc) {
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        AdaptiveCard {
+        AdaptiveCard(contentSelectionEnabled = true) {
             AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
             Spacer(modifier = Modifier.height(12.dp))
             SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)

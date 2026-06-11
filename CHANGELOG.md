@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- `AdaptiveSelectionArea` for opt-in selectable text in content-heavy surfaces without making controls selectable by default.
+- `AdaptiveOverlayDefaults` for dialog sizing, spacing and overlay policy.
 - `Modifier.adaptiveInteractiveCursor` and `AdaptiveInteractionDefaults` for shared pointer/hand cursor behavior on interactive AdaptiveKt controls.
 - Component interaction guard scripts and component gallery visual capture tooling.
 - `AdaptivePaneList`, `AdaptivePaneDetail`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` for side-pane content inside list/detail workflows.
@@ -18,6 +20,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- `AdaptiveCard` and `AdaptiveDialog` now expose opt-in content selection for static/readable body content.
 - Clickable AdaptiveKt controls now consistently request an interactive cursor on pointer-capable platforms while static content and text inputs keep their default cursor.
 - AI Workspace Chats and Prompt Library now use pane-aware list primitives so list items fill the useful pane width.
 - AI Workspace chat detail now keeps its composer fixed to the bottom of the detail pane.
@@ -25,6 +28,9 @@
 - Ecommerce product listing now dogfoods `AdaptiveCollectionView` with search, category filters, sorting and pagination.
 - Improved ecommerce showcase navigation, theme handling and product visuals.
 - Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.
+
+### Fixed
+- `AdaptiveDialog` now renders as a true modal overlay instead of inline layout-flow content that can push the page down.
 
 ## 0.1.0-alpha01
 

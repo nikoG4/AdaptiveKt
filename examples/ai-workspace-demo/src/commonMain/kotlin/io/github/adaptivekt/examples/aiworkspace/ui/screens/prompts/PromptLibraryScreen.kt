@@ -33,6 +33,7 @@ import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveSelect
+import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -321,7 +322,7 @@ private fun PromptDetailPane(
 @Composable
 private fun PromptOverview(prompt: PromptTemplate) {
     AdaptiveSection(title = "Template") {
-        AdaptiveCard {
+        AdaptiveCard(contentSelectionEnabled = true) {
             Text(
                 text = prompt.body,
                 style = MaterialTheme.typography.bodyMedium,
@@ -344,7 +345,10 @@ private fun PromptVariables(prompt: PromptTemplate) {
             AdaptiveGrid {
                 prompt.variables.forEach { variable ->
                     item(span = 6) {
-                        AdaptiveCard(contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium)) {
+                        AdaptiveCard(
+                            contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
+                            contentSelectionEnabled = true,
+                        ) {
                             AdaptiveBadge(text = "Input", tone = AdaptiveBadgeTone.Info)
                             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
                             Text(
@@ -396,11 +400,13 @@ private fun PromptRuns(prompt: PromptTemplate) {
 private fun PromptNotes(prompt: PromptTemplate) {
     AdaptiveSection(title = "Notes") {
         AdaptiveCard {
-            Text(
-                text = "Use this template when a ${prompt.category.lowercase()} task needs a repeatable instruction contract. Keep variables explicit and attach source files when running in production.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = AdaptiveTheme.colors.textSecondary,
-            )
+            AdaptiveSelectionArea {
+                Text(
+                    text = "Use this template when a ${prompt.category.lowercase()} task needs a repeatable instruction contract. Keep variables explicit and attach source files when running in production.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AdaptiveTheme.colors.textSecondary,
+                )
+            }
         }
     }
 }

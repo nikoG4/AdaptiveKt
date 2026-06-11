@@ -232,7 +232,9 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
                     }
                     
                     Spacer(Modifier.height(32.dp))
-                    Text(product.shortDescription, color = AdaptiveTheme.colors.textSecondary, fontSize = 18.sp, lineHeight = 28.sp)
+                    AdaptiveSelectionArea {
+                        Text(product.shortDescription, color = AdaptiveTheme.colors.textSecondary, fontSize = 18.sp, lineHeight = 28.sp)
+                    }
                     
                     Spacer(Modifier.height(40.dp))
                     
@@ -290,12 +292,14 @@ fun ProductDetailScreen(state: StoreState, productId: String, modifier: Modifier
             AdaptiveGrid(columns = if (compact) 1 else 2, horizontalGap = 24.dp, verticalGap = 8.dp) {
                 product.specs.forEach { spec ->
                     item(span = 1) {
-                        Column {
-                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(spec.name, color = AdaptiveTheme.colors.textSecondary, fontWeight = FontWeight.Medium)
-                                Text(spec.value, color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
+                        AdaptiveSelectionArea {
+                            Column {
+                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(spec.name, color = AdaptiveTheme.colors.textSecondary, fontWeight = FontWeight.Medium)
+                                    Text(spec.value, color = AdaptiveTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
+                                }
+                                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(AdaptiveTheme.colors.border))
                             }
-                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(AdaptiveTheme.colors.border))
                         }
                     }
                 }
