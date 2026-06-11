@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- `Modifier.adaptiveInteractiveCursor` and `AdaptiveInteractionDefaults` for shared pointer/hand cursor behavior on interactive AdaptiveKt controls.
+- Component interaction guard scripts and component gallery visual capture tooling.
 - `AdaptivePaneList`, `AdaptivePaneDetail`, `AdaptivePaneListGroup`, and `AdaptivePaneListItem` for side-pane content inside list/detail workflows.
 - `AdaptiveListDetailPanePolicy` for predictable list/detail pane sizing without app-level width patches.
 - Configurable navigation surface title/subtitle on `AdaptiveNavigationScaffold`, `Sidebar`, and `Drawer`.
@@ -16,6 +18,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- Clickable AdaptiveKt controls now consistently request an interactive cursor on pointer-capable platforms while static content and text inputs keep their default cursor.
 - AI Workspace Chats and Prompt Library now use pane-aware list primitives so list items fill the useful pane width.
 - AI Workspace chat detail now keeps its composer fixed to the bottom of the detail pane.
 - AI Workspace showcase now consumes AdaptiveKt list/detail and navigation layout policy instead of local width hacks.

@@ -47,6 +47,7 @@ import io.github.adaptivekt.core.AdaptiveBreakpoint
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.feedback.AdaptiveErrorState
@@ -224,12 +225,14 @@ private fun <T> AdaptiveDataTableRow(
         .background(rowBackground)
         .then(
             if (!isHeader && onItemClick != null && item != null) {
-                Modifier.clickable(
-                    interactionSource = rowInteractionSource,
-                    indication = null,
-                ) {
-                    onItemClick(item)
-                }
+                Modifier
+                    .adaptiveInteractiveCursor()
+                    .clickable(
+                        interactionSource = rowInteractionSource,
+                        indication = null,
+                    ) {
+                        onItemClick(item)
+                    }
             } else {
                 Modifier
             },

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 @Composable
 public fun <T> AdaptiveBreadcrumbs(
@@ -39,7 +40,13 @@ public fun <T> AdaptiveBreadcrumbs(
             val selected = item == selectedItem
             BasicText(
                 text = itemLabel(item),
-                modifier = if (selected) Modifier else Modifier.clickable { onItemSelected(item) },
+                modifier = if (selected) {
+                    Modifier
+                } else {
+                    Modifier
+                        .adaptiveInteractiveCursor()
+                        .clickable { onItemSelected(item) }
+                },
                 style = TextStyle(
                     fontSize = 13.sp,
                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,

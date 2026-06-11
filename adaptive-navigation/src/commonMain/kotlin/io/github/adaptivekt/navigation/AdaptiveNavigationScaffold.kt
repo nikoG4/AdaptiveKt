@@ -32,6 +32,7 @@ import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveContent
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 
 private val NavigationSurfaceWidth: Dp = AdaptiveTokens.PaneWidths.Sidebar
@@ -116,6 +117,7 @@ public fun AdaptiveNavigationScaffold(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(AdaptiveTheme.colors.overlay)
+                                        .adaptiveInteractiveCursor()
                                         .clickable { drawerOpen = false },
                                 )
                                 Box(

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveColorScheme
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public enum class AdaptiveButtonVariant {
     Primary,
@@ -82,6 +83,7 @@ public fun AdaptiveButton(
             .background(colors.background, shape)
             .border(colors.borderWidth, colors.border, shape)
             .hoverable(interactionSource = interactionSource, enabled = enabled)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

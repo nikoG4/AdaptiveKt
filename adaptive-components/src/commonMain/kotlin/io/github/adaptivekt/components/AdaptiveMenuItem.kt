@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 @Composable
 public fun AdaptiveMenuItem(
@@ -50,6 +51,7 @@ public fun AdaptiveMenuItem(
             .clip(shape)
             .background(background, shape)
             .hoverable(interactionSource = interactionSource)
+            .adaptiveInteractiveCursor()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

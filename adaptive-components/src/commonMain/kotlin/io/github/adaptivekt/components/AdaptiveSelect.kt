@@ -36,6 +36,7 @@ import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
 import io.github.adaptivekt.components.AdaptiveComponentDefaults
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Returns true if [label] contains [query] (case-insensitive). Empty [query] always matches.
@@ -257,6 +258,7 @@ private fun <T> SelectTrigger(
             .background(actualBg, shape)
             .border(1.dp, borderColor, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -345,6 +347,7 @@ private fun SelectMenuItem(
             .clip(shape)
             .background(background, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -393,6 +396,7 @@ private fun SelectOptionWrapper(
             .clip(shape)
             .background(background, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Segmented horizontal tabs component with scroll support for compact widths.
@@ -55,6 +56,7 @@ public fun <T> AdaptiveTabs(
                     .clip(AdaptiveComponentDefaults.PillShape)
                     .background(background)
                     .border(1.dp, borderColor, AdaptiveComponentDefaults.PillShape)
+                    .adaptiveInteractiveCursor()
                     .clickable { onTabSelected(tab) }
                     .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small)
                     .sizeIn(minWidth = 72.dp),

@@ -101,5 +101,5 @@ private fun thumbnailFontSize(size: Dp) = when {
 
 private fun thumbnailTextColor(background: Color): Color {
     val luminance = (0.299f * background.red) + (0.587f * background.green) + (0.114f * background.blue)
-    return if (luminance < 0.55f) Color.White else Color(0xFF0F172A)
+    return if (luminance < 0.55f) Color(0xFFFFFFFF) else Color(0xFF0F172A)
 }

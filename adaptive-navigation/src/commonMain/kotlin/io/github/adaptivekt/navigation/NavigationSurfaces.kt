@@ -43,6 +43,7 @@ import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public enum class AdaptiveNavigationItemStyle {
     Pill,
@@ -434,6 +435,7 @@ private fun NavigationItem(
         .background(itemBackground, shape = shape)
         .border(width = 1.dp, color = itemBorder, shape = shape)
         .hoverable(interactionSource = interactionSource)
+        .adaptiveInteractiveCursor()
         .clickable(
             interactionSource = interactionSource,
             indication = null,

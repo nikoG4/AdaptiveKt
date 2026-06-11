@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 @Composable
 public fun AdaptiveCard(
@@ -24,7 +25,9 @@ public fun AdaptiveCard(
 ) {
     val shape = AdaptiveComponentDefaults.MediumShape
     val clickableModifier = if (onClick != null) {
-        Modifier.clickable(onClick = onClick)
+        Modifier
+            .adaptiveInteractiveCursor()
+            .clickable(onClick = onClick)
     } else {
         Modifier
     }
