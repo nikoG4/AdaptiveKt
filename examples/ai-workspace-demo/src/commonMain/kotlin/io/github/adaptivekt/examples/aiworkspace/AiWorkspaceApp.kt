@@ -54,6 +54,7 @@ public fun AiWorkspaceApp(
                 initialRoute = AiRoute.Dashboard,
                 codec = AiRouteCodec
             )
+            AdaptiveNavigationBackHandler(navigator)
             val selectedItemId = when (navigator.currentRoute) {
                 is AiRoute.Dashboard -> "dashboard"
                 is AiRoute.Chats, is AiRoute.Chat -> "chats"

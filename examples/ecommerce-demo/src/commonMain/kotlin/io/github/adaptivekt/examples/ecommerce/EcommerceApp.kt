@@ -28,6 +28,7 @@ import io.github.adaptivekt.examples.ecommerce.ui.states.UiStatesScreen
 import io.github.adaptivekt.navigation.rememberAdaptiveNavigator
 import io.github.adaptivekt.navigation.AdaptiveNavigationOptions
 import io.github.adaptivekt.navigation.AdaptiveWebNavigationMode
+import io.github.adaptivekt.navigation.AdaptiveNavigationBackHandler
 import io.github.adaptivekt.examples.ecommerce.navigation.StoreRouteCodec
 
 @Composable
@@ -39,6 +40,7 @@ fun EcommerceApp(storeState: StoreState = remember { StoreState() }) {
             webMode = AdaptiveWebNavigationMode.Hash
         )
     )
+    AdaptiveNavigationBackHandler(navigator)
     
     LaunchedEffect(navigator) {
         storeState.navigator = navigator
