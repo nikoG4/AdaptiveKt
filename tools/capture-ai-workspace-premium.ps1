@@ -9,6 +9,33 @@ $ErrorActionPreference = "Stop"
 $root = Resolve-Path "$PSScriptRoot\.."
 Set-Location $root
 
+function Wait-LocalSite {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Url,
+        [int]$TimeoutSeconds = 45
+    )
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $lastError = $null
+
+    while ((Get-Date) -lt $deadline) {
+        try {
+            $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 2
+            if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) {
+                Write-Host "Local site is ready at $Url" -ForegroundColor Green
+                return
+            }
+        } catch {
+            $lastError = $_.Exception.Message
+        }
+
+        Start-Sleep -Milliseconds 500
+    }
+
+    throw "Timed out waiting for local site at $Url. Last error: $lastError"
+}
+
 if (-not $SkipBuild) {
     Write-Host "Preparing Pages site..." -ForegroundColor Cyan
     .\tools\prepare-pages-site.ps1
@@ -31,7 +58,7 @@ if ([string]::IsNullOrWhiteSpace($captureBaseUrl)) {
     $captureBaseUrl = "http://localhost:8080"
     Write-Host "Starting local site-dist server at $captureBaseUrl..." -ForegroundColor Cyan
     $serverProcess = Start-Process -FilePath python -ArgumentList @("-m", "http.server", "8080", "-d", "site-dist") -WindowStyle Hidden -PassThru
-    Start-Sleep -Seconds 3
+    Wait-LocalSite -Url "$captureBaseUrl/"
 }
 
 try {
