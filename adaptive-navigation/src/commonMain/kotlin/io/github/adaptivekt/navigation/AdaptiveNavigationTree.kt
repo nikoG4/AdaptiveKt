@@ -34,6 +34,7 @@ import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public data class AdaptiveNavigationTreeItem(
     val id: String,
@@ -182,6 +183,7 @@ private fun NavigationTreeRow(
             .background(background, shape)
             .border(1.dp, border, shape)
             .hoverable(interactionSource = interactionSource, enabled = enabled)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

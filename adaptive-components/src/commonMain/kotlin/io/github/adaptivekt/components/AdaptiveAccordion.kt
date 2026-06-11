@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Expandable disclosure component for inline detail or nested settings.
@@ -73,6 +74,7 @@ public fun AdaptiveAccordion(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .adaptiveInteractiveCursor()
                 .clickable { updateExpanded(!isExpanded) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,

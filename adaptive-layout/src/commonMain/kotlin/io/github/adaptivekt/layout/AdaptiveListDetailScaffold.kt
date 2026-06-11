@@ -26,6 +26,7 @@ import io.github.adaptivekt.core.AdaptiveBreakpoint
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Defines the sizing and weight constraints for a single pane within the [AdaptiveListDetailScaffold].
@@ -272,6 +273,7 @@ internal fun DefaultCompactDetailHeader(onBackToList: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .adaptiveInteractiveCursor()
             .clickable { onBackToList() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically

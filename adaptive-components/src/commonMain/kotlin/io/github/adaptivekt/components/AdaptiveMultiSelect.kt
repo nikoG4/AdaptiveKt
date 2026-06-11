@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public fun <T> filterMultiSelectOptions(
     options: List<T>,
@@ -251,6 +252,7 @@ private fun <T> MultiSelectTrigger(
             .background(actualBg, shape)
             .border(1.dp, borderColor, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -347,6 +349,7 @@ private fun MultiSelectCustomChip(
             .clip(shape)
             .background(if (enabled) AdaptiveComponentDefaults.PrimarySubtle else AdaptiveComponentDefaults.DisabledSurface, shape)
             .border(1.dp, if (enabled) AdaptiveComponentDefaults.Primary else AdaptiveComponentDefaults.Border, shape)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(enabled = enabled, onClick = onRemove)
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
         verticalAlignment = Alignment.CenterVertically,
@@ -387,6 +390,7 @@ private fun MultiSelectMenuItem(
             .clip(shape)
             .background(background, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -435,6 +439,7 @@ private fun MultiSelectOptionWrapper(
             .clip(shape)
             .background(background, shape)
             .hoverable(interactionSource)
+            .adaptiveInteractiveCursor()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

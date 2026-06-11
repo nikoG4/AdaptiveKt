@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public object AdaptivePaneDefaults {
     public fun contentPadding(): PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Small)
@@ -211,7 +212,9 @@ public fun AdaptivePaneListItem(
 ) {
     val shape = AdaptiveTheme.shapes.medium
     val clickModifier = if (onClick != null) {
-        Modifier.clickable(onClick = onClick)
+        Modifier
+            .adaptiveInteractiveCursor()
+            .clickable(onClick = onClick)
     } else {
         Modifier
     }

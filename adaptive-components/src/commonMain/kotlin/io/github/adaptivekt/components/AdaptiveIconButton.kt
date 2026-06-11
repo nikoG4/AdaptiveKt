@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Renders a compact, rounded icon button for toolbars and concise actions.
@@ -54,6 +55,7 @@ public fun AdaptiveIconButton(
             .background(background, shape)
             .border(1.dp, border, shape)
             .hoverable(interactionSource = interactionSource, enabled = enabled)
+            .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

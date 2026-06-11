@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 public fun normalizeCarouselIndex(index: Int, itemCount: Int): Int {
     if (itemCount <= 0) return 0
@@ -268,7 +269,9 @@ private fun CarouselIndicator(
             .border(1.dp, border, shape)
             .then(
                 if (enabled) {
-                    Modifier.clickable(indication = null, interactionSource = null, onClick = onClick)
+                    Modifier
+                        .adaptiveInteractiveCursor()
+                        .clickable(indication = null, interactionSource = null, onClick = onClick)
                 } else {
                     Modifier
                 },

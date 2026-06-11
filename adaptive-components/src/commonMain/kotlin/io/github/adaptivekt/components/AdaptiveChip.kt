@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveColorScheme
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Chip tone enum for AdaptiveChip.
@@ -74,7 +75,9 @@ public fun AdaptiveChip(
             .border(1.dp, chipBorderColor, shape)
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(enabled = enabled, onClick = onClick)
+                    Modifier
+                        .adaptiveInteractiveCursor(enabled)
+                        .clickable(enabled = enabled, onClick = onClick)
                 } else {
                     Modifier
                 },

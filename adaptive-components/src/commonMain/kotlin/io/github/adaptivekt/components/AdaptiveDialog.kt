@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
  * Modal dialog primitive for focused decisions, confirmations, and alerts.
@@ -55,6 +56,7 @@ public fun AdaptiveDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AdaptiveTheme.colors.overlay)
+                .adaptiveInteractiveCursor()
                 .clickable(onClick = onDismissRequest),
         )
         Box(
