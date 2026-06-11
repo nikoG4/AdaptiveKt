@@ -27,6 +27,11 @@ kotlin {
                 implementation(compose.foundation)
             }
         }
+        val androidMain by getting {
+            dependencies {
+                implementation("androidx.activity:activity-compose:1.8.2")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
