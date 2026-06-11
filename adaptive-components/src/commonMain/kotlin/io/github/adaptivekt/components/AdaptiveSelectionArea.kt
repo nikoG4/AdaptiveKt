@@ -9,6 +9,9 @@ import androidx.compose.runtime.Composable
  *
  * Keep interactive controls such as buttons, tabs, menu items and navigation labels outside this
  * wrapper so drag selection does not compete with click and hover interactions.
+ * 
+ * Note: AdaptiveSelectionArea does not provide layout structuring. If wrapping multiple composables,
+ * ensure they are placed within a layout component (like a Column) to prevent visual overlap.
  */
 @Composable
 public fun AdaptiveSelectionArea(

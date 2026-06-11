@@ -121,7 +121,9 @@ public fun AdaptiveDialog(
                         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
                     }
                     AdaptiveSelectionArea(enabled = contentSelectionEnabled) {
-                        content()
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            content()
+                        }
                     }
                     Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
                     Row(
