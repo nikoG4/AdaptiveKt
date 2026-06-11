@@ -1,0 +1,14 @@
+package io.github.adaptivekt.examples.communication
+
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import io.github.adaptivekt.examples.communication.ui.CommunicationApp
+
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Communication Suite Demo"
+    ) {
+        CommunicationApp()
+    }
+}

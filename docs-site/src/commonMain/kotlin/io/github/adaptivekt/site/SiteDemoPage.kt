@@ -60,6 +60,20 @@ internal fun SiteDemoPage() {
             )
         }
         
+        // Communication Suite Showcase
+        AdaptiveCard {
+            AdaptiveBadge("communication-suite-demo", tone = AdaptiveBadgeTone.Primary)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
+            SiteText("Communication Suite", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+            SiteText("Chat and mail productivity demo showcasing adaptive list-detail layouts, modal compose flows, selectable content and responsive panes.", color = SiteMuted, maxLines = 3)
+            Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
+            AdaptiveButton(
+                text = "Open Communication Suite",
+                onClick = { openSiteUrl("examples/communication-suite/") },
+            )
+        }
+        
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
 
         // Admin Demo

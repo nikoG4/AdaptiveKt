@@ -4,6 +4,7 @@ param(
     [string]$AdminDemoDist = "admin-demo/build/dist/wasmJs/productionExecutable",
     [string]$EcommerceDemoDist = "examples/ecommerce-demo/build/dist/wasmJs/productionExecutable",
     [string]$AiWorkspaceDemoDist = "examples/ai-workspace-demo/build/dist/wasmJs/productionExecutable",
+    [string]$CommunicationSuiteDemoDist = "examples/communication-suite-demo/build/dist/wasmJs/productionExecutable",
     [string]$BasePath = "/",
     [switch]$SkipBuild
 )
@@ -25,6 +26,9 @@ if (-not $SkipBuild) {
 
     Write-Host "Building ai-workspace-demo Wasm distribution..." -ForegroundColor Cyan
     .\gradlew.bat -p examples/ai-workspace-demo wasmJsBrowserDistribution --console=plain --stacktrace
+
+    Write-Host "Building communication-suite-demo Wasm distribution..." -ForegroundColor Cyan
+    .\gradlew.bat -p examples/communication-suite-demo wasmJsBrowserDistribution --console=plain --stacktrace
 }
 
 $distPath = Join-Path $root $DistDir
@@ -32,10 +36,12 @@ $docsPath = Join-Path $root $DocsSiteDist
 $demoPath = Join-Path $root $AdminDemoDist
 $ecommercePath = Join-Path $root $EcommerceDemoDist
 $aiWorkspacePath = Join-Path $root $AiWorkspaceDemoDist
+$communicationSuitePath = Join-Path $root $CommunicationSuiteDemoDist
 
 $demoTarget = Join-Path $distPath "demo\app"
 $ecommerceTarget = Join-Path $distPath "examples\ecommerce"
 $aiWorkspaceTarget = Join-Path $distPath "examples\ai-workspace"
+$communicationSuiteTarget = Join-Path $distPath "examples\communication-suite"
 
 function Normalize-BasePath {
     param([string]$Path)
@@ -83,6 +89,10 @@ if (-not (Test-Path $aiWorkspacePath)) {
     throw "AI Workspace demo distribution not found: $aiWorkspacePath"
 }
 
+if (-not (Test-Path $communicationSuitePath)) {
+    throw "Communication Suite demo distribution not found: $communicationSuitePath"
+}
+
 if (Test-Path $distPath) {
     $resolvedRoot = (Resolve-Path $root).Path
     $resolvedDist = (Resolve-Path $distPath).Path
@@ -103,6 +113,9 @@ Copy-Item -Path (Join-Path $ecommercePath "*") -Destination $ecommerceTarget -Re
 
 New-Item -ItemType Directory -Force -Path $aiWorkspaceTarget | Out-Null
 Copy-Item -Path (Join-Path $aiWorkspacePath "*") -Destination $aiWorkspaceTarget -Recurse -Force
+
+New-Item -ItemType Directory -Force -Path $communicationSuiteTarget | Out-Null
+Copy-Item -Path (Join-Path $communicationSuitePath "*") -Destination $communicationSuiteTarget -Recurse -Force
 
 New-Item -ItemType File -Force -Path (Join-Path $distPath ".nojekyll") | Out-Null
 
@@ -153,6 +166,7 @@ Inject-BaseHref -FilePath (Join-Path $distPath "index.html") -BaseHref $normaliz
 Inject-BaseHref -FilePath (Join-Path $demoTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "demo/app")
 Inject-BaseHref -FilePath (Join-Path $ecommerceTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "examples/ecommerce")
 Inject-BaseHref -FilePath (Join-Path $aiWorkspaceTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "examples/ai-workspace")
+Inject-BaseHref -FilePath (Join-Path $communicationSuiteTarget "index.html") -BaseHref (Join-BasePath $normalizedBasePath "examples/communication-suite")
 
 Write-Host "Prepared Pages site: $distPath" -ForegroundColor Green
 Write-Host "Base path: $normalizedBasePath" -ForegroundColor Green
@@ -160,3 +174,4 @@ Write-Host "Docs site copied from: $docsPath" -ForegroundColor Green
 Write-Host "Admin demo copied to: $demoTarget" -ForegroundColor Green
 Write-Host "Ecommerce showcase copied to: $ecommerceTarget" -ForegroundColor Green
 Write-Host "AI Workspace showcase copied to: $aiWorkspaceTarget" -ForegroundColor Green
+Write-Host "Communication Suite showcase copied to: $communicationSuiteTarget" -ForegroundColor Green

@@ -13,6 +13,7 @@ jobs:
     outputs:
       library: ${{ steps.filter.outputs.library }}
       ai_workspace: ${{ steps.filter.outputs.ai_workspace }}
+      communication_suite: ${{ steps.filter.outputs.communication_suite }}
       visual: ${{ steps.filter.outputs.visual }}
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +48,8 @@ jobs:
 
         LIBRARY_PATTERN='^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
         AI_WORKSPACE_PATTERN='^examples/ai-workspace-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
-        VISUAL_PATTERN='^(docs-site|admin-demo)/|^examples/(ai-workspace-demo|ecommerce-demo)/|^tools/(prepare-pages-site|check-site-links|capture-|docs-site-capture/)|^scripts/(verify-|check-)|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+        COMMUNICATION_SUITE_PATTERN='^examples/communication-suite-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+        VISUAL_PATTERN='^(docs-site|admin-demo)/|^examples/(ai-workspace-demo|ecommerce-demo|communication-suite-demo)/|^tools/(prepare-pages-site|check-site-links|capture-|docs-site-capture/|^validate-)|^scripts/(verify-|check-)|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
 
         if changed "$LIBRARY_PATTERN"; then
           echo "library=true" >> "$GITHUB_OUTPUT"
@@ -59,6 +61,12 @@ jobs:
           echo "ai_workspace=true" >> "$GITHUB_OUTPUT"
         else
           echo "ai_workspace=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if changed "$COMMUNICATION_SUITE_PATTERN"; then
+          echo "communication_suite=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "communication_suite=false" >> "$GITHUB_OUTPUT"
         fi
 
         if changed "$VISUAL_PATTERN"; then
@@ -141,6 +149,31 @@ jobs:
         ./gradlew desktopTest --console=plain
         ./gradlew wasmJsBrowserDistribution --console=plain
 
+  communication-suite-demo:
+    name: Build Communication Suite demo
+    needs: changes
+    if: needs.changes.outputs.communication_suite == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build Communication Suite Demo
+      working-directory: examples/communication-suite-demo
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build --console=plain
+        ./gradlew wasmJsBrowserDistribution --console=plain
+
   visual-artifacts:
     name: Capture visual validation artifacts
     needs: changes
@@ -182,12 +215,32 @@ jobs:
       shell: pwsh
       run: .\tools\capture-component-gallery.ps1 -SkipBuild
 
+    - name: Check Communication Suite Guards
+      shell: pwsh
+      run: .\scripts\check-communication-suite-guards.ps1
+
+    - name: Validate Communication Suite Routes
+      shell: pwsh
+      run: .\tools\validate-communication-suite-routes.ps1 -SkipBuild
+
+    - name: Capture Communication Suite screenshots
+      shell: pwsh
+      run: .\tools\capture-communication-suite.ps1 -SkipBuild
+
     - name: Upload AI Workspace screenshots
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: ai-workspace-screenshots
         path: artifacts/screenshots/ai-workspace-premium-refactor/
+        retention-days: 14
+
+    - name: Upload Communication Suite screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: communication-suite-screenshots
+        path: artifacts/screenshots/communication-suite/
         retention-days: 14
 
     - name: Upload Component Gallery screenshots
