@@ -45,7 +45,9 @@ public fun AdaptiveCard(
     ) {
         if (contentSelectionEnabled && onClick == null) {
             AdaptiveSelectionArea {
-                content()
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    content()
+                }
             }
         } else {
             content()

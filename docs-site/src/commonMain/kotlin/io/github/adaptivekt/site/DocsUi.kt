@@ -75,6 +75,7 @@ internal fun DocsShell(
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val compact = maxWidth < 880.dp
+        val showRightToc = maxWidth >= 1150.dp
         
         if (compact) {
             Column(
@@ -126,7 +127,7 @@ internal fun DocsShell(
                         Spacer(modifier = Modifier.height(48.dp))
                         SiteFooter()
                     }
-                    if (!onThisPage.isNullOrEmpty()) {
+                    if (!onThisPage.isNullOrEmpty() && showRightToc) {
                         DocsOnThisPage(
                             items = onThisPage,
                             compact = false,
@@ -281,9 +282,6 @@ internal fun DocsOnThisPage(
                         AdaptiveBadge(
                             text = item, 
                             tone = AdaptiveBadgeTone.Neutral,
-                            modifier = Modifier
-                                .docsClickableCursor()
-                                .clickable { onItemClick(item) }
                         )
                     }
                 }
@@ -293,8 +291,6 @@ internal fun DocsOnThisPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(AdaptiveTheme.shapes.small)
-                            .docsClickableCursor()
-                            .clickable { onItemClick(item) }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -439,7 +435,7 @@ internal fun DocsCodeBlock(
 @Composable
 internal fun DocsParameterTable(parameters: List<ComponentParameter>) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 720.dp
+        val compact = maxWidth < 560.dp
         if (compact) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 parameters.forEach { parameter ->
@@ -516,13 +512,15 @@ private fun ParameterRow(values: List<String>, header: Boolean = false) {
 internal fun ComponentDocArticle(doc: ComponentDoc) {
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
         AdaptiveCard(contentSelectionEnabled = true) {
-            AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
-            Spacer(modifier = Modifier.height(12.dp))
-            SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
-            Spacer(modifier = Modifier.height(10.dp))
-            SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 7)
-            Spacer(modifier = Modifier.height(12.dp))
-            SiteText(doc.usage, color = SiteMuted, maxLines = 8)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
+                Spacer(modifier = Modifier.height(12.dp))
+                SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
+                Spacer(modifier = Modifier.height(10.dp))
+                SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
+                Spacer(modifier = Modifier.height(12.dp))
+                SiteText(doc.usage, color = SiteMuted, maxLines = 20)
+            }
         }
 
         DocsSection("Basic usage", "A minimal example rendered with the real component API.") {

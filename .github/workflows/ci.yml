@@ -170,6 +170,14 @@ jobs:
       shell: pwsh
       run: .\tools\capture-ai-workspace-premium.ps1 -SkipBuild
 
+    - name: Check Docs Site Guards
+      shell: pwsh
+      run: .\scripts\check-docs-site-guards.ps1
+
+    - name: Validate Component Routes
+      shell: pwsh
+      run: .\tools\validate-component-routes.ps1 -SkipBuild
+
     - name: Capture Component Gallery screenshots
       shell: pwsh
       run: .\tools\capture-component-gallery.ps1 -SkipBuild
@@ -187,7 +195,15 @@ jobs:
       if: always()
       with:
         name: component-gallery-screenshots
-        path: artifacts/screenshots/component-gallery/
+        path: artifacts/screenshots/
+        retention-days: 14
+
+    - name: Upload Component Route Validation
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: component-route-validation
+        path: artifacts/route-validation/
         retention-days: 14
 
     - name: Upload Pages preview site
