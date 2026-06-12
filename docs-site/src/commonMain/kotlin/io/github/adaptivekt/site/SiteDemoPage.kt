@@ -62,7 +62,7 @@ internal fun SiteDemoPage() {
         
         // Communication Suite Showcase
         AdaptiveCard {
-            AdaptiveBadge("communication-suite-demo", tone = AdaptiveBadgeTone.Primary)
+            AdaptiveBadge("communication-suite-demo", tone = AdaptiveBadgeTone.Info)
             Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
             SiteText("Communication Suite", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
             Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
