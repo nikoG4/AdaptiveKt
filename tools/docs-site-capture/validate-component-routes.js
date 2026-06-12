@@ -43,8 +43,8 @@ async function validate() {
 
     try {
       const response = await page.goto(url, { waitUntil: 'networkidle' });
-      if (!response || !response.ok()) {
-        throw new Error(`HTTP status ${response ? response.status() : 'unknown'}`);
+      if (response !== null && !response.ok()) {
+        throw new Error(`HTTP status ${response.status()}`);
       }
 
       await page.waitForSelector('#webApp canvas', { timeout: 30000 });
@@ -57,6 +57,10 @@ async function validate() {
 
       // Check if hash routed correctly. In Compose Web, we can't easily query semantic DOM nodes unless they have testTags,
       // but if the page didn't throw an exception, it's mostly working.
+      if (!page.url().includes(hash)) {
+        throw new Error(`URL did not navigate to expected hash ${hash}`);
+      }
+      
       if (consoleMessages.length > 0) {
         throw new Error(`Console errors detected: ${consoleMessages[0]}`);
       }
