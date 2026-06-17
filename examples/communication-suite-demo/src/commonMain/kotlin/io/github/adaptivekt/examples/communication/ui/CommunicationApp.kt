@@ -29,31 +29,38 @@ private fun CommunicationShell(state: CommunicationState) {
         AdaptiveNavItem(
             id = "chat",
             label = "Chat",
-            icon = { /* Use AdaptiveIcons.Chat if available, else a placeholder */ }
+            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Chat) }
         ),
         AdaptiveNavItem(
-            id = "mail",
-            label = "Mail",
-            icon = { /* Use AdaptiveIcons.Mail if available, else a placeholder */ }
+            id = "contacts",
+            label = "Contacts",
+            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Contacts) }
         ),
         AdaptiveNavItem(
+            id = "calls",
+            label = "Calls",
+            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Call) }
+        ),        AdaptiveNavItem(
             id = "settings",
             label = "Settings",
-            icon = { /* Use AdaptiveIcons.Settings if available */ }
+            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Settings) }
         )
     )
 
     AdaptiveNavigationScaffold(
         navItems = navItems,
+        preferBottomNavigationOnCompact = true,
         selectedItemId = when (state.activeArea) {
             AppArea.Chat -> "chat"
-            AppArea.Mail -> "mail"
+            AppArea.Contacts -> "contacts"
+            AppArea.Calls -> "calls"
             AppArea.Settings -> "settings"
         },
         onItemSelected = { id ->
             when (id) {
                 "chat" -> state.activeArea = AppArea.Chat
-                "mail" -> state.activeArea = AppArea.Mail
+                "contacts" -> state.activeArea = AppArea.Contacts
+                "calls" -> state.activeArea = AppArea.Calls
                 "settings" -> state.activeArea = AppArea.Settings
             }
         },
@@ -64,7 +71,8 @@ private fun CommunicationShell(state: CommunicationState) {
         androidx.compose.foundation.layout.Box(modifier = androidx.compose.ui.Modifier.padding(padding)) {
             when (state.activeArea) {
                 AppArea.Chat -> io.github.adaptivekt.examples.communication.ui.chat.ChatArea(state)
-                AppArea.Mail -> io.github.adaptivekt.examples.communication.ui.mail.MailArea(state)
+                AppArea.Contacts -> io.github.adaptivekt.examples.communication.ui.contacts.ContactsArea(state)
+                AppArea.Calls -> io.github.adaptivekt.examples.communication.ui.calls.CallsArea(state)
                 AppArea.Settings -> io.github.adaptivekt.examples.communication.ui.settings.SettingsArea(state)
             }
         }

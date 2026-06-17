@@ -12,10 +12,6 @@ class CommunicationRouteResolverTest {
         CommunicationRouteResolver.resolve("#/chat/conversation/team-alpha", state)
         assertEquals(AppArea.Chat, state.activeArea)
         assertEquals("c_1", state.selectedConversationId)
-
-        CommunicationRouteResolver.resolve("#/mail/thread/product-launch", state)
-        assertEquals(AppArea.Mail, state.activeArea)
-        assertEquals("t_1", state.selectedMailThreadId)
     }
 
     @Test
@@ -42,15 +38,5 @@ class CommunicationRouteResolverTest {
         assertEquals("#/chat/conversation/support-desk", hash)
     }
 
-    @Test
-    fun testStableInternalSelectionAfterSlugNavigation() {
-        val state = CommunicationState()
-        
-        // Navigate by slug
-        CommunicationRouteResolver.resolve("#/mail/thread/security-review", state)
-        assertEquals("t_2", state.selectedMailThreadId)
-        
-        // Internal state is stable, hash is generated correctly
-        assertEquals("#/mail/thread/security-review", CommunicationRouteResolver.generateHash(state))
-    }
+
 }

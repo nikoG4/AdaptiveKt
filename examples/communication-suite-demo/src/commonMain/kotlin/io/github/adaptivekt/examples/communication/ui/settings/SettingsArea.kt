@@ -3,12 +3,14 @@ package io.github.adaptivekt.examples.communication.ui.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.components.*
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.examples.communication.state.CommunicationState
+import io.github.adaptivekt.examples.communication.model.PresenceStatus
 import io.github.adaptivekt.forms.*
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.layout.AdaptiveSection
@@ -58,20 +60,42 @@ fun SettingsArea(state: CommunicationState) {
             
             item {
                 Spacer(modifier = Modifier.height(24.dp))
+                AdaptiveSection(title = "Notifications") {
+                    AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                AdaptiveText("Enable Notifications")
+                                AdaptiveButton("On", variant = AdaptiveButtonVariant.Secondary, onClick = {})
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                AdaptiveText("Sound")
+                                AdaptiveButton("Default", variant = AdaptiveButtonVariant.Secondary, onClick = {})
+                            }
+                        }
+                    }
+                }
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
                 AdaptiveSection(title = "Account") {
                     AdaptiveCard(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             AdaptiveTextField(
-                                value = "Alex Johnson",
-                                onValueChange = {},
+                                value = state.currentUser.name,
+                                onValueChange = { state.currentUser = state.currentUser.copy(name = it) },
                                 label = "Display Name",
-                                enabled = false
+                                enabled = true
                             )
-                            AdaptiveTextField(
-                                value = "alex@example.com",
-                                onValueChange = {},
-                                label = "Email",
-                                enabled = false
+
+                            AdaptiveSelect(
+                                options = PresenceStatus.entries,
+                                selectedOption = state.currentUser.status ?: PresenceStatus.Offline,
+                                onSelectedOptionChange = { status ->
+                                    state.currentUser = state.currentUser.copy(status = status ?: PresenceStatus.Offline)
+                                },
+                                label = "Status",
+                                optionLabel = { it.name }
                             )
                         }
                     }
@@ -88,6 +112,11 @@ fun SettingsArea(state: CommunicationState) {
                         }
                     }
                 }
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+                AdaptiveButton("Sign Out", onClick = { /* Handle sign out */ }, variant = AdaptiveButtonVariant.Danger, modifier = Modifier.fillMaxWidth())
             }
         }
     }

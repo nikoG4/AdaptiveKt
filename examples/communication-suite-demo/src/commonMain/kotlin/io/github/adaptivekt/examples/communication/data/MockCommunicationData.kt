@@ -185,117 +185,48 @@ object MockCommunicationData {
         return list
     }
 
-    val labels = listOf(
-        MailLabel("l_1", "Product", "#4CAF50"),
-        MailLabel("l_2", "Security", "#F44336"),
-        MailLabel("l_3", "Finance", "#FF9800"),
-        MailLabel("l_4", "Legal", "#9C27B0"),
-        MailLabel("l_5", "Hiring", "#2196F3")
-    )
 
-    private fun generateMailThreads(): List<MailThread> {
-        val list = mutableListOf<MailThread>()
+    private fun generateCalls(): List<CallRecord> {
+        val list = mutableListOf<CallRecord>()
         val now = Clock.System.now()
-
-        val myContact = MailContact("Alex Johnson", "alex@example.com")
-        val pContact1 = MailContact("Product Team", "product@example.com")
-        val sContact = MailContact("Security Ops", "security@example.com")
-
-        // Product Launch
+        
         list.add(
-            MailThread(
-                id = "t_1",
-                slug = "product-launch",
-                subject = "AdaptiveKt v1.0 Launch Sequence",
-                labels = listOf(labels[0]),
-                priority = MailPriority.High,
-                messages = listOf(
-                    MailMessage(
-                        id = "mm_1_1",
-                        threadId = "t_1",
-                        sender = pContact1,
-                        recipients = listOf(myContact),
-                        timestamp = now.minus(2.days),
-                        body = "Hello team, \n\nWe are preparing for the v1.0 launch. Please review the attached assets.",
-                        attachments = listOf(MailAttachment("a_1", "launch_plan.pdf", 4000000, "application/pdf")),
-                        isRead = true
-                    ),
-                    MailMessage(
-                        id = "mm_1_2",
-                        threadId = "t_1",
-                        sender = myContact,
-                        recipients = listOf(pContact1),
-                        timestamp = now.minus(1.days),
-                        body = "Looks good. I will finalize the KMP targets.",
-                        isRead = true
-                    ),
-                    MailMessage(
-                        id = "mm_1_3",
-                        threadId = "t_1",
-                        sender = pContact1,
-                        recipients = listOf(myContact),
-                        timestamp = now.minus(2.hours),
-                        body = "Great, let's proceed.",
-                        isRead = false,
-                        isStarred = true
-                    )
-                )
+            CallRecord(
+                id = "call_1",
+                caller = teamAlpha[0],
+                receiver = currentUser,
+                timestamp = now.minus(30.minutes),
+                durationSeconds = 0,
+                type = CallType.Video,
+                direction = CallDirection.Missed
             )
         )
-
-        // Security Review
         list.add(
-            MailThread(
-                id = "t_2",
-                slug = "security-review",
-                subject = "Q3 Security Audit Findings",
-                labels = listOf(labels[1]),
-                priority = MailPriority.High,
-                messages = listOf(
-                    MailMessage(
-                        id = "mm_2_1",
-                        threadId = "t_2",
-                        sender = sContact,
-                        recipients = listOf(myContact),
-                        timestamp = now.minus(5.days),
-                        body = "Please review the Q3 findings. No critical issues, but a few warnings.",
-                        isRead = true
-                    )
-                )
+            CallRecord(
+                id = "call_2",
+                caller = currentUser,
+                receiver = teamAlpha[1],
+                timestamp = now.minus(2.hours),
+                durationSeconds = 1450,
+                type = CallType.Audio,
+                direction = CallDirection.Outgoing
             )
         )
-
-        // Generate 18 more threads to hit 20
-        for (i in 3..21) {
-            val messages = mutableListOf<MailMessage>()
-            for (j in 1..3) {
-                messages.add(
-                    MailMessage(
-                        id = "mm_${i}_$j",
-                        threadId = "t_$i",
-                        sender = MailContact("Sender $i", "sender$i@example.com"),
-                        recipients = listOf(myContact),
-                        timestamp = now.minus(i.days).plus(j.hours),
-                        body = "This is a generated email body for thread $i message $j. We need to make sure the email reading pane handles long text properly. AdaptiveKt is a powerful UI toolkit.",
-                        isRead = j != 3 || i % 2 == 0
-                    )
-                )
-            }
-            list.add(
-                MailThread(
-                    id = "t_$i",
-                    subject = "Generated Thread Subject $i",
-                    labels = if (i % 4 == 0) listOf(labels.random()) else emptyList(),
-                    folder = if (i % 7 == 0) MailFolder.Archive else MailFolder.Inbox,
-                    messages = messages
-                )
+        list.add(
+            CallRecord(
+                id = "call_3",
+                caller = supportDesk[0],
+                receiver = currentUser,
+                timestamp = now.minus(1.days),
+                durationSeconds = 300,
+                type = CallType.Video,
+                direction = CallDirection.Incoming
             )
-        }
-
-        return list.sortedByDescending { it.latestMessage?.timestamp ?: now }
+        )
+        return list
     }
 
     val conversations = generateConversations()
     val messages = generateMessages()
-    val mailThreads = generateMailThreads()
+    val calls = generateCalls()
 }

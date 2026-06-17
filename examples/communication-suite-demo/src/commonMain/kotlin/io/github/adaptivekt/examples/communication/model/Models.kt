@@ -58,58 +58,20 @@ data class Message(
     val isSystemMessage: Boolean = false
 )
 
-enum class MailFolder {
-    Inbox, Starred, Sent, Drafts, Archive, Spam, Trash, Snoozed
+enum class CallType {
+    Audio, Video
 }
 
-data class MailLabel(
-    val id: String,
-    val name: String,
-    val colorHex: String
-)
-
-data class MailContact(
-    val name: String,
-    val email: String,
-    val avatarUrl: String? = null
-)
-
-data class MailAttachment(
-    val id: String,
-    val name: String,
-    val sizeBytes: Long,
-    val mimeType: String
-)
-
-enum class MailPriority {
-    Low, Normal, High
+enum class CallDirection {
+    Incoming, Outgoing, Missed
 }
 
-data class MailMessage(
+data class CallRecord(
     val id: String,
-    val threadId: String,
-    val sender: MailContact,
-    val recipients: List<MailContact>,
-    val cc: List<MailContact> = emptyList(),
-    val bcc: List<MailContact> = emptyList(),
+    val caller: UserProfile,
+    val receiver: UserProfile,
     val timestamp: Instant,
-    val body: String,
-    val attachments: List<MailAttachment> = emptyList(),
-    val isRead: Boolean = false,
-    val isStarred: Boolean = false
+    val durationSeconds: Int,
+    val type: CallType,
+    val direction: CallDirection
 )
-
-data class MailThread(
-    val id: String,
-    val slug: String = id,
-    val subject: String,
-    val messages: List<MailMessage>,
-    val labels: List<MailLabel> = emptyList(),
-    val folder: MailFolder = MailFolder.Inbox,
-    val priority: MailPriority = MailPriority.Normal
-) {
-    val latestMessage: MailMessage? get() = messages.maxByOrNull { it.timestamp }
-    val isRead: Boolean get() = messages.all { it.isRead }
-    val isStarred: Boolean get() = messages.any { it.isStarred }
-    val senderNames: String get() = messages.map { it.sender.name }.distinct().joinToString(", ")
-}

@@ -19,9 +19,8 @@ const screens = [
   { name: 'chat-inbox', hash: '#/chat/inbox' },
   { name: 'chat-detail', hash: '#/chat/conversation/team-alpha' },
   { name: 'chat-search', hash: '#/chat/search' },
-  { name: 'mail-inbox', hash: '#/mail/inbox' },
-  { name: 'mail-reading', hash: '#/mail/thread/product-launch' },
-  { name: 'mail-compose', hash: '#/mail/compose' },
+  { name: 'contacts', hash: '#/contacts' },
+  { name: 'calls', hash: '#/calls' },
   { name: 'settings', hash: '#/settings' }
 ];
 

@@ -10,7 +10,6 @@ object CommunicationRouteResolver {
         when (segments[0]) {
             "chat" -> {
                 state.activeArea = AppArea.Chat
-                state.isComposeMailOpen = false
                 state.isChatSearchActive = false
 
                 when (segments.getOrNull(1)) {
@@ -31,33 +30,21 @@ object CommunicationRouteResolver {
                 }
             }
 
-            "mail" -> {
-                state.activeArea = AppArea.Mail
-                state.isChatSearchActive = false
-                state.isComposeMailOpen = false
 
-                when (segments.getOrNull(1)) {
-                    null, "", "inbox" -> state.selectedMailThreadId = null
-                    "thread" -> {
-                        val slug = segments.getOrNull(2)
-                        val thread = state.mailThreads.find { it.slug == slug }
-                        if (thread != null) {
-                            state.selectMailThread(thread.id)
-                        } else {
-                            state.selectedMailThreadId = null
-                        }
-                    }
-                    "compose" -> {
-                        state.selectedMailThreadId = null
-                        state.isComposeMailOpen = true
-                    }
-                }
+
+            "contacts" -> {
+                state.activeArea = AppArea.Contacts
+                state.isChatSearchActive = false
+            }
+
+            "calls" -> {
+                state.activeArea = AppArea.Calls
+                state.isChatSearchActive = false
             }
 
             "settings" -> {
                 state.activeArea = AppArea.Settings
                 state.isChatSearchActive = false
-                state.isComposeMailOpen = false
             }
         }
     }
@@ -76,18 +63,10 @@ object CommunicationRouteResolver {
                 }
             }
 
-            AppArea.Mail -> {
-                when {
-                    state.isComposeMailOpen -> "#/mail/compose"
-                    state.selectedMailThreadId != null -> {
-                        val threadId = state.selectedMailThreadId!!
-                        val slug = state.mailThreads.find { it.id == threadId }?.slug ?: threadId
-                        "#/mail/thread/$slug"
-                    }
-                    else -> "#/mail/inbox"
-                }
-            }
 
+
+            AppArea.Contacts -> "#/contacts"
+            AppArea.Calls -> "#/calls"
             AppArea.Settings -> "#/settings"
         }
     }

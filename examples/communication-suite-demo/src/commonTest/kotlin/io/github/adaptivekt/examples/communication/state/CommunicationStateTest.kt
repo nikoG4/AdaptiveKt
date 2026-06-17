@@ -1,6 +1,6 @@
 package io.github.adaptivekt.examples.communication.state
 
-import io.github.adaptivekt.examples.communication.model.MailFolder
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -49,19 +49,5 @@ class CommunicationStateTest {
         assertEquals(cId, newMsg.conversationId)
     }
 
-    @Test
-    fun testArchiveMailThread() {
-        val state = CommunicationState()
-        val tId = "t_1"
-        state.selectMailFolder(MailFolder.Inbox)
-        state.selectMailThread(tId)
-        
-        assertTrue(state.visibleMailThreads.any { it.id == tId })
-        
-        state.archiveMailThread(tId)
-        
-        // It should no longer be in Inbox
-        assertTrue(state.visibleMailThreads.none { it.id == tId })
-        assertEquals(null, state.selectedMailThreadId)
-    }
+
 }

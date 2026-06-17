@@ -82,7 +82,7 @@ public fun AdaptiveNavigationScaffold(
         
         // If navigationBehavior is provided, use it for backwards compatibility/custom behavior.
         // Otherwise, use the layoutInfo.navigationMode.
-        val placement = if (navigationBehavior != null) {
+        val placement = if (navigationBehavior != null || preferBottomNavigationOnCompact) {
             resolveAdaptiveNavigationPlacement(layoutInfo.breakpoint, effectiveBehavior)
         } else {
             when (layoutInfo.navigationMode) {

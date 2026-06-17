@@ -150,6 +150,7 @@ AdaptiveKt is designed for Compose Multiplatform commonMain usage. Platform-spec
 ## Examples
 
 - `admin-demo`: responsive admin dashboard demo for Desktop and Web/Wasm.
+- `communication-suite-demo`: adaptive chat and mail productivity showcase for Desktop and Web/Wasm.
 - `ai-workspace-demo`: complex SaaS/internal-tool showcase demonstrating advanced list/detail patterns, chat workspaces, prompt libraries, and form configurations.
 - `ecommerce-demo`: complete frontend storefront demonstrating product grids, checkout, and layout primitives.
 - `docs-site`: public Compose Multiplatform/Wasm documentation site and component catalog.
@@ -175,6 +176,12 @@ You can view the interactive demo gallery at the [AdaptiveKt GitHub Pages site](
 ```powershell
 .\gradlew.bat -p examples/ai-workspace-demo desktopRun
 .\gradlew.bat -p examples/ai-workspace-demo wasmJsBrowserDevelopmentRun
+```
+
+**How to run `communication-suite-demo`:**
+```powershell
+.\gradlew.bat -p examples/communication-suite-demo desktopRun
+.\gradlew.bat -p examples/communication-suite-demo wasmJsBrowserDevelopmentRun
 ```
 
 **How to prepare Pages locally:**

@@ -7,13 +7,11 @@ const outputDir = process.argv[3] || 'artifacts/route-validation/communication-s
 
 const routes = [
   '/', '#/chat', '#/chat/inbox', '#/chat/conversation/team-alpha', '#/chat/conversation/support-desk',
-  '#/chat/search', '#/mail', '#/mail/inbox', '#/mail/thread/product-launch', '#/mail/thread/security-review',
-  '#/mail/compose', '#/settings'
+  '#/chat/search', '#/contacts', '#/calls', '#/settings'
 ];
 
 function canonicalHash(route) {
   if (route === '/' || route === '#/chat') return '#/chat/inbox';
-  if (route === '#/mail') return '#/mail/inbox';
   return route;
 }
 
