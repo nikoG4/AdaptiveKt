@@ -170,9 +170,9 @@ jobs:
     - name: Build Communication Suite Demo
       working-directory: examples/communication-suite-demo
       run: |
-        chmod +x ./gradlew
-        ./gradlew build --console=plain
-        ./gradlew wasmJsBrowserDistribution --console=plain
+        chmod +x ../../gradlew
+        ../../gradlew build --console=plain --stacktrace
+        ../../gradlew wasmJsBrowserDistribution --console=plain --stacktrace
 
   visual-artifacts:
     name: Capture visual validation artifacts
