@@ -19,6 +19,7 @@ enum class ConversationType {
 
 data class Conversation(
     val id: String,
+    val slug: String = id,
     val type: ConversationType,
     val title: String,
     val participants: List<UserProfile>,
@@ -100,6 +101,7 @@ data class MailMessage(
 
 data class MailThread(
     val id: String,
+    val slug: String = id,
     val subject: String,
     val messages: List<MailMessage>,
     val labels: List<MailLabel> = emptyList(),

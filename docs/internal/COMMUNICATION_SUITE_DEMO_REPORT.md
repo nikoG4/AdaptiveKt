@@ -1,7 +1,7 @@
 # Communication Suite Demo Report
 
 ## Overview
-The Communication Suite Demo is a comprehensive showcase of AdaptiveKt capabilities, implementing a rich Chat and Mail client layout in a single KMP codebase supporting Web, Desktop, Android, and iOS.
+The Communication Suite Demo is a comprehensive showcase of AdaptiveKt capabilities, implementing a rich Chat and Mail client layout in a single KMP codebase supporting Desktop and Web/Wasm.
 
 ## Adaptive Component Utilization
 - Fully built using `AdaptiveApp`, `AdaptiveTheme`, and `AdaptiveNavigationScaffold` for app chrome.

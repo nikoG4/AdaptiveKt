@@ -241,6 +241,15 @@ jobs:
       with:
         name: communication-suite-screenshots
         path: artifacts/screenshots/communication-suite/
+        if-no-files-found: error
+        retention-days: 14
+
+    - name: Upload Communication Suite Route Validation
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: communication-suite-route-validation
+        path: artifacts/route-validation/communication-suite/
         retention-days: 14
 
     - name: Upload Component Gallery screenshots

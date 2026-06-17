@@ -34,6 +34,7 @@ object MockCommunicationData {
         list.add(
             Conversation(
                 id = "c_1",
+                slug = "team-alpha",
                 type = ConversationType.Channel,
                 title = "team-alpha",
                 participants = teamAlpha + currentUser,
@@ -45,6 +46,7 @@ object MockCommunicationData {
         list.add(
             Conversation(
                 id = "c_2",
+                slug = "support-desk",
                 type = ConversationType.Channel,
                 title = "support-desk",
                 participants = supportDesk + currentUser,
@@ -203,6 +205,7 @@ object MockCommunicationData {
         list.add(
             MailThread(
                 id = "t_1",
+                slug = "product-launch",
                 subject = "AdaptiveKt v1.0 Launch Sequence",
                 labels = listOf(labels[0]),
                 priority = MailPriority.High,
@@ -244,6 +247,7 @@ object MockCommunicationData {
         list.add(
             MailThread(
                 id = "t_2",
+                slug = "security-review",
                 subject = "Q3 Security Audit Findings",
                 labels = listOf(labels[1]),
                 priority = MailPriority.High,

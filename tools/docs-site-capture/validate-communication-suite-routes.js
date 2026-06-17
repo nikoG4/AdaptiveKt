@@ -6,8 +6,8 @@ const baseUrl = (process.argv[2] || 'http://localhost:8080/examples/communicatio
 const outputDir = process.argv[3] || 'artifacts/route-validation/communication-suite';
 
 const routes = [
-  '/', '#/chat', '#/chat/inbox', '#/chat/conversation/c_1', '#/chat/conversation/c_2', 
-  '#/chat/search', '#/mail', '#/mail/inbox', '#/mail/thread/t_1', '#/mail/thread/t_2', 
+  '/', '#/chat', '#/chat/inbox', '#/chat/conversation/team-alpha', '#/chat/conversation/support-desk', 
+  '#/chat/search', '#/mail', '#/mail/inbox', '#/mail/thread/product-launch', '#/mail/thread/security-review', 
   '#/mail/compose', '#/settings'
 ];
 
@@ -38,12 +38,27 @@ async function validate() {
 
     try {
       const response = await page.goto(url, { waitUntil: 'networkidle' });
-      if (!response || !response.ok()) {
-        throw new Error(`HTTP status ${response ? response.status() : 'unknown'}`);
+      if (response !== null && !response.ok()) {
+        throw new Error(`HTTP status ${response.status()}`);
       }
 
       await page.waitForSelector('canvas', { timeout: 30000 });
       await page.waitForTimeout(1000); // Wait for compose rendering
+
+      const currentUrl = await page.evaluate(() => window.location.href);
+      if (hash !== '/' && !currentUrl.includes(hash)) {
+        throw new Error(`URL mismatch. Expected hash ${hash} but got ${currentUrl}`);
+      }
+
+      const bridgeRoute = await page.evaluate(() => window.__adaptiveKtCommunicationRoute);
+      if (bridgeRoute !== undefined && bridgeRoute !== hash && hash !== '/') {
+        throw new Error(`Bridge mismatch. Expected hash ${hash} but got ${bridgeRoute}`);
+      }
+
+      const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+      if (hasOverflow) {
+        throw new Error('Horizontal overflow detected');
+      }
 
       const canvasBox = await page.locator('canvas').boundingBox();
       if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {

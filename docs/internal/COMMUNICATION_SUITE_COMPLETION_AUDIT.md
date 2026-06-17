@@ -19,8 +19,8 @@
 - Pages integration: complete
 - Tests: complete
 - Guards: complete
-- Visual capture: missing
-- CI integration: missing
+- Visual capture: complete
+- CI integration: complete
 - Docs: partial
 
 ### Mock Data Counts

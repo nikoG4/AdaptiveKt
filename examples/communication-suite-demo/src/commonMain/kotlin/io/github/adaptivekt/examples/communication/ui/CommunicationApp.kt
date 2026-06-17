@@ -12,8 +12,7 @@ import io.github.adaptivekt.examples.communication.state.CommunicationState
 import androidx.compose.foundation.layout.padding
 
 @Composable
-fun CommunicationApp() {
-    val state = remember { CommunicationState() }
+fun CommunicationApp(state: CommunicationState = remember { CommunicationState() }) {
     
     val themeMode = if (state.isDarkMode == true) AdaptiveThemeMode.Dark else if (state.isDarkMode == false) AdaptiveThemeMode.Light else AdaptiveThemeMode.System
     
