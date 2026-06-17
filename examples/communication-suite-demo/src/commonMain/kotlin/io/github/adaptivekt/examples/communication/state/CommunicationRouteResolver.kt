@@ -10,47 +10,54 @@ object CommunicationRouteResolver {
         when (segments[0]) {
             "chat" -> {
                 state.activeArea = AppArea.Chat
-                if (segments.size > 1) {
-                    when (segments[1]) {
-                        "inbox" -> state.selectedConversationId = null
-                        "conversation" -> {
-                            if (segments.size > 2) {
-                                val slug = segments[2]
-                                val conv = state.conversations.find { it.slug == slug }
-                                if (conv != null) {
-                                    state.selectConversation(conv.id)
-                                } else {
-                                    state.selectedConversationId = null // Unknown slug
-                                }
-                            }
+                state.isComposeMailOpen = false
+                state.isChatSearchActive = false
+
+                when (segments.getOrNull(1)) {
+                    null, "", "inbox" -> state.selectedConversationId = null
+                    "search" -> {
+                        state.selectedConversationId = null
+                        state.isChatSearchActive = true
+                    }
+                    "conversation" -> {
+                        val slug = segments.getOrNull(2)
+                        val conversation = state.conversations.find { it.slug == slug }
+                        if (conversation != null) {
+                            state.selectConversation(conversation.id)
+                        } else {
+                            state.selectedConversationId = null
                         }
                     }
                 }
             }
+
             "mail" -> {
                 state.activeArea = AppArea.Mail
-                if (segments.size > 1) {
-                    when (segments[1]) {
-                        "inbox" -> state.selectedMailThreadId = null
-                        "thread" -> {
-                            if (segments.size > 2) {
-                                val slug = segments[2]
-                                val thread = state.mailThreads.find { it.slug == slug }
-                                if (thread != null) {
-                                    state.selectMailThread(thread.id)
-                                } else {
-                                    state.selectedMailThreadId = null // Unknown slug
-                                }
-                            }
+                state.isChatSearchActive = false
+                state.isComposeMailOpen = false
+
+                when (segments.getOrNull(1)) {
+                    null, "", "inbox" -> state.selectedMailThreadId = null
+                    "thread" -> {
+                        val slug = segments.getOrNull(2)
+                        val thread = state.mailThreads.find { it.slug == slug }
+                        if (thread != null) {
+                            state.selectMailThread(thread.id)
+                        } else {
+                            state.selectedMailThreadId = null
                         }
-                        "compose" -> {
-                            state.isComposeMailOpen = true
-                        }
+                    }
+                    "compose" -> {
+                        state.selectedMailThreadId = null
+                        state.isComposeMailOpen = true
                     }
                 }
             }
+
             "settings" -> {
                 state.activeArea = AppArea.Settings
+                state.isChatSearchActive = false
+                state.isComposeMailOpen = false
             }
         }
     }
@@ -58,27 +65,29 @@ object CommunicationRouteResolver {
     fun generateHash(state: CommunicationState): String {
         return when (state.activeArea) {
             AppArea.Chat -> {
-                val convId = state.selectedConversationId
-                if (convId != null) {
-                    val slug = state.conversations.find { it.id == convId }?.slug ?: convId
-                    "#/chat/conversation/$slug"
-                } else {
-                    "#/chat/inbox"
+                when {
+                    state.isChatSearchActive -> "#/chat/search"
+                    state.selectedConversationId != null -> {
+                        val conversationId = state.selectedConversationId!!
+                        val slug = state.conversations.find { it.id == conversationId }?.slug ?: conversationId
+                        "#/chat/conversation/$slug"
+                    }
+                    else -> "#/chat/inbox"
                 }
             }
+
             AppArea.Mail -> {
-                if (state.isComposeMailOpen) {
-                    "#/mail/compose"
-                } else {
-                    val threadId = state.selectedMailThreadId
-                    if (threadId != null) {
+                when {
+                    state.isComposeMailOpen -> "#/mail/compose"
+                    state.selectedMailThreadId != null -> {
+                        val threadId = state.selectedMailThreadId!!
                         val slug = state.mailThreads.find { it.id == threadId }?.slug ?: threadId
                         "#/mail/thread/$slug"
-                    } else {
-                        "#/mail/inbox"
                     }
+                    else -> "#/mail/inbox"
                 }
             }
+
             AppArea.Settings -> "#/settings"
         }
     }
