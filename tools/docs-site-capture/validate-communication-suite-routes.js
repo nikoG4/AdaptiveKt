@@ -6,10 +6,16 @@ const baseUrl = (process.argv[2] || 'http://localhost:8080/examples/communicatio
 const outputDir = process.argv[3] || 'artifacts/route-validation/communication-suite';
 
 const routes = [
-  '/', '#/chat', '#/chat/inbox', '#/chat/conversation/team-alpha', '#/chat/conversation/support-desk', 
-  '#/chat/search', '#/mail', '#/mail/inbox', '#/mail/thread/product-launch', '#/mail/thread/security-review', 
+  '/', '#/chat', '#/chat/inbox', '#/chat/conversation/team-alpha', '#/chat/conversation/support-desk',
+  '#/chat/search', '#/mail', '#/mail/inbox', '#/mail/thread/product-launch', '#/mail/thread/security-review',
   '#/mail/compose', '#/settings'
 ];
+
+function canonicalHash(route) {
+  if (route === '/' || route === '#/chat') return '#/chat/inbox';
+  if (route === '#/mail') return '#/mail/inbox';
+  return route;
+}
 
 async function validate() {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -19,13 +25,12 @@ async function validate() {
   const results = [];
 
   for (const hash of routes) {
+    const expectedHash = canonicalHash(hash);
     const consoleMessages = [];
     const requestFailures = [];
 
     const consoleHandler = message => {
-      if (message.type() === 'error') {
-        consoleMessages.push(message.text());
-      }
+      if (message.type() === 'error') consoleMessages.push(message.text());
     };
     const requestHandler = request => {
       requestFailures.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`.trim());
@@ -43,22 +48,20 @@ async function validate() {
       }
 
       await page.waitForSelector('canvas', { timeout: 30000 });
-      await page.waitForTimeout(1000); // Wait for compose rendering
+      await page.waitForTimeout(1000);
 
-      const currentUrl = await page.evaluate(() => window.location.href);
-      if (hash !== '/' && !currentUrl.includes(hash)) {
-        throw new Error(`URL mismatch. Expected hash ${hash} but got ${currentUrl}`);
+      const currentHash = await page.evaluate(() => window.location.hash);
+      if (currentHash !== expectedHash) {
+        throw new Error(`URL mismatch. Expected hash ${expectedHash} but got ${currentHash}`);
       }
 
       const bridgeRoute = await page.evaluate(() => window.__adaptiveKtCommunicationRoute);
-      if (bridgeRoute !== undefined && bridgeRoute !== hash && hash !== '/') {
-        throw new Error(`Bridge mismatch. Expected hash ${hash} but got ${bridgeRoute}`);
+      if (bridgeRoute !== undefined && bridgeRoute !== expectedHash) {
+        throw new Error(`Bridge mismatch. Expected hash ${expectedHash} but got ${bridgeRoute}`);
       }
 
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
-      if (hasOverflow) {
-        throw new Error('Horizontal overflow detected');
-      }
+      if (hasOverflow) throw new Error('Horizontal overflow detected');
 
       const canvasBox = await page.locator('canvas').boundingBox();
       if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
@@ -69,10 +72,10 @@ async function validate() {
         throw new Error(`Console errors detected: ${consoleMessages[0]}`);
       }
 
-      results.push({ hash, success: true, consoleErrors: 0, networkFailures: requestFailures.length });
+      results.push({ hash, expectedHash, success: true, consoleErrors: 0, networkFailures: requestFailures.length });
     } catch (error) {
       console.error(`Failed: ${error.message}`);
-      results.push({ hash, success: false, error: error.message, consoleErrors: consoleMessages.length, networkFailures: requestFailures.length });
+      results.push({ hash, expectedHash, success: false, error: error.message, consoleErrors: consoleMessages.length, networkFailures: requestFailures.length });
     } finally {
       page.off('console', consoleHandler);
       page.off('requestfailed', requestHandler);
@@ -80,26 +83,24 @@ async function validate() {
   }
 
   await browser.close();
-  
+
   let report = '# Communication Suite Routes Validation Report\n\n';
   report += `Generated on: ${new Date().toISOString()}\n\n`;
   report += `Base URL: ${baseUrl}\n\n`;
-  report += '| Route | Console errors | Network failures | Result |\n';
-  report += '|---|---:|---:|---|\n';
+  report += '| Requested route | Canonical route | Console errors | Network failures | Result |\n';
+  report += '|---|---|---:|---:|---|\n';
 
   let failed = false;
   for (const result of results) {
     const status = result.success ? 'OK' : `FAILED: ${result.error}`;
-    report += `| ${result.hash} | ${result.consoleErrors} | ${result.networkFailures} | ${status} |\n`;
+    report += `| ${result.hash} | ${result.expectedHash} | ${result.consoleErrors} | ${result.networkFailures} | ${status} |\n`;
     if (!result.success || result.consoleErrors > 0 || result.networkFailures > 0) failed = true;
   }
 
   fs.writeFileSync(path.join(outputDir, 'route-validation-report.md'), report);
   console.log(`Report generated at ${path.join(outputDir, 'route-validation-report.md')}`);
 
-  if (failed) {
-    process.exit(1);
-  }
+  if (failed) process.exit(1);
 }
 
 validate().catch(error => {
