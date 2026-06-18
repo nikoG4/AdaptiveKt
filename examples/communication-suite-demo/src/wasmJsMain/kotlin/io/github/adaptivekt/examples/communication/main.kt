@@ -19,18 +19,26 @@ fun main() {
         LaunchedEffect(Unit) {
             // Initial load
             CommunicationRouteResolver.resolve(window.location.hash, state)
-            
+
+            // Check for theme override in URL
+            val search = window.location.search
+            if (search.contains("theme=dark")) {
+                state.isDarkMode = true
+            } else if (search.contains("theme=light")) {
+                state.isDarkMode = false
+            }
+
             // Listen for external hash changes
             window.addEventListener("hashchange", {
                 CommunicationRouteResolver.resolve(window.location.hash, state)
             })
-            
+
             // Sync state to hash and validation bridge
             snapshotFlow { CommunicationRouteResolver.generateHash(state) }.collect { hash ->
                 if (window.location.hash != hash) {
                     window.location.hash = hash
                 }
-                
+
                 // Expose validation bridge
                 updateValidationBridge(hash)
             }

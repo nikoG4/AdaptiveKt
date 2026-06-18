@@ -46,12 +46,17 @@ data class MessageReaction(
     val reactedByMe: Boolean
 )
 
+enum class MessageType {
+    Text, Code, Image, File, Link, System, Event
+}
+
 data class Message(
     val id: String,
     val conversationId: String,
     val sender: UserProfile,
     val content: String,
     val timestamp: Instant,
+    val type: MessageType = MessageType.Text,
     val deliveryStatus: MessageDeliveryStatus = MessageDeliveryStatus.Sent,
     val attachments: List<MessageAttachment> = emptyList(),
     val reactions: List<MessageReaction> = emptyList(),

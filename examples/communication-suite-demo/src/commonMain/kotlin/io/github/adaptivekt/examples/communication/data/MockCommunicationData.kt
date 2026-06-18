@@ -24,8 +24,29 @@ object MockCommunicationData {
         UserProfile("u_4", "David Kim", status = PresenceStatus.Online),
         UserProfile("u_5", "Lisa Thorne", status = PresenceStatus.Offline)
     )
-    
-    val allUsers = teamAlpha + supportDesk + currentUser
+
+    val marketingTeam = listOf(
+        UserProfile("u_6", "Rachel Green", status = PresenceStatus.Away),
+        UserProfile("u_7", "Joey Tribbiani", status = PresenceStatus.Online),
+        UserProfile("u_8", "Chandler Bing", status = PresenceStatus.Busy)
+    )
+
+    val externalPartners = listOf(
+        UserProfile("u_9", "Phoebe Buffay", status = PresenceStatus.Offline),
+        UserProfile("u_10", "Ross Geller", status = PresenceStatus.Online),
+        UserProfile("u_11", "Monica Geller", status = PresenceStatus.Busy),
+        UserProfile("u_12", "Gunther Centralperk", status = PresenceStatus.Away)
+    )
+
+    val contractors = listOf(
+        UserProfile("u_13", "Janice Hosenstein", status = PresenceStatus.Online),
+        UserProfile("u_14", "Mike Hannigan", status = PresenceStatus.Offline),
+        UserProfile("u_15", "Richard Burke", status = PresenceStatus.Away),
+        UserProfile("u_16", "Carol Willick", status = PresenceStatus.Online),
+        UserProfile("u_17", "Susan Bunch", status = PresenceStatus.Busy)
+    )
+
+    val allUsers = teamAlpha + supportDesk + marketingTeam + externalPartners + contractors + currentUser
 
     private fun generateConversations(): List<Conversation> {
         val now = Clock.System.now()
@@ -71,7 +92,7 @@ object MockCommunicationData {
                 id = "c_4",
                 type = ConversationType.Channel,
                 title = "engineering",
-                participants = allUsers,
+                participants = allUsers.take(8),
                 unreadCount = 15,
                 isPinned = false,
                 lastMessageAt = now.minus(1.days)
@@ -99,15 +120,21 @@ object MockCommunicationData {
                 lastMessageAt = now.minus(3.days)
             )
         )
-        // Add 6 more to reach 12 requirement
-        for (i in 7..12) {
+
+        // Add more conversations to reach 14
+        val additionalUserNames = listOf(
+            "Emma Watson", "David Kim", "Lisa Thorne", "Rachel Green",
+            "Joey Tribbiani", "Chandler Bing", "Phoebe Buffay", "Ross Geller"
+        )
+        for (i in 7..14) {
+            val user = allUsers.find { it.name == additionalUserNames[i - 7] } ?: allUsers[i]
             list.add(
                 Conversation(
                     id = "c_$i",
                     type = ConversationType.Direct,
-                    title = "User $i",
-                    participants = listOf(UserProfile("u_$i", "User $i", status = PresenceStatus.Offline), currentUser),
-                    unreadCount = 0,
+                    title = user.name,
+                    participants = listOf(user, currentUser),
+                    unreadCount = if (i % 3 == 0) 2 else 0,
                     isPinned = false,
                     lastMessageAt = now.minus(i.days)
                 )
@@ -120,7 +147,7 @@ object MockCommunicationData {
     private fun generateMessages(): List<Message> {
         val list = mutableListOf<Message>()
         val now = Clock.System.now()
-        
+
         // team-alpha messages
         val c1Id = "c_1"
         for (i in 0..30) {
@@ -132,11 +159,12 @@ object MockCommunicationData {
                     sender = sender,
                     content = "This is a mock message $i for team-alpha. We are discussing the new AdaptiveKt primitives.",
                     timestamp = now.minus((30 - i).hours).minus(5.minutes),
-                    deliveryStatus = if (sender == currentUser) MessageDeliveryStatus.Read else MessageDeliveryStatus.Sent
+                    deliveryStatus = if (sender == currentUser) MessageDeliveryStatus.Read else MessageDeliveryStatus.Sent,
+                    reactions = if (i == 5 || i == 15) listOf(MessageReaction("👍", 2, true), MessageReaction("🚀", 1, false)) else emptyList()
                 )
             )
         }
-        
+
         // Add a code snippet message
         list.add(
             Message(
@@ -166,16 +194,16 @@ object MockCommunicationData {
             )
         }
 
-        // Fill remaining messages to hit 80+ requirement
-        for (c in 4..12) {
+        // Fill remaining messages without using .random()
+        for (c in 4..14) {
             val cId = "c_$c"
             for (i in 0..5) {
                 list.add(
                     Message(
                         id = "m_${c}_$i",
                         conversationId = cId,
-                        sender = if (i % 2 == 0) currentUser else allUsers.random(),
-                        content = "Random placeholder message $i for conversation $c",
+                        sender = if (i % 2 == 0) currentUser else allUsers[(c + i) % allUsers.size],
+                        content = "Deterministic mock message $i for conversation $c.",
                         timestamp = now.minus((10 * c).days).plus(i.hours)
                     )
                 )
@@ -185,45 +213,41 @@ object MockCommunicationData {
         return list
     }
 
-
     private fun generateCalls(): List<CallRecord> {
         val list = mutableListOf<CallRecord>()
         val now = Clock.System.now()
-        
-        list.add(
-            CallRecord(
-                id = "call_1",
-                caller = teamAlpha[0],
-                receiver = currentUser,
-                timestamp = now.minus(30.minutes),
-                durationSeconds = 0,
-                type = CallType.Video,
-                direction = CallDirection.Missed
-            )
+
+        // Ensure exactly 12 calls
+        val callSetups = listOf(
+            Triple(teamAlpha[0], CallDirection.Missed, CallType.Video),
+            Triple(teamAlpha[1], CallDirection.Outgoing, CallType.Audio),
+            Triple(supportDesk[0], CallDirection.Incoming, CallType.Video),
+            Triple(marketingTeam[1], CallDirection.Missed, CallType.Audio),
+            Triple(externalPartners[0], CallDirection.Outgoing, CallType.Video),
+            Triple(contractors[2], CallDirection.Incoming, CallType.Audio),
+            Triple(teamAlpha[2], CallDirection.Incoming, CallType.Video),
+            Triple(supportDesk[1], CallDirection.Outgoing, CallType.Audio),
+            Triple(marketingTeam[0], CallDirection.Missed, CallType.Video),
+            Triple(externalPartners[2], CallDirection.Incoming, CallType.Audio),
+            Triple(contractors[0], CallDirection.Outgoing, CallType.Video),
+            Triple(marketingTeam[2], CallDirection.Missed, CallType.Audio)
         )
-        list.add(
-            CallRecord(
-                id = "call_2",
-                caller = currentUser,
-                receiver = teamAlpha[1],
-                timestamp = now.minus(2.hours),
-                durationSeconds = 1450,
-                type = CallType.Audio,
-                direction = CallDirection.Outgoing
+
+        callSetups.forEachIndexed { index, setup ->
+            list.add(
+                CallRecord(
+                    id = "call_${index + 1}",
+                    caller = if (setup.second == CallDirection.Incoming || setup.second == CallDirection.Missed) setup.first else currentUser,
+                    receiver = if (setup.second == CallDirection.Incoming || setup.second == CallDirection.Missed) currentUser else setup.first,
+                    timestamp = now.minus((index * 3 + 1).hours),
+                    durationSeconds = if (setup.second == CallDirection.Missed) 0 else (index * 120 + 30),
+                    type = setup.third,
+                    direction = setup.second
+                )
             )
-        )
-        list.add(
-            CallRecord(
-                id = "call_3",
-                caller = supportDesk[0],
-                receiver = currentUser,
-                timestamp = now.minus(1.days),
-                durationSeconds = 300,
-                type = CallType.Video,
-                direction = CallDirection.Incoming
-            )
-        )
-        return list
+        }
+
+        return list.sortedByDescending { it.timestamp }
     }
 
     val conversations = generateConversations()

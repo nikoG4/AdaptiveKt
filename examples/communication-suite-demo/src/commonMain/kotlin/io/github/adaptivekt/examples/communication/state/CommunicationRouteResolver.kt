@@ -20,7 +20,7 @@ object CommunicationRouteResolver {
                     }
                     "conversation" -> {
                         val slug = segments.getOrNull(2)
-                        val conversation = state.conversations.find { it.slug == slug }
+                        val conversation = state.conversations.find { it.slug == slug || it.id == slug }
                         if (conversation != null) {
                             state.selectConversation(conversation.id)
                         } else {
@@ -30,26 +30,86 @@ object CommunicationRouteResolver {
                 }
             }
 
-
-
             "contacts" -> {
                 state.activeArea = AppArea.Contacts
                 state.isChatSearchActive = false
+
+                when (segments.getOrNull(1)) {
+                    null, "", "all" -> {
+                        state.contactsFilter = "all"
+                        state.selectedContactId = null
+                    }
+                    "favorites" -> {
+                        state.contactsFilter = "favorites"
+                        state.selectedContactId = null
+                    }
+                    "pending" -> {
+                        state.contactsFilter = "pending"
+                        state.selectedContactId = null
+                    }
+                    "blocked" -> {
+                        state.contactsFilter = "blocked"
+                        state.selectedContactId = null
+                    }
+                    else -> {
+                        val userId = segments[1]
+                        state.contactsFilter = "all"
+                        state.selectedContactId = userId
+                    }
+                }
             }
 
             "calls" -> {
                 state.activeArea = AppArea.Calls
                 state.isChatSearchActive = false
+
+                when (segments.getOrNull(1)) {
+                    null, "", "history" -> {
+                        state.callsFilter = "history"
+                        state.activeCallId = null
+                        state.incomingCallId = null
+                    }
+                    "missed" -> {
+                        state.callsFilter = "missed"
+                        state.activeCallId = null
+                        state.incomingCallId = null
+                    }
+                    "incoming" -> {
+                        val id = segments.getOrNull(2)
+                        state.incomingCallId = id
+                        state.activeCallId = null
+                    }
+                    "outgoing", "active" -> {
+                        val id = segments.getOrNull(2)
+                        state.activeCallId = id
+                        state.incomingCallId = null
+                    }
+                }
             }
 
             "settings" -> {
                 state.activeArea = AppArea.Settings
                 state.isChatSearchActive = false
+
+                val section = segments.getOrNull(1)
+                if (section.isNullOrEmpty()) {
+                    state.settingsSection = "home"
+                } else {
+                    state.settingsSection = section
+                }
+            }
+
+            "demo" -> {
+                state.demoState = segments.getOrNull(1)
             }
         }
     }
 
     fun generateHash(state: CommunicationState): String {
+        if (state.demoState != null) {
+            return "#/demo/${state.demoState}"
+        }
+
         return when (state.activeArea) {
             AppArea.Chat -> {
                 when {
@@ -63,11 +123,26 @@ object CommunicationRouteResolver {
                 }
             }
 
+            AppArea.Contacts -> {
+                when {
+                    state.selectedContactId != null -> "#/contacts/${state.selectedContactId}"
+                    state.contactsFilter != "all" -> "#/contacts/${state.contactsFilter}"
+                    else -> "#/contacts"
+                }
+            }
 
+            AppArea.Calls -> {
+                when {
+                    state.activeCallId != null -> "#/calls/active/${state.activeCallId}"
+                    state.incomingCallId != null -> "#/calls/incoming/${state.incomingCallId}"
+                    state.callsFilter == "missed" -> "#/calls/missed"
+                    else -> "#/calls"
+                }
+            }
 
-            AppArea.Contacts -> "#/contacts"
-            AppArea.Calls -> "#/calls"
-            AppArea.Settings -> "#/settings"
+            AppArea.Settings -> {
+                if (state.settingsSection == "home") "#/settings" else "#/settings/${state.settingsSection}"
+            }
         }
     }
 }

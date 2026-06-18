@@ -19,10 +19,11 @@ import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
 import io.github.adaptivekt.layout.AdaptiveSection
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
-import io.github.adaptivekt.examples.communication.ui.icons.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
+import io.github.adaptivekt.examples.communication.ui.icons.DemoIcons
+import androidx.compose.material3.Icon
 
 fun formatRelativeTime(instant: Instant): String {
     val now = Clock.System.now()
@@ -56,7 +57,7 @@ fun ChatArea(state: CommunicationState) {
                     )
                 } else {
                     AdaptiveEmptyState(
-                        title = "No conversation selected", 
+                        title = "No conversation selected",
                         description = "Choose a conversation to start chatting."
                     )
                 }
@@ -72,18 +73,18 @@ fun ChatInbox(state: CommunicationState) {
             leadingContent = { AdaptiveText("Chat", fontWeight = FontWeight.Bold) },
             secondaryActions = {
                 AdaptiveIconButton(
-                    content = { DemoIcon(DemoIcons.Add) },
+                    content = { Icon(DemoIcons.Add, contentDescription = "Add") },
                     onClick = { state.isNewConversationOpen = true }
                 )
             }
         )
-        
+
         Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             AdaptiveTextField(
                 value = state.chatSearchQuery,
-                onValueChange = { 
+                onValueChange = {
                     state.chatSearchQuery = it
-                    state.isChatSearchActive = true 
+                    state.isChatSearchActive = true
                 },
                 placeholder = "Search messages...",
                 modifier = Modifier.fillMaxWidth()
@@ -106,7 +107,7 @@ fun ChatInbox(state: CommunicationState) {
                 } else {
                     state.messages.filter { it.content.contains(query, ignoreCase = true) }
                 }
-                
+
                 item {
                     AdaptiveSection(title = if (query.isBlank()) "Type to search" else "Search Results") {
                         if (query.isNotBlank() && searchResults.isEmpty()) {
@@ -181,15 +182,17 @@ fun ChatInbox(state: CommunicationState) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    // Normally we would add to state, but for mock, let's just close dialog 
+                                    // Normally we would add to state, but for mock, let's just close dialog
                                     // and select the user's direct message if it exists.
-                                    val existing = state.conversations.find { 
-                                        it.type == ConversationType.Direct && it.participants.any { p -> p.id == user.id } 
+                                    val existing = state.conversations.find {
+                                        it.type == ConversationType.Direct && it.participants.any { p -> p.id == user.id }
                                     }
                                     if (existing != null) {
                                         state.selectConversation(existing.id)
+                                        state.isNewConversationOpen = false
+                                    } else {
+                                        state.createConversation(user)
                                     }
-                                    state.isNewConversationOpen = false
                                 }
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -220,7 +223,7 @@ fun ConversationRow(conversation: Conversation, lastMessage: Message?, isSelecte
             Column(modifier = Modifier.weight(1f)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     AdaptiveText(
-                        text = conversation.title, 
+                        text = conversation.title,
                         fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.SemiBold,
                         color = AdaptiveTheme.colors.textPrimary,
                         maxLines = 1
@@ -238,10 +241,10 @@ fun ConversationRow(conversation: Conversation, lastMessage: Message?, isSelecte
                     val messagePreview = if (lastMessage != null) {
                         if (lastMessage.sender.id == MockCommunicationData.currentUser.id) "You: ${lastMessage.content}" else lastMessage.content
                     } else "No messages yet"
-                    
+
                     AdaptiveText(
-                        text = messagePreview, 
-                        color = if (conversation.unreadCount > 0) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textMuted, 
+                        text = messagePreview,
+                        color = if (conversation.unreadCount > 0) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textMuted,
                         maxLines = 1,
                         style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                         fontWeight = if (conversation.unreadCount > 0) FontWeight.Medium else FontWeight.Normal,
@@ -273,15 +276,15 @@ fun ChatDetail(state: CommunicationState, conversation: Conversation) {
             secondaryActions = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AdaptiveIconButton(
-                        content = { DemoIcon(DemoIcons.Call, contentDescription = "Start Audio Call") },
-                        onClick = { /* Start Audio Call */ }
+                        content = { Icon(DemoIcons.Call, contentDescription = "Start Audio Call") },
+                        onClick = { println("Action") }
                     )
                     AdaptiveIconButton(
-                        content = { DemoIcon(DemoIcons.Videocam, contentDescription = "Start Video Call") },
-                        onClick = { /* Start Video Call */ }
+                        content = { Icon(DemoIcons.Face, contentDescription = "Start Video Call") },
+                        onClick = { println("Action") }
                     )
                     AdaptiveIconButton(
-                        content = { DemoIcon(DemoIcons.Info, contentDescription = "Conversation Info") },
+                        content = { Icon(DemoIcons.Info, contentDescription = "Conversation Info") },
                         onClick = { isInfoPanelOpen = true }
                     )
                 }
@@ -289,7 +292,7 @@ fun ChatDetail(state: CommunicationState, conversation: Conversation) {
         )
 
         val messages = state.messages.filter { it.conversationId == conversation.id }.sortedBy { it.timestamp }
-        
+
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             reverseLayout = true
@@ -300,7 +303,7 @@ fun ChatDetail(state: CommunicationState, conversation: Conversation) {
         }
 
         ChatComposer(state, conversation)
-        
+
         if (isInfoPanelOpen) {
             AdaptiveDialog(
                 onDismissRequest = { isInfoPanelOpen = false },
@@ -365,14 +368,32 @@ fun MessageRow(message: Message) {
                     .background(bgColor, AdaptiveTheme.shapes.medium)
                     .padding(12.dp)
             ) {
-                AdaptiveText(message.content, color = textColor)
+                if (message.content.startsWith("Check out this snippet:\n```kotlin")) {
+                    Column {
+                        AdaptiveText("Check out this snippet:", color = textColor, modifier = Modifier.padding(bottom = 8.dp))
+                        Box(modifier = Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Color(0xFF2B2B2B), AdaptiveTheme.shapes.small).padding(8.dp)) {
+                            AdaptiveText("fun hello() {\n    println(\"World\")\n}", color = androidx.compose.ui.graphics.Color(0xFFE0E0E0), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                } else {
+                    AdaptiveText(message.content, color = textColor)
+                }
+            }
+        }
+        if (message.reactions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start) {
+                message.reactions.forEach { reaction ->
+                    AdaptiveChip("${reaction.emoji} ${reaction.count}", onClick = { println("Action") })
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
             }
         }
         if (message.attachments.isNotEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 message.attachments.forEach { att ->
-                    AdaptiveChip(text = att.name, onClick = {})
+                    AdaptiveChip(text = att.name, onClick = { println("Action") })
                 }
             }
         }
@@ -382,21 +403,21 @@ fun MessageRow(message: Message) {
 @Composable
 fun ChatComposer(state: CommunicationState, conversation: Conversation) {
     var text by remember { mutableStateOf(state.chatDrafts[conversation.id] ?: "") }
-    
+
     AdaptiveCard(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AdaptiveIconButton(
-                content = { DemoIcon(DemoIcons.AttachFile, contentDescription = "Attach File") },
-                onClick = { /* Open attachment */ }
+                content = { Icon(DemoIcons.AddCircle, contentDescription = "Attach File") },
+                onClick = { println("Action") }
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(modifier = Modifier.weight(1f)) {
                 AdaptiveTextField(
                     value = text,
-                    onValueChange = { 
+                    onValueChange = {
                         text = it
                         state.chatDrafts[conversation.id] = it
                     },

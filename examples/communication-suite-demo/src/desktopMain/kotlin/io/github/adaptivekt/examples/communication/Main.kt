@@ -7,7 +7,7 @@ import io.github.adaptivekt.examples.communication.ui.CommunicationApp
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "Communication Suite Demo"
+        title = "Adaptive Chat"
     ) {
         CommunicationApp()
     }

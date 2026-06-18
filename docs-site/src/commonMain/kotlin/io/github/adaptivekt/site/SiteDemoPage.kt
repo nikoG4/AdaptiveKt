@@ -31,7 +31,7 @@ internal fun SiteDemoPage() {
             description = "Explore full applications built with AdaptiveKt to see how components, layout, theming, and validation come together in production-like scenarios.",
         )
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
-        
+
         // AI Workspace Showcase
         AdaptiveCard {
             AdaptiveBadge("ai-workspace-demo", tone = AdaptiveBadgeTone.Info)
@@ -45,7 +45,7 @@ internal fun SiteDemoPage() {
                 onClick = { openSiteUrl("examples/ai-workspace/") },
             )
         }
-        
+
         // Ecommerce Showcase
         AdaptiveCard {
             AdaptiveBadge("ecommerce-demo", tone = AdaptiveBadgeTone.Success)
@@ -59,21 +59,21 @@ internal fun SiteDemoPage() {
                 onClick = { openSiteUrl("examples/ecommerce/") },
             )
         }
-        
-        // Communication Suite Showcase
+
+        // Adaptive Chat Showcase
         AdaptiveCard {
             AdaptiveBadge("communication-suite-demo", tone = AdaptiveBadgeTone.Info)
             Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-            SiteText("Communication Suite", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            SiteText("Adaptive Chat", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
             Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
             SiteText("Chat and mail productivity demo showcasing adaptive list-detail layouts, modal compose flows, selectable content and responsive panes.", color = SiteMuted, maxLines = 3)
             Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
             AdaptiveButton(
-                text = "Open Communication Suite",
+                text = "Open Adaptive Chat",
                 onClick = { openSiteUrl("examples/communication-suite/") },
             )
         }
-        
+
         Spacer(modifier = androidx.compose.ui.Modifier.height(20.dp))
 
         // Admin Demo

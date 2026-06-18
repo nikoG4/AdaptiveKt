@@ -23,6 +23,16 @@ class CommunicationState {
     var isChatSearchActive by mutableStateOf(false)
     var chatDrafts = mutableMapOf<String, String>()
 
+    var contactsFilter by mutableStateOf("all")
+    var callsFilter by mutableStateOf("history")
+    var activeCallId by mutableStateOf<String?>(null)
+    var incomingCallId by mutableStateOf<String?>(null)
+
+    var settingsSection by mutableStateOf("home")
+    var navigationBehavior by mutableStateOf(true)
+
+    var demoState by mutableStateOf<String?>(null)
+
     var isNewConversationOpen by mutableStateOf(false)
     var selectedAttachment by mutableStateOf<MessageAttachment?>(null)
 
@@ -57,6 +67,22 @@ class CommunicationState {
     }
 
 
+
+    fun createConversation(user: UserProfile) {
+        val now = Clock.System.now()
+        val newConv = Conversation(
+            id = "c_new_${now.toEpochMilliseconds()}",
+            type = ConversationType.Direct,
+            title = user.name,
+            participants = listOf(user, currentUser),
+            unreadCount = 0,
+            isPinned = false,
+            lastMessageAt = now
+        )
+        conversations = listOf(newConv) + conversations
+        selectConversation(newConv.id)
+        isNewConversationOpen = false
+    }
 
     val visibleConversations: List<Conversation>
         get() = if (chatSearchQuery.isBlank()) conversations else conversations.filter {

@@ -10,12 +10,14 @@ import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
 import io.github.adaptivekt.examples.communication.state.AppArea
 import io.github.adaptivekt.examples.communication.state.CommunicationState
 import androidx.compose.foundation.layout.padding
+import io.github.adaptivekt.examples.communication.ui.icons.DemoIcons
+import androidx.compose.material3.Icon
 
 @Composable
 fun CommunicationApp(state: CommunicationState = remember { CommunicationState() }) {
-    
+
     val themeMode = if (state.isDarkMode == true) AdaptiveThemeMode.Dark else if (state.isDarkMode == false) AdaptiveThemeMode.Light else AdaptiveThemeMode.System
-    
+
     AdaptiveApp {
         AdaptiveTheme(mode = themeMode) {
             CommunicationShell(state)
@@ -29,27 +31,27 @@ private fun CommunicationShell(state: CommunicationState) {
         AdaptiveNavItem(
             id = "chat",
             label = "Chat",
-            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Chat) }
+            icon = { Icon(DemoIcons.Email, contentDescription = "Chat") }
         ),
         AdaptiveNavItem(
             id = "contacts",
             label = "Contacts",
-            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Contacts) }
+            icon = { Icon(DemoIcons.Person, contentDescription = "Contacts") }
         ),
         AdaptiveNavItem(
             id = "calls",
             label = "Calls",
-            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Call) }
+            icon = { Icon(DemoIcons.Call, contentDescription = "Calls") }
         ),        AdaptiveNavItem(
             id = "settings",
             label = "Settings",
-            icon = { io.github.adaptivekt.examples.communication.ui.icons.DemoIcon(io.github.adaptivekt.examples.communication.ui.icons.DemoIcons.Settings) }
+            icon = { Icon(DemoIcons.Settings, contentDescription = "Settings") }
         )
     )
 
     AdaptiveNavigationScaffold(
         navItems = navItems,
-        preferBottomNavigationOnCompact = true,
+        preferBottomNavigationOnCompact = state.navigationBehavior,
         selectedItemId = when (state.activeArea) {
             AppArea.Chat -> "chat"
             AppArea.Contacts -> "contacts"

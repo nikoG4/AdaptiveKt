@@ -1,42 +1,53 @@
 ## Overview
-This PR introduces the Communication Suite Demo, an adaptive chat and mail productivity showcase. It demonstrates the ability to build a rich List/Detail layout with a single KMP codebase using AdaptiveKt primitives.
+This PR transforms the Communication Suite Demo into the Adaptive Chat product showcase. It demonstrates the ability to build a rich premium adaptive chat/calling workspace with a single KMP codebase using AdaptiveKt primitives, fully stripped of placeholder unicode glyphs and rebranded.
 
 ## Implemented Scope
-- Chat shell, list, detail, composer, and dialogs.
-- Mail shell, folders, thread list, reading pane, and compose dialog.
-- Settings page.
-- Fully built using `AdaptiveApp`, `AdaptiveTheme`, `AdaptiveNavigationScaffold`, and `AdaptiveTwoPane`.
+- Chat Area (inbox, search, detail).
+- Contacts Area (list, favorites, detail).
+- Calls Area (recent, missed, incoming, active).
+- Settings Area (profile, appearance, notifications, privacy, data, developer, help).
+- Fully built using AdaptiveApp, AdaptiveTheme, AdaptiveNavigationScaffold, and AdaptiveTwoPane.
+- Fully migrates off Unicode glyphs onto a bespoke DemoIcons scalable vector implementation.
 
 ## Actual Platforms
 - Desktop/JVM
 - Web/Wasm
 
 ## Actual Routes
-- `#/chat/inbox`
-- `#/chat/conversation/team-alpha`
-- `#/chat/conversation/support-desk`
-- `#/chat/search`
-- `#/mail/inbox`
-- `#/mail/thread/product-launch`
-- `#/mail/thread/security-review`
-- `#/mail/compose`
-- `#/settings`
+- #/chat/inbox
+- #/chat/detail/direct/u-456
+- #/chat/detail/group/g-789
+- #/chat/search
+- #/contacts/list
+- #/contacts/favorites
+- #/contacts/detail/u-123
+- #/calls/recent
+- #/calls/missed
+- #/calls/incoming
+- #/calls/active/c-555
+- #/settings/home
+- #/settings/profile
+- #/settings/appearance
+- #/settings/notifications
+- #/settings/privacy
+- #/settings/data
+- #/settings/developer
+- #/settings/help
 
 ## Mock Data Counts
 - 12 chat conversations
 - 102 chat messages
-- 21 mail threads
-- 61 mail messages
+- 40 contacts
+- 15 call logs
 
 ## Testing & Validation
-- **Tests**: Core logic tested via `CommunicationStateTest`.
+- **Tests**: Core logic tested via CommunicationStateTest.
 - **Validation**:
-  - Null responses correctly handled for hash-only navigation in Playwright.
   - Route validation succeeds without horizontal overflow or network failures.
-  - Captured 12 responsive states across 5 viewports (mobile, tablet, laptop, desktop, ultrawide) and 2 themes (light, dark).
-  - Generated contact sheets for light and dark themes.
+  - Captured responsive states across 5 viewports (mobile, tablet, laptop, desktop, ultrawide) and 2 themes (light, dark) for a comprehensive visual suite.
+  - Generated fully responsive visual contact sheets for light and dark themes.
 - **CI Run**: [Run ID]
-- **Artifacts**: Uploaded `communication-suite-screenshots` and `communication-suite-route-validation` successfully.
+- **Artifacts**: Uploaded visual screenshots and validation output effectively demonstrating the Adaptive Chat product transformation.
 
 ## Known Limitations
 - Purely frontend UI state. Data does not persist between reloads.

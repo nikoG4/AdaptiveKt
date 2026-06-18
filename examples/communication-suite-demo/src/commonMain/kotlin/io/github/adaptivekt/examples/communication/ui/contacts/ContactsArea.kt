@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,17 +14,19 @@ import io.github.adaptivekt.components.AdaptiveAvatar
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveButton
+import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.examples.communication.data.MockCommunicationData
 import io.github.adaptivekt.examples.communication.model.PresenceStatus
 import io.github.adaptivekt.examples.communication.model.UserProfile
 import io.github.adaptivekt.examples.communication.state.CommunicationState
-import io.github.adaptivekt.examples.communication.ui.icons.*
 import io.github.adaptivekt.feedback.AdaptiveEmptyState
 import io.github.adaptivekt.layout.AdaptiveActionBar
 import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
 import io.github.adaptivekt.layout.AdaptiveSection
+import io.github.adaptivekt.examples.communication.ui.icons.DemoIcons
+import androidx.compose.material3.Icon
 
 @Composable
 fun ContactsArea(state: CommunicationState) {
@@ -54,55 +56,77 @@ fun ContactsList(state: CommunicationState) {
             leadingContent = { AdaptiveText("Contacts", fontWeight = FontWeight.Bold) },
             secondaryActions = {
                 AdaptiveIconButton(
-                    content = { DemoIcon(DemoIcons.Search, contentDescription = "Search Contacts") },
-                    onClick = { /* Search Contacts */ }
+                    content = { Icon(DemoIcons.Search, contentDescription = "Search Contacts") },
+                    onClick = { state.demoState = "offline" }
                 )
                 AdaptiveIconButton(
-                    content = { DemoIcon(DemoIcons.Add, contentDescription = "Add Contact") },
-                    onClick = { /* Add Contact */ }
+                    content = { Icon(DemoIcons.Add, contentDescription = "Add Contact") },
+                    onClick = { state.demoState = "offline" }
                 )
             }
         )
 
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            AdaptiveButton("All", variant = if (state.contactsFilter == "all") AdaptiveButtonVariant.Primary else AdaptiveButtonVariant.Secondary, onClick = { state.contactsFilter = "all" })
+            AdaptiveButton("Favorites", variant = if (state.contactsFilter == "favorites") AdaptiveButtonVariant.Primary else AdaptiveButtonVariant.Secondary, onClick = { state.contactsFilter = "favorites" })
+        }
+
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            val usersByPresence = MockCommunicationData.allUsers.groupBy { it.status }
-            
-            // Online
-            val online = usersByPresence[PresenceStatus.Online].orEmpty()
-            if (online.isNotEmpty()) {
+            if (state.contactsFilter == "blocked") {
                 item {
-                    AdaptiveSection(title = "Online (${online.size})") {
-                        online.forEach { user ->
+                    AdaptiveEmptyState("No Blocked Contacts", description = "You haven't blocked anyone.", modifier = Modifier.padding(32.dp))
+                }
+            } else if (state.contactsFilter == "favorites") {
+                item {
+                    AdaptiveSection(title = "Favorites") {
+                        val favorites = MockCommunicationData.teamAlpha + MockCommunicationData.supportDesk.first()
+                        favorites.forEach { user ->
                             ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
                                 state.selectedContactId = user.id
                             }
                         }
                     }
                 }
-            }
+            } else {
+                val usersByPresence = MockCommunicationData.allUsers.filter { it.id != MockCommunicationData.currentUser.id }.groupBy { it.status }
 
-            // Busy / Away
-            val awayOrBusy = usersByPresence.filterKeys { it == PresenceStatus.Away || it == PresenceStatus.Busy }.values.flatten()
-            if (awayOrBusy.isNotEmpty()) {
-                item {
-                    AdaptiveSection(title = "Busy & Away (${awayOrBusy.size})") {
-                        awayOrBusy.forEach { user ->
-                            ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
-                                state.selectedContactId = user.id
+                // Online
+                val online = usersByPresence[PresenceStatus.Online].orEmpty()
+                if (online.isNotEmpty()) {
+                    item {
+                        AdaptiveSection(title = "Online (${online.size})") {
+                            online.forEach { user ->
+                                ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
+                                    state.selectedContactId = user.id
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Offline
-            val offline = usersByPresence[PresenceStatus.Offline].orEmpty()
-            if (offline.isNotEmpty()) {
-                item {
-                    AdaptiveSection(title = "Offline (${offline.size})") {
-                        offline.forEach { user ->
-                            ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
-                                state.selectedContactId = user.id
+                // Busy / Away
+                val awayOrBusy = usersByPresence.filterKeys { it == PresenceStatus.Away || it == PresenceStatus.Busy }.values.flatten()
+                if (awayOrBusy.isNotEmpty()) {
+                    item {
+                        AdaptiveSection(title = "Busy & Away (${awayOrBusy.size})") {
+                            awayOrBusy.forEach { user ->
+                                ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
+                                    state.selectedContactId = user.id
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Offline
+                val offline = usersByPresence[PresenceStatus.Offline].orEmpty()
+                if (offline.isNotEmpty()) {
+                    item {
+                        AdaptiveSection(title = "Offline (${offline.size})") {
+                            offline.forEach { user ->
+                                ContactRow(user = user, isSelected = user.id == state.selectedContactId) {
+                                    state.selectedContactId = user.id
+                                }
                             }
                         }
                     }
@@ -130,18 +154,18 @@ fun ContactRow(user: UserProfile, isSelected: Boolean, onClick: () -> Unit) {
                     PresenceStatus.Away -> AdaptiveTheme.colors.warning
                     PresenceStatus.Offline -> AdaptiveTheme.colors.textMuted
                 }
-                Box(modifier = Modifier.size(12.dp).background(badgeColor, androidx.compose.foundation.shape.CircleShape).align(Alignment.BottomEnd))
+                Box(modifier = Modifier.size(12.dp).background(badgeColor, CircleShape).align(Alignment.BottomEnd))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 AdaptiveText(
-                    text = user.name, 
+                    text = user.name,
                     fontWeight = FontWeight.SemiBold,
                     color = AdaptiveTheme.colors.textPrimary,
                     maxLines = 1
                 )
                 AdaptiveText(
-                    text = user.status.name, 
+                    text = user.status.name,
                     color = AdaptiveTheme.colors.textMuted,
                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                     maxLines = 1
@@ -165,7 +189,7 @@ fun ContactDetail(state: CommunicationState, contact: UserProfile) {
             AdaptiveAvatar(name = contact.name, size = 120.dp)
             Spacer(modifier = Modifier.height(16.dp))
             AdaptiveText(contact.name, fontWeight = FontWeight.Bold, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium)
-            
+
             val statusColor = when (contact.status) {
                 PresenceStatus.Online -> AdaptiveBadgeTone.Success
                 PresenceStatus.Busy -> AdaptiveBadgeTone.Danger
@@ -173,17 +197,46 @@ fun ContactDetail(state: CommunicationState, contact: UserProfile) {
                 PresenceStatus.Offline -> AdaptiveBadgeTone.Neutral
             }
             AdaptiveBadge(contact.status.name, tone = statusColor)
-            
+
             Spacer(modifier = Modifier.height(32.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                AdaptiveButton("Message", onClick = {
-                    // Setup conversation or navigate
-                    state.selectedContactId = null
-                    // If we had a way to jump to chat we would do it here
+                AdaptiveButton("Message", leadingIcon = { Icon(DemoIcons.Email, contentDescription = null) }, onClick = {
+                    val existing = state.conversations.find {
+                        it.type == io.github.adaptivekt.examples.communication.model.ConversationType.Direct && it.participants.any { p -> p.id == contact.id }
+                    }
+                    if (existing != null) {
+                        state.activeArea = io.github.adaptivekt.examples.communication.state.AppArea.Chat
+                        state.selectConversation(existing.id)
+                    }
                 })
-                AdaptiveButton("Call", onClick = {
-                    // Initiate call
+                AdaptiveButton("Call", leadingIcon = { Icon(DemoIcons.Call, contentDescription = null) }, onClick = {
+                    val call = MockCommunicationData.calls.firstOrNull { it.caller.id == contact.id || it.receiver.id == contact.id }
+                    if (call != null) {
+                        state.activeArea = io.github.adaptivekt.examples.communication.state.AppArea.Calls
+                        state.activeCallId = call.id
+                    }
                 })
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                AdaptiveSection(title = "Actions") {
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).clickable { state.demoState = "offline" }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(DemoIcons.Star, contentDescription = null, tint = AdaptiveTheme.colors.textMuted, modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        AdaptiveText("Add to Favorites")
+                    }
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).clickable { state.demoState = "offline" }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(DemoIcons.Person, contentDescription = null, tint = AdaptiveTheme.colors.textMuted, modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        AdaptiveText("Share Contact")
+                    }
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).clickable { state.demoState = "offline" }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(DemoIcons.Lock, contentDescription = null, tint = AdaptiveTheme.colors.danger, modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        AdaptiveText("Block Contact", color = AdaptiveTheme.colors.danger)
+                    }
+                }
             }
         }
     }
