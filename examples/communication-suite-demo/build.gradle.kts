@@ -2,12 +2,14 @@ plugins {
     kotlin("multiplatform") version "2.1.21"
     id("org.jetbrains.compose") version "1.8.2"
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
+    id("com.android.application") version "8.5.2"
 }
 
 group = "io.github.adaptivekt.examples"
 version = "1.0-SNAPSHOT"
 
 kotlin {
+    androidTarget()
     jvm("desktop")
     
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
@@ -58,6 +60,12 @@ kotlin {
             }
         }
         
+        val androidMain by getting {
+            dependencies {
+                implementation("androidx.activity:activity-compose:1.9.1")
+            }
+        }
+        
         commonTest.dependencies {
             implementation(kotlin("test"))
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
@@ -74,5 +82,21 @@ compose.desktop {
             packageName = "AdaptiveCommunicationSuite"
             packageVersion = "1.0.0"
         }
+    }
+}
+
+android {
+    namespace = "io.github.adaptivekt.examples.communication"
+    compileSdk = 35
+    defaultConfig {
+        applicationId = "io.github.adaptivekt.examples.communication"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }

@@ -34,12 +34,30 @@ fun CallsArea(state: CommunicationState) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             state.activeCallId != null -> {
-                val call = MockCommunicationData.calls.find { it.id == state.activeCallId } ?: return
-                ActiveCallScreen(state = state, call = call)
+                val call = MockCommunicationData.calls.find { it.id == state.activeCallId }
+                if (call != null) {
+                    ActiveCallScreen(state = state, call = call)
+                } else {
+                    io.github.adaptivekt.feedback.AdaptiveEmptyState(
+                        title = "Call Not Found",
+                        description = "The active call could not be located.",
+                        actionLabel = "Go Back",
+                        onAction = { state.activeCallId = null }
+                    )
+                }
             }
             state.incomingCallId != null -> {
-                val call = MockCommunicationData.calls.find { it.id == state.incomingCallId } ?: return
-                IncomingCallScreen(state = state, call = call)
+                val call = MockCommunicationData.calls.find { it.id == state.incomingCallId }
+                if (call != null) {
+                    IncomingCallScreen(state = state, call = call)
+                } else {
+                    io.github.adaptivekt.feedback.AdaptiveEmptyState(
+                        title = "Call Not Found",
+                        description = "The incoming call could not be located.",
+                        actionLabel = "Go Back",
+                        onAction = { state.incomingCallId = null }
+                    )
+                }
             }
             else -> {
                 CallsList(state = state)
@@ -150,40 +168,40 @@ fun CallRow(call: CallRecord, state: CommunicationState) {
 fun IncomingCallScreen(state: CommunicationState, call: CallRecord) {
     val caller = call.caller
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E)),
+        modifier = Modifier.fillMaxSize().background(AdaptiveTheme.colors.surfaceMuted),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AdaptiveText("Incoming Call", color = Color.White, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        AdaptiveText("Incoming Call", color = AdaptiveTheme.colors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(32.dp))
         AdaptiveAvatar(name = caller.name, size = 120.dp)
         Spacer(modifier = Modifier.height(24.dp))
-        AdaptiveText(caller.name, color = Color.White, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        AdaptiveText(caller.name, color = AdaptiveTheme.colors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        AdaptiveText("Video Call", color = Color.LightGray)
+        AdaptiveText("Video Call", color = AdaptiveTheme.colors.textSecondary)
 
         Spacer(modifier = Modifier.height(80.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(Color(0xFFE53935)).clickable {
+                Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(AdaptiveTheme.colors.danger).clickable {
                     state.incomingCallId = null
                 }, contentAlignment = Alignment.Center) {
-                    Icon(DemoIcons.Close, contentDescription = "Decline", tint = Color.White, modifier = Modifier.size(32.dp))
+                    Icon(DemoIcons.Close, contentDescription = "Decline", tint = AdaptiveTheme.colors.textInverse, modifier = Modifier.size(32.dp))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                AdaptiveText("Decline", color = Color.White)
+                AdaptiveText("Decline", color = AdaptiveTheme.colors.textPrimary)
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(Color(0xFF43A047)).clickable {
+                Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(AdaptiveTheme.colors.success).clickable {
                     state.activeCallId = call.id
                     state.incomingCallId = null
                 }, contentAlignment = Alignment.Center) {
-                    Icon(DemoIcons.Call, contentDescription = "Accept", tint = Color.White, modifier = Modifier.size(32.dp))
+                    Icon(DemoIcons.Call, contentDescription = "Accept", tint = AdaptiveTheme.colors.textInverse, modifier = Modifier.size(32.dp))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                AdaptiveText("Accept", color = Color.White)
+                AdaptiveText("Accept", color = AdaptiveTheme.colors.textPrimary)
             }
         }
     }
@@ -195,16 +213,16 @@ fun ActiveCallScreen(state: CommunicationState, call: CallRecord) {
     val otherPerson = if (isIncoming) call.caller else call.receiver
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(AdaptiveTheme.colors.surfaceRaised),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(48.dp))
         AdaptiveAvatar(name = otherPerson.name, size = 150.dp)
         Spacer(modifier = Modifier.height(24.dp))
-        AdaptiveText(otherPerson.name, color = Color.White, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        AdaptiveText(otherPerson.name, color = AdaptiveTheme.colors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        AdaptiveText("02:45", color = Color.White, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        AdaptiveText("02:45", color = AdaptiveTheme.colors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -214,16 +232,16 @@ fun ActiveCallScreen(state: CommunicationState, call: CallRecord) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             AdaptiveIconButton(
-                content = { Icon(DemoIcons.Person, contentDescription = "Mute", tint = Color.White) },
+                content = { Icon(DemoIcons.Person, contentDescription = "Mute") },
                 onClick = { state.demoState = "offline" }
             )
-            Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(Color(0xFFE53935)).clickable {
+            Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(AdaptiveTheme.colors.danger).clickable {
                 state.activeCallId = null
             }, contentAlignment = Alignment.Center) {
-                Icon(DemoIcons.Close, contentDescription = "End Call", tint = Color.White, modifier = Modifier.size(32.dp))
+                Icon(DemoIcons.Close, contentDescription = "End Call", tint = AdaptiveTheme.colors.textInverse, modifier = Modifier.size(32.dp))
             }
             AdaptiveIconButton(
-                content = { Icon(DemoIcons.Face, contentDescription = "Video", tint = Color.White) },
+                content = { Icon(DemoIcons.Face, contentDescription = "Video") },
                 onClick = { state.demoState = "offline" }
             )
         }

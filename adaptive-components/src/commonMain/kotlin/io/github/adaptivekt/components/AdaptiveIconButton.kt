@@ -48,6 +48,12 @@ public fun AdaptiveIconButton(
     }
     val border = if (hovered || pressed) AdaptiveComponentDefaults.BorderStrong else AdaptiveComponentDefaults.Border
 
+    val textColor = when {
+        !enabled -> AdaptiveComponentDefaults.DisabledContent
+        pressed || hovered -> AdaptiveTheme.colors.textPrimary
+        else -> AdaptiveTheme.colors.textSecondary
+    }
+
     Box(
         modifier = modifier
             .size(size)
@@ -64,6 +70,8 @@ public fun AdaptiveIconButton(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        content()
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides textColor) {
+            content()
+        }
     }
 }

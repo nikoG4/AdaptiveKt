@@ -371,8 +371,8 @@ fun MessageRow(message: Message) {
                 if (message.content.startsWith("Check out this snippet:\n```kotlin")) {
                     Column {
                         AdaptiveText("Check out this snippet:", color = textColor, modifier = Modifier.padding(bottom = 8.dp))
-                        Box(modifier = Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Color(0xFF2B2B2B), AdaptiveTheme.shapes.small).padding(8.dp)) {
-                            AdaptiveText("fun hello() {\n    println(\"World\")\n}", color = androidx.compose.ui.graphics.Color(0xFFE0E0E0), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                        Box(modifier = Modifier.fillMaxWidth().background(AdaptiveTheme.colors.surfaceMuted, AdaptiveTheme.shapes.small).padding(8.dp)) {
+                            AdaptiveText("fun hello() {\n    println(\"World\")\n}", color = AdaptiveTheme.colors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
                         }
                     }
                 } else {
@@ -443,4 +443,36 @@ fun ChatComposer(state: CommunicationState, conversation: Conversation) {
 @Composable
 private fun AdaptiveText(text: String, modifier: Modifier = Modifier, color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, style: androidx.compose.ui.text.TextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium) {
     androidx.compose.material3.Text(text = text, modifier = modifier, color = color, fontWeight = fontWeight, maxLines = maxLines, style = style)
+}
+
+@Composable
+fun EmptyChatsScenario() {
+    AdaptiveListDetailScaffold(
+        selectedItem = null,
+        onBackToList = { },
+        listPane = {
+            Column(modifier = Modifier.fillMaxSize()) {
+                AdaptiveActionBar(
+                    leadingContent = { AdaptiveText("Chat", fontWeight = FontWeight.Bold) },
+                    secondaryActions = {
+                        AdaptiveIconButton(
+                            content = { Icon(DemoIcons.Add, contentDescription = "Add") },
+                            onClick = { }
+                        )
+                    }
+                )
+                AdaptiveEmptyState(
+                    title = "No conversations yet",
+                    description = "Start a new chat to connect with others.",
+                    modifier = Modifier.padding(32.dp)
+                )
+            }
+        },
+        detailPane = {
+            AdaptiveEmptyState(
+                title = "No conversation selected",
+                description = "Choose a conversation to start chatting."
+            )
+        }
+    )
 }

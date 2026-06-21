@@ -9,6 +9,7 @@ enum class PresenceStatus {
 data class UserProfile(
     val id: String,
     val name: String,
+    val slug: String = id,
     val avatarUrl: String? = null,
     val status: PresenceStatus = PresenceStatus.Offline
 )

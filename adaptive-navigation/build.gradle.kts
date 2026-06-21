@@ -25,6 +25,7 @@ kotlin {
                 api(project(":adaptive-core"))
                 implementation(project(":adaptive-components"))
                 implementation(compose.foundation)
+                implementation(compose.material3)
             }
         }
         val androidMain by getting {

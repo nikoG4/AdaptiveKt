@@ -20,7 +20,11 @@ fun CommunicationApp(state: CommunicationState = remember { CommunicationState()
 
     AdaptiveApp {
         AdaptiveTheme(mode = themeMode) {
-            CommunicationShell(state)
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.material3.LocalContentColor provides io.github.adaptivekt.core.AdaptiveTheme.colors.textPrimary
+            ) {
+                CommunicationShell(state)
+            }
         }
     }
 }
@@ -52,6 +56,8 @@ private fun CommunicationShell(state: CommunicationState) {
     AdaptiveNavigationScaffold(
         navItems = navItems,
         preferBottomNavigationOnCompact = state.navigationBehavior,
+        navigationTitle = "Adaptive Chat",
+        navigationSubtitle = "Communication Suite",
         selectedItemId = when (state.activeArea) {
             AppArea.Chat -> "chat"
             AppArea.Contacts -> "contacts"
@@ -67,15 +73,19 @@ private fun CommunicationShell(state: CommunicationState) {
             }
         },
         topBar = {
-            io.github.adaptivekt.components.AdaptiveBadge("CommSuite", tone = io.github.adaptivekt.components.AdaptiveBadgeTone.Info)
+            io.github.adaptivekt.components.AdaptiveBadge("Adaptive Chat", tone = io.github.adaptivekt.components.AdaptiveBadgeTone.Info)
         }
     ) { padding ->
         androidx.compose.foundation.layout.Box(modifier = androidx.compose.ui.Modifier.padding(padding)) {
-            when (state.activeArea) {
-                AppArea.Chat -> io.github.adaptivekt.examples.communication.ui.chat.ChatArea(state)
-                AppArea.Contacts -> io.github.adaptivekt.examples.communication.ui.contacts.ContactsArea(state)
-                AppArea.Calls -> io.github.adaptivekt.examples.communication.ui.calls.CallsArea(state)
-                AppArea.Settings -> io.github.adaptivekt.examples.communication.ui.settings.SettingsArea(state)
+            if (state.demoState == "empty-chats") {
+                io.github.adaptivekt.examples.communication.ui.chat.EmptyChatsScenario()
+            } else {
+                when (state.activeArea) {
+                    AppArea.Chat -> io.github.adaptivekt.examples.communication.ui.chat.ChatArea(state)
+                    AppArea.Contacts -> io.github.adaptivekt.examples.communication.ui.contacts.ContactsArea(state)
+                    AppArea.Calls -> io.github.adaptivekt.examples.communication.ui.calls.CallsArea(state)
+                    AppArea.Settings -> io.github.adaptivekt.examples.communication.ui.settings.SettingsArea(state)
+                }
             }
         }
     }

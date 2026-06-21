@@ -11,13 +11,14 @@ object MockCommunicationData {
     val currentUser = UserProfile(
         id = "u_me",
         name = "Alex Johnson",
+        slug = "alex-johnson",
         status = PresenceStatus.Online
     )
 
     val teamAlpha = listOf(
-        UserProfile("u_1", "Sarah Chen", status = PresenceStatus.Online),
-        UserProfile("u_2", "Marcus Rodriguez", status = PresenceStatus.Busy),
-        UserProfile("u_3", "Emma Watson", status = PresenceStatus.Away)
+        UserProfile("u_1", "Sarah Chen", slug = "sarah-chen", status = PresenceStatus.Online),
+        UserProfile("u_2", "Marcus Rodriguez", slug = "marcus-rodriguez", status = PresenceStatus.Busy),
+        UserProfile("u_3", "Emma Watson", slug = "emma-watson", status = PresenceStatus.Away)
     )
 
     val supportDesk = listOf(
@@ -79,6 +80,7 @@ object MockCommunicationData {
         list.add(
             Conversation(
                 id = "c_3",
+                slug = "sarah-chen",
                 type = ConversationType.Direct,
                 title = "Sarah Chen",
                 participants = listOf(teamAlpha[0], currentUser),

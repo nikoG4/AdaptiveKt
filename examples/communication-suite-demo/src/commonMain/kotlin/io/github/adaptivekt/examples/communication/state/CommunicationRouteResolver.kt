@@ -2,6 +2,61 @@ package io.github.adaptivekt.examples.communication.state
 
 object CommunicationRouteResolver {
 
+    private fun CommunicationState.enterChat() {
+        activeArea = AppArea.Chat
+        selectedContactId = null
+        activeCallId = null
+        incomingCallId = null
+        if (settingsSection != "home") {
+            settingsSection = "home"
+        }
+        demoState = null
+    }
+
+    private fun CommunicationState.enterContacts() {
+        activeArea = AppArea.Contacts
+        selectedConversationId = null
+        isChatSearchActive = false
+        activeCallId = null
+        incomingCallId = null
+        if (settingsSection != "home") {
+            settingsSection = "home"
+        }
+        demoState = null
+    }
+
+    private fun CommunicationState.enterCalls() {
+        activeArea = AppArea.Calls
+        selectedConversationId = null
+        selectedContactId = null
+        isChatSearchActive = false
+        if (settingsSection != "home") {
+            settingsSection = "home"
+        }
+        demoState = null
+    }
+
+    private fun CommunicationState.enterSettings() {
+        activeArea = AppArea.Settings
+        selectedConversationId = null
+        selectedContactId = null
+        activeCallId = null
+        incomingCallId = null
+        isChatSearchActive = false
+        demoState = null
+    }
+
+    private fun CommunicationState.enterDemoScenario(scenario: String) {
+        activeArea = AppArea.Chat
+        selectedConversationId = null
+        selectedContactId = null
+        activeCallId = null
+        incomingCallId = null
+        isChatSearchActive = false
+        settingsSection = "home"
+        demoState = scenario
+    }
+
     fun resolve(hash: String, state: CommunicationState) {
         val path = hash.removePrefix("#").removePrefix("/")
         val segments = path.split("/")
@@ -9,8 +64,7 @@ object CommunicationRouteResolver {
 
         when (segments[0]) {
             "chat" -> {
-                state.activeArea = AppArea.Chat
-                state.isChatSearchActive = false
+                state.enterChat()
 
                 when (segments.getOrNull(1)) {
                     null, "", "inbox" -> state.selectedConversationId = null
@@ -19,6 +73,7 @@ object CommunicationRouteResolver {
                         state.isChatSearchActive = true
                     }
                     "conversation" -> {
+                        state.isChatSearchActive = false
                         val slug = segments.getOrNull(2)
                         val conversation = state.conversations.find { it.slug == slug || it.id == slug }
                         if (conversation != null) {
@@ -31,8 +86,7 @@ object CommunicationRouteResolver {
             }
 
             "contacts" -> {
-                state.activeArea = AppArea.Contacts
-                state.isChatSearchActive = false
+                state.enterContacts()
 
                 when (segments.getOrNull(1)) {
                     null, "", "all" -> {
@@ -53,15 +107,15 @@ object CommunicationRouteResolver {
                     }
                     else -> {
                         val userId = segments[1]
+                        val user = state.conversations.flatMap { it.participants }.find { it.slug == userId || it.id == userId }
                         state.contactsFilter = "all"
-                        state.selectedContactId = userId
+                        state.selectedContactId = user?.id ?: userId
                     }
                 }
             }
 
             "calls" -> {
-                state.activeArea = AppArea.Calls
-                state.isChatSearchActive = false
+                state.enterCalls()
 
                 when (segments.getOrNull(1)) {
                     null, "", "history" -> {
@@ -88,8 +142,7 @@ object CommunicationRouteResolver {
             }
 
             "settings" -> {
-                state.activeArea = AppArea.Settings
-                state.isChatSearchActive = false
+                state.enterSettings()
 
                 val section = segments.getOrNull(1)
                 if (section.isNullOrEmpty()) {
@@ -100,7 +153,10 @@ object CommunicationRouteResolver {
             }
 
             "demo" -> {
-                state.demoState = segments.getOrNull(1)
+                val scenario = segments.getOrNull(1)
+                if (scenario != null) {
+                    state.enterDemoScenario(scenario)
+                }
             }
         }
     }
@@ -125,7 +181,11 @@ object CommunicationRouteResolver {
 
             AppArea.Contacts -> {
                 when {
-                    state.selectedContactId != null -> "#/contacts/${state.selectedContactId}"
+                    state.selectedContactId != null -> {
+                        val contactId = state.selectedContactId!!
+                        val slug = state.conversations.flatMap { it.participants }.find { it.id == contactId }?.slug ?: contactId
+                        "#/contacts/$slug"
+                    }
                     state.contactsFilter != "all" -> "#/contacts/${state.contactsFilter}"
                     else -> "#/contacts"
                 }

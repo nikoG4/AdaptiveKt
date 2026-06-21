@@ -39,8 +39,15 @@ fun main() {
                     window.location.hash = hash
                 }
 
-                // Expose validation bridge
-                updateValidationBridge(hash)
+                val validationData = """
+                    {
+                        "route": "$hash",
+                        "activeArea": "${state.activeArea.name}",
+                        "selectedConversationId": ${if (state.selectedConversationId != null) "\"${state.selectedConversationId}\"" else "null"},
+                        "theme": "${if (state.isDarkMode == true) "dark" else "light"}"
+                    }
+                """.trimIndent()
+                updateValidationBridge(validationData)
             }
         }
 
@@ -48,6 +55,6 @@ fun main() {
     }
 }
 
-private fun updateValidationBridge(hash: String) {
-    js("window.__adaptiveKtCommunicationRoute = hash")
+private fun updateValidationBridge(validationData: String) {
+    js("window.__adaptiveKtCommunicationValidation = JSON.parse(validationData)")
 }

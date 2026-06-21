@@ -7,7 +7,11 @@ const outputDir = process.argv[3] || 'artifacts/route-validation/communication-s
 
 const routes = [
   '/', '#/chat', '#/chat/inbox', '#/chat/conversation/team-alpha', '#/chat/conversation/support-desk',
-  '#/chat/search', '#/contacts', '#/calls', '#/settings'
+  '#/chat/search', '#/contacts', '#/contacts/favorites', '#/contacts/sarah-chen',
+  '#/calls', '#/calls/missed', '#/calls/incoming/call_3', '#/calls/active/call_2',
+  '#/settings', '#/settings/profile', '#/settings/appearance', '#/settings/notifications',
+  '#/settings/privacy', '#/settings/data', '#/settings/developer', '#/settings/help',
+  '#/demo/empty-chats'
 ];
 
 function canonicalHash(route) {
@@ -53,9 +57,9 @@ async function validate() {
         throw new Error(`URL mismatch. Expected hash ${expectedHash} but got ${currentHash}`);
       }
 
-      const bridgeRoute = await page.evaluate(() => window.__adaptiveKtCommunicationRoute);
-      if (bridgeRoute !== undefined && bridgeRoute !== expectedHash) {
-        throw new Error(`Bridge mismatch. Expected hash ${expectedHash} but got ${bridgeRoute}`);
+      const bridge = await page.evaluate(() => window.__adaptiveKtCommunicationValidation);
+      if (bridge !== undefined && bridge.route !== expectedHash) {
+        throw new Error(`Bridge mismatch. Expected hash ${expectedHash} but got ${bridge.route}`);
       }
 
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);

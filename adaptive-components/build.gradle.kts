@@ -25,6 +25,7 @@ kotlin {
                 implementation(project(":adaptive-core"))
                 implementation(compose.animation)
                 implementation(compose.foundation)
+                implementation(compose.material3)
             }
         }
         val commonTest by getting {
