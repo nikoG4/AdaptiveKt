@@ -94,11 +94,40 @@ async function capture() {
   const callSettingsFiles = savedFiles.filter(f => path.basename(f).startsWith('calls-') || path.basename(f).startsWith('settings-'));
   const mobileDesktopFiles = savedFiles.filter(f => f.includes('-mobile-') || f.includes('-desktop-'));
 
-  await createContactSheet(lightFiles, path.join(outputDir, '1-all-screens-light.png'), 5, 250);
-  await createContactSheet(darkFiles, path.join(outputDir, '2-all-screens-dark.png'), 5, 250);
-  await createContactSheet(chatContactFiles, path.join(outputDir, '3-chat-contacts.png'), 5, 250);
-  await createContactSheet(callSettingsFiles, path.join(outputDir, '4-calls-settings.png'), 5, 250);
-  await createContactSheet(mobileDesktopFiles, path.join(outputDir, '5-mobile-desktop-compare.png'), 4, 300);
+  await createContactSheet(
+    lightFiles,
+    path.join(outputDir, 'contact-sheet-adaptive-chat-light.png'),
+    5,
+    250
+  );
+
+  await createContactSheet(
+    darkFiles,
+    path.join(outputDir, 'contact-sheet-adaptive-chat-dark.png'),
+    5,
+    250
+  );
+
+  await createContactSheet(
+    chatContactFiles,
+    path.join(outputDir, 'contact-sheet-adaptive-chat-chat-contacts.png'),
+    5,
+    250
+  );
+
+  await createContactSheet(
+    callSettingsFiles,
+    path.join(outputDir, 'contact-sheet-adaptive-chat-calls-settings.png'),
+    5,
+    250
+  );
+
+  await createContactSheet(
+    mobileDesktopFiles,
+    path.join(outputDir, 'contact-sheet-adaptive-chat-mobile-desktop.png'),
+    4,
+    300
+  );
 
   await browser.close();
   console.log(`Screenshots and contact sheets saved to ${outputDir}`);
