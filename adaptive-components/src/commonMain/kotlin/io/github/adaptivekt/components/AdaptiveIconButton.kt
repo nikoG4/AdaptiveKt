@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
@@ -49,7 +50,7 @@ public fun AdaptiveIconButton(
     val border = if (hovered || pressed) AdaptiveComponentDefaults.BorderStrong else AdaptiveComponentDefaults.Border
 
     val textColor = when {
-        !enabled -> AdaptiveComponentDefaults.DisabledContent
+        !enabled -> AdaptiveComponentDefaults.DisabledText
         pressed || hovered -> AdaptiveTheme.colors.textPrimary
         else -> AdaptiveTheme.colors.textSecondary
     }
