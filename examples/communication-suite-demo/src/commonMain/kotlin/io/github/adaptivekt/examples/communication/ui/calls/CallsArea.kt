@@ -41,8 +41,12 @@ fun CallsArea(state: CommunicationState) {
                     io.github.adaptivekt.feedback.AdaptiveEmptyState(
                         title = "Call Not Found",
                         description = "The active call could not be located.",
-                        actionLabel = "Go Back",
-                        onAction = { state.activeCallId = null }
+                        action = {
+                            AdaptiveButton(
+                                text = "Go Back",
+                                onClick = { state.activeCallId = null }
+                            )
+                        }
                     )
                 }
             }
@@ -54,8 +58,12 @@ fun CallsArea(state: CommunicationState) {
                     io.github.adaptivekt.feedback.AdaptiveEmptyState(
                         title = "Call Not Found",
                         description = "The incoming call could not be located.",
-                        actionLabel = "Go Back",
-                        onAction = { state.incomingCallId = null }
+                        action = {
+                            AdaptiveButton(
+                                text = "Go Back",
+                                onClick = { state.incomingCallId = null }
+                            )
+                        }
                     )
                 }
             }
@@ -142,7 +150,7 @@ fun CallRow(call: CallRecord, state: CommunicationState) {
                     Icon(callIcon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (call.direction == CallDirection.Missed) AdaptiveTheme.colors.danger else AdaptiveTheme.colors.textMuted)
                     Spacer(modifier = Modifier.width(4.dp))
                     AdaptiveText(
-                        text = "$typeStr • $timeStr",
+                        text = "$typeStr â€¢ $timeStr",
                         color = AdaptiveTheme.colors.textMuted,
                         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                         maxLines = 1

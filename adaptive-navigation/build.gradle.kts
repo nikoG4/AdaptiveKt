@@ -48,7 +48,7 @@ kotlin {
 
 android {
     namespace = "io.github.adaptivekt.navigation"
-    compileSdk = 34
+    compileSdk = 35
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

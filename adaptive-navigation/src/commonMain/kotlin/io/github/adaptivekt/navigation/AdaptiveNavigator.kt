@@ -78,7 +78,7 @@ class DefaultAdaptiveNavigator<R>(
 
     override fun replace(route: R) {
         if (backStack.isNotEmpty()) {
-            backStack.removeLast()
+            backStack.removeAt(backStack.lastIndex)
         }
         backStack.add(route)
         historyTracker?.replace(codec.encode(route))
@@ -86,7 +86,7 @@ class DefaultAdaptiveNavigator<R>(
 
     override fun goBack() {
         if (canGoBack) {
-            backStack.removeLast()
+            backStack.removeAt(backStack.lastIndex)
             historyTracker?.goBack()
         }
     }
@@ -96,7 +96,7 @@ class DefaultAdaptiveNavigator<R>(
         if (decoded != null) {
             if (decoded != currentRoute) {
                 if (backStack.size > 1 && backStack[backStack.size - 2] == decoded) {
-                    backStack.removeLast()
+                    backStack.removeAt(backStack.lastIndex)
                 } else {
                     backStack.add(decoded)
                 }
