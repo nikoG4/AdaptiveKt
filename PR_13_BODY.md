@@ -12,20 +12,21 @@ This PR transforms the Communication Suite Demo into the Adaptive Chat product s
 ## Actual Platforms
 - Desktop/JVM
 - Web/Wasm
+- Android
 
 ## Actual Routes
 - #/chat/inbox
-- #/chat/detail/direct/u-456
-- #/chat/detail/group/g-789
+- #/chat/conversation/c-123
+- #/chat/conversation/c-group
 - #/chat/search
-- #/contacts/list
+- #/contacts
 - #/contacts/favorites
-- #/contacts/detail/u-123
-- #/calls/recent
+- #/contacts/u-456
+- #/calls
 - #/calls/missed
-- #/calls/incoming
-- #/calls/active/c-555
-- #/settings/home
+- #/calls/incoming/call-789
+- #/calls/active/call-012
+- #/settings
 - #/settings/profile
 - #/settings/appearance
 - #/settings/notifications
@@ -46,9 +47,15 @@ This PR transforms the Communication Suite Demo into the Adaptive Chat product s
   - Route validation succeeds without horizontal overflow or network failures.
   - Captured responsive states across 5 viewports (mobile, tablet, laptop, desktop, ultrawide) and 2 themes (light, dark) for a comprehensive visual suite.
   - Generated fully responsive visual contact sheets for light and dark themes.
-- **CI Run**: [Run ID]
+- **CI Run**: 28124403210 (Commit 58a510bd3c0209962c59024017d3dc9c81dd0138)
 - **Artifacts**: Uploaded visual screenshots and validation output effectively demonstrating the Adaptive Chat product transformation.
 
 ## Known Limitations
 - Purely frontend UI state. Data does not persist between reloads.
 - No real network transport.
+
+## Final Polish Additions
+- **Conditional BottomBar Policy**: Dynamically hides the BottomBar on compact screens when a conversation is opened (`isNavigationVisible` abstraction), maintaining an immersive chat view. The Sidebar and Rail always remain visible on larger screens.
+- **Crash & Bug Fixes**: Replaced unstable `backStack.removeLast()` with bounds-safe `removeAt(backStack.lastIndex)`. Fixed compilation errors in AdaptiveIconButton.kt.
+- **UI/UX Cleanup**: Resolved UTF-8 mojibake (\u2022) in CallsArea.kt, abstracted Active Call action buttons into a cohesive CallControl, fully stripped leftover unicode placeholders, aligned Developer Options buttons, and addressed Android application ID discrepancies.
+- **Multiplatform Compatibility**: Verified builds and UI consistency across JVM, Wasm, and Android targets.
