@@ -1,4 +1,4 @@
-package io.github.adaptivekt.examples.communication.ui.calls
+﻿package io.github.adaptivekt.examples.communication.ui.calls
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -150,7 +150,7 @@ fun CallRow(call: CallRecord, state: CommunicationState) {
                     Icon(callIcon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (call.direction == CallDirection.Missed) AdaptiveTheme.colors.danger else AdaptiveTheme.colors.textMuted)
                     Spacer(modifier = Modifier.width(4.dp))
                     AdaptiveText(
-                        text = "$typeStr â€¢ $timeStr",
+                        text = "$typeStr \u2022 $timeStr",
                         color = AdaptiveTheme.colors.textMuted,
                         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                         maxLines = 1
@@ -260,3 +260,33 @@ fun ActiveCallScreen(state: CommunicationState, call: CallRecord) {
 private fun AdaptiveText(text: String, modifier: Modifier = Modifier, color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, style: androidx.compose.ui.text.TextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium) {
     androidx.compose.material3.Text(text = text, modifier = modifier, color = color, fontWeight = fontWeight, maxLines = maxLines, style = style)
 }
+
+@Composable
+private fun CallControl(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    isDanger: Boolean = false,
+    contentDescription: String
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (isDanger) {
+            Box(
+                modifier = Modifier.size(64.dp).clip(CircleShape).background(AdaptiveTheme.colors.danger).clickable(onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = contentDescription, tint = AdaptiveTheme.colors.textInverse, modifier = Modifier.size(32.dp))
+            }
+        } else {
+            Box(
+                modifier = Modifier.size(64.dp).clip(CircleShape).background(AdaptiveTheme.colors.surfaceMuted).clickable(onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = contentDescription, tint = AdaptiveTheme.colors.textPrimary, modifier = Modifier.size(32.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        AdaptiveText(label, color = AdaptiveTheme.colors.textPrimary)
+    }
+}
+

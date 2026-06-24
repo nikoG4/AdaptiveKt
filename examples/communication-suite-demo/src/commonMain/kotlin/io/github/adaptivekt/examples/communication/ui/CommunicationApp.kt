@@ -7,6 +7,7 @@ import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
+import io.github.adaptivekt.navigation.AdaptiveNavigationPlacement
 import io.github.adaptivekt.examples.communication.state.AppArea
 import io.github.adaptivekt.examples.communication.state.CommunicationState
 import androidx.compose.foundation.layout.padding
@@ -72,8 +73,10 @@ private fun CommunicationShell(state: CommunicationState) {
                 "settings" -> state.activeArea = AppArea.Settings
             }
         },
-        topBar = {
-            io.github.adaptivekt.components.AdaptiveBadge("Adaptive Chat", tone = io.github.adaptivekt.components.AdaptiveBadgeTone.Info)
+        isNavigationVisible = { placement ->
+            placement != AdaptiveNavigationPlacement.BottomBar ||
+                state.activeArea != AppArea.Chat ||
+                state.selectedConversationId == null
         }
     ) { padding ->
         androidx.compose.foundation.layout.Box(modifier = androidx.compose.ui.Modifier.padding(padding)) {

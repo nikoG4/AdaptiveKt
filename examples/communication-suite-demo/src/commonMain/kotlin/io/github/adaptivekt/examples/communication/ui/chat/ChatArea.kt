@@ -226,7 +226,8 @@ fun ConversationRow(conversation: Conversation, lastMessage: Message?, isSelecte
                         text = conversation.title,
                         fontWeight = if (conversation.unreadCount > 0) FontWeight.Bold else FontWeight.SemiBold,
                         color = AdaptiveTheme.colors.textPrimary,
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     if (lastMessage != null) {
                         AdaptiveText(
@@ -246,6 +247,7 @@ fun ConversationRow(conversation: Conversation, lastMessage: Message?, isSelecte
                         text = messagePreview,
                         color = if (conversation.unreadCount > 0) AdaptiveTheme.colors.textPrimary else AdaptiveTheme.colors.textMuted,
                         maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                         fontWeight = if (conversation.unreadCount > 0) FontWeight.Medium else FontWeight.Normal,
                         modifier = Modifier.weight(1f)
@@ -330,7 +332,7 @@ fun ChatDetail(state: CommunicationState, conversation: Conversation) {
                         } else {
                             allFiles.forEach { file ->
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                                    AdaptiveText("📄", modifier = Modifier.padding(end = 8.dp))
+                                    Icon(DemoIcons.Email, contentDescription = "File", modifier = Modifier.padding(end = 8.dp).size(16.dp))
                                     AdaptiveText(file.name, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
                                 }
                             }
@@ -441,8 +443,8 @@ fun ChatComposer(state: CommunicationState, conversation: Conversation) {
 }
 
 @Composable
-private fun AdaptiveText(text: String, modifier: Modifier = Modifier, color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, style: androidx.compose.ui.text.TextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium) {
-    androidx.compose.material3.Text(text = text, modifier = modifier, color = color, fontWeight = fontWeight, maxLines = maxLines, style = style)
+private fun AdaptiveText(text: String, modifier: Modifier = Modifier, color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, overflow: androidx.compose.ui.text.style.TextOverflow = androidx.compose.ui.text.style.TextOverflow.Clip, style: androidx.compose.ui.text.TextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium) {
+    androidx.compose.material3.Text(text = text, modifier = modifier, color = color, fontWeight = fontWeight, maxLines = maxLines, overflow = overflow, style = style)
 }
 
 @Composable

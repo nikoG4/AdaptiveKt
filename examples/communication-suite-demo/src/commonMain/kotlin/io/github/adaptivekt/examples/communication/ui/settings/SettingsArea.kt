@@ -280,8 +280,8 @@ fun DeveloperSettings(state: CommunicationState) {
                 label = "Navigation Scaffold Behavior",
                 optionLabel = { it }
             )
-            AdaptiveButton("Reset Demo Data", onClick = { state.demoState = "empty-chats" }, variant = AdaptiveButtonVariant.Danger)
-            AdaptiveButton("Simulate Error State", onClick = { state.demoState = "error" }, variant = AdaptiveButtonVariant.Ghost)
+            AdaptiveButton("Reset Demo Data", onClick = { state.demoState = "empty-chats" }, variant = AdaptiveButtonVariant.Danger, modifier = Modifier.fillMaxWidth())
+            AdaptiveButton("Simulate Error State", onClick = { state.demoState = "error" }, variant = AdaptiveButtonVariant.Secondary, modifier = Modifier.fillMaxWidth())
         }
     }
 }
