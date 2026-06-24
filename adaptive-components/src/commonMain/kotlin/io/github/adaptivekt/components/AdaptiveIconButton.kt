@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
@@ -48,6 +49,12 @@ public fun AdaptiveIconButton(
     }
     val border = if (hovered || pressed) AdaptiveComponentDefaults.BorderStrong else AdaptiveComponentDefaults.Border
 
+    val textColor = when {
+        !enabled -> AdaptiveComponentDefaults.DisabledText
+        pressed || hovered -> AdaptiveTheme.colors.textPrimary
+        else -> AdaptiveTheme.colors.textSecondary
+    }
+
     Box(
         modifier = modifier
             .size(size)
@@ -64,6 +71,8 @@ public fun AdaptiveIconButton(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        content()
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides textColor) {
+            content()
+        }
     }
 }

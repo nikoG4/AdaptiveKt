@@ -93,27 +93,29 @@ public fun AdaptiveButton(
             .padding(horizontal = metrics.horizontalPadding, vertical = metrics.verticalPadding),
         contentAlignment = Alignment.Center,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (leadingIcon != null) {
-                leadingIcon()
-                Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
-            }
-            BasicText(
-                text = text,
-                style = TextStyle(
-                    fontSize = metrics.fontSize,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.content,
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (trailingIcon != null) {
-                Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
-                trailingIcon()
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides colors.content) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
+                }
+                BasicText(
+                    text = text,
+                    style = TextStyle(
+                        fontSize = metrics.fontSize,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.content,
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (trailingIcon != null) {
+                    Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
+                    trailingIcon()
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
+import io.github.adaptivekt.components.icons.AdaptiveIcons
 
 /**
  * Defines the sizing and weight constraints for a single pane within the [AdaptiveListDetailScaffold].
@@ -278,7 +280,18 @@ internal fun DefaultCompactDetailHeader(onBackToList: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicText("← Back", style = TextStyle(fontWeight = FontWeight.Bold))
+        AdaptiveIcons.ChevronLeft(
+            tint = AdaptiveTheme.colors.textPrimary,
+            contentDescription = "Back"
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        BasicText(
+            text = "Back",
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                color = AdaptiveTheme.colors.textPrimary
+            )
+        )
     }
 }
 

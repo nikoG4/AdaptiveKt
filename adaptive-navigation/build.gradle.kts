@@ -25,6 +25,7 @@ kotlin {
                 api(project(":adaptive-core"))
                 implementation(project(":adaptive-components"))
                 implementation(compose.foundation)
+                implementation(compose.material3)
             }
         }
         val androidMain by getting {
@@ -47,7 +48,7 @@ kotlin {
 
 android {
     namespace = "io.github.adaptivekt.navigation"
-    compileSdk = 34
+    compileSdk = 35
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

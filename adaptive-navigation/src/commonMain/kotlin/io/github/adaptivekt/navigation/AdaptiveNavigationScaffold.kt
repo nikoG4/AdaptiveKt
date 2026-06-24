@@ -55,6 +55,7 @@ private val BottomNavigationHeight: Dp = AdaptiveTokens.Sizes.TopBarHeight + Ada
  * @param navigationItemStyle Visual style for navigation items (Card, Pill, Minimal).
  * @param navigationDensity Padding density for navigation items.
  * @param topBar Optional composable slot for a top app bar.
+ * @param isNavigationVisible Evaluated after resolving responsive placement (receiving the placement that would have been used). If it returns false, the surface becomes AdaptiveNavigationPlacement.Hidden. Does not alter responsive behavior, allowing hiding a bottom bar in details without hiding sidebar.
  * @param content Screen content with applied scaffold padding.
  */
 @Composable
@@ -70,6 +71,7 @@ public fun AdaptiveNavigationScaffold(
     navigationItemStyle: AdaptiveNavigationItemStyle = AdaptiveNavigationItemStyle.Pill,
     navigationDensity: AdaptiveNavigationDensity = AdaptiveNavigationDensity.Comfortable,
     topBar: (@Composable () -> Unit)? = null,
+    isNavigationVisible: (AdaptiveNavigationPlacement) -> Boolean = { true },
     content: @Composable (PaddingValues) -> Unit,
 ) {
     AdaptiveContent(modifier = modifier.background(AdaptiveTheme.colors.background)) {
@@ -82,7 +84,7 @@ public fun AdaptiveNavigationScaffold(
         
         // If navigationBehavior is provided, use it for backwards compatibility/custom behavior.
         // Otherwise, use the layoutInfo.navigationMode.
-        val placement = if (navigationBehavior != null) {
+        val resolvedPlacement = if (navigationBehavior != null || preferBottomNavigationOnCompact) {
             resolveAdaptiveNavigationPlacement(layoutInfo.breakpoint, effectiveBehavior)
         } else {
             when (layoutInfo.navigationMode) {
@@ -92,6 +94,7 @@ public fun AdaptiveNavigationScaffold(
                 AdaptiveNavigationMode.Sidebar -> AdaptiveNavigationPlacement.Sidebar
             }
         }
+        val placement = applyAdaptiveNavigationVisibility(resolvedPlacement, isNavigationVisible(resolvedPlacement))
         var drawerOpen by remember { mutableStateOf(false) }
         val showGlobalTopBar = placement == AdaptiveNavigationPlacement.Drawer ||
             (placement == AdaptiveNavigationPlacement.Hidden && topBar != null) ||
@@ -305,3 +308,10 @@ private fun CompactTopBar(
         }
     }
 }
+
+
+internal fun applyAdaptiveNavigationVisibility(
+    placement: AdaptiveNavigationPlacement,
+    visible: Boolean,
+): AdaptiveNavigationPlacement =
+    if (visible) placement else AdaptiveNavigationPlacement.Hidden

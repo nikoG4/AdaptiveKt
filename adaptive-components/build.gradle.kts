@@ -25,6 +25,7 @@ kotlin {
                 implementation(project(":adaptive-core"))
                 implementation(compose.animation)
                 implementation(compose.foundation)
+                implementation(compose.material3)
             }
         }
         val commonTest by getting {
@@ -42,7 +43,7 @@ kotlin {
 
 android {
     namespace = "io.github.adaptivekt.components"
-    compileSdk = 34
+    compileSdk = 35
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

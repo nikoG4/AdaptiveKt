@@ -546,17 +546,19 @@ private fun NavigationGlyph(
             .background(background, shape = AdaptiveTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
-        if (item.icon != null) {
-            item.icon.invoke()
-        } else {
-            BasicText(
-                text = item.label.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                style = AdaptiveTheme.typography.label.copy(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor,
-                ),
-            )
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides textColor) {
+            if (item.icon != null) {
+                item.icon.invoke()
+            } else {
+                BasicText(
+                    text = item.label.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
+                    style = AdaptiveTheme.typography.label.copy(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                    ),
+                )
+            }
         }
     }
 }
