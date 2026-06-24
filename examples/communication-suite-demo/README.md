@@ -1,13 +1,28 @@
 # Adaptive Chat Showcase
 
-The Adaptive Chat Showcase is a premium communication workspace built entirely with **AdaptiveKt** and **Compose Multiplatform** for Wasm/JS.
+Adaptive Chat is a frontend-only communication workspace built with **AdaptiveKt** and **Compose Multiplatform** for Android, Desktop/JVM, and Web/Wasm.
 
-It demonstrates advanced responsive architecture, managing complex UI patterns across mobile, tablet, and desktop viewports using a single unified codebase.
+- [Open the live Web/Wasm demo](https://nikog4.github.io/AdaptiveKt/examples/communication-suite/)
+- [Read the public architecture guide](../../docs/examples/adaptive-chat.md)
 
-## Key Features
+## What it demonstrates
 
-- **Adaptive Navigation Scaffold**: Uses Bottom Navigation on compact screens, a Navigation Rail on medium screens, and an expanded Sidebar on large screens.
-- **Hash-based Routing**: In-memory state and simple `#` route resolution.
-- **Mock Data Layer**: Entirely local, static mock data with realistic conversation states and presence indicators.
-- **Comprehensive AdaptiveKt Usage**: Utilizes `AdaptiveTheme`, `AdaptiveCard`, `AdaptiveTextField`, `AdaptiveButton`, `AdaptiveBadge`, `AdaptiveSelect`, and standard Material icons seamlessly integrated via fallback tokens.
-- **Presence & Settings**: User profile and application-level settings stored in memory for session continuity.
+- `AdaptiveNavigationScaffold` switching between compact bottom navigation and wider rail/sidebar surfaces.
+- Contextual navigation visibility through `isNavigationVisible`, hiding the compact bottom bar while a conversation detail is open.
+- `AdaptiveListDetailScaffold` switching between stacked compact navigation and side-by-side list/detail panes.
+- Chat, contacts, calls, and settings flows backed by deterministic in-memory mock data.
+- Theme-aware AdaptiveKt components across light and dark modes.
+
+## Run locally
+
+From the repository root:
+
+```powershell
+.\gradlew.bat -p examples/communication-suite-demo desktopRun
+.\gradlew.bat -p examples/communication-suite-demo wasmJsBrowserDevelopmentRun
+.\gradlew.bat -p examples/communication-suite-demo assembleDebug
+```
+
+## Limitations
+
+This is a UI architecture showcase. Data is local and non-persistent, and there is no authentication, backend, push notification service, or real network transport.
