@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
-import io.github.adaptivekt.components.AdaptiveSurface
 import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
@@ -27,200 +25,30 @@ import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.layout.AdaptiveGrid
-import kotlin.math.max
-
-internal data class CodeReductionMetrics(
-    val adaptiveLines: Int,
-    val composeLines: Int,
-    val savedLines: Int,
-    val reductionPercent: Int,
-)
-
-internal fun countMeaningfulCodeLines(code: String): Int {
-    return code.lines().count { line ->
-        val trimmed = line.trim()
-        trimmed.isNotEmpty() &&
-        !trimmed.startsWith("import ") &&
-        !trimmed.startsWith("package ") &&
-        !trimmed.startsWith("//") &&
-        !(trimmed.startsWith("/*") && trimmed.endsWith("*/"))
-    }
-}
-
-internal fun calculateCodeReduction(adaptiveCode: String, composeCode: String): CodeReductionMetrics {
-    val adaptiveLines = countMeaningfulCodeLines(adaptiveCode)
-    val composeLines = countMeaningfulCodeLines(composeCode)
-    val savedLines = max(0, composeLines - adaptiveLines)
-    val reductionPercent = if (composeLines > 0) (savedLines * 100) / composeLines else 0
-
-    return CodeReductionMetrics(
-        adaptiveLines = adaptiveLines,
-        composeLines = composeLines,
-        savedLines = savedLines,
-        reductionPercent = reductionPercent,
-    )
-}
-
-internal val AdaptiveDataViewComparisonCode = """
-@Composable
-fun UserDirectory(users: List<User>) {
-    val columns = listOf(
-        AdaptiveDataColumn<User>(
-            id = "name",
-            header = "Name",
-            mobileRole = AdaptiveDataMobileRole.Title,
-            cell = { user -> Text(user.name, fontWeight = FontWeight.Bold) },
-        ),
-        AdaptiveDataColumn<User>(
-            id = "role",
-            header = "Role",
-            mobileRole = AdaptiveDataMobileRole.Subtitle,
-            cell = { user -> Text(user.role) },
-        ),
-        AdaptiveDataColumn<User>(
-            id = "status",
-            header = "Status",
-            mobileRole = AdaptiveDataMobileRole.Status,
-            cell = { user -> Text(user.status) },
-        )
-    )
-
-    AdaptiveDataView(
-        state = AdaptiveDataContent(users),
-        columns = columns,
-        displayMode = AdaptiveDataDisplayMode.Auto,
-    )
-}
-""".trimIndent()
-
-internal val PlainComposeDataViewComparisonCode = """
-@Composable
-fun UserDirectory(users: List<User>) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 600.dp
-        
-        if (users.isEmpty()) {
-            EmptyUsersState()
-        } else if (compact) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(users) { user ->
-                    UserMobileCard(user)
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
-            ) {
-                UserTableHeader()
-                Divider()
-                users.forEachIndexed { index, user ->
-                    UserTableRow(user)
-                    if (index < users.lastIndex) Divider()
-                }
-            }
-        }
-    }
-}
 
 @Composable
-private fun UserMobileCard(user: User) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = 0.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(user.name, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(user.role, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
-                }
-                UserStatusBadge(user.status)
-            }
-        }
-    }
-}
-
-@Composable
-private fun UserTableHeader() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.onSurface.copy(alpha = 0.05f))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text("Name", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-        Text("Role", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-        Text("Status", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun UserTableRow(user: User) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(user.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-        Text(user.role, modifier = Modifier.weight(1f))
-        Box(modifier = Modifier.weight(1f)) {
-            UserStatusBadge(user.status)
-        }
-    }
-}
-
-@Composable
-private fun EmptyUsersState() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("No users available", fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun UserStatusBadge(status: String) {
-    Box(
-        modifier = Modifier
-            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f), RoundedCornerShape(50))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(status, color = MaterialTheme.colors.primary, fontSize = 12.sp)
-    }
-}
-""".trimIndent()
-
-@Composable
-internal fun HomeCodeComparisonSection(compact: Boolean) {
+internal fun HomeCodeComparisonSection() {
     val metrics = remember { calculateCodeReduction(AdaptiveDataViewComparisonCode, PlainComposeDataViewComparisonCode) }
+    var showMethodology by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveBadge("Less boilerplate", tone = AdaptiveBadgeTone.Info)
         Spacer(modifier = Modifier.height(12.dp))
-        SiteText("Same adaptive result. Less UI plumbing.", fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
+        SiteText("Same responsive behavior. Less UI plumbing.", fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
         Spacer(modifier = Modifier.height(8.dp))
         SiteText("AdaptiveKt keeps the UI in Compose while centralizing the responsive table, compact cards, empty states and theme-aware defaults that applications otherwise rebuild themselves.", color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+        Spacer(modifier = Modifier.height(8.dp))
+        SiteText("Both examples implement the same table-to-card breakpoint behavior, empty state and status presentation.", color = SiteMuted, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(16.dp))
         
-        if (compact) {
-            CompactCodeComparison(metrics)
-        } else {
-            DesktopCodeComparison(metrics)
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val layoutMode = resolveHomeCodeComparisonLayout(maxWidth)
+            
+            if (layoutMode == HomeCodeComparisonLayout.Tabbed) {
+                CompactCodeComparison(metrics)
+            } else {
+                DesktopCodeComparison(metrics)
+            }
         }
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -236,25 +64,45 @@ internal fun HomeCodeComparisonSection(compact: Boolean) {
                 text = "AdaptiveKt: ${metrics.adaptiveLines} meaningful lines vs Plain Compose: ${metrics.composeLines} meaningful lines (${metrics.savedLines} fewer lines).",
                 color = SiteMuted,
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            AdaptiveButton(
+                text = if (showMethodology) "Hide methodology" else "How is this measured?",
+                variant = AdaptiveButtonVariant.Ghost,
+                onClick = { showMethodology = !showMethodology }
+            )
+            if (showMethodology) {
+                Spacer(modifier = Modifier.height(8.dp))
+                SiteText(
+                    text = "Imports, package declarations, blank lines and full-line comments are excluded. Required helper composables are included.",
+                    color = SiteMuted,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun DesktopCodeComparison(metrics: CodeReductionMetrics) {
+    val expandedStates = remember { mutableStateMapOf<ComparisonImplementation, Boolean>() }
+    
     AdaptiveGrid(columns = 12, horizontalGap = 16.dp, verticalGap = 16.dp) {
         item(span = 6) {
             CodeComparisonPanel(
-                title = "AdaptiveKt",
-                metricsText = "${metrics.adaptiveLines} meaningful lines",
-                code = AdaptiveDataViewComparisonCode
+                implementation = ComparisonImplementation.AdaptiveKt,
+                metricsText = formatMeaningfulLineCount(metrics.adaptiveLines),
+                code = AdaptiveDataViewComparisonCode,
+                expanded = expandedStates[ComparisonImplementation.AdaptiveKt] ?: false,
+                onExpandedChange = { expandedStates[ComparisonImplementation.AdaptiveKt] = it }
             )
         }
         item(span = 6) {
             CodeComparisonPanel(
-                title = "Plain Compose",
-                metricsText = "${metrics.composeLines} meaningful lines",
-                code = PlainComposeDataViewComparisonCode
+                implementation = ComparisonImplementation.PlainCompose,
+                metricsText = formatMeaningfulLineCount(metrics.composeLines),
+                code = PlainComposeDataViewComparisonCode,
+                expanded = expandedStates[ComparisonImplementation.PlainCompose] ?: false,
+                onExpandedChange = { expandedStates[ComparisonImplementation.PlainCompose] = it }
             )
         }
     }
@@ -262,42 +110,46 @@ private fun DesktopCodeComparison(metrics: CodeReductionMetrics) {
 
 @Composable
 private fun CompactCodeComparison(metrics: CodeReductionMetrics) {
-    var selectedTab by remember { mutableStateOf("AdaptiveKt") }
+    var selectedTab by remember { mutableStateOf(ComparisonImplementation.AdaptiveKt) }
+    val expandedStates = remember { mutableStateMapOf<ComparisonImplementation, Boolean>() }
     
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveTabs(
-            tabs = listOf("AdaptiveKt", "Plain Compose"),
+            tabs = ComparisonImplementation.values().toList(),
             selectedTab = selectedTab,
             onTabSelected = { selectedTab = it },
             tabLabel = { 
-                val lines = if (it == "AdaptiveKt") metrics.adaptiveLines else metrics.composeLines
-                "${it} · ${lines}" 
+                val lines = if (it == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
+                "${it.label} · ${lines}" 
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        if (selectedTab == "AdaptiveKt") {
-            CodeComparisonPanel(
-                title = "AdaptiveKt",
-                metricsText = "${metrics.adaptiveLines} meaningful lines",
-                code = AdaptiveDataViewComparisonCode
-            )
-        } else {
-            CodeComparisonPanel(
-                title = "Plain Compose",
-                metricsText = "${metrics.composeLines} meaningful lines",
-                code = PlainComposeDataViewComparisonCode
-            )
-        }
+        
+        val code = if (selectedTab == ComparisonImplementation.AdaptiveKt) AdaptiveDataViewComparisonCode else PlainComposeDataViewComparisonCode
+        val linesText = if (selectedTab == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
+        
+        CodeComparisonPanel(
+            implementation = selectedTab,
+            metricsText = formatMeaningfulLineCount(linesText),
+            code = code,
+            expanded = expandedStates[selectedTab] ?: false,
+            onExpandedChange = { expandedStates[selectedTab] = it }
+        )
     }
 }
 
 @Composable
-private fun CodeComparisonPanel(title: String, metricsText: String, code: String) {
-    var expanded by remember { mutableStateOf(false) }
+private fun CodeComparisonPanel(
+    implementation: ComparisonImplementation,
+    metricsText: String,
+    code: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
+) {
     val lines = code.lines()
     val maxCollapsedLines = 28
     val isCollapsible = lines.size > maxCollapsedLines
-    val displayedCode = if (expanded || !isCollapsible) code else lines.take(maxCollapsedLines).joinToString("\n") + "\n\n  // ... ${lines.size - maxCollapsedLines} more lines"
+    val displayedCode = if (expanded || !isCollapsible) code else lines.take(maxCollapsedLines).joinToString("\n")
 
     Column(
         modifier = Modifier
@@ -306,16 +158,28 @@ private fun CodeComparisonPanel(title: String, metricsText: String, code: String
             .background(AdaptiveTheme.colors.surface)
             .border(1.dp, SiteLine, AdaptiveTheme.shapes.medium)
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(AdaptiveTheme.colors.surfaceMuted)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            SiteText(title, fontWeight = FontWeight.Bold)
-            AdaptiveBadge(metricsText, tone = AdaptiveBadgeTone.Info)
+            if (maxWidth < 200.dp) {
+                Column {
+                    SiteText(implementation.label, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    AdaptiveBadge(metricsText, tone = AdaptiveBadgeTone.Info)
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SiteText(implementation.label, fontWeight = FontWeight.Bold)
+                    AdaptiveBadge(metricsText, tone = AdaptiveBadgeTone.Info)
+                }
+            }
         }
         
         AdaptiveDivider()
@@ -340,6 +204,18 @@ private fun CodeComparisonPanel(title: String, metricsText: String, code: String
             }
         }
         
+        if (isCollapsible && !expanded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AdaptiveTheme.colors.surfaceMuted.copy(alpha = 0.5f))
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                SiteText("// ... ${lines.size - maxCollapsedLines} more lines", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp)
+            }
+        }
+        
         if (isCollapsible) {
             AdaptiveDivider()
             Box(
@@ -351,7 +227,7 @@ private fun CodeComparisonPanel(title: String, metricsText: String, code: String
                 AdaptiveButton(
                     text = if (expanded) "Collapse" else "Show full code",
                     variant = AdaptiveButtonVariant.Ghost,
-                    onClick = { expanded = !expanded }
+                    onClick = { onExpandedChange(!expanded) }
                 )
             }
         }

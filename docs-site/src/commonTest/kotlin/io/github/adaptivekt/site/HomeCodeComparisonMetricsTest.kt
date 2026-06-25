@@ -7,51 +7,140 @@ import kotlin.test.assertTrue
 class HomeCodeComparisonMetricsTest {
 
     @Test
-    fun testCountMeaningfulCodeLines_excludesEmptyLines() {
+    fun ignoresBlankLines() {
         val code = """
             val a = 1
             
             val b = 2
+            
         """.trimIndent()
         assertEquals(2, countMeaningfulCodeLines(code))
     }
 
     @Test
-    fun testCountMeaningfulCodeLines_excludesImportsAndPackages() {
+    fun ignoresPackageDeclarations() {
         val code = """
-            package com.example
-            import java.util.*
-            import kotlin.math.*
-            
+            package com.example.test
             val a = 1
         """.trimIndent()
         assertEquals(1, countMeaningfulCodeLines(code))
     }
 
     @Test
-    fun testCountMeaningfulCodeLines_excludesFullLineComments() {
+    fun ignoresImports() {
+        val code = """
+            import java.util.*
+            import kotlin.math.max
+            val a = 1
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun ignoresFullLineComments() {
         val code = """
             // This is a comment
+            val a = 1
+            // Another comment
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun ignoresSingleLineBlockComments() {
+        val code = """
+            /* single line block */
+            val a = 1
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun ignoresMultilineBlockComments() {
+        val code = """
+            /*
+             * multi line
+             * comment
+             */
+            val a = 1
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun ignoresDocComments() {
+        val code = """
+            /**
+             * Documentation.
+             */
+            val a = 1
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun countsInlineCommentsAsCode() {
+        val code = """
             val a = 1 // inline comment
-            /* multi line comment on single line */
-            val b = 2
+            val b = 2 /* inline block comment */
         """.trimIndent()
         assertEquals(2, countMeaningfulCodeLines(code))
     }
 
     @Test
-    fun testCalculateCodeReduction_correctMetrics() {
-        val adaptive = """
-            val a = 1
-        """.trimIndent() // 1 line
-        
-        val compose = """
-            val a = 1
-            val b = 2
-            val c = 3
-        """.trimIndent() // 3 lines
+    fun countsCodeAfterClosingBlockComment() {
+        val code = """
+            /* explanation */ val a = 1
+            /* 
+             * multiline
+             */ val b = 2
+        """.trimIndent()
+        assertEquals(2, countMeaningfulCodeLines(code))
+    }
 
-        val metrics = calculateCodeReduction(adaptive, compose)
+    @Test
+    fun doesNotTreatCommentMarkersInsideStringsAsComments() {
+        val code = """
+            val url = "https://example.com"
+            val marker = "/* not a comment */"
+            val marker2 = "// neither is this"
+        """.trimIndent()
+        assertEquals(3, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun supportsCrLf() {
+        val code = "val a = 1\r\nval b = 2\r\n"
+        assertEquals(2, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun supportsMissingFinalNewline() {
+        val code = "val a = 1\nval b = 2"
+        assertEquals(2, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesEmptyComposeSnippet() {
+        val metrics = calculateCodeReduction("val a = 1", "")
+        assertEquals(1, metrics.adaptiveLines)
+        assertEquals(0, metrics.composeLines)
+        assertEquals(0, metrics.savedLines)
+        assertEquals(0, metrics.reductionPercent)
+    }
+
+    @Test
+    fun clampsNegativeSavings() {
+        val metrics = calculateCodeReduction("val a = 1\nval b = 2", "val c = 3")
+        assertEquals(2, metrics.adaptiveLines)
+        assertEquals(1, metrics.composeLines)
+        assertEquals(0, metrics.savedLines)
+        assertEquals(0, metrics.reductionPercent)
+    }
+
+    @Test
+    fun calculatesIntegerPercentage() {
+        val metrics = calculateCodeReduction("val a = 1", "val a = 1\nval b = 2\nval c = 3")
         assertEquals(1, metrics.adaptiveLines)
         assertEquals(3, metrics.composeLines)
         assertEquals(2, metrics.savedLines)
@@ -59,19 +148,7 @@ class HomeCodeComparisonMetricsTest {
     }
 
     @Test
-    fun testCalculateCodeReduction_zeroComposeLines() {
-        val adaptive = "val a = 1"
-        val compose = ""
-
-        val metrics = calculateCodeReduction(adaptive, compose)
-        assertEquals(1, metrics.adaptiveLines)
-        assertEquals(0, metrics.composeLines)
-        assertEquals(0, metrics.savedLines) // max(0, 0 - 1)
-        assertEquals(0, metrics.reductionPercent)
-    }
-
-    @Test
-    fun testRealSnippetsProducePositiveReduction() {
+    fun realSnippetsRemainComparable() {
         val metrics = calculateCodeReduction(
             AdaptiveDataViewComparisonCode,
             PlainComposeDataViewComparisonCode

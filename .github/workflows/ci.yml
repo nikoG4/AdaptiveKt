@@ -209,6 +209,16 @@ jobs:
       shell: pwsh
       run: .\scripts\check-docs-site-guards.ps1
 
+    - name: Capture Code Comparison screenshots
+      shell: pwsh
+      run: |
+        $serverProcess = Start-Process -FilePath python -ArgumentList @("-m", "http.server", "8080", "-d", "site-dist") -WindowStyle Hidden -PassThru
+        Start-Sleep -Seconds 3
+        npm install playwright
+        npx playwright install chromium
+        node ci/capture-code-comparison.mjs
+        if ($serverProcess -and -not $serverProcess.HasExited) { Stop-Process -Id $serverProcess.Id -Force }
+
     - name: Validate Component Routes
       shell: pwsh
       run: .\tools\validate-component-routes.ps1 -SkipBuild
@@ -277,3 +287,11 @@ jobs:
         name: pages-site-dist-preview
         path: site-dist/
         retention-days: 7
+
+    - name: Upload Code Comparison screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: code-comparison-screenshots
+        path: docs-site/build/screenshots/code-comparison/
+        retention-days: 14
