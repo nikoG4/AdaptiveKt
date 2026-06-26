@@ -33,8 +33,8 @@ internal fun SiteDocsPage(
     selectedHash: String,
     onSelectedHashChange: (String) -> Unit,
 ) {
-    val topics = remember { docsTopics() }
-    val selectedId = selectedHash.ifEmpty { topics.first().id }
+    val topics = remember { DocsRegistry.getTopics { docsTopics() } }
+    val selectedId = DocsRegistry.resolveTopicId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.TOPIC_GETTING_STARTED)
     val selected = topics.firstOrNull { it.id == selectedId } ?: topics.first()
     val navGroups = topics.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
@@ -67,7 +67,7 @@ internal fun SiteDocsPage(
 
 private fun docsTopics(): List<DocsTopic> = listOf(
     DocsTopic(
-        id = "getting-started",
+        id = DocsRegistry.TOPIC_GETTING_STARTED,
         family = "Getting started",
         title = "Getting started",
         summary = "Set up the published AdaptiveKt alpha from Maven Central.",
@@ -133,7 +133,7 @@ dependencies {
         }
     },
     DocsTopic(
-        id = "theme",
+        id = DocsRegistry.TOPIC_THEME,
         family = "Foundations",
         title = "AdaptiveTheme",
         summary = "Shared color, shape, typography and state tokens for all AdaptiveKt primitives.",
@@ -171,7 +171,7 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
         }
     },
     DocsTopic(
-        id = "responsive-navigation-behavior",
+        id = DocsRegistry.TOPIC_RESPONSIVE_NAV,
         family = "Navigation",
         title = "Responsive navigation behavior",
         summary = "Configure whether navigation becomes a sidebar, rail, bottom bar, drawer or hidden custom surface per breakpoint.",
@@ -218,7 +218,7 @@ AdaptiveNavigationScaffold(
         }
     },
     DocsTopic(
-        id = "layout-system",
+        id = DocsRegistry.TOPIC_LAYOUT_SYSTEM,
         family = "Layouts",
         title = "Layout system",
         summary = "AdaptiveContent, AdaptiveContainer and AdaptiveGrid provide the responsive foundation for screens and docs pages.",
@@ -261,7 +261,7 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "publishing",
+        id = DocsRegistry.TOPIC_PUBLISHING,
         family = "Publishing",
         title = "Publishing status",
         summary = "AdaptiveKt 0.1.0-alpha01 is published to Maven Central; local dry-runs remain available.",
@@ -290,7 +290,7 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "visual-verification",
+        id = DocsRegistry.TOPIC_VISUAL_VERIFICATION,
         family = "Quality",
         title = "Visual verification",
         summary = "Desktop and web capture scripts keep responsive states visible before publishing changes.",
@@ -325,7 +325,7 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "roadmap",
+        id = DocsRegistry.TOPIC_ROADMAP,
         family = "Roadmap",
         title = "What is next",
         summary = "The public docs separate what works today from planned release and ecosystem work.",
@@ -354,3 +354,4 @@ private fun RowLikeBullet(text: String) {
         SiteText(text, color = SiteMuted, maxLines = 5)
     }
 }
+

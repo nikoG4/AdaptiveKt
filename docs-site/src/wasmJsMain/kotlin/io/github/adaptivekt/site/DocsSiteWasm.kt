@@ -22,47 +22,31 @@ internal actual fun openSiteUrl(url: String) {
     }
 }
 
-internal actual fun initialSiteRoute(): SiteRoute {
+internal actual fun initialSiteLocation(): SiteLocation {
     val path = window.location.pathname.trimEnd('/') + "/"
-    return when {
-        path.endsWith("/components/") -> SiteRoute.Components
-        path.endsWith("/docs/") -> SiteRoute.Docs
-        path.endsWith("/demo/") -> SiteRoute.Demo
-        else -> SiteRoute.Home
-    }
+    val hash = window.location.hash
+    val search = window.location.search
+    return parseSiteLocation(path, hash, search, false)
 }
 
-internal actual fun initialSiteDarkTheme(): Boolean {
-    return window.location.search
-        .removePrefix("?")
-        .split("&")
-        .any { it == "theme=dark" }
-}
-
-internal actual fun initialSiteHash(): String {
-    return window.location.hash.removePrefix("#")
-}
-
-internal actual fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkTheme: Boolean) {
+internal actual fun pushSiteLocation(location: SiteLocation) {
     val base = siteBasePath()
-    val nextPathBase = if (route == SiteRoute.Home) {
-        base
+    val serialized = serializeSiteLocation(location)
+
+    val nextPath = if (location.route == SiteRoute.Home) {
+        base + serialized.removePrefix("/")
     } else {
-        base + route.path.trim('/') + "/"
+        base + serialized.removePrefix("/")
     }
-    val query = if (darkTheme) "?theme=dark" else ""
-    val hashPart = if (hash.isNotEmpty()) "#$hash" else ""
-    val nextPath = "$nextPathBase$query$hashPart"
-    
-    // Only push if the path actually changed to avoid stacking identical states
+
     if (window.location.pathname + window.location.search + window.location.hash != nextPath) {
-        window.history.pushState(null, route.label, nextPath)
+        window.history.pushState(null, location.route.label, nextPath)
     }
 }
 
-internal actual fun observeHistory(onHistoryChange: (SiteRoute, String) -> Unit): () -> Unit {
+internal actual fun observeSiteLocation(onLocationChange: (SiteLocation) -> Unit): () -> Unit {
     val listener: (org.w3c.dom.events.Event) -> Unit = {
-        onHistoryChange(initialSiteRoute(), initialSiteHash())
+        onLocationChange(initialSiteLocation())
     }
     window.addEventListener("popstate", listener)
     return {

@@ -9,12 +9,8 @@ internal enum class SiteRoute(val label: String, val path: String) {
 
 internal expect fun openSiteUrl(url: String)
 
-internal expect fun initialSiteRoute(): SiteRoute
+internal expect fun initialSiteLocation(): SiteLocation
 
-internal expect fun initialSiteHash(): String
+internal expect fun pushSiteLocation(location: SiteLocation)
 
-internal expect fun initialSiteDarkTheme(): Boolean
-
-internal expect fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkTheme: Boolean)
-
-internal expect fun observeHistory(onHistoryChange: (SiteRoute, String) -> Unit): () -> Unit
+internal expect fun observeSiteLocation(onLocationChange: (SiteLocation) -> Unit): () -> Unit
