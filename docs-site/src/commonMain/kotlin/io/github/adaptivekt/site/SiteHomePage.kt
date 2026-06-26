@@ -80,6 +80,7 @@ internal fun SiteHomePage(
 
             HomeInstallSection(compact = compact)
             HomeFeatureSection(compact = compact)
+            HomeCodeComparisonSection()
             HomeWhySection(compact = compact, onOpenDocs = onOpenDocs)
             SiteFooter()
         }
