@@ -14,12 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -61,8 +62,11 @@ internal val SiteAccent: Color
 internal fun SiteLayout(
     route: SiteRoute,
     darkTheme: Boolean,
+    searchQuery: String,
     onNavigate: (SiteRoute) -> Unit,
+    onNavigateLocation: (SiteLocation) -> Unit,
     onThemeToggle: () -> Unit,
+    onSearchChange: (String) -> Unit,
     content: @Composable () -> Unit,
 ) {
     Column(
@@ -73,8 +77,10 @@ internal fun SiteLayout(
         SiteNavigation(
             route = route,
             darkTheme = darkTheme,
+            searchQuery = searchQuery,
             onThemeToggle = onThemeToggle,
             onNavigate = onNavigate,
+            onSearchChange = onSearchChange,
         )
         Box(
             modifier = Modifier
@@ -88,7 +94,41 @@ internal fun SiteLayout(
                     .widthIn(max = 1360.dp)
                     .padding(horizontal = 24.dp, vertical = 28.dp),
             ) {
-                content()
+                if (searchQuery.isNotBlank()) {
+                    val searchIndex = remember { SiteSearchIndex().apply { buildIndex() } }
+                    val results = remember(searchQuery) { searchIndex.search(searchQuery) }
+
+                    SiteText("Search results for \"$searchQuery\"", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (results.isEmpty()) {
+                        SiteText("No results found.", color = SiteMuted)
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            results.forEach { result ->
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.medium)
+                                        .border(1.dp, SiteLine, AdaptiveTheme.shapes.medium)
+                                        .clickable {
+                                            // Navigate to result
+                                            onNavigateLocation(SiteLocation(route = result.route, selectedItemId = result.id))
+                                        }
+                                        .padding(16.dp)
+                                ) {
+                                    AdaptiveBadge(text = result.route.label, tone = AdaptiveBadgeTone.Info)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    SiteText(result.title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = SiteAccent)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    SiteText(result.description, color = SiteMuted, maxLines = 2)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    content()
+                }
             }
         }
     }

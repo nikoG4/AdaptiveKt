@@ -20,6 +20,7 @@ import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveIconButton
+import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.core.AdaptiveTheme
 
 import androidx.compose.foundation.clickable
@@ -31,8 +32,10 @@ import androidx.compose.ui.draw.clip
 internal fun SiteNavigation(
     route: SiteRoute,
     darkTheme: Boolean,
+    searchQuery: String,
     onThemeToggle: () -> Unit,
     onNavigate: (SiteRoute) -> Unit,
+    onSearchChange: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -67,6 +70,13 @@ internal fun SiteNavigation(
                     modifier = Modifier.docsClickableCursor()
                 )
             }
+            AdaptiveSearchField(
+                value = searchQuery,
+                onValueChange = onSearchChange,
+                placeholder = "Search components ( / )",
+                onClear = { onSearchChange("") },
+                modifier = Modifier.width(200.dp)
+            )
             AdaptiveIconButton(
                 onClick = onThemeToggle,
                 size = 32.dp,
