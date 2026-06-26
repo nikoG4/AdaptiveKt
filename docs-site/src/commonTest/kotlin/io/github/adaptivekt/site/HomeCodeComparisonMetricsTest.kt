@@ -3,6 +3,7 @@ package io.github.adaptivekt.site
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import androidx.compose.ui.unit.dp
 
 class HomeCodeComparisonMetricsTest {
 
@@ -104,8 +105,58 @@ class HomeCodeComparisonMetricsTest {
             val url = "https://example.com"
             val marker = "/* not a comment */"
             val marker2 = "// neither is this"
+            val marker3 = "\"\"\"/* this is string */"
         """.trimIndent()
-        assertEquals(3, countMeaningfulCodeLines(code))
+        assertEquals(4, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesNestedBlockComments() {
+        val code = """
+            /*
+             outer
+             /* inner */
+             outer again
+            */
+            val result = 1
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesBlockCommentBeginningAfterCode() {
+        val code = """
+            val result = 1 /* comment
+             * continued
+             */
+            val next = 2
+        """.trimIndent()
+        assertEquals(2, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesMultipleBlockCommentsOnOneLine() {
+        val code = """
+            /* 1 */ val a = 1 /* 2 */ val b = 2 /* 3 */
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesEscapedQuotes() {
+        val code = """
+            val a = "an escaped \" quote /* inside */"
+        """.trimIndent()
+        assertEquals(1, countMeaningfulCodeLines(code))
+    }
+
+    @Test
+    fun handlesCharLiterals() {
+        val code = """
+            val c = '"' // not a string start
+            val d = 1
+        """.trimIndent()
+        assertEquals(2, countMeaningfulCodeLines(code))
     }
 
     @Test
@@ -157,5 +208,22 @@ class HomeCodeComparisonMetricsTest {
         assertTrue(metrics.adaptiveLines > 0, "Adaptive snippet should have meaningful lines")
         assertTrue(metrics.composeLines > metrics.adaptiveLines, "Compose snippet should be longer")
         assertTrue(metrics.reductionPercent in 1..99, "Reduction percent should be between 1 and 99")
+    }
+
+    @Test
+    fun resolvesLayoutCorrectly() {
+        assertEquals(HomeCodeComparisonLayout.Tabbed, resolveHomeCodeComparisonLayout(0.dp))
+        assertEquals(HomeCodeComparisonLayout.Tabbed, resolveHomeCodeComparisonLayout(390.dp))
+        assertEquals(HomeCodeComparisonLayout.Tabbed, resolveHomeCodeComparisonLayout(768.dp))
+        assertEquals(HomeCodeComparisonLayout.Tabbed, resolveHomeCodeComparisonLayout(959.dp))
+        assertEquals(HomeCodeComparisonLayout.SideBySide, resolveHomeCodeComparisonLayout(960.dp))
+        assertEquals(HomeCodeComparisonLayout.SideBySide, resolveHomeCodeComparisonLayout(1440.dp))
+    }
+
+    @Test
+    fun formatsMeaningfulLineCount() {
+        assertEquals("1 meaningful line", formatMeaningfulLineCount(1))
+        assertEquals("2 meaningful lines", formatMeaningfulLineCount(2))
+        assertEquals("0 meaningful lines", formatMeaningfulLineCount(0))
     }
 }

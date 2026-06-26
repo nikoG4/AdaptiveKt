@@ -25,18 +25,24 @@ import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.layout.AdaptiveGrid
+import androidx.compose.foundation.ScrollState
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+
+internal data class HomeCodeComparisonUiState(
+    var selectedTab: ComparisonImplementation = ComparisonImplementation.AdaptiveKt,
+    var expandedAdaptiveKt: Boolean = false,
+    var expandedPlainCompose: Boolean = false,
+    var methodologyExpanded: Boolean = false
+)
 
 @Composable
 internal fun HomeCodeComparisonSection() {
     val metrics = remember { calculateCodeReduction(AdaptiveDataViewComparisonCode, PlainComposeDataViewComparisonCode) }
-    var showMethodology by remember { mutableStateOf(false) }
+    val uiState = remember { HomeCodeComparisonUiState() }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        AdaptiveBadge("Less boilerplate", tone = AdaptiveBadgeTone.Info)
-        Spacer(modifier = Modifier.height(12.dp))
-        SiteText("Same responsive behavior. Less UI plumbing.", fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
-        Spacer(modifier = Modifier.height(8.dp))
-        SiteText("AdaptiveKt keeps the UI in Compose while centralizing the responsive table, compact cards, empty states and theme-aware defaults that applications otherwise rebuild themselves.", color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+    Column(modifier = Modifier.fillMaxWidth().semantics { testTag = "home-code-comparison" }) {
+        SiteText("Less boilerplate, more focus", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         SiteText("Both examples implement the same table-to-card breakpoint behavior, empty state and status presentation.", color = SiteMuted, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -45,9 +51,9 @@ internal fun HomeCodeComparisonSection() {
             val layoutMode = resolveHomeCodeComparisonLayout(maxWidth)
             
             if (layoutMode == HomeCodeComparisonLayout.Tabbed) {
-                CompactCodeComparison(metrics)
+                CompactCodeComparison(metrics, uiState)
             } else {
-                DesktopCodeComparison(metrics)
+                DesktopCodeComparison(metrics, uiState)
             }
         }
         
@@ -66,16 +72,18 @@ internal fun HomeCodeComparisonSection() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             AdaptiveButton(
-                text = if (showMethodology) "Hide methodology" else "How is this measured?",
+                modifier = Modifier.semantics { testTag = "comparison-methodology" },
+                text = if (uiState.methodologyExpanded) "Hide methodology" else "How is this measured?",
                 variant = AdaptiveButtonVariant.Ghost,
-                onClick = { showMethodology = !showMethodology }
+                onClick = { uiState.methodologyExpanded = !uiState.methodologyExpanded }
             )
-            if (showMethodology) {
+            if (uiState.methodologyExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 SiteText(
                     text = "Imports, package declarations, blank lines and full-line comments are excluded. Required helper composables are included.",
                     color = SiteMuted,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
+                    modifier = Modifier.semantics { testTag = "comparison-metrics" }
                 )
             }
         }
@@ -83,17 +91,15 @@ internal fun HomeCodeComparisonSection() {
 }
 
 @Composable
-private fun DesktopCodeComparison(metrics: CodeReductionMetrics) {
-    val expandedStates = remember { mutableStateMapOf<ComparisonImplementation, Boolean>() }
-    
+private fun DesktopCodeComparison(metrics: CodeReductionMetrics, uiState: HomeCodeComparisonUiState) {
     AdaptiveGrid(columns = 12, horizontalGap = 16.dp, verticalGap = 16.dp) {
         item(span = 6) {
             CodeComparisonPanel(
                 implementation = ComparisonImplementation.AdaptiveKt,
                 metricsText = formatMeaningfulLineCount(metrics.adaptiveLines),
                 code = AdaptiveDataViewComparisonCode,
-                expanded = expandedStates[ComparisonImplementation.AdaptiveKt] ?: false,
-                onExpandedChange = { expandedStates[ComparisonImplementation.AdaptiveKt] = it }
+                expanded = uiState.expandedAdaptiveKt,
+                onExpandedChange = { uiState.expandedAdaptiveKt = it }
             )
         }
         item(span = 6) {
@@ -101,39 +107,46 @@ private fun DesktopCodeComparison(metrics: CodeReductionMetrics) {
                 implementation = ComparisonImplementation.PlainCompose,
                 metricsText = formatMeaningfulLineCount(metrics.composeLines),
                 code = PlainComposeDataViewComparisonCode,
-                expanded = expandedStates[ComparisonImplementation.PlainCompose] ?: false,
-                onExpandedChange = { expandedStates[ComparisonImplementation.PlainCompose] = it }
+                expanded = uiState.expandedPlainCompose,
+                onExpandedChange = { uiState.expandedPlainCompose = it }
             )
         }
     }
 }
 
 @Composable
-private fun CompactCodeComparison(metrics: CodeReductionMetrics) {
-    var selectedTab by remember { mutableStateOf(ComparisonImplementation.AdaptiveKt) }
-    val expandedStates = remember { mutableStateMapOf<ComparisonImplementation, Boolean>() }
-    
+private fun CompactCodeComparison(metrics: CodeReductionMetrics, uiState: HomeCodeComparisonUiState) {
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveTabs(
             tabs = ComparisonImplementation.values().toList(),
-            selectedTab = selectedTab,
-            onTabSelected = { selectedTab = it },
+            selectedTab = uiState.selectedTab,
+            onTabSelected = { uiState.selectedTab = it },
             tabLabel = { 
                 val lines = if (it == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
-                "${it.label} · ${lines}" 
+                "${it.label} — ${lines}" 
+            },
+            tabModifier = { tab ->
+                Modifier.semantics {
+                    testTag = if (tab == ComparisonImplementation.AdaptiveKt) "comparison-tab-adaptivekt" else "comparison-tab-plain-compose"
+                }
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
         
-        val code = if (selectedTab == ComparisonImplementation.AdaptiveKt) AdaptiveDataViewComparisonCode else PlainComposeDataViewComparisonCode
-        val linesText = if (selectedTab == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
+        val code = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) AdaptiveDataViewComparisonCode else PlainComposeDataViewComparisonCode
+        val linesText = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
+        val expanded = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) uiState.expandedAdaptiveKt else uiState.expandedPlainCompose
+        val onExpandedChange = { e: Boolean -> 
+            if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) uiState.expandedAdaptiveKt = e
+            else uiState.expandedPlainCompose = e
+        }
         
         CodeComparisonPanel(
-            implementation = selectedTab,
+            implementation = uiState.selectedTab,
             metricsText = formatMeaningfulLineCount(linesText),
             code = code,
-            expanded = expandedStates[selectedTab] ?: false,
-            onExpandedChange = { expandedStates[selectedTab] = it }
+            expanded = expanded,
+            onExpandedChange = onExpandedChange
         )
     }
 }
@@ -150,6 +163,10 @@ private fun CodeComparisonPanel(
     val maxCollapsedLines = 28
     val isCollapsible = lines.size > maxCollapsedLines
     val displayedCode = if (expanded || !isCollapsible) code else lines.take(maxCollapsedLines).joinToString("\n")
+    val panelTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-panel-adaptivekt" else "comparison-panel-plain-compose"
+    val expandTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-expand-adaptivekt" else "comparison-expand-plain-compose"
+
+    val scrollState = remember(implementation) { ScrollState(0) }
 
     Column(
         modifier = Modifier
@@ -157,6 +174,7 @@ private fun CodeComparisonPanel(
             .clip(AdaptiveTheme.shapes.medium)
             .background(AdaptiveTheme.colors.surface)
             .border(1.dp, SiteLine, AdaptiveTheme.shapes.medium)
+            .semantics { testTag = panelTag }
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -187,7 +205,7 @@ private fun CodeComparisonPanel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
+                .horizontalScroll(scrollState)
                 .padding(16.dp)
         ) {
             AdaptiveSelectionArea {
@@ -225,6 +243,7 @@ private fun CodeComparisonPanel(
                 contentAlignment = Alignment.Center
             ) {
                 AdaptiveButton(
+                    modifier = Modifier.semantics { testTag = expandTag },
                     text = if (expanded) "Collapse" else "Show full code",
                     variant = AdaptiveButtonVariant.Ghost,
                     onClick = { onExpandedChange(!expanded) }

@@ -41,35 +41,105 @@ internal fun formatMeaningfulLineCount(count: Int): String {
 }
 
 internal fun countMeaningfulCodeLines(code: String): Int {
-    var inBlockComment = false
-    return code.lines().count { line ->
-        val trimmed = line.trim()
-        
-        if (inBlockComment) {
-            if (trimmed.contains("*/")) {
-                inBlockComment = false
-                val codeAfterComment = trimmed.substringAfterLast("*/").trim()
-                codeAfterComment.isNotEmpty() && !codeAfterComment.startsWith("/*") && !codeAfterComment.startsWith("//")
-            } else {
-                false
+    var blockCommentDepth = 0
+    var insideString = false
+    var insideChar = false
+    var escapeNext = false
+    var meaningfulLines = 0
+
+    val lines = code.lines()
+    for (line in lines) {
+        val trimmed = line.trimStart()
+        if (blockCommentDepth == 0 && (trimmed.startsWith("import ") || trimmed.startsWith("package "))) {
+            continue
+        }
+
+        var lineHasMeaningfulCode = false
+        var i = 0
+        while (i < line.length) {
+            val c = line[i]
+            val nextC = if (i + 1 < line.length) line[i + 1] else '\u0000'
+
+            if (escapeNext) {
+                escapeNext = false
+                if (blockCommentDepth == 0) lineHasMeaningfulCode = true
+                i++
+                continue
             }
-        } else {
-            if (trimmed.startsWith("/*")) {
-                if (!trimmed.contains("*/")) {
-                    inBlockComment = true
-                    false
-                } else {
-                    val codeAfterComment = trimmed.substringAfterLast("*/").trim()
-                    codeAfterComment.isNotEmpty() && !codeAfterComment.startsWith("/*") && !codeAfterComment.startsWith("//")
+
+            if (c == '\\' && (insideString || insideChar)) {
+                escapeNext = true
+                i++
+                continue
+            }
+
+            if (insideString) {
+                if (c == '"') {
+                    insideString = false
                 }
-            } else {
-                trimmed.isNotEmpty() &&
-                !trimmed.startsWith("import ") &&
-                !trimmed.startsWith("package ") &&
-                !trimmed.startsWith("//")
+                if (blockCommentDepth == 0) lineHasMeaningfulCode = true
+                i++
+                continue
             }
+
+            if (insideChar) {
+                if (c == '\'') {
+                    insideChar = false
+                }
+                if (blockCommentDepth == 0) lineHasMeaningfulCode = true
+                i++
+                continue
+            }
+
+            if (blockCommentDepth > 0) {
+                if (c == '*' && nextC == '/') {
+                    blockCommentDepth--
+                    i += 2
+                    continue
+                } else if (c == '/' && nextC == '*') {
+                    blockCommentDepth++
+                    i += 2
+                    continue
+                }
+                i++
+                continue
+            }
+
+            if (c == '/' && nextC == '/') {
+                break
+            }
+
+            if (c == '/' && nextC == '*') {
+                blockCommentDepth++
+                i += 2
+                continue
+            }
+
+            if (c == '"') {
+                insideString = true
+                lineHasMeaningfulCode = true
+                i++
+                continue
+            }
+
+            if (c == '\'') {
+                insideChar = true
+                lineHasMeaningfulCode = true
+                i++
+                continue
+            }
+
+            if (!c.isWhitespace()) {
+                lineHasMeaningfulCode = true
+            }
+            i++
+        }
+
+        if (lineHasMeaningfulCode) {
+            meaningfulLines++
         }
     }
+    return meaningfulLines
 }
 
 internal fun calculateCodeReduction(adaptiveCode: String, composeCode: String): CodeReductionMetrics {

@@ -21,25 +21,10 @@ import io.github.adaptivekt.data.AdaptiveDataView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 
-// Local mocks for missing compose.material dependency in docs-site tests
-@Composable
-internal fun Text(text: String, modifier: Modifier = Modifier, color: Color = Color.Black, fontWeight: FontWeight? = null, fontSize: androidx.compose.ui.unit.TextUnit = androidx.compose.ui.unit.TextUnit.Unspecified) {}
-
-@Composable
-internal fun Card(modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(0.dp), elevation: androidx.compose.ui.unit.Dp = 0.dp, border: BorderStroke? = null, content: @Composable () -> Unit) { content() }
-
-@Composable
-internal fun Divider() {}
-
-internal object MaterialTheme {
-    val colors = Colors()
-}
-
-internal class Colors {
-    val surface = Color.White
-    val onSurface = Color.Black
-    val primary = Color.Blue
-}
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 
 internal data class ComparisonUser(
     val name: String,
