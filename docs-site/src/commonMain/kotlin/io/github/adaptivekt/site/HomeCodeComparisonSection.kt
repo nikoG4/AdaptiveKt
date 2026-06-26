@@ -235,25 +235,11 @@ private fun CodeComparisonPanel(
 
         AdaptiveDivider()
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(scrollState)
-                .padding(16.dp)
-        ) {
-            AdaptiveSelectionArea {
-                BasicText(
-                    text = displayedCode,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        color = AdaptiveTheme.colors.textPrimary,
-                        fontFamily = FontFamily.Monospace,
-                    ),
-                    softWrap = false,
-                )
-            }
-        }
+        DocsCodeEditorView(
+            code = displayedCode,
+            scrollState = scrollState,
+            modifier = Modifier.padding(16.dp)
+        )
 
         if (isCollapsible && !expanded) {
             Box(
