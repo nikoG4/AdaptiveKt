@@ -197,7 +197,8 @@ async function capture() {
 
             // Methodology
             // Let's reset page and use methodology toggle
-            await page.reload({ waitUntil: 'networkidle' });
+            await page.goto(url, { waitUntil: 'networkidle' });
+            await page.waitForSelector('#webApp canvas', { timeout: 30000 });
             await page.waitForTimeout(3000);
             await page.locator('#webApp canvas').click({ position: { x: 10, y: 10 } });
             for (let i = 0; i < 6; i++) {
