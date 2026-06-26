@@ -14,6 +14,7 @@ jobs:
       library: ${{ steps.filter.outputs.library }}
       ai_workspace: ${{ steps.filter.outputs.ai_workspace }}
       communication_suite: ${{ steps.filter.outputs.communication_suite }}
+      docs_site: ${{ steps.filter.outputs.docs_site }}
       visual: ${{ steps.filter.outputs.visual }}
     steps:
     - uses: actions/checkout@v4
@@ -49,6 +50,7 @@ jobs:
         LIBRARY_PATTERN='^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
         AI_WORKSPACE_PATTERN='^examples/ai-workspace-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
         COMMUNICATION_SUITE_PATTERN='^examples/communication-suite-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+        DOCS_SITE_PATTERN='^docs-site/|^tools/docs-site-capture/|^tools/capture-home-code-comparison|^scripts/check-home-code-comparison-guards|^scripts/generate-home-code-comparison-report|^\.github/workflows/ci\.yml$'
         VISUAL_PATTERN='^(docs-site|admin-demo)/|^examples/(ai-workspace-demo|ecommerce-demo|communication-suite-demo)/|^tools/(prepare-pages-site|check-site-links|capture-|docs-site-capture/|^validate-)|^scripts/(verify-|check-)|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
 
         if changed "$LIBRARY_PATTERN"; then
@@ -69,11 +71,239 @@ jobs:
           echo "communication_suite=false" >> "$GITHUB_OUTPUT"
         fi
 
+        if changed "$DOCS_SITE_PATTERN"; then
+          echo "docs_site=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "docs_site=false" >> "$GITHUB_OUTPUT"
+        fi
+
         if changed "$VISUAL_PATTERN"; then
           echo "visual=true" >> "$GITHUB_OUTPUT"
         else
           echo "visual=false" >> "$GITHUB_OUTPUT"
         fi
+
+  docs-site:
+    name: Test docs site
+    needs: changes
+    if: needs.changes.outputs.docs_site == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Run docs-site checks
+      run: |
+        chmod +x ./gradlew
+        ./gradlew :docs-site:wasmJsTest --console=plain --stacktrace
+        ./gradlew :docs-site:wasmJsBrowserDistribution --console=plain --stacktrace
+
+    - name: Run bash guards
+      run: bash ./scripts/check-home-code-comparison-guards.sh
+
+  build:
+    name: Build library and core demos
+    needs: changes
+    if: needs.changes.outputs.library == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Run Gradle build
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build --console=plain --stacktrace
+
+    - name: Build Wasm distribution
+      run: |
+        ./gradlew :docs-site:wasmJsBrowserDistribution --console=plain --stacktrace
+        ./gradlew :admin-demo:wasmJsBrowserDistribution --console=plain --stacktrace
+
+    - name: Upload build reports
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-reports
+        path: "**/build/reports/"
+        retention-days: 14
+
+    - name: Upload Wasm distribution
+      uses: actions/upload-artifact@v4
+      with:
+        name: wasm-distribution
+        path: |
+          docs-site/build/dist/wasmJs/productionExecutable/
+          admin-demo/build/dist/wasmJs/productionExecutable/
+        retention-days: 14
+
+  ai-workspace-demo:
+    name: Build AI Workspace demo
+    needs: changes
+    if: needs.changes.outputs.ai_workspace == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build AI Workspace Demo
+      working-directory: examples/ai-workspace-demo
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build --console=plain
+        ./gradlew desktopTest --console=plain
+        ./gradlew wasmJsBrowserDistribution --console=plain
+
+  communication-suite-demo:
+    name: Build Communication Suite demo
+    needs: changes
+    if: needs.changes.outputs.communication_suite == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Build Communication Suite Demo
+      working-directory: examples/communication-suite-demo
+      run: |
+        chmod +x ../../gradlew
+        ../../gradlew build --console=plain --stacktrace
+        ../../gradlew wasmJsBrowserDistribution --console=plain --stacktrace
+
+  visual-artifacts:
+    name: Capture visual validation artifacts
+    needs: changes
+    if: needs.changes.outputs.visual == 'true'
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Prepare Pages site
+      shell: pwsh
+      run: .\tools\prepare-pages-site.ps1
+
+    - name: Capture AI Workspace screenshots
+      shell: pwsh
+      run: .\tools\capture-ai-workspace-premium.ps1 -SkipBuild
+
+    - name: Check Docs Site Guards
+      shell: pwsh
+      run: .\scripts\check-docs-site-guards.ps1
+        AI_WORKSPACE_PATTERN='^examples/ai-workspace-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+        COMMUNICATION_SUITE_PATTERN='^examples/communication-suite-demo/|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+        DOCS_SITE_PATTERN='^docs-site/|^tools/docs-site-capture/|^tools/capture-home-code-comparison|^scripts/check-home-code-comparison-guards|^scripts/generate-home-code-comparison-report|^\.github/workflows/ci\.yml$'
+        VISUAL_PATTERN='^(docs-site|admin-demo)/|^examples/(ai-workspace-demo|ecommerce-demo|communication-suite-demo)/|^tools/(prepare-pages-site|check-site-links|capture-|docs-site-capture/|^validate-)|^scripts/(verify-|check-)|^(adaptive-core|adaptive-components|adaptive-layout|adaptive-navigation|adaptive-data|adaptive-forms|adaptive-feedback)/|^(build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat)$|^gradle/|^\.github/workflows/ci\.yml$'
+
+        if changed "$LIBRARY_PATTERN"; then
+          echo "library=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "library=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if changed "$AI_WORKSPACE_PATTERN"; then
+          echo "ai_workspace=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ai_workspace=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if changed "$COMMUNICATION_SUITE_PATTERN"; then
+          echo "communication_suite=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "communication_suite=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if changed "$DOCS_SITE_PATTERN"; then
+          echo "docs_site=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "docs_site=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if changed "$VISUAL_PATTERN"; then
+          echo "visual=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "visual=false" >> "$GITHUB_OUTPUT"
+        fi
+
+  docs-site:
+    name: Test docs site
+    needs: changes
+    if: needs.changes.outputs.docs_site == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Run docs-site checks
+      run: |
+        chmod +x ./gradlew
+        ./gradlew :docs-site:wasmJsTest --console=plain --stacktrace
+        ./gradlew :docs-site:wasmJsBrowserDistribution --console=plain --stacktrace
+
+    - name: Run bash guards
+      run: bash ./scripts/check-home-code-comparison-guards.sh
 
   build:
     name: Build library and core demos
@@ -209,15 +439,17 @@ jobs:
       shell: pwsh
       run: .\scripts\check-docs-site-guards.ps1
 
-    - name: Capture Code Comparison screenshots
+    - name: Capture Home Code Comparison
       shell: pwsh
-      run: |
-        $serverProcess = Start-Process -FilePath python -ArgumentList @("-m", "http.server", "8080", "-d", "site-dist") -WindowStyle Hidden -PassThru
-        Start-Sleep -Seconds 3
-        npm install playwright
-        npx playwright install chromium
-        node ci/capture-code-comparison.mjs
-        if ($serverProcess -and -not $serverProcess.HasExited) { Stop-Process -Id $serverProcess.Id -Force }
+      run: .\tools\capture-home-code-comparison.ps1 -SkipBuild
+
+    - name: Check Home Code Comparison Guards
+      shell: pwsh
+      run: .\scripts\check-home-code-comparison-guards.ps1
+
+    - name: Generate Home Code Comparison Report
+      shell: pwsh
+      run: node .\scripts\generate-home-code-comparison-report.js
 
     - name: Validate Component Routes
       shell: pwsh
@@ -288,10 +520,13 @@ jobs:
         path: site-dist/
         retention-days: 7
 
-    - name: Upload Code Comparison screenshots
+    - name: Upload Home Code Comparison screenshots
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: code-comparison-screenshots
-        path: docs-site/build/screenshots/code-comparison/
+        name: home-code-comparison-screenshots
+        path: |
+          artifacts/screenshots/home-code-comparison/
+          artifacts/reports/home-code-comparison.md
+        if-no-files-found: error
         retention-days: 14

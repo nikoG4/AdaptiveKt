@@ -39,7 +39,6 @@ public fun <T> AdaptiveTabs(
     onTabSelected: (T) -> Unit,
     tabLabel: (T) -> String,
     modifier: Modifier = Modifier,
-    tabModifier: (T) -> Modifier = { Modifier },
 ) {
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
@@ -57,7 +56,6 @@ public fun <T> AdaptiveTabs(
                     .clip(AdaptiveComponentDefaults.PillShape)
                     .background(background)
                     .border(1.dp, borderColor, AdaptiveComponentDefaults.PillShape)
-                    .then(tabModifier(tab))
                     .adaptiveInteractiveCursor()
                     .clickable { onTabSelected(tab) }
                     .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small)

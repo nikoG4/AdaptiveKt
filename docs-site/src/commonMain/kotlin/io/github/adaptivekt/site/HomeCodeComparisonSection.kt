@@ -29,36 +29,53 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 
-internal data class HomeCodeComparisonUiState(
-    var selectedTab: ComparisonImplementation = ComparisonImplementation.AdaptiveKt,
-    var expandedAdaptiveKt: Boolean = false,
-    var expandedPlainCompose: Boolean = false,
-    var methodologyExpanded: Boolean = false
-)
-
 @Composable
 internal fun HomeCodeComparisonSection() {
     val metrics = remember { calculateCodeReduction(AdaptiveDataViewComparisonCode, PlainComposeDataViewComparisonCode) }
-    val uiState = remember { HomeCodeComparisonUiState() }
+    var selectedTab by remember { mutableStateOf(ComparisonImplementation.AdaptiveKt) }
+    var expandedAdaptiveKt by remember { mutableStateOf(false) }
+    var expandedPlainCompose by remember { mutableStateOf(false) }
+    var methodologyExpanded by remember { mutableStateOf(false) }
+
+    val adaptiveScrollState = rememberScrollState()
+    val composeScrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxWidth().semantics { testTag = "home-code-comparison" }) {
         SiteText("Less boilerplate, more focus", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         SiteText("Both examples implement the same table-to-card breakpoint behavior, empty state and status presentation.", color = SiteMuted, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val layoutMode = resolveHomeCodeComparisonLayout(maxWidth)
-            
+
             if (layoutMode == HomeCodeComparisonLayout.Tabbed) {
-                CompactCodeComparison(metrics, uiState)
+                CompactCodeComparison(
+                    metrics = metrics,
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it },
+                    expandedAdaptiveKt = expandedAdaptiveKt,
+                    onExpandedAdaptiveKtChange = { expandedAdaptiveKt = it },
+                    expandedPlainCompose = expandedPlainCompose,
+                    onExpandedPlainComposeChange = { expandedPlainCompose = it },
+                    adaptiveScrollState = adaptiveScrollState,
+                    composeScrollState = composeScrollState
+                )
             } else {
-                DesktopCodeComparison(metrics, uiState)
+                DesktopCodeComparison(
+                    metrics = metrics,
+                    expandedAdaptiveKt = expandedAdaptiveKt,
+                    onExpandedAdaptiveKtChange = { expandedAdaptiveKt = it },
+                    expandedPlainCompose = expandedPlainCompose,
+                    onExpandedPlainComposeChange = { expandedPlainCompose = it },
+                    adaptiveScrollState = adaptiveScrollState,
+                    composeScrollState = composeScrollState
+                )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         AdaptiveCard {
             SiteText(
                 text = "${metrics.reductionPercent}% fewer meaningful UI lines in this example",
@@ -73,11 +90,11 @@ internal fun HomeCodeComparisonSection() {
             Spacer(modifier = Modifier.height(8.dp))
             AdaptiveButton(
                 modifier = Modifier.semantics { testTag = "comparison-methodology" },
-                text = if (uiState.methodologyExpanded) "Hide methodology" else "How is this measured?",
+                text = if (methodologyExpanded) "Hide methodology" else "How is this measured?",
                 variant = AdaptiveButtonVariant.Ghost,
-                onClick = { uiState.methodologyExpanded = !uiState.methodologyExpanded }
+                onClick = { methodologyExpanded = !methodologyExpanded }
             )
-            if (uiState.methodologyExpanded) {
+            if (methodologyExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 SiteText(
                     text = "Imports, package declarations, blank lines and full-line comments are excluded. Required helper composables are included.",
@@ -91,15 +108,24 @@ internal fun HomeCodeComparisonSection() {
 }
 
 @Composable
-private fun DesktopCodeComparison(metrics: CodeReductionMetrics, uiState: HomeCodeComparisonUiState) {
+private fun DesktopCodeComparison(
+    metrics: CodeReductionMetrics,
+    expandedAdaptiveKt: Boolean,
+    onExpandedAdaptiveKtChange: (Boolean) -> Unit,
+    expandedPlainCompose: Boolean,
+    onExpandedPlainComposeChange: (Boolean) -> Unit,
+    adaptiveScrollState: ScrollState,
+    composeScrollState: ScrollState
+) {
     AdaptiveGrid(columns = 12, horizontalGap = 16.dp, verticalGap = 16.dp) {
         item(span = 6) {
             CodeComparisonPanel(
                 implementation = ComparisonImplementation.AdaptiveKt,
                 metricsText = formatMeaningfulLineCount(metrics.adaptiveLines),
                 code = AdaptiveDataViewComparisonCode,
-                expanded = uiState.expandedAdaptiveKt,
-                onExpandedChange = { uiState.expandedAdaptiveKt = it }
+                expanded = expandedAdaptiveKt,
+                onExpandedChange = onExpandedAdaptiveKtChange,
+                scrollState = adaptiveScrollState
             )
         }
         item(span = 6) {
@@ -107,46 +133,54 @@ private fun DesktopCodeComparison(metrics: CodeReductionMetrics, uiState: HomeCo
                 implementation = ComparisonImplementation.PlainCompose,
                 metricsText = formatMeaningfulLineCount(metrics.composeLines),
                 code = PlainComposeDataViewComparisonCode,
-                expanded = uiState.expandedPlainCompose,
-                onExpandedChange = { uiState.expandedPlainCompose = it }
+                expanded = expandedPlainCompose,
+                onExpandedChange = onExpandedPlainComposeChange,
+                scrollState = composeScrollState
             )
         }
     }
 }
 
 @Composable
-private fun CompactCodeComparison(metrics: CodeReductionMetrics, uiState: HomeCodeComparisonUiState) {
+private fun CompactCodeComparison(
+    metrics: CodeReductionMetrics,
+    selectedTab: ComparisonImplementation,
+    onTabSelected: (ComparisonImplementation) -> Unit,
+    expandedAdaptiveKt: Boolean,
+    onExpandedAdaptiveKtChange: (Boolean) -> Unit,
+    expandedPlainCompose: Boolean,
+    onExpandedPlainComposeChange: (Boolean) -> Unit,
+    adaptiveScrollState: ScrollState,
+    composeScrollState: ScrollState
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveTabs(
             tabs = ComparisonImplementation.values().toList(),
-            selectedTab = uiState.selectedTab,
-            onTabSelected = { uiState.selectedTab = it },
-            tabLabel = { 
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            tabLabel = {
                 val lines = if (it == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
-                "${it.label} — ${lines}" 
-            },
-            tabModifier = { tab ->
-                Modifier.semantics {
-                    testTag = if (tab == ComparisonImplementation.AdaptiveKt) "comparison-tab-adaptivekt" else "comparison-tab-plain-compose"
-                }
+                "${it.label} — ${lines}"
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
-        val code = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) AdaptiveDataViewComparisonCode else PlainComposeDataViewComparisonCode
-        val linesText = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
-        val expanded = if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) uiState.expandedAdaptiveKt else uiState.expandedPlainCompose
-        val onExpandedChange = { e: Boolean -> 
-            if (uiState.selectedTab == ComparisonImplementation.AdaptiveKt) uiState.expandedAdaptiveKt = e
-            else uiState.expandedPlainCompose = e
+
+        val code = if (selectedTab == ComparisonImplementation.AdaptiveKt) AdaptiveDataViewComparisonCode else PlainComposeDataViewComparisonCode
+        val linesText = if (selectedTab == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
+        val expanded = if (selectedTab == ComparisonImplementation.AdaptiveKt) expandedAdaptiveKt else expandedPlainCompose
+        val onExpandedChange = { e: Boolean ->
+            if (selectedTab == ComparisonImplementation.AdaptiveKt) onExpandedAdaptiveKtChange(e)
+            else onExpandedPlainComposeChange(e)
         }
-        
+        val scrollState = if (selectedTab == ComparisonImplementation.AdaptiveKt) adaptiveScrollState else composeScrollState
+
         CodeComparisonPanel(
-            implementation = uiState.selectedTab,
+            implementation = selectedTab,
             metricsText = formatMeaningfulLineCount(linesText),
             code = code,
             expanded = expanded,
-            onExpandedChange = onExpandedChange
+            onExpandedChange = onExpandedChange,
+            scrollState = scrollState
         )
     }
 }
@@ -157,7 +191,8 @@ private fun CodeComparisonPanel(
     metricsText: String,
     code: String,
     expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
+    onExpandedChange: (Boolean) -> Unit,
+    scrollState: ScrollState
 ) {
     val lines = code.lines()
     val maxCollapsedLines = 28
@@ -165,8 +200,6 @@ private fun CodeComparisonPanel(
     val displayedCode = if (expanded || !isCollapsible) code else lines.take(maxCollapsedLines).joinToString("\n")
     val panelTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-panel-adaptivekt" else "comparison-panel-plain-compose"
     val expandTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-expand-adaptivekt" else "comparison-expand-plain-compose"
-
-    val scrollState = remember(implementation) { ScrollState(0) }
 
     Column(
         modifier = Modifier
@@ -199,9 +232,9 @@ private fun CodeComparisonPanel(
                 }
             }
         }
-        
+
         AdaptiveDivider()
-        
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -221,7 +254,7 @@ private fun CodeComparisonPanel(
                 )
             }
         }
-        
+
         if (isCollapsible && !expanded) {
             Box(
                 modifier = Modifier
@@ -233,7 +266,7 @@ private fun CodeComparisonPanel(
                 SiteText("// ... ${lines.size - maxCollapsedLines} more lines", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp)
             }
         }
-        
+
         if (isCollapsible) {
             AdaptiveDivider()
             Box(
