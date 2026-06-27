@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -87,6 +87,8 @@ import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 internal fun SiteComponentsPage(
     selectedHash: String,
     onSelectedHashChange: (String) -> Unit,
+    sectionId: String?,
+    onSectionChange: (String) -> Unit,
 ) {
     val docs = remember { DocsRegistry.getComponents { componentDocs() } }
     val resolvedId = DocsRegistry.resolveComponentId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.ID_THEME)
@@ -107,7 +109,8 @@ internal fun SiteComponentsPage(
         selectedId = component.id,
         onSelectedIdChange = onSelectedHashChange,
         onThisPage = component.tocItems,
-        onTocItemClick = { /* TOC clicks are currently for local focal feedback only; they do not touch the primary route */ },
+        onTocItemClick = { onSectionChange(it) },
+        sectionId = sectionId,
     ) {
         CompositionLocalProvider(LocalDocsVisualState provides selectedHash) {
             ComponentDocArticle(component)

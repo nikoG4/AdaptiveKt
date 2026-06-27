@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 internal object DocsRegistry {
 
@@ -74,14 +74,14 @@ internal object DocsRegistry {
     }
 
     fun resolveComponentId(hash: String): String {
-        // Fallback a componente base si la sub-sección es inválida (ej. "adaptive-button-icon" -> "adaptive-button")
+        // Fallback a componente base si la sub-secciÃ³n es invÃ¡lida (ej. "adaptive-button-icon" -> "adaptive-button")
         // O si no existe, devuelve el primer componente.
         if (hash in allComponentIds) return hash
-        
+
         // Simple fallback matcher
         val baseId = allComponentIds.find { hash.startsWith("$it-") }
         if (baseId != null) return baseId
-        
+
         return ID_THEME // Default
     }
 

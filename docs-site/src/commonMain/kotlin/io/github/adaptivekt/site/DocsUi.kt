@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,19 +69,39 @@ internal fun DocsShell(
     navGroups: List<DocsNavGroup>,
     selectedId: String,
     onSelectedIdChange: (String) -> Unit,
+    sectionId: String? = null,
     onThisPage: List<String>?,
     onTocItemClick: ((String) -> Unit)? = null,
+    scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState(),
     content: @Composable () -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 880.dp
-        val showRightToc = maxWidth >= 1150.dp
-        
+    val registry = androidx.compose.runtime.remember { DocsSectionRegistry() }
+
+    // Automatically scroll to section when it's available or selectedId/sectionId changes
+    androidx.compose.runtime.LaunchedEffect(selectedId, sectionId) {
+        if (sectionId != null) {
+            val y = registry.getPosition(sectionId)
+            if (y != null) {
+                scrollState.animateScrollTo(y)
+            }
+        } else {
+            // Scroll to top when changing page without a section
+            scrollState.animateScrollTo(0)
+        }
+    }
+
+    val activeSection = registry.getActiveSection(scrollState.value)
+
+    androidx.compose.runtime.CompositionLocalProvider(LocalDocsSectionRegistry provides registry) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 880.dp
+            val showRightToc = maxWidth >= 1150.dp
+
         if (compact) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
             ) {
                 DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = true)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -89,9 +109,10 @@ internal fun DocsShell(
                     DocsCompactNav(navGroups = navGroups, selectedId = selectedId, onSelectedIdChange = onSelectedIdChange)
                     if (!onThisPage.isNullOrEmpty()) {
                         DocsOnThisPage(
-                            items = onThisPage, 
+                            items = onThisPage,
+                            activeItem = activeSection,
                             compact = true,
-                            onItemClick = { onTocItemClick?.invoke(it) }
+                            onItemClick = { onTocItemClick?.invoke(normalizeSectionId(it)) }
                         )
                     }
                     content()
@@ -121,7 +142,7 @@ internal fun DocsShell(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(scrollState),
                     ) {
                         content()
                         Spacer(modifier = Modifier.height(48.dp))
@@ -130,8 +151,9 @@ internal fun DocsShell(
                     if (!onThisPage.isNullOrEmpty() && showRightToc) {
                         DocsOnThisPage(
                             items = onThisPage,
+                            activeItem = activeSection,
                             compact = false,
-                            onItemClick = { onTocItemClick?.invoke(it) },
+                            onItemClick = { onTocItemClick?.invoke(normalizeSectionId(it)) },
                             modifier = Modifier
                                 .width(210.dp)
                                 .fillMaxHeight()
@@ -143,6 +165,7 @@ internal fun DocsShell(
             }
         }
     }
+}
 }
 
 @Composable
@@ -266,6 +289,7 @@ private fun DocsNavButton(
 @Composable
 internal fun DocsOnThisPage(
     items: List<String>,
+    activeItem: String?,
     compact: Boolean,
     onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -279,18 +303,24 @@ internal fun DocsOnThisPage(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items.forEach { item ->
+                        val isActive = normalizeSectionId(item) == activeItem
                         AdaptiveBadge(
-                            text = item, 
-                            tone = AdaptiveBadgeTone.Neutral,
+                            text = item,
+                            tone = if (isActive) AdaptiveBadgeTone.Info else AdaptiveBadgeTone.Neutral,
                         )
                     }
                 }
             } else {
                 items.forEach { item ->
+                    val isActive = normalizeSectionId(item) == activeItem
+                    val color = if (isActive) AdaptiveTheme.colors.primary else SiteMuted
+                    val dotColor = if (isActive) AdaptiveTheme.colors.primary else Color.Transparent
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(AdaptiveTheme.shapes.small)
+                            .docsClickableCursor()
+                            .clickable { onItemClick(item) }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -298,10 +328,10 @@ internal fun DocsOnThisPage(
                             modifier = Modifier
                                 .width(6.dp)
                                 .height(6.dp)
-                                .background(AdaptiveTheme.colors.primary, AdaptiveTheme.shapes.pill),
+                                .background(dotColor, AdaptiveTheme.shapes.pill),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        SiteText(item, color = SiteMuted, maxLines = 2)
+                        SiteText(item, color = color, maxLines = 2, fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal)
                     }
                 }
             }
@@ -315,14 +345,16 @@ internal fun DocsSection(
     description: String? = null,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
-        if (description != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+    DocsSectionAnchor(id = normalizeSectionId(title), modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
+            if (description != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            content()
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        content()
     }
 }
 
@@ -365,14 +397,14 @@ internal fun DocsCodeBlock(
     title: String = "Kotlin",
 ) {
     var copied by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(copied) {
         if (copied) {
             delay(2000)
             copied = false
         }
     }
-    
+
     val shape = RoundedCornerShape(10.dp)
     Column(
         modifier = Modifier
@@ -395,8 +427,9 @@ internal fun DocsCodeBlock(
             )
             AdaptiveIconButton(
                 onClick = {
-                    requestCopyToClipboard(code.trimIndent())
-                    copied = true
+                    requestCopyToClipboard(code.trimIndent()) {
+                        copied = true
+                    }
                 },
                 size = 32.dp,
                 modifier = Modifier.docsClickableCursor(),
@@ -511,15 +544,17 @@ private fun ParameterRow(values: List<String>, header: Boolean = false) {
 @Composable
 internal fun ComponentDocArticle(doc: ComponentDoc) {
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        AdaptiveCard(contentSelectionEnabled = true) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
-                Spacer(modifier = Modifier.height(10.dp))
-                SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.usage, color = SiteMuted, maxLines = 20)
+        DocsSectionAnchor(id = "overview", modifier = Modifier.fillMaxWidth()) {
+            AdaptiveCard(contentSelectionEnabled = true) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SiteText(doc.usage, color = SiteMuted, maxLines = 20)
+                }
             }
         }
 
@@ -581,7 +616,9 @@ private fun NotesGrid(notes: List<Pair<String, List<String>>>) {
     }
 }
 
-internal fun requestCopyToClipboard(@Suppress("UNUSED_PARAMETER") text: String) {
-    // Wasm clipboard support is intentionally best-effort for now. The docs UI still gives
-    // an immediate copied state so examples remain usable even where browser APIs are blocked.
+internal fun requestCopyToClipboard(text: String, onSuccess: () -> Unit) {
+    PlatformInterop.copyToClipboard(text, onSuccess = onSuccess, onError = {
+        // Fallback or ignore for now
+        println("Clipboard error: $it")
+    })
 }

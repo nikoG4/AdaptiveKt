@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +25,7 @@ class SiteLocationTest {
         for (loc in locations) {
             val canonical = canonicalizeSiteLocation(loc)
             val url = serializeSiteLocation(canonical)
-            
+
             // split URL into path, query and hash for parsing
             val hashIndex = url.indexOf('#')
             val hashPart = if (hashIndex != -1) url.substring(hashIndex) else ""
@@ -39,27 +39,27 @@ class SiteLocationTest {
             assertEquals(canonical, parsed, "Failed round-trip for $url")
         }
     }
-    
+
     @Test
     fun testParseQueryString() {
         // query empty
         assertEquals(emptyMap(), parseQueryString(""))
         assertEquals(emptyMap(), parseQueryString("?"))
-        
+
         // spaces and encoding
         val q1 = parseQueryString("?q=adaptive+button")
         assertEquals("adaptive button", q1["q"])
-        
+
         val q2 = parseQueryString("?q=special%20chars%26%3D")
         assertEquals("special chars&=", q2["q"])
     }
-    
+
     @Test
     fun testCanonicalizationAndNormalization() {
         assertEquals("adaptive-button", normalizeDocsId("Adaptive-Button"))
         assertEquals("setup-guide", normalizeDocsId("Setup---Guide "))
         assertEquals("a-b", normalizeDocsId("A!@#B"))
-        
+
         val dirty = SiteLocation(
             route = SiteRoute.Components,
             selectedItemId = " A!!B--c ",
@@ -70,5 +70,17 @@ class SiteLocationTest {
         assertEquals("a-b-c", clean.selectedItemId)
         assertEquals("section-1", clean.sectionId)
         assertEquals("search", clean.searchQuery)
+    }
+
+    @Test
+    fun testInvalidPaths() {
+        // Unknown route falls back to Home
+        val p1 = parseSiteLocation("/unknown-path", "", "", false)
+        assertEquals(SiteRoute.Home, p1.route)
+
+        // Nested subpaths fallback to base
+        val p2 = parseSiteLocation("/components/extra", "#adaptive-button", "", false)
+        assertEquals(SiteRoute.Components, p2.route)
+        assertEquals("adaptive-button", p2.selectedItemId)
     }
 }

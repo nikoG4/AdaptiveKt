@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,10 +54,14 @@ public fun AdaptiveKtSiteApp() {
                     SiteRoute.Components -> SiteComponentsPage(
                         selectedHash = location.selectedItemId ?: "",
                         onSelectedHashChange = { updateLocation(location.copy(route = SiteRoute.Components, selectedItemId = it)) },
+                        sectionId = location.sectionId,
+                        onSectionChange = { updateLocation(location.copy(sectionId = it)) }
                     )
                     SiteRoute.Docs -> SiteDocsPage(
                         selectedHash = location.selectedItemId ?: "",
                         onSelectedHashChange = { updateLocation(location.copy(route = SiteRoute.Docs, selectedItemId = it)) },
+                        sectionId = location.sectionId,
+                        onSectionChange = { updateLocation(location.copy(sectionId = it)) }
                     )
                     SiteRoute.Demo -> SiteDemoPage()
                 }

@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -47,7 +47,7 @@ internal object KotlinLexer {
 
         while (i < length) {
             val c = code[i]
-            
+
             // Whitespace
             if (c.isWhitespace()) {
                 val start = i
@@ -127,7 +127,7 @@ internal object KotlinLexer {
                 val start = i
                 while (i < length && (code[i].isLetterOrDigit() || code[i] == '_')) i++
                 val text = code.substring(start, i)
-                
+
                 // Peek ahead to see if it's a function call
                 var isFunction = false
                 var peek = i
@@ -135,7 +135,7 @@ internal object KotlinLexer {
                 if (peek < length && (code[peek] == '(' || code[peek] == '{')) {
                     isFunction = true
                 }
-                
+
                 val type = when {
                     text in keywords -> TokenType.KEYWORD
                     text in types -> TokenType.TYPE
@@ -143,7 +143,7 @@ internal object KotlinLexer {
                     isFunction -> TokenType.FUNCTION
                     else -> TokenType.IDENTIFIER
                 }
-                
+
                 tokens.add(Token(text, type))
                 continue
             }

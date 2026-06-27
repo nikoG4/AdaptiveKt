@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -66,7 +66,7 @@ internal fun AdaptiveUserDirectoryFixture(users: List<ComparisonUser>) {
 internal fun PlainComposeUserDirectoryFixture(users: List<ComparisonUser>) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useCards = maxWidth < 840.dp
-        
+
         if (users.isEmpty()) {
             EmptyUsersStateFixture()
         } else if (useCards) {

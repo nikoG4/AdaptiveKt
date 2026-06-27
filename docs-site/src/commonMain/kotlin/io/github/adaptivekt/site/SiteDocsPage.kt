@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxWidth
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveButton
@@ -32,6 +34,8 @@ import io.github.adaptivekt.layout.AdaptiveGrid
 internal fun SiteDocsPage(
     selectedHash: String,
     onSelectedHashChange: (String) -> Unit,
+    sectionId: String?,
+    onSectionChange: (String) -> Unit,
 ) {
     val topics = remember { DocsRegistry.getTopics { docsTopics() } }
     val selectedId = DocsRegistry.resolveTopicId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.TOPIC_GETTING_STARTED)
@@ -51,16 +55,19 @@ internal fun SiteDocsPage(
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
         onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
-        onTocItemClick = { /* Local focal navigation only; preserves primary route */ },
+        onTocItemClick = { onSectionChange(it) },
+        sectionId = sectionId,
     ) {
-        AdaptiveCard {
-            AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-            SiteText(selected.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
-            SiteText(selected.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 8)
+        DocsSectionAnchor(id = "overview", modifier = Modifier.fillMaxWidth()) {
+            AdaptiveCard {
+                AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
+                Spacer(modifier = Modifier.height(12.dp))
+                SiteText(selected.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
+                Spacer(modifier = Modifier.height(10.dp))
+                SiteText(selected.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 8)
+            }
         }
-        Spacer(modifier = androidx.compose.ui.Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         selected.content()
     }
 }
@@ -99,7 +106,7 @@ dependencies {
                     AdaptiveSurface(contentPadding = PaddingValues(16.dp)) {
                         Column {
                             SiteText("Maven Central alpha", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             SiteText("Group: io.github.nikog4.adaptivekt", color = SiteMuted)
                         }
                     }
@@ -152,7 +159,7 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                     AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                         AdaptiveCard {
                             SiteText("Theme preview", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             AdaptiveButton("Primary action", onClick = {})
                         }
                     }
@@ -349,8 +356,8 @@ AdaptiveGrid(columns = 12) {
 private fun RowLikeBullet(text: String) {
     androidx.compose.foundation.layout.Row {
         AdaptiveBadge("Next", tone = AdaptiveBadgeTone.Info)
-        Spacer(modifier = androidx.compose.ui.Modifier.height(1.dp))
-        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(10.dp))
+        Spacer(modifier = Modifier.height(1.dp))
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(10.dp))
         SiteText(text, color = SiteMuted, maxLines = 5)
     }
 }

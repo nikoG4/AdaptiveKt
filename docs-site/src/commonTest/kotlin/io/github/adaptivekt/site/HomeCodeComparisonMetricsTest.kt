@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,9 +11,9 @@ class HomeCodeComparisonMetricsTest {
     fun ignoresBlankLines() {
         val code = """
             val a = 1
-            
+
             val b = 2
-            
+
         """.trimIndent()
         assertEquals(2, countMeaningfulCodeLines(code))
     }
@@ -92,7 +92,7 @@ class HomeCodeComparisonMetricsTest {
     fun countsCodeAfterClosingBlockComment() {
         val code = """
             /* explanation */ val a = 1
-            /* 
+            /*
              * multiline
              */ val b = 2
         """.trimIndent()
@@ -204,7 +204,7 @@ class HomeCodeComparisonMetricsTest {
             AdaptiveDataViewComparisonCode,
             PlainComposeDataViewComparisonCode
         )
-        
+
         assertTrue(metrics.adaptiveLines > 0, "Adaptive snippet should have meaningful lines")
         assertTrue(metrics.composeLines > metrics.adaptiveLines, "Compose snippet should be longer")
         assertTrue(metrics.reductionPercent in 1..99, "Reduction percent should be between 1 and 99")

@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 internal data class SiteLocation(
     val route: SiteRoute,
@@ -16,19 +16,19 @@ internal fun parseSiteLocation(
     darkTheme: Boolean
 ): SiteLocation {
     val route = when {
-        path.endsWith("/docs/") -> SiteRoute.Docs
-        path.endsWith("/components/") -> SiteRoute.Components
-        path.endsWith("/demo/") -> SiteRoute.Demo
+        path.contains("/docs/") -> SiteRoute.Docs
+        path.contains("/components/") -> SiteRoute.Components
+        path.contains("/demo/") -> SiteRoute.Demo
         else -> SiteRoute.Home
     }
-    
+
     // Parse query params
     val queryParams = parseQueryString(queryString)
     val q = queryParams["q"]?.takeIf { it.isNotBlank() }
     val section = queryParams["section"]?.takeIf { it.isNotBlank() }
     val themeOverride = queryParams["theme"]
     val captureState = queryParams["capture"]
-    
+
     val finalDarkTheme = when (themeOverride) {
         "dark" -> true
         "light" -> false
@@ -49,7 +49,7 @@ internal fun parseSiteLocation(
 
 internal fun serializeSiteLocation(location: SiteLocation): String {
     val routePath = location.route.path // This will be "/", "/docs/", "/components/"
-    
+
     val queryParts = mutableListOf<String>()
     if (!location.searchQuery.isNullOrBlank()) {
         queryParts.add("q=${encodeURIComponent(location.searchQuery)}")
@@ -63,10 +63,10 @@ internal fun serializeSiteLocation(location: SiteLocation): String {
     if (!location.visualState.isNullOrBlank()) {
         queryParts.add("capture=${encodeURIComponent(location.visualState)}")
     }
-    
+
     val queryString = if (queryParts.isNotEmpty()) "?" + queryParts.joinToString("&") else ""
     val hashString = if (!location.selectedItemId.isNullOrBlank()) "#${location.selectedItemId}" else ""
-    
+
     return "$routePath$queryString$hashString"
 }
 
@@ -96,7 +96,7 @@ internal fun normalizeSectionId(id: String): String {
 internal fun parseQueryString(query: String): Map<String, String> {
     val q = query.removePrefix("?")
     if (q.isBlank()) return emptyMap()
-    
+
     val map = mutableMapOf<String, String>()
     q.split("&").forEach { pair ->
         val parts = pair.split("=", limit = 2)
@@ -142,7 +142,7 @@ internal fun decodeURIComponent(str: String): String {
             val hex = str.substring(i + 1, i + 3)
             try {
                 val byte = hex.toInt(16).toByte()
-                sb.append(byte.toInt().toChar()) 
+                sb.append(byte.toInt().toChar())
                 i += 3
             } catch (e: Exception) {
                 sb.append(c)
@@ -153,5 +153,5 @@ internal fun decodeURIComponent(str: String): String {
             i++
         }
     }
-    return sb.toString() 
+    return sb.toString()
 }

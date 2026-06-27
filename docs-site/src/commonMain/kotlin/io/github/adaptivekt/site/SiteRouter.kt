@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 internal enum class SiteRoute(val label: String, val path: String) {
     Home("Home", "/"),

@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 internal data class SearchResult(
     val id: String,
@@ -11,11 +11,14 @@ internal data class SearchResult(
 internal class SiteSearchIndex {
     private val records = mutableListOf<SearchRecord>()
 
-    fun buildIndex() {
+    fun buildIndex(
+        components: List<ComponentDoc> = DocsRegistry.getComponents { emptyList() },
+        topics: List<DocsTopic> = DocsRegistry.getTopics { emptyList() }
+    ) {
         if (records.isNotEmpty()) return
 
         // Index components
-        DocsRegistry.getComponents { emptyList() }.forEach { doc ->
+        components.forEach { doc ->
             records.add(
                 SearchRecord(
                     id = doc.id,
@@ -28,7 +31,7 @@ internal class SiteSearchIndex {
         }
 
         // Index docs
-        DocsRegistry.getTopics { emptyList() }.forEach { topic ->
+        topics.forEach { topic ->
             records.add(
                 SearchRecord(
                     id = topic.id,
@@ -44,7 +47,7 @@ internal class SiteSearchIndex {
     fun search(query: String): List<SearchResult> {
         if (query.isBlank()) return emptyList()
 
-        val tokens = query.lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }
+        val tokens = query.lowercase().split(" ", "\t", "\n", "\r").filter { it.isNotBlank() }
         if (tokens.isEmpty()) return emptyList()
 
         return records.mapNotNull { record ->

@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -160,7 +160,7 @@ private fun CompactCodeComparison(
             onTabSelected = onTabSelected,
             tabLabel = {
                 val lines = if (it == ComparisonImplementation.AdaptiveKt) metrics.adaptiveLines else metrics.composeLines
-                "${it.label} — ${lines}"
+                "${it.label} â€” ${lines}"
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
