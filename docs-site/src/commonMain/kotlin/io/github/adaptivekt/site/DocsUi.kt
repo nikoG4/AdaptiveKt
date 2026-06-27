@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import io.github.adaptivekt.site.LocalSiteLocation
+import io.github.adaptivekt.site.serializeSiteLocation
+import io.github.adaptivekt.site.normalizeSectionId
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -80,10 +84,7 @@ internal fun DocsShell(
     // Automatically scroll to section when it's available or selectedId/sectionId changes
     androidx.compose.runtime.LaunchedEffect(selectedId, sectionId) {
         if (sectionId != null) {
-            val y = registry.getPosition(sectionId)
-            if (y != null) {
-                scrollState.animateScrollTo(y)
-            }
+            registry.scrollToSection(sectionId)
         } else {
             // Scroll to top when changing page without a section
             scrollState.animateScrollTo(0)
@@ -181,19 +182,50 @@ internal fun DocsHeroHeader(
         val primary = AdaptiveTheme.colors.primary
         val info = AdaptiveTheme.colors.info
         val success = AdaptiveTheme.colors.success
-        BasicText(
-            text = title,
-            style = TextStyle(
-                fontSize = if (compact) 34.sp else 48.sp,
-                lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
-                fontWeight = FontWeight.ExtraBold,
-                brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                    colors = listOf(primary, info, success)
+        
+        var copied by remember { mutableStateOf(false) }
+        LaunchedEffect(copied) {
+            if (copied) {
+                kotlinx.coroutines.delay(2000)
+                copied = false
+            }
+        }
+        val location = LocalSiteLocation.current
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BasicText(
+                text = title,
+                style = TextStyle(
+                    fontSize = if (compact) 34.sp else 48.sp,
+                    lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
+                    fontWeight = FontWeight.ExtraBold,
+                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                        colors = listOf(primary, info, success)
+                    ),
                 ),
-            ),
-            maxLines = if (compact) 4 else 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+                maxLines = if (compact) 4 else 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            AdaptiveIconButton(
+                onClick = {
+                    val permalink = PlatformInterop.getWindowOrigin() + serializeSiteLocation(location.copy(sectionId = null))
+                    requestCopyToClipboard(permalink) {
+                        copied = true
+                    }
+                },
+                modifier = Modifier.docsClickableCursor().alpha(if (copied) 1f else 0.2f),
+                size = 28.dp,
+                content = {
+                    androidx.compose.foundation.Image(
+                        imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
+                        contentDescription = "Copy page link",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         SiteText(
             text = description,
@@ -307,6 +339,7 @@ internal fun DocsOnThisPage(
                         AdaptiveBadge(
                             text = item,
                             tone = if (isActive) AdaptiveBadgeTone.Info else AdaptiveBadgeTone.Neutral,
+                            modifier = Modifier.clip(AdaptiveTheme.shapes.small).docsClickableCursor().clickable { onItemClick(item) },
                         )
                     }
                 }
@@ -346,8 +379,39 @@ internal fun DocsSection(
     content: @Composable () -> Unit,
 ) {
     DocsSectionAnchor(id = normalizeSectionId(title), modifier = Modifier.fillMaxWidth()) {
+        var copied by remember { mutableStateOf(false) }
+        LaunchedEffect(copied) {
+            if (copied) {
+                kotlinx.coroutines.delay(2000)
+                copied = false
+            }
+        }
+        val location = LocalSiteLocation.current
+        val sectionId = normalizeSectionId(title)
+        
         Column(modifier = Modifier.fillMaxWidth()) {
-            SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
+                Spacer(modifier = Modifier.width(8.dp))
+                AdaptiveIconButton(
+                    onClick = {
+                        val permalink = PlatformInterop.getWindowOrigin() + serializeSiteLocation(location.copy(sectionId = sectionId))
+                        requestCopyToClipboard(permalink) {
+                            copied = true
+                        }
+                    },
+                    modifier = Modifier.docsClickableCursor().alpha(if (copied) 1f else 0.2f),
+                    size = 28.dp,
+                    content = {
+                        androidx.compose.foundation.Image(
+                            imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
+                            contentDescription = "Copy section link",
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
+            }
             if (description != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
@@ -422,8 +486,8 @@ internal fun DocsCodeBlock(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BasicText(
-                text = title,
-                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFCBD5E1)),
+                text = if (copied) "Copied!" else title,
+                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (copied) AdaptiveTheme.colors.success else Color(0xFFCBD5E1)),
             )
             AdaptiveIconButton(
                 onClick = {
@@ -622,3 +686,10 @@ internal fun requestCopyToClipboard(text: String, onSuccess: () -> Unit) {
         println("Clipboard error: $it")
     })
 }
+
+
+
+
+
+
+

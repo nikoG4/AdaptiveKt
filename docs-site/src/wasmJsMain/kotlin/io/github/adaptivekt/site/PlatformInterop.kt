@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
@@ -13,6 +13,10 @@ internal actual object PlatformInterop {
     actual fun scrollToElement(id: String) {
         scrollIntoViewJs(id)
     }
+
+    actual fun getWindowOrigin(): String = kotlinx.browser.window.location.origin
+
+
 
     actual fun copyToClipboard(text: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         try {
@@ -30,3 +34,5 @@ internal actual object PlatformInterop {
         }
     }
 }
+
+

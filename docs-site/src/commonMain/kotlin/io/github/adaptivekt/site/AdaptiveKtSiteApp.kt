@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +24,7 @@ public fun AdaptiveKtSiteApp() {
         AdaptiveTheme(
             colorScheme = if (location.darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
         ) {
+            androidx.compose.runtime.CompositionLocalProvider(LocalSiteLocation provides location) {
             val updateLocation: (SiteLocation) -> Unit = { newLocation ->
                 location = newLocation
                 pushSiteLocation(newLocation)
@@ -66,6 +67,8 @@ public fun AdaptiveKtSiteApp() {
                     SiteRoute.Demo -> SiteDemoPage()
                 }
             }
+            }
         }
     }
 }
+

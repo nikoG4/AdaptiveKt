@@ -1,4 +1,8 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
+
+import androidx.compose.runtime.compositionLocalOf
+
+internal val LocalSiteLocation = compositionLocalOf<SiteLocation> { error("No SiteLocation provided") }
 
 internal data class SiteLocation(
     val route: SiteRoute,
@@ -155,3 +159,5 @@ internal fun decodeURIComponent(str: String): String {
     }
     return sb.toString()
 }
+
+

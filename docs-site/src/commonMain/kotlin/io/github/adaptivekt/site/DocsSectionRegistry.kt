@@ -1,38 +1,44 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalFoundationApi::class)
 @Stable
 internal class DocsSectionRegistry {
     private val sectionPositions = mutableStateMapOf<String, Int>()
+    private val sectionRequesters = mutableMapOf<String, BringIntoViewRequester>()
 
-    fun register(id: String, yPos: Int) {
+    fun register(id: String, yPos: Int, requester: BringIntoViewRequester) {
         sectionPositions[id] = yPos
+        sectionRequesters[id] = requester
     }
 
     fun unregister(id: String) {
         sectionPositions.remove(id)
+        sectionRequesters.remove(id)
     }
 
-    fun getPosition(id: String): Int? {
-        return sectionPositions[id]
+    suspend fun scrollToSection(id: String) {
+        sectionRequesters[id]?.bringIntoView()
     }
 
-    // For TOC tracking (not perfectly accurate without scroll offset, but good enough for static TOC)
     fun getActiveSection(currentScroll: Int): String? {
         if (sectionPositions.isEmpty()) return null
 
-        // Find the section with the largest Y that is <= currentScroll + offset
-        // We add an offset so clicking a link doesn't just put it exactly at the top.
         val targetY = currentScroll + 100
 
         var bestId: String? = null
@@ -45,7 +51,6 @@ internal class DocsSectionRegistry {
             }
         }
 
-        // If we are at the very top, return the first section if any
         if (bestId == null && sectionPositions.isNotEmpty()) {
             return sectionPositions.entries.minByOrNull { it.value }?.key
         }
@@ -56,6 +61,7 @@ internal class DocsSectionRegistry {
 
 internal val LocalDocsSectionRegistry = compositionLocalOf { DocsSectionRegistry() }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun DocsSectionAnchor(
     id: String,
@@ -63,15 +69,16 @@ internal fun DocsSectionAnchor(
     content: @Composable () -> Unit,
 ) {
     val registry = LocalDocsSectionRegistry.current
+    val requester = remember { BringIntoViewRequester() }
 
     androidx.compose.foundation.layout.Box(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            val y = coordinates.positionInRoot().y.roundToInt()
-            registry.register(id, y)
-        }
+        modifier = modifier
+            .bringIntoViewRequester(requester)
+            .onGloballyPositioned { coordinates ->
+                val y = coordinates.positionInRoot().y.roundToInt()
+                registry.register(id, y, requester)
+            }
     ) {
         content()
     }
 }
-
-
