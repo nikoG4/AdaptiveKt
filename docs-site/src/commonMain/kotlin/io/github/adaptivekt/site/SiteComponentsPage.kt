@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -123,7 +123,7 @@ private fun commonNotes(title: String): List<String> = listOf(
     "Light and dark modes are handled by the active AdaptiveTheme color scheme.",
 )
 
-private fun componentDocs(): List<ComponentDoc> = listOf(
+internal fun componentDocs(): List<ComponentDoc> = listOf(
     ComponentDoc(
         id = DocsRegistry.ID_THEME,
         family = "Foundations",
@@ -535,6 +535,33 @@ AdaptiveMultiSelect(
         responsiveNotes = listOf("Selected chips collapse into +N overflow after maxVisibleChips."),
         accessibilityNotes = listOf("Custom option rows should still expose readable names and selection state visually."),
         limitations = listOf("Keyboard navigation polish can be expanded in a later accessibility pass."),
+    ),
+    ComponentDoc(
+        id = DocsRegistry.ID_TEXT_FIELD,
+        family = "Forms",
+        title = "AdaptiveTextField",
+        summary = "Text input field with support for placeholder, leading/trailing icons, and validation.",
+        usage = "Use inside forms or alone for simple text input.",
+        basicExample = DocsExample(
+            "Basic text field",
+            "A standard text field.",
+            """AdaptiveTextField(value = text, onValueChange = { text = it }, placeholder = "Enter name")""",
+        ) {
+            var text by remember { mutableStateOf("") }
+            AdaptiveTextField(value = text, onValueChange = { text = it }, placeholder = "Enter name")
+        },
+        parameters = listOf(
+            ComponentParameter("value", "String", "required", true, "Current field value."),
+            ComponentParameter("onValueChange", "(String) -> Unit", "required", true, "Callback on value change."),
+            ComponentParameter("placeholder", "String?", "null", false, "Placeholder text."),
+            ComponentParameter("enabled", "Boolean", "true", false, "Whether the field is enabled."),
+            ComponentParameter("isError", "Boolean", "false", false, "Visual error state."),
+            ComponentParameter("leadingIcon / trailingIcon", "(@Composable () -> Unit)?", "null", false, "Icons inside the field."),
+        ),
+        themingNotes = commonNotes("AdaptiveTextField"),
+        responsiveNotes = listOf("Fills available width by default."),
+        accessibilityNotes = listOf("If used outside of AdaptiveFormLayout, ensure proper labels are provided."),
+        limitations = listOf("Advanced input masking is not yet natively supported."),
     ),
     ComponentDoc(
         id = DocsRegistry.ID_FORM_LAYOUT,

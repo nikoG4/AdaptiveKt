@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 internal object DocsRegistry {
 
@@ -54,7 +54,7 @@ internal object DocsRegistry {
 
     fun getComponents(factory: () -> List<ComponentDoc>): List<ComponentDoc> {
         return cachedComponents ?: factory().also { docs ->
-            validateIds(docs.map { it.id }, "Components")
+            requireValidComponentDocs(docs)
             cachedComponents = docs
         }
     }
@@ -70,6 +70,27 @@ internal object DocsRegistry {
         val duplicates = ids.groupingBy { it }.eachCount().filter { it.value > 1 }
         if (duplicates.isNotEmpty()) {
             error("Duplicate IDs found in $context: ${duplicates.keys}")
+        }
+    }
+
+    internal fun requireValidComponentDocs(docs: List<ComponentDoc>) {
+        require(docs.isNotEmpty()) { "Component catalog cannot be empty" }
+        
+        val kebabCasePattern = Regex("^[a-z0-9]+(?:-[a-z0-9]+)*$")
+        val ids = mutableSetOf<String>()
+        
+        docs.forEach { doc ->
+            require(doc.id.isNotBlank()) { "Component ID cannot be empty" }
+            require(kebabCasePattern.matches(doc.id)) { "Component ID '${doc.id}' is not kebab-case" }
+            require(ids.add(doc.id)) { "Duplicate component ID found: ${doc.id}" }
+            
+            require(doc.title.isNotBlank()) { "Component '${doc.id}' title cannot be empty" }
+            require(doc.family.isNotBlank()) { "Component '${doc.id}' family cannot be empty" }
+            require(doc.summary.isNotBlank()) { "Component '${doc.id}' summary cannot be empty" }
+            require(doc.usage.isNotBlank()) { "Component '${doc.id}' usage cannot be empty" }
+            
+            require(doc.basicExample.title.isNotBlank()) { "Component '${doc.id}' basic example title cannot be empty" }
+            require(doc.basicExample.code.isNotBlank()) { "Component '${doc.id}' basic example code cannot be empty" }
         }
     }
 
@@ -90,3 +111,4 @@ internal object DocsRegistry {
         return TOPIC_GETTING_STARTED // Default
     }
 }
+
