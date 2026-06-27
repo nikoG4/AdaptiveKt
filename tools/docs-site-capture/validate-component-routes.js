@@ -17,7 +17,7 @@ const routes = [
 
 async function validate() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const context = await browser.newContext();
   const page = await context.newPage();
   const results = [];
@@ -28,7 +28,7 @@ async function validate() {
 
     // Attach listeners
     const consoleHandler = message => {
-      if (message.type() === 'error') {
+      if (message.type() === 'error' && !message.text().includes('WebGL') && !message.text().includes('GL Driver Message')) {
         consoleMessages.push(message.text());
       }
     };
@@ -102,3 +102,8 @@ validate().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+

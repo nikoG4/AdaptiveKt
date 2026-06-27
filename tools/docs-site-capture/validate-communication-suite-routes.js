@@ -21,7 +21,7 @@ function canonicalHash(route) {
 
 async function validate() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const context = await browser.newContext();
   const page = await context.newPage();
   const results = [];
@@ -109,3 +109,8 @@ validate().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+

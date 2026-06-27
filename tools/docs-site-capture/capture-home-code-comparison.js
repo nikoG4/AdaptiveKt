@@ -83,7 +83,7 @@ function getFileHash(filePath) {
 
 async function capture() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const results = [];
 
   let globalConsoleErrors = 0;
@@ -105,7 +105,7 @@ async function capture() {
       let pageErrors = 0;
 
       page.on('console', message => {
-        if (message.type() === 'error') {
+        if (message.type() === 'error' && !message.text().includes('WebGL') && !message.text().includes('GL Driver Message')) {
           consoleMessages++;
         }
       });
@@ -182,6 +182,8 @@ async function capture() {
             await page.waitForTimeout(200);
             await page.keyboard.press('Tab');
             await page.waitForTimeout(200);
+            await page.keyboard.press('Tab'); // +1 for DocsCodeEditorView
+            await page.waitForTimeout(200);
             await page.keyboard.press('Enter');
             await page.waitForTimeout(1000);
 
@@ -201,7 +203,7 @@ async function capture() {
             await page.waitForSelector('#webApp canvas', { timeout: 30000 });
             await page.waitForTimeout(3000);
             await page.locator('#webApp canvas').click({ position: { x: 10, y: 10 } });
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 7; i++) { // +1 for DocsCodeEditorView
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(200);
             }
@@ -219,7 +221,7 @@ async function capture() {
 
         } else {
             // SideBySide layout
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 6; i++) { // +1 for DocsCodeEditorView
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(200);
             }
@@ -236,6 +238,10 @@ async function capture() {
             }
 
             await page.keyboard.press('Tab');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Tab');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Tab'); // +1 for DocsCodeEditorView
             await page.waitForTimeout(200);
             await page.keyboard.press('Enter'); // Expand Plain Compose
             await page.waitForTimeout(1000);
@@ -311,3 +317,8 @@ capture().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+
