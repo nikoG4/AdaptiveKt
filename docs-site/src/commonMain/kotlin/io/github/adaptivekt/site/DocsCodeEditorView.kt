@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.ScrollState
@@ -94,7 +95,7 @@ internal fun DocsCodeEditorView(code: String, modifier: Modifier = Modifier, scr
         Spacer(modifier = Modifier.width(16.dp))
 
         // Code
-        Box(modifier = Modifier.weight(1f).horizontalScroll(scrollState)) {
+        Box(modifier = Modifier.weight(1f).horizontalScroll(scrollState).focusProperties { canFocus = false }) {
             io.github.adaptivekt.components.AdaptiveSelectionArea {
                 BasicText(
                     text = annotatedCode,
@@ -115,3 +116,4 @@ internal fun DocsCodeEditorView(code: String, modifier: Modifier = Modifier, scr
 private fun Color.luminance(): Float {
     return (0.299f * red + 0.587f * green + 0.114f * blue)
 }
+

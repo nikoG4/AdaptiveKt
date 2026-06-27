@@ -31,6 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import io.github.adaptivekt.site.LocalSiteLocation
@@ -95,7 +98,7 @@ internal fun DocsShell(
 
     androidx.compose.runtime.CompositionLocalProvider(LocalDocsSectionRegistry provides registry) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 880.dp
+            val compact = maxWidth < 900.dp
             val showRightToc = maxWidth >= 1150.dp
 
         if (compact) {
@@ -195,6 +198,7 @@ internal fun DocsHeroHeader(
         Row(verticalAlignment = Alignment.CenterVertically) {
             BasicText(
                 text = title,
+                modifier = Modifier.semantics { heading() },
                 style = TextStyle(
                     fontSize = if (compact) 34.sp else 48.sp,
                     lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
@@ -686,6 +690,10 @@ internal fun requestCopyToClipboard(text: String, onSuccess: () -> Unit) {
         println("Clipboard error: $it")
     })
 }
+
+
+
+
 
 
 
