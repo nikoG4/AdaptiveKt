@@ -33,7 +33,18 @@ internal class DocsSectionRegistry {
     }
 
     suspend fun scrollToSection(id: String) {
-        sectionRequesters[id]?.bringIntoView()
+        for (i in 0..20) {
+            val requester = sectionRequesters[id]
+            if (requester != null) {
+                try {
+                    requester.bringIntoView()
+                } catch (e: Exception) {
+                    // Ignore cancellation or unattached errors
+                }
+                return
+            }
+            kotlinx.coroutines.delay(50)
+        }
     }
 
     fun getActiveSection(currentScroll: Int): String? {
@@ -70,6 +81,12 @@ internal fun DocsSectionAnchor(
 ) {
     val registry = LocalDocsSectionRegistry.current
     val requester = remember { BringIntoViewRequester() }
+
+    androidx.compose.runtime.DisposableEffect(id) {
+        onDispose {
+            registry.unregister(id)
+        }
+    }
 
     androidx.compose.foundation.layout.Box(
         modifier = modifier

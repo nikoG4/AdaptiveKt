@@ -156,10 +156,13 @@ foreach ($route in @("components", "docs", "demo")) {
 function Inject-BaseHref {
     param([string]$FilePath, [string]$BaseHref)
     $content = Get-Content $FilePath -Raw
-    if ($content -notmatch "<base href=") {
+    if ($content -match "<base href=") {
+        $content = $content -replace "(?i)<base href=`"[^`"]*`">", "<base href=`"$BaseHref`">"
+        $content = $content -replace "(?i)<base href='[^']*'>", "<base href=`"$BaseHref`">"
+    } else {
         $content = $content -replace "(?i)(<head.*?>)", "`$1`n  <base href=`"$BaseHref`">"
-        Set-Content -Path $FilePath -Value $content -Encoding UTF8
     }
+    Set-Content -Path $FilePath -Value $content -Encoding UTF8
 }
 
 Inject-BaseHref -FilePath (Join-Path $distPath "index.html") -BaseHref $normalizedBasePath

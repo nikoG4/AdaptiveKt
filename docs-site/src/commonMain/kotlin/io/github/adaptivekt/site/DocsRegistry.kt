@@ -52,42 +52,15 @@ internal object DocsRegistry {
         TOPIC_PUBLISHING, TOPIC_VISUAL_VERIFICATION, TOPIC_ROADMAP
     )
 
-    fun getComponents(factory: () -> List<ComponentDoc>): List<ComponentDoc> {
-        return cachedComponents ?: normalizeRuntimeComponentDocs(factory()).also { docs ->
+    fun getComponents(): List<ComponentDoc> {
+        return cachedComponents ?: DocsCatalog.components().also { docs ->
             requireValidComponentDocs(docs)
             cachedComponents = docs
         }
     }
 
-    /**
-     * Keeps the docs site renderable while the legacy catalog still contains two
-     * AdaptiveTextField entries. Unexpected duplicate IDs remain hard failures.
-     * Remove this compatibility normalization when the duplicate source entry is deleted.
-     */
-    private fun normalizeRuntimeComponentDocs(docs: List<ComponentDoc>): List<ComponentDoc> {
-        val duplicateIds = docs.groupingBy { it.id }.eachCount().filterValues { it > 1 }
-        val unexpectedDuplicateIds = duplicateIds.keys - ID_TEXT_FIELD
-        require(unexpectedDuplicateIds.isEmpty()) {
-            "Duplicate component IDs found: $unexpectedDuplicateIds"
-        }
-
-        if (ID_TEXT_FIELD !in duplicateIds) return docs
-
-        var textFieldSeen = false
-        return docs.filter { doc ->
-            if (doc.id != ID_TEXT_FIELD) {
-                true
-            } else if (!textFieldSeen) {
-                textFieldSeen = true
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    fun getTopics(factory: () -> List<DocsTopic>): List<DocsTopic> {
-        return cachedTopics ?: factory().also { topics ->
+    fun getTopics(): List<DocsTopic> {
+        return cachedTopics ?: DocsCatalog.topics().also { topics ->
             validateIds(topics.map { it.id }, "Topics")
             cachedTopics = topics
         }

@@ -1,10 +1,4 @@
-﻿package io.github.adaptivekt.site
-
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
+package io.github.adaptivekt.site
 
 internal enum class TokenType {
     KEYWORD,
@@ -29,15 +23,8 @@ internal object KotlinLexer {
         "as", "as?", "object", "typealias", "enum", "data", "sealed", "open", "abstract",
         "override", "private", "protected", "internal", "public", "companion", "inline",
         "noinline", "crossinline", "reified", "out", "in", "vararg", "suspend", "operator",
-        "infix", "tailrec", "external", "annotation", "expect", "actual", "lateinit", "const"
-    )
-
-    private val types = setOf(
-        "String", "Int", "Boolean", "Float", "Double", "Long", "Short", "Byte", "Char",
-        "Unit", "Any", "Nothing", "List", "Set", "Map", "Modifier", "Color", "Dp",
-        "AdaptiveTheme", "AdaptiveCard", "AdaptiveButton", "AdaptiveBadge",
-        "AdaptiveTextField", "AdaptiveSelect", "AdaptiveDataView", "AdaptiveAvatar",
-        "AdaptiveSurface"
+        "infix", "tailrec", "external", "annotation", "expect", "actual", "lateinit", "const",
+        "value"
     )
 
     fun tokenize(code: String): List<Token> {
@@ -45,62 +32,87 @@ internal object KotlinLexer {
         var i = 0
         val length = code.length
 
+        fun peek(offset: Int = 0): Char? = if (i + offset < length) code[i + offset] else null
+        
+        fun isWhitespace(c: Char) = c.isWhitespace()
+        
+        fun isIdentifierStart(c: Char) = c.isLetter() || c == '_'
+        fun isIdentifierPart(c: Char) = c.isLetterOrDigit() || c == '_'
+
         while (i < length) {
-            val c = code[i]
+            val c = peek()!!
 
             // Whitespace
-            if (c.isWhitespace()) {
+            if (isWhitespace(c)) {
                 val start = i
-                while (i < length && code[i].isWhitespace()) i++
+                while (peek()?.let { isWhitespace(it) } == true) i++
                 tokens.add(Token(code.substring(start, i), TokenType.WHITESPACE))
                 continue
             }
 
-            // Single line comment
-            if (c == '/' && i + 1 < length && code[i + 1] == '/') {
+            // Line comment
+            if (c == '/' && peek(1) == '/') {
                 val start = i
-                while (i < length && code[i] != '\n') i++
+                while (peek() != null && peek() != '\n') i++
                 tokens.add(Token(code.substring(start, i), TokenType.COMMENT))
                 continue
             }
 
-            // Multi line comment
-            if (c == '/' && i + 1 < length && code[i + 1] == '*') {
+            // Block comment (handles nesting)
+            if (c == '/' && peek(1) == '*') {
                 val start = i
                 i += 2
-                while (i < length) {
-                    if (code[i] == '*' && i + 1 < length && code[i + 1] == '/') {
+                var nesting = 1
+                while (peek() != null && nesting > 0) {
+                    if (peek() == '/' && peek(1) == '*') {
+                        nesting++
                         i += 2
+                    } else if (peek() == '*' && peek(1) == '/') {
+                        nesting--
+                        i += 2
+                    } else {
+                        i++
+                    }
+                }
+                tokens.add(Token(code.substring(start, i), TokenType.COMMENT))
+                continue
+            }
+
+            // Triple quote string
+            if (c == '"' && peek(1) == '"' && peek(2) == '"') {
+                val start = i
+                i += 3
+                while (peek() != null) {
+                    if (peek() == '"' && peek(1) == '"' && peek(2) == '"') {
+                        i += 3
                         break
                     }
                     i++
                 }
-                tokens.add(Token(code.substring(start, i), TokenType.COMMENT))
+                tokens.add(Token(code.substring(start, i), TokenType.STRING))
                 continue
             }
 
-            // String literals
+            // Single quote string
             if (c == '"') {
                 val start = i
-                if (i + 2 < length && code[i + 1] == '"' && code[i + 2] == '"') {
-                    // Triple quote string
-                    i += 3
-                    while (i < length) {
-                        if (code[i] == '"' && i + 2 < length && code[i + 1] == '"' && code[i + 2] == '"') {
-                            i += 3
-                            break
-                        }
-                        i++
-                    }
-                } else {
-                    // Single quote string
-                    i++
-                    while (i < length && code[i] != '"') {
-                        if (code[i] == '\\') i++ // skip escaped char
-                        i++
-                    }
-                    if (i < length) i++
+                i++
+                while (peek() != null && peek() != '"' && peek() != '\n') {
+                    if (peek() == '\\') i += 2 else i++
                 }
+                if (peek() == '"') i++
+                tokens.add(Token(code.substring(start, i), TokenType.STRING))
+                continue
+            }
+
+            // Character literal
+            if (c == '\'') {
+                val start = i
+                i++
+                while (peek() != null && peek() != '\'' && peek() != '\n') {
+                    if (peek() == '\\') i += 2 else i++
+                }
+                if (peek() == '\'') i++
                 tokens.add(Token(code.substring(start, i), TokenType.STRING))
                 continue
             }
@@ -109,41 +121,60 @@ internal object KotlinLexer {
             if (c == '@') {
                 val start = i
                 i++
-                while (i < length && (code[i].isLetterOrDigit() || code[i] == '_')) i++
+                while (peek()?.let { isIdentifierPart(it) } == true) i++
                 tokens.add(Token(code.substring(start, i), TokenType.ANNOTATION))
                 continue
             }
 
-            // Number
+            // Number (Decimal, Hex, Binary)
             if (c.isDigit()) {
                 val start = i
-                while (i < length && (code[i].isLetterOrDigit() || code[i] == '.')) i++
+                if (c == '0' && (peek(1) == 'x' || peek(1) == 'X')) {
+                    i += 2
+                    while (peek()?.let { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' || it == '_' } == true) i++
+                } else if (c == '0' && (peek(1) == 'b' || peek(1) == 'B')) {
+                    i += 2
+                    while (peek()?.let { it == '0' || it == '1' || it == '_' } == true) i++
+                } else {
+                    while (peek()?.let { it.isDigit() || it == '_' || it == '.' || it == 'e' || it == 'E' || it == 'f' || it == 'F' || it == 'L' } == true) {
+                        // Prevent eating the dot of a function call if it's not a float e.g. 1.toString() vs 1.0
+                        if (peek() == '.' && peek(1)?.isDigit() != true) break
+                        i++
+                    }
+                }
+                if (peek() == 'L' || peek() == 'f' || peek() == 'F') i++
                 tokens.add(Token(code.substring(start, i), TokenType.NUMBER))
                 continue
             }
 
-            // Identifier / Keyword / Type / Function
-            if (c.isLetter() || c == '_') {
+            // Identifier
+            if (isIdentifierStart(c) || c == '`') {
                 val start = i
-                while (i < length && (code[i].isLetterOrDigit() || code[i] == '_')) i++
+                if (c == '`') {
+                    i++
+                    while (peek() != null && peek() != '`' && peek() != '\n') i++
+                    if (peek() == '`') i++
+                } else {
+                    while (peek()?.let { isIdentifierPart(it) } == true) i++
+                }
+                
                 val text = code.substring(start, i)
-
-                // Peek ahead to see if it's a function call
+                
+                // Lookahead to see if function
                 var isFunction = false
-                var peek = i
-                while (peek < length && code[peek].isWhitespace()) peek++
-                if (peek < length && (code[peek] == '(' || code[peek] == '{')) {
+                var peekIndex = i
+                while (peekIndex < length && code[peekIndex].isWhitespace()) peekIndex++
+                if (peekIndex < length && (code[peekIndex] == '(' || code[peekIndex] == '{')) {
                     isFunction = true
                 }
-
+                
                 val type = when {
                     text in keywords -> TokenType.KEYWORD
-                    text in types -> TokenType.TYPE
-                    text.first().isUpperCase() -> TokenType.TYPE
+                    text.firstOrNull()?.isUpperCase() == true && text.all { isIdentifierPart(it) } -> TokenType.TYPE
                     isFunction -> TokenType.FUNCTION
                     else -> TokenType.IDENTIFIER
                 }
-
+                
                 tokens.add(Token(text, type))
                 continue
             }

@@ -114,50 +114,17 @@ internal fun parseQueryString(query: String): Map<String, String> {
 }
 
 internal fun encodeURIComponent(str: String): String {
-    // Basic JS encodeURIComponent equivalent for commonMain, handling common cases.
-    val allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.!~*'()"
-    val sb = StringBuilder()
-    for (char in str) {
-        if (char in allowed) {
-            sb.append(char)
-        } else if (char == ' ') {
-            sb.append("+")
-        } else {
-            val bytes = char.toString().encodeToByteArray()
-            for (b in bytes) {
-                val hex = b.toUByte().toString(16).uppercase()
-                sb.append("%").append(if (hex.length == 1) "0$hex" else hex)
-            }
-        }
-    }
-    return sb.toString()
+    return PlatformInterop.encodeUrlComponent(str).replace("%20", "+")
 }
 
 internal fun decodeURIComponent(str: String): String {
-    // Best effort decode for commonMain
-    var i = 0
-    val sb = StringBuilder()
-    while (i < str.length) {
-        val c = str[i]
-        if (c == '+') {
-            sb.append(' ')
-            i++
-        } else if (c == '%' && i + 2 < str.length) {
-            val hex = str.substring(i + 1, i + 3)
-            try {
-                val byte = hex.toInt(16).toByte()
-                sb.append(byte.toInt().toChar())
-                i += 3
-            } catch (e: Exception) {
-                sb.append(c)
-                i++
-            }
-        } else {
-            sb.append(c)
-            i++
-        }
-    }
-    return sb.toString()
+    return PlatformInterop.decodeUrlComponent(str.replace("+", "%20"))
+}
+
+internal fun buildAbsoluteSiteUrl(location: SiteLocation): String {
+    val origin = PlatformInterop.getWindowOrigin()
+    val basePath = PlatformInterop.getWindowBasePath().trimEnd('/')
+    return origin + basePath + serializeSiteLocation(location)
 }
 
 

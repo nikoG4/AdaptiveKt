@@ -4,6 +4,9 @@ internal expect object PlatformInterop {
     fun scrollToElement(id: String)
     fun copyToClipboard(text: String, onSuccess: () -> Unit, onError: (String) -> Unit)
     fun getWindowOrigin(): String
+    fun getWindowBasePath(): String
+    fun encodeUrlComponent(value: String): String
+    fun decodeUrlComponent(value: String): String
     fun logTelemetry(event: String, data: String = "none")
 }
 

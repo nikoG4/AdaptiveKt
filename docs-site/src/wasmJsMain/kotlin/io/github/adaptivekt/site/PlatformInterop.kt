@@ -12,12 +12,24 @@ internal external fun writeTextToClipboardJs(text: String): kotlin.js.Promise<Js
 @JsFun("(event, data) => console.log('[Telemetry] ' + event + ' - ' + data)")
 internal external fun logTelemetryJs(event: String, data: String)
 
+@JsFun("(str) => encodeURIComponent(str)")
+internal external fun encodeURIComponentJs(str: String): String
+
+@JsFun("(str) => decodeURIComponent(str)")
+internal external fun decodeURIComponentJs(str: String): String
+
 internal actual object PlatformInterop {
     actual fun scrollToElement(id: String) {
         scrollIntoViewJs(id)
     }
 
     actual fun getWindowOrigin(): String = kotlinx.browser.window.location.origin
+
+    actual fun getWindowBasePath(): String = kotlinx.browser.window.location.pathname
+
+    actual fun encodeUrlComponent(value: String): String = encodeURIComponentJs(value)
+
+    actual fun decodeUrlComponent(value: String): String = decodeURIComponentJs(value)
 
     actual fun logTelemetry(event: String, data: String) {
         logTelemetryJs(event, data)

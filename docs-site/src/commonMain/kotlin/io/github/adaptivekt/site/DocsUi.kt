@@ -213,7 +213,7 @@ internal fun DocsHeroHeader(
             Spacer(modifier = Modifier.width(8.dp))
             AdaptiveIconButton(
                 onClick = {
-                    val permalink = PlatformInterop.getWindowOrigin() + serializeSiteLocation(location.copy(sectionId = null))
+                    val permalink = buildAbsoluteSiteUrl(location.copy(sectionId = null, searchQuery = null))
                     requestCopyToClipboard(permalink) {
                         copied = true
                     }
@@ -399,7 +399,7 @@ internal fun DocsSection(
                 Spacer(modifier = Modifier.width(8.dp))
                 AdaptiveIconButton(
                     onClick = {
-                        val permalink = PlatformInterop.getWindowOrigin() + serializeSiteLocation(location.copy(sectionId = sectionId))
+                        val permalink = buildAbsoluteSiteUrl(location.copy(sectionId = sectionId, searchQuery = null))
                         requestCopyToClipboard(permalink) {
                             copied = true
                         }
@@ -455,83 +455,10 @@ internal fun DocsExampleBlock(example: DocsExample) {
             example.preview()
         }
         Spacer(modifier = Modifier.height(14.dp))
-        DocsCodeBlock(code = example.code, title = "Kotlin")
+        DocsCodeEditorView(code = example.code, title = "Kotlin")
     }
 }
 
-@Composable
-internal fun DocsCodeBlock(
-    code: String,
-    title: String = "Kotlin",
-) {
-    var copied by remember { mutableStateOf(false) }
-
-    LaunchedEffect(copied) {
-        if (copied) {
-            delay(2000)
-            copied = false
-        }
-    }
-
-    val shape = RoundedCornerShape(10.dp)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(Color(0xFF0F172A), shape)
-            .border(1.dp, Color(0xFF243044), shape),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF111827))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BasicText(
-                text = if (copied) "Copied!" else title,
-                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (copied) AdaptiveTheme.colors.success else Color(0xFFCBD5E1)),
-            )
-            AdaptiveIconButton(
-                onClick = {
-                    requestCopyToClipboard(code.trimIndent()) {
-                        copied = true
-                    }
-                },
-                size = 32.dp,
-                modifier = Modifier.docsClickableCursor(),
-                content = {
-                    androidx.compose.foundation.Image(
-                        imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
-                        contentDescription = if (copied) "Copied" else "Copy code",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(14.dp),
-        ) {
-            AdaptiveSelectionArea {
-                BasicText(
-                    text = code.trimIndent(),
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        color = Color(0xFFE2E8F0),
-                        fontFamily = FontFamily.Monospace,
-                    ),
-                    softWrap = false,
-                )
-            }
-        }
-    }
-}
 
 @Composable
 internal fun DocsParameterTable(parameters: List<ComponentParameter>) {

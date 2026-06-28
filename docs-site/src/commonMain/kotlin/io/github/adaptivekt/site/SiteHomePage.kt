@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -248,7 +248,7 @@ private fun HomeInstallSection(compact: Boolean) {
             }
             item(span = if (compact) 12 else 7) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    DocsCodeBlock(
+                    DocsCodeEditorView(
                         title = "Consume from Maven Central",
                         code = """
 repositories {
@@ -269,7 +269,7 @@ dependencies {
             Column {
                 SiteText("Local dry-run remains available", fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
-                DocsCodeBlock(
+                DocsCodeEditorView(
                     title = "Verify publication artifacts locally",
                     code = "./gradlew publishAllPublicationsToLocalTestRepository",
                 )

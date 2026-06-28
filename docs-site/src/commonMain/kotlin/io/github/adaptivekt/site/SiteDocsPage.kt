@@ -1,4 +1,4 @@
-﻿package io.github.adaptivekt.site
+package io.github.adaptivekt.site
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +37,7 @@ internal fun SiteDocsPage(
     sectionId: String?,
     onSectionChange: (String) -> Unit,
 ) {
-    val topics = remember { DocsRegistry.getTopics { docsTopics() } }
+    val topics = remember { DocsRegistry.getTopics() }
     val selectedId = DocsRegistry.resolveTopicId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.TOPIC_GETTING_STARTED)
     val selected = topics.firstOrNull { it.id == selectedId } ?: topics.first()
     val navGroups = topics.groupBy { it.family }.map { (family, items) ->
@@ -72,7 +72,7 @@ internal fun SiteDocsPage(
     }
 }
 
-private fun docsTopics(): List<DocsTopic> = listOf(
+internal fun docsTopics(): List<DocsTopic> = listOf(
     DocsTopic(
         id = DocsRegistry.TOPIC_GETTING_STARTED,
         family = "Getting started",
@@ -112,7 +112,7 @@ dependencies {
                     }
                 },
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Consume from another project",
                 code = """
 repositories {
@@ -184,7 +184,7 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
         summary = "Configure whether navigation becomes a sidebar, rail, bottom bar, drawer or hidden custom surface per breakpoint.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Storefront preset",
                 code = """
 AdaptiveNavigationScaffold(
@@ -197,7 +197,7 @@ AdaptiveNavigationScaffold(
 }
                 """,
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Custom placements",
                 code = """
 AdaptiveNavigationScaffold(
@@ -279,7 +279,7 @@ AdaptiveGrid(columns = 12) {
                 body = "The first alpha is available from Maven Central. Future releases remain manual and guarded; local publishing and consumer smoke tests are kept for preflight verification.",
                 tone = AdaptiveBadgeTone.Success,
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Local dry-run for maintainers",
                 code = """
 ./gradlew publishAllPublicationsToLocalTestRepository
@@ -303,7 +303,7 @@ AdaptiveGrid(columns = 12) {
         summary = "Desktop and web capture scripts keep responsive states visible before publishing changes.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Docs and demo captures",
                 code = """
 ./tools/capture-docs-site-web.ps1 -SkipBuild

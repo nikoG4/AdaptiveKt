@@ -90,7 +90,7 @@ internal fun SiteComponentsPage(
     sectionId: String?,
     onSectionChange: (String) -> Unit,
 ) {
-    val docs = remember { DocsRegistry.getComponents { componentDocs() } }
+    val docs = remember { DocsRegistry.getComponents() }
     val resolvedId = DocsRegistry.resolveComponentId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.ID_THEME)
     val componentIndex = docs.indexOfFirst { it.id == resolvedId }
     val component = docs.getOrNull(componentIndex) ?: docs.first()
@@ -428,10 +428,7 @@ AdaptiveSelectionArea {
         accessibilityNotes = listOf("Use selection for read-only copyable content, not for primary controls."),
         limitations = listOf("Touch text-selection affordances are platform-controlled by Compose."),
     ),
-    inputDoc("adaptive-text-field", "AdaptiveTextField", "Foundation text input with label, placeholder, disabled state and validation message.") {
-        var value by remember { mutableStateOf("AdaptiveKt Inc.") }
-        AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")
-    },
+
     ComponentDoc(
         id = DocsRegistry.ID_SEARCH_FIELD,
         family = "Inputs",
@@ -544,11 +541,11 @@ AdaptiveMultiSelect(
         usage = "Use inside forms or alone for simple text input.",
         basicExample = DocsExample(
             "Basic text field",
-            "A standard text field.",
-            """AdaptiveTextField(value = text, onValueChange = { text = it }, placeholder = "Enter name")""",
+            "Foundation text input with label, placeholder, disabled state and validation message.",
+            """AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")""",
         ) {
-            var text by remember { mutableStateOf("") }
-            AdaptiveTextField(value = text, onValueChange = { text = it }, placeholder = "Enter name")
+            var value by remember { mutableStateOf("AdaptiveKt Inc.") }
+            AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")
         },
         parameters = listOf(
             ComponentParameter("value", "String", "required", true, "Current field value."),
