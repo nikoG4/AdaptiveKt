@@ -62,6 +62,17 @@ class DocsRegistryTest {
     }
 
     @Test
+    fun componentCatalogContainsUniqueIds() {
+        val docs = componentDocs()
+        assertEquals(
+            docs.size,
+            docs.map { it.id }.toSet().size,
+            "Component catalog contains duplicate IDs",
+        )
+        DocsRegistry.requireValidComponentDocs(docs)
+    }
+
+    @Test
     fun registry_contains_every_rendered_component() {
         val docs = componentDocs()
         val renderedIds = docs.map { it.id }.toSet()
