@@ -53,9 +53,36 @@ internal object DocsRegistry {
     )
 
     fun getComponents(factory: () -> List<ComponentDoc>): List<ComponentDoc> {
-        return cachedComponents ?: factory().also { docs ->
+        return cachedComponents ?: normalizeRuntimeComponentDocs(factory()).also { docs ->
             requireValidComponentDocs(docs)
             cachedComponents = docs
+        }
+    }
+
+    /**
+     * Keeps the docs site renderable while the legacy catalog still contains two
+     * AdaptiveTextField entries. Unexpected duplicate IDs remain hard failures.
+     * Remove this compatibility normalization when the duplicate source entry is deleted.
+     */
+    private fun normalizeRuntimeComponentDocs(docs: List<ComponentDoc>): List<ComponentDoc> {
+        val duplicateIds = docs.groupingBy { it.id }.eachCount().filterValues { it > 1 }
+        val unexpectedDuplicateIds = duplicateIds.keys - ID_TEXT_FIELD
+        require(unexpectedDuplicateIds.isEmpty()) {
+            "Duplicate component IDs found: $unexpectedDuplicateIds"
+        }
+
+        if (ID_TEXT_FIELD !in duplicateIds) return docs
+
+        var textFieldSeen = false
+        return docs.filter { doc ->
+            if (doc.id != ID_TEXT_FIELD) {
+                true
+            } else if (!textFieldSeen) {
+                textFieldSeen = true
+                true
+            } else {
+                false
+            }
         }
     }
 
@@ -75,40 +102,37 @@ internal object DocsRegistry {
 
     internal fun requireValidComponentDocs(docs: List<ComponentDoc>) {
         require(docs.isNotEmpty()) { "Component catalog cannot be empty" }
-        
+
         val kebabCasePattern = Regex("^[a-z0-9]+(?:-[a-z0-9]+)*$")
         val ids = mutableSetOf<String>()
-        
+
         docs.forEach { doc ->
             require(doc.id.isNotBlank()) { "Component ID cannot be empty" }
             require(kebabCasePattern.matches(doc.id)) { "Component ID '${doc.id}' is not kebab-case" }
             require(ids.add(doc.id)) { "Duplicate component ID found: ${doc.id}" }
-            
+
             require(doc.title.isNotBlank()) { "Component '${doc.id}' title cannot be empty" }
             require(doc.family.isNotBlank()) { "Component '${doc.id}' family cannot be empty" }
             require(doc.summary.isNotBlank()) { "Component '${doc.id}' summary cannot be empty" }
             require(doc.usage.isNotBlank()) { "Component '${doc.id}' usage cannot be empty" }
-            
+
             require(doc.basicExample.title.isNotBlank()) { "Component '${doc.id}' basic example title cannot be empty" }
             require(doc.basicExample.code.isNotBlank()) { "Component '${doc.id}' basic example code cannot be empty" }
         }
     }
 
     fun resolveComponentId(hash: String): String {
-        // Fallback a componente base si la sub-secciÃ³n es invÃ¡lida (ej. "adaptive-button-icon" -> "adaptive-button")
-        // O si no existe, devuelve el primer componente.
+        // Fall back to the base component for legacy sub-section hashes.
         if (hash in allComponentIds) return hash
 
-        // Simple fallback matcher
         val baseId = allComponentIds.find { hash.startsWith("$it-") }
         if (baseId != null) return baseId
 
-        return ID_THEME // Default
+        return ID_THEME
     }
 
     fun resolveTopicId(hash: String): String {
         if (hash in allTopicIds) return hash
-        return TOPIC_GETTING_STARTED // Default
+        return TOPIC_GETTING_STARTED
     }
 }
-
