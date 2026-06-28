@@ -9,7 +9,8 @@ const componentRoutes = JSON.parse(fs.readFileSync(path.join(__dirname, "compone
 
 function isKnownRunnerWarning(text) {
   return text.includes("GPU stall due to ReadPixels") ||
-         text.includes("Automatic fallback to software WebGL has been deprecated");
+         text.includes("Automatic fallback to software WebGL has been deprecated") ||
+         text.includes("WEBGL_debug_renderer_info not enabled");
 }
 
 async function validate() {
