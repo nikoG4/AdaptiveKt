@@ -6,16 +6,7 @@ const { execSync } = require('child_process');
 const baseUrl = (process.argv[2] || 'http://localhost:8080').replace(/\/$/, '');
 const outputDir = process.argv[3] || 'artifacts/screenshots/component-gallery-hardening';
 
-const routesToCapture = [
-  '#adaptive-theme',
-  '#adaptive-card',
-  '#adaptive-selectionarea',
-  '#adaptive-dialog',
-  '#adaptive-carousel',
-  '#adaptive-data-view',
-  '#adaptive-form-layout',
-  '#adaptive-navigation-scaffold'
-];
+const routesToCapture = JSON.parse(fs.readFileSync(path.join(__dirname, 'component-routes.json'), 'utf8')).components.map(id => '#' + id);
 
 const viewports = [
   { name: 'compact', width: 390, height: 844 },

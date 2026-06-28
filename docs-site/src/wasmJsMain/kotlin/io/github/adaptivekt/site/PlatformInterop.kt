@@ -18,6 +18,9 @@ internal external fun encodeURIComponentJs(str: String): String
 @JsFun("(str) => decodeURIComponent(str)")
 internal external fun decodeURIComponentJs(str: String): String
 
+@JsFun("(route, component, section) => { let el = document.getElementById('docs-validation-state'); if (!el) { el = document.createElement('div'); el.id = 'docs-validation-state'; el.style.display = 'none'; document.body.appendChild(el); } el.setAttribute('data-route', route); el.setAttribute('data-component', component); el.setAttribute('data-section', section); }")
+internal external fun updateValidationStateJs(route: String, component: String, section: String)
+
 internal actual object PlatformInterop {
     actual fun scrollToElement(id: String) {
         scrollIntoViewJs(id)
@@ -33,6 +36,21 @@ internal actual object PlatformInterop {
 
     actual fun logTelemetry(event: String, data: String) {
         logTelemetryJs(event, data)
+    }
+
+    actual fun updateValidationState(route: String, component: String, section: String) {
+        updateValidationStateJs(route, component, section)
+    }
+
+    actual fun currentSiteBasePath(): String {
+        var path = getWindowBasePath()
+        if (path.endsWith("index.html")) {
+            path = path.substringBeforeLast("index.html")
+        }
+        if (!path.endsWith("/")) {
+            path += "/"
+        }
+        return path
     }
 
 

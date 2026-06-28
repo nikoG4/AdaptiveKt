@@ -1,0 +1,26 @@
+{
+  "components": [
+    "adaptive-theme",
+    "adaptive-button",
+    "adaptive-icon-button",
+    "adaptive-badge",
+    "adaptive-chip",
+    "adaptive-avatar",
+    "adaptive-thumbnail",
+    "adaptive-card-surface",
+    "adaptive-selection-area",
+    "adaptive-search-field",
+    "adaptive-select",
+    "adaptive-multi-select",
+    "adaptive-form-layout",
+    "adaptive-data-view",
+    "adaptive-navigation-scaffold",
+    "adaptive-navigation-tree",
+    "adaptive-breadcrumbs",
+    "adaptive-tabs",
+    "adaptive-carousel",
+    "adaptive-accordion-dialog",
+    "adaptive-text-field",
+    "feedback-states"
+  ]
+}

@@ -8,6 +8,8 @@ internal expect object PlatformInterop {
     fun encodeUrlComponent(value: String): String
     fun decodeUrlComponent(value: String): String
     fun logTelemetry(event: String, data: String = "none")
+    fun updateValidationState(route: String, component: String, section: String)
+    fun currentSiteBasePath(): String
 }
 
 

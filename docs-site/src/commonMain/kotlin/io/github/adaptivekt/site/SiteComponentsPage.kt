@@ -112,6 +112,9 @@ internal fun SiteComponentsPage(
         onTocItemClick = { onSectionChange(it) },
         sectionId = sectionId,
     ) {
+        androidx.compose.runtime.LaunchedEffect(component.id, sectionId) {
+            PlatformInterop.updateValidationState("components", component.id, sectionId ?: "")
+        }
         CompositionLocalProvider(LocalDocsVisualState provides selectedHash) {
             ComponentDocArticle(component)
         }
