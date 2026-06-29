@@ -11,13 +11,8 @@ if grep -rnw "$SOURCE_DIR" -e "import androidx.compose.foundation.text.selection
     FAILED=1
 fi
 
-echo "Checking for duplicate hash IDs in SiteComponentsPage.kt..."
-DUPLICATES=$(grep -oE 'id = "([^"]+)"' "$SOURCE_DIR/commonMain/kotlin/io/github/adaptivekt/site/SiteComponentsPage.kt" | sort | uniq -d)
-if [ -n "$DUPLICATES" ]; then
-    echo "ERROR: Duplicate component IDs found:"
-    echo "$DUPLICATES"
-    FAILED=1
-fi
+echo "Running DocsRegistry validation..."
+python "$WORKSPACE_ROOT/scripts/check-docs-site-registry.py" || FAILED=1
 
 if [ $FAILED -ne 0 ]; then
     echo "Docs site guards failed."
@@ -26,3 +21,5 @@ else
     echo "Docs site guards passed."
     exit 0
 fi
+
+

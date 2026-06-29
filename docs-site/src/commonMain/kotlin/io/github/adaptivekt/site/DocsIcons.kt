@@ -13,6 +13,34 @@ import androidx.compose.ui.unit.dp
 
 internal object DocsIcons {
 
+    val Menu: ImageVector
+        @Composable
+        get() = remember {
+            ImageVector.Builder(
+                name = "Menu",
+                defaultWidth = 24.dp,
+                defaultHeight = 24.dp,
+                viewportWidth = 24f,
+                viewportHeight = 24f,
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    stroke = SolidColor(Color.Black),
+                    strokeLineWidth = 2f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                ) {
+                    moveTo(3f, 12f)
+                    lineTo(21f, 12f)
+                    moveTo(3f, 6f)
+                    lineTo(21f, 6f)
+                    moveTo(3f, 18f)
+                    lineTo(21f, 18f)
+                }
+            }.build()
+        }
+
+
     val Copy: ImageVector
         @Composable
         get() = remember {
@@ -205,3 +233,4 @@ internal object DocsIcons {
             }.build()
         }
 }
+

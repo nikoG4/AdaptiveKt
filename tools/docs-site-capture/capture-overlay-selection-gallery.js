@@ -95,7 +95,7 @@ let currentTheme = themes[0];
 
 async function capture() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const results = [];
 
   for (const theme of themes) {
@@ -111,7 +111,7 @@ async function capture() {
         const requestFailures = [];
 
         page.on('console', message => {
-          if (message.type() === 'error') {
+          if (message.type() === 'error' && !message.text().includes('WebGL') && !message.text().includes('GL Driver Message')) {
             consoleMessages.push(message.text());
           }
         });
@@ -223,3 +223,8 @@ capture().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+

@@ -6,16 +6,7 @@ const { execSync } = require('child_process');
 const baseUrl = (process.argv[2] || 'http://localhost:8080').replace(/\/$/, '');
 const outputDir = process.argv[3] || 'artifacts/screenshots/component-gallery-hardening';
 
-const routesToCapture = [
-  '#adaptive-theme',
-  '#adaptive-card',
-  '#adaptive-selectionarea',
-  '#adaptive-dialog',
-  '#adaptive-carousel',
-  '#adaptive-data-view',
-  '#adaptive-form-layout',
-  '#adaptive-navigation-scaffold'
-];
+const routesToCapture = JSON.parse(fs.readFileSync(path.join(__dirname, 'component-routes.json'), 'utf8')).components.map(id => '#' + id);
 
 const viewports = [
   { name: 'compact', width: 390, height: 844 },
@@ -31,7 +22,7 @@ const themes = [
 
 async function capture() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const results = [];
 
   for (const hash of routesToCapture) {
@@ -46,7 +37,7 @@ async function capture() {
         const requestFailures = [];
 
         page.on('console', message => {
-          if (message.type() === 'error') {
+          if (message.type() === 'error' && !message.text().includes('WebGL') && !message.text().includes('GL Driver Message')) {
             consoleMessages.push(message.text());
           }
         });
@@ -68,7 +59,7 @@ async function capture() {
           }
 
           await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-          await page.waitForTimeout(3000); // Allow Compose to settle
+          await page.waitForTimeout(10000); // Allow Compose to settle
 
           const canvasBox = await page.locator('#webApp canvas').boundingBox();
           if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
@@ -189,3 +180,9 @@ capture().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+
+

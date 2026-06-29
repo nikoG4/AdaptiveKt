@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 internal val AdaptiveDataViewComparisonCode = """
 @Composable
@@ -37,7 +37,7 @@ internal val PlainComposeDataViewComparisonCode = """
 fun UserDirectory(users: List<User>) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useCards = maxWidth < 840.dp
-        
+
         if (users.isEmpty()) {
             EmptyUsersState()
         } else if (useCards) {

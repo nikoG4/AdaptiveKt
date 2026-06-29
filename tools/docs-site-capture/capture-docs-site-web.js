@@ -26,7 +26,7 @@ const viewports = [
 async function captureDocsSite() {
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const results = [];
 
   for (const viewport of viewports) {
@@ -150,3 +150,8 @@ captureDocsSite().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+

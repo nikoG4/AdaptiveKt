@@ -40,7 +40,7 @@ const screens = [
 
 async function capture() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
   const savedFiles = [];
   for (const theme of themes) {
     for (const viewport of viewports) {
@@ -152,3 +152,8 @@ capture().catch(error => {
   console.error(error);
   process.exit(1);
 });
+
+
+
+
+

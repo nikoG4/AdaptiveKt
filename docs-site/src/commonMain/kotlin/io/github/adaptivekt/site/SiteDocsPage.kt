@@ -14,6 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxWidth
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
 import io.github.adaptivekt.components.AdaptiveButton
@@ -32,9 +34,11 @@ import io.github.adaptivekt.layout.AdaptiveGrid
 internal fun SiteDocsPage(
     selectedHash: String,
     onSelectedHashChange: (String) -> Unit,
+    sectionId: String?,
+    onSectionChange: (String) -> Unit,
 ) {
-    val topics = remember { docsTopics() }
-    val selectedId = selectedHash.ifEmpty { topics.first().id }
+    val topics = remember { DocsRegistry.getTopics() }
+    val selectedId = DocsRegistry.resolveTopicId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.TOPIC_GETTING_STARTED)
     val selected = topics.firstOrNull { it.id == selectedId } ?: topics.first()
     val navGroups = topics.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
@@ -51,23 +55,26 @@ internal fun SiteDocsPage(
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
         onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
-        onTocItemClick = { /* Local focal navigation only; preserves primary route */ },
+        onTocItemClick = { onSectionChange(it) },
+        sectionId = sectionId,
     ) {
-        AdaptiveCard {
-            AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-            SiteText(selected.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
-            SiteText(selected.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 8)
+        DocsSectionAnchor(id = "overview", modifier = Modifier.fillMaxWidth()) {
+            AdaptiveCard {
+                AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
+                Spacer(modifier = Modifier.height(12.dp))
+                SiteText(selected.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
+                Spacer(modifier = Modifier.height(10.dp))
+                SiteText(selected.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 8)
+            }
         }
-        Spacer(modifier = androidx.compose.ui.Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         selected.content()
     }
 }
 
-private fun docsTopics(): List<DocsTopic> = listOf(
+internal fun docsTopics(): List<DocsTopic> = listOf(
     DocsTopic(
-        id = "getting-started",
+        id = DocsRegistry.TOPIC_GETTING_STARTED,
         family = "Getting started",
         title = "Getting started",
         summary = "Set up the published AdaptiveKt alpha from Maven Central.",
@@ -99,13 +106,13 @@ dependencies {
                     AdaptiveSurface(contentPadding = PaddingValues(16.dp)) {
                         Column {
                             SiteText("Maven Central alpha", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             SiteText("Group: io.github.nikog4.adaptivekt", color = SiteMuted)
                         }
                     }
                 },
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Consume from another project",
                 code = """
 repositories {
@@ -133,7 +140,7 @@ dependencies {
         }
     },
     DocsTopic(
-        id = "theme",
+        id = DocsRegistry.TOPIC_THEME,
         family = "Foundations",
         title = "AdaptiveTheme",
         summary = "Shared color, shape, typography and state tokens for all AdaptiveKt primitives.",
@@ -152,7 +159,7 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                     AdaptiveTheme(mode = AdaptiveThemeMode.System) {
                         AdaptiveCard {
                             SiteText("Theme preview", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             AdaptiveButton("Primary action", onClick = {})
                         }
                     }
@@ -171,13 +178,13 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
         }
     },
     DocsTopic(
-        id = "responsive-navigation-behavior",
+        id = DocsRegistry.TOPIC_RESPONSIVE_NAV,
         family = "Navigation",
         title = "Responsive navigation behavior",
         summary = "Configure whether navigation becomes a sidebar, rail, bottom bar, drawer or hidden custom surface per breakpoint.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Storefront preset",
                 code = """
 AdaptiveNavigationScaffold(
@@ -190,7 +197,7 @@ AdaptiveNavigationScaffold(
 }
                 """,
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Custom placements",
                 code = """
 AdaptiveNavigationScaffold(
@@ -218,7 +225,7 @@ AdaptiveNavigationScaffold(
         }
     },
     DocsTopic(
-        id = "layout-system",
+        id = DocsRegistry.TOPIC_LAYOUT_SYSTEM,
         family = "Layouts",
         title = "Layout system",
         summary = "AdaptiveContent, AdaptiveContainer and AdaptiveGrid provide the responsive foundation for screens and docs pages.",
@@ -261,7 +268,7 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "publishing",
+        id = DocsRegistry.TOPIC_PUBLISHING,
         family = "Publishing",
         title = "Publishing status",
         summary = "AdaptiveKt 0.1.0-alpha01 is published to Maven Central; local dry-runs remain available.",
@@ -272,7 +279,7 @@ AdaptiveGrid(columns = 12) {
                 body = "The first alpha is available from Maven Central. Future releases remain manual and guarded; local publishing and consumer smoke tests are kept for preflight verification.",
                 tone = AdaptiveBadgeTone.Success,
             )
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Local dry-run for maintainers",
                 code = """
 ./gradlew publishAllPublicationsToLocalTestRepository
@@ -290,13 +297,13 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "visual-verification",
+        id = DocsRegistry.TOPIC_VISUAL_VERIFICATION,
         family = "Quality",
         title = "Visual verification",
         summary = "Desktop and web capture scripts keep responsive states visible before publishing changes.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
-            DocsCodeBlock(
+            DocsCodeEditorView(
                 title = "Docs and demo captures",
                 code = """
 ./tools/capture-docs-site-web.ps1 -SkipBuild
@@ -325,7 +332,7 @@ AdaptiveGrid(columns = 12) {
         }
     },
     DocsTopic(
-        id = "roadmap",
+        id = DocsRegistry.TOPIC_ROADMAP,
         family = "Roadmap",
         title = "What is next",
         summary = "The public docs separate what works today from planned release and ecosystem work.",
@@ -349,8 +356,9 @@ AdaptiveGrid(columns = 12) {
 private fun RowLikeBullet(text: String) {
     androidx.compose.foundation.layout.Row {
         AdaptiveBadge("Next", tone = AdaptiveBadgeTone.Info)
-        Spacer(modifier = androidx.compose.ui.Modifier.height(1.dp))
-        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(10.dp))
+        Spacer(modifier = Modifier.height(1.dp))
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(10.dp))
         SiteText(text, color = SiteMuted, maxLines = 5)
     }
 }
+

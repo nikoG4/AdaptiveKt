@@ -16,15 +16,9 @@ if ($selectionContainerMatches -ne $null) {
     $failed = $true
 }
 
-Write-Host "Checking for duplicate hash IDs in SiteComponentsPage.kt..."
-$ids = Select-String -Path "$SourceDir\commonMain\kotlin\io\github\adaptivekt\site\SiteComponentsPage.kt" -Pattern 'id = "([^"]+)"' -AllMatches
-$idList = $ids.Matches | Foreach-Object { $_.Groups[1].Value }
-$duplicates = $idList | Group-Object | Where-Object Count -gt 1
-if ($duplicates) {
-    Write-Host "ERROR: Duplicate component IDs found:" -ForegroundColor Red
-    $duplicates | ForEach-Object { Write-Host $_.Name }
-    $failed = $true
-}
+Write-Host "Running DocsRegistry validation..."
+python "$workspaceRoot/scripts/check-docs-site-registry.py"
+if ($LASTEXITCODE -ne 0) { $failed = $true }
 
 if ($failed) {
     Write-Host "Docs site guards failed." -ForegroundColor Red
@@ -35,3 +29,4 @@ if ($failed) {
     Pop-Location
     exit 0
 }
+

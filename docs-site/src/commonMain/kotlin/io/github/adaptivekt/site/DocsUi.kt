@@ -31,7 +31,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import io.github.adaptivekt.site.LocalSiteLocation
+import io.github.adaptivekt.site.serializeSiteLocation
+import io.github.adaptivekt.site.normalizeSectionId
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -69,19 +76,36 @@ internal fun DocsShell(
     navGroups: List<DocsNavGroup>,
     selectedId: String,
     onSelectedIdChange: (String) -> Unit,
+    sectionId: String? = null,
     onThisPage: List<String>?,
     onTocItemClick: ((String) -> Unit)? = null,
+    scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState(),
     content: @Composable () -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 880.dp
-        val showRightToc = maxWidth >= 1150.dp
-        
+    val registry = androidx.compose.runtime.remember { DocsSectionRegistry() }
+
+    // Automatically scroll to section when it's available or selectedId/sectionId changes
+    androidx.compose.runtime.LaunchedEffect(selectedId, sectionId) {
+        if (sectionId != null) {
+            registry.scrollToSection(sectionId)
+        } else {
+            // Scroll to top when changing page without a section
+            scrollState.animateScrollTo(0)
+        }
+    }
+
+    val activeSection = registry.getActiveSection(scrollState.value)
+
+    androidx.compose.runtime.CompositionLocalProvider(LocalDocsSectionRegistry provides registry) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 900.dp
+            val showRightToc = maxWidth >= 1150.dp
+
         if (compact) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
             ) {
                 DocsHeroHeader(eyebrow = eyebrow, title = title, description = description, compact = true)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -89,9 +113,10 @@ internal fun DocsShell(
                     DocsCompactNav(navGroups = navGroups, selectedId = selectedId, onSelectedIdChange = onSelectedIdChange)
                     if (!onThisPage.isNullOrEmpty()) {
                         DocsOnThisPage(
-                            items = onThisPage, 
+                            items = onThisPage,
+                            activeItem = activeSection,
                             compact = true,
-                            onItemClick = { onTocItemClick?.invoke(it) }
+                            onItemClick = { onTocItemClick?.invoke(normalizeSectionId(it)) }
                         )
                     }
                     content()
@@ -121,7 +146,7 @@ internal fun DocsShell(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(scrollState),
                     ) {
                         content()
                         Spacer(modifier = Modifier.height(48.dp))
@@ -130,8 +155,9 @@ internal fun DocsShell(
                     if (!onThisPage.isNullOrEmpty() && showRightToc) {
                         DocsOnThisPage(
                             items = onThisPage,
+                            activeItem = activeSection,
                             compact = false,
-                            onItemClick = { onTocItemClick?.invoke(it) },
+                            onItemClick = { onTocItemClick?.invoke(normalizeSectionId(it)) },
                             modifier = Modifier
                                 .width(210.dp)
                                 .fillMaxHeight()
@@ -143,6 +169,7 @@ internal fun DocsShell(
             }
         }
     }
+}
 }
 
 @Composable
@@ -158,19 +185,51 @@ internal fun DocsHeroHeader(
         val primary = AdaptiveTheme.colors.primary
         val info = AdaptiveTheme.colors.info
         val success = AdaptiveTheme.colors.success
-        BasicText(
-            text = title,
-            style = TextStyle(
-                fontSize = if (compact) 34.sp else 48.sp,
-                lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
-                fontWeight = FontWeight.ExtraBold,
-                brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                    colors = listOf(primary, info, success)
+        
+        var copied by remember { mutableStateOf(false) }
+        LaunchedEffect(copied) {
+            if (copied) {
+                kotlinx.coroutines.delay(2000)
+                copied = false
+            }
+        }
+        val location = LocalSiteLocation.current
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BasicText(
+                text = title,
+                modifier = Modifier.semantics { heading() },
+                style = TextStyle(
+                    fontSize = if (compact) 34.sp else 48.sp,
+                    lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
+                    fontWeight = FontWeight.ExtraBold,
+                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                        colors = listOf(primary, info, success)
+                    ),
                 ),
-            ),
-            maxLines = if (compact) 4 else 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+                maxLines = if (compact) 4 else 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            AdaptiveIconButton(
+                onClick = {
+                    val permalink = buildAbsoluteSiteUrl(location.copy(sectionId = null, searchQuery = null))
+                    requestCopyToClipboard(permalink) {
+                        copied = true
+                    }
+                },
+                modifier = Modifier.docsClickableCursor().alpha(if (copied) 1f else 0.2f),
+                size = 28.dp,
+                content = {
+                    androidx.compose.foundation.Image(
+                        imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
+                        contentDescription = "Copy page link",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         SiteText(
             text = description,
@@ -266,6 +325,7 @@ private fun DocsNavButton(
 @Composable
 internal fun DocsOnThisPage(
     items: List<String>,
+    activeItem: String?,
     compact: Boolean,
     onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -279,18 +339,25 @@ internal fun DocsOnThisPage(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items.forEach { item ->
+                        val isActive = normalizeSectionId(item) == activeItem
                         AdaptiveBadge(
-                            text = item, 
-                            tone = AdaptiveBadgeTone.Neutral,
+                            text = item,
+                            tone = if (isActive) AdaptiveBadgeTone.Info else AdaptiveBadgeTone.Neutral,
+                            modifier = Modifier.clip(AdaptiveTheme.shapes.small).docsClickableCursor().clickable { onItemClick(item) },
                         )
                     }
                 }
             } else {
                 items.forEach { item ->
+                    val isActive = normalizeSectionId(item) == activeItem
+                    val color = if (isActive) AdaptiveTheme.colors.primary else SiteMuted
+                    val dotColor = if (isActive) AdaptiveTheme.colors.primary else Color.Transparent
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(AdaptiveTheme.shapes.small)
+                            .docsClickableCursor()
+                            .clickable { onItemClick(item) }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -298,10 +365,10 @@ internal fun DocsOnThisPage(
                             modifier = Modifier
                                 .width(6.dp)
                                 .height(6.dp)
-                                .background(AdaptiveTheme.colors.primary, AdaptiveTheme.shapes.pill),
+                                .background(dotColor, AdaptiveTheme.shapes.pill),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        SiteText(item, color = SiteMuted, maxLines = 2)
+                        SiteText(item, color = color, maxLines = 2, fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal)
                     }
                 }
             }
@@ -315,14 +382,47 @@ internal fun DocsSection(
     description: String? = null,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
-        if (description != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+    DocsSectionAnchor(id = normalizeSectionId(title), modifier = Modifier.fillMaxWidth()) {
+        var copied by remember { mutableStateOf(false) }
+        LaunchedEffect(copied) {
+            if (copied) {
+                kotlinx.coroutines.delay(2000)
+                copied = false
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        content()
+        val location = LocalSiteLocation.current
+        val sectionId = normalizeSectionId(title)
+        
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3)
+                Spacer(modifier = Modifier.width(8.dp))
+                AdaptiveIconButton(
+                    onClick = {
+                        val permalink = buildAbsoluteSiteUrl(location.copy(sectionId = sectionId, searchQuery = null))
+                        requestCopyToClipboard(permalink) {
+                            copied = true
+                        }
+                    },
+                    modifier = Modifier.docsClickableCursor().alpha(if (copied) 1f else 0.2f),
+                    size = 28.dp,
+                    content = {
+                        androidx.compose.foundation.Image(
+                            imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
+                            contentDescription = "Copy section link",
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
+            }
+            if (description != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            content()
+        }
     }
 }
 
@@ -355,82 +455,10 @@ internal fun DocsExampleBlock(example: DocsExample) {
             example.preview()
         }
         Spacer(modifier = Modifier.height(14.dp))
-        DocsCodeBlock(code = example.code, title = "Kotlin")
+        DocsCodeEditorView(code = example.code, title = "Kotlin")
     }
 }
 
-@Composable
-internal fun DocsCodeBlock(
-    code: String,
-    title: String = "Kotlin",
-) {
-    var copied by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(copied) {
-        if (copied) {
-            delay(2000)
-            copied = false
-        }
-    }
-    
-    val shape = RoundedCornerShape(10.dp)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(Color(0xFF0F172A), shape)
-            .border(1.dp, Color(0xFF243044), shape),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF111827))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BasicText(
-                text = title,
-                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFCBD5E1)),
-            )
-            AdaptiveIconButton(
-                onClick = {
-                    requestCopyToClipboard(code.trimIndent())
-                    copied = true
-                },
-                size = 32.dp,
-                modifier = Modifier.docsClickableCursor(),
-                content = {
-                    androidx.compose.foundation.Image(
-                        imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
-                        contentDescription = if (copied) "Copied" else "Copy code",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(14.dp),
-        ) {
-            AdaptiveSelectionArea {
-                BasicText(
-                    text = code.trimIndent(),
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        color = Color(0xFFE2E8F0),
-                        fontFamily = FontFamily.Monospace,
-                    ),
-                    softWrap = false,
-                )
-            }
-        }
-    }
-}
 
 @Composable
 internal fun DocsParameterTable(parameters: List<ComponentParameter>) {
@@ -511,15 +539,17 @@ private fun ParameterRow(values: List<String>, header: Boolean = false) {
 @Composable
 internal fun ComponentDocArticle(doc: ComponentDoc) {
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        AdaptiveCard(contentSelectionEnabled = true) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
-                Spacer(modifier = Modifier.height(10.dp))
-                SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.usage, color = SiteMuted, maxLines = 20)
+        DocsSectionAnchor(id = "overview", modifier = Modifier.fillMaxWidth()) {
+            AdaptiveCard(contentSelectionEnabled = true) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SiteText(doc.usage, color = SiteMuted, maxLines = 20)
+                }
             }
         }
 
@@ -581,7 +611,20 @@ private fun NotesGrid(notes: List<Pair<String, List<String>>>) {
     }
 }
 
-internal fun requestCopyToClipboard(@Suppress("UNUSED_PARAMETER") text: String) {
-    // Wasm clipboard support is intentionally best-effort for now. The docs UI still gives
-    // an immediate copied state so examples remain usable even where browser APIs are blocked.
+internal fun requestCopyToClipboard(text: String, onSuccess: () -> Unit) {
+    PlatformInterop.copyToClipboard(text, onSuccess = onSuccess, onError = {
+        // Fallback or ignore for now
+        println("Clipboard error: $it")
+    })
 }
+
+
+
+
+
+
+
+
+
+
+

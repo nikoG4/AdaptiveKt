@@ -11,56 +11,64 @@ import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 public fun AdaptiveKtSiteApp() {
-    var route by remember { mutableStateOf(initialSiteRoute()) }
-    var hash by remember { mutableStateOf(initialSiteHash()) }
-    var darkTheme by remember { mutableStateOf(initialSiteDarkTheme()) }
+    var location by remember { mutableStateOf(initialSiteLocation()) }
 
     androidx.compose.runtime.DisposableEffect(Unit) {
-        val cleanup = observeHistory { newRoute, newHash ->
-            route = newRoute
-            hash = newHash
+        val cleanup = observeSiteLocation { newLocation ->
+            location = newLocation
         }
         onDispose { cleanup() }
     }
 
     AdaptiveApp {
         AdaptiveTheme(
-            colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
+            colorScheme = if (location.darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
         ) {
-            val navigateTo: (SiteRoute, String) -> Unit = { newRoute, newHash ->
-                route = newRoute
-                hash = newHash
-                pushSiteRouteAndHash(newRoute, newHash, darkTheme)
+            androidx.compose.runtime.CompositionLocalProvider(LocalSiteLocation provides location) {
+            val updateLocation: (SiteLocation) -> Unit = { newLocation ->
+                location = newLocation
+                pushSiteLocation(newLocation)
             }
             SiteLayout(
-                route = route,
-                darkTheme = darkTheme,
+                route = location.route,
+                darkTheme = location.darkTheme,
+                searchQuery = location.searchQuery ?: "",
                 onNavigate = {
-                    navigateTo(it, "")
+                    updateLocation(location.copy(route = it, selectedItemId = null, sectionId = null, searchQuery = null))
+                },
+                onNavigateLocation = { newLocation ->
+                    updateLocation(newLocation.copy(darkTheme = location.darkTheme))
                 },
                 onThemeToggle = {
-                    val nextDarkTheme = !darkTheme
-                    darkTheme = nextDarkTheme
-                    pushSiteRouteAndHash(route, hash, nextDarkTheme)
+                    updateLocation(location.copy(darkTheme = !location.darkTheme))
                 },
+                onSearchChange = { newQuery ->
+                    updateLocation(location.copy(searchQuery = newQuery))
+                }
             ) {
-                when (route) {
+                when (location.route) {
                     SiteRoute.Home -> SiteHomePage(
-                        onOpenComponents = { navigateTo(SiteRoute.Components, "") },
-                        onOpenDocs = { navigateTo(SiteRoute.Docs, "") },
-                        onOpenDemo = { navigateTo(SiteRoute.Demo, "") },
+                        onOpenComponents = { updateLocation(location.copy(route = SiteRoute.Components, selectedItemId = null)) },
+                        onOpenDocs = { updateLocation(location.copy(route = SiteRoute.Docs, selectedItemId = null)) },
+                        onOpenDemo = { updateLocation(location.copy(route = SiteRoute.Demo, selectedItemId = null)) },
                     )
                     SiteRoute.Components -> SiteComponentsPage(
-                        selectedHash = hash,
-                        onSelectedHashChange = { navigateTo(SiteRoute.Components, it) },
+                        selectedHash = location.selectedItemId ?: "",
+                        onSelectedHashChange = { updateLocation(location.copy(route = SiteRoute.Components, selectedItemId = it)) },
+                        sectionId = location.sectionId,
+                        onSectionChange = { updateLocation(location.copy(sectionId = it)) }
                     )
                     SiteRoute.Docs -> SiteDocsPage(
-                        selectedHash = hash,
-                        onSelectedHashChange = { navigateTo(SiteRoute.Docs, it) },
+                        selectedHash = location.selectedItemId ?: "",
+                        onSelectedHashChange = { updateLocation(location.copy(route = SiteRoute.Docs, selectedItemId = it)) },
+                        sectionId = location.sectionId,
+                        onSectionChange = { updateLocation(location.copy(sectionId = it)) }
                     )
                     SiteRoute.Demo -> SiteDemoPage()
                 }
             }
+            }
         }
     }
 }
+

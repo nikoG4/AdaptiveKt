@@ -1,4 +1,4 @@
-package io.github.adaptivekt.site
+﻿package io.github.adaptivekt.site
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -39,7 +39,7 @@ class HomeCodeComparisonCompileGuardTest {
     @Test
     fun breakpointParity_exactBehavior() {
         val cases = listOf(0, 320, 390, 599, 600, 767, 768, 839, 840, 1024, 1199, 1200, 1920)
-        
+
         cases.forEach { widthInt ->
             val width = widthInt.dp
             val composeUsesCards = plainComposeUsesCards(width)
@@ -47,7 +47,7 @@ class HomeCodeComparisonCompileGuardTest {
                 breakpoint = io.github.adaptivekt.core.breakpointForWidth(width),
                 displayMode = io.github.adaptivekt.data.AdaptiveDataDisplayMode.Auto
             )
-            
+
             if (composeUsesCards) {
                 assertEquals(io.github.adaptivekt.data.AdaptiveDataDisplayMode.Cards, adaptiveMode, "At $width, plain compose uses Cards but AdaptiveKt uses $adaptiveMode")
             } else {

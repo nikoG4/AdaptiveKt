@@ -87,10 +87,13 @@ import io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem
 internal fun SiteComponentsPage(
     selectedHash: String,
     onSelectedHashChange: (String) -> Unit,
+    sectionId: String?,
+    onSectionChange: (String) -> Unit,
 ) {
-    val docs = remember { componentDocs() }
-    val selectedId = componentDocIdForHash(selectedHash).ifEmpty { docs.first().id }
-    val selected = docs.firstOrNull { it.id == selectedId } ?: docs.first()
+    val docs = remember { DocsRegistry.getComponents() }
+    val resolvedId = DocsRegistry.resolveComponentId(selectedHash.takeIf { it.isNotBlank() } ?: DocsRegistry.ID_THEME)
+    val componentIndex = docs.indexOfFirst { it.id == resolvedId }
+    val component = docs.getOrNull(componentIndex) ?: docs.first()
     val navGroups = docs.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
             title = family,
@@ -103,20 +106,19 @@ internal fun SiteComponentsPage(
         title = "Rendered examples, code and API tables",
         description = "Browse the AdaptiveKt public component surface. Every page shows what the component is for, a real rendered example, copyable code, parameters, variants and usage notes.",
         navGroups = navGroups,
-        selectedId = selected.id,
+        selectedId = component.id,
         onSelectedIdChange = onSelectedHashChange,
-        onThisPage = selected.tocItems,
-        onTocItemClick = { /* TOC clicks are currently for local focal feedback only; they do not touch the primary route */ },
+        onThisPage = component.tocItems,
+        onTocItemClick = { onSectionChange(it) },
+        sectionId = sectionId,
     ) {
+        androidx.compose.runtime.LaunchedEffect(component.id, sectionId) {
+            PlatformInterop.updateValidationState("components", component.id, sectionId ?: "")
+        }
         CompositionLocalProvider(LocalDocsVisualState provides selectedHash) {
-            ComponentDocArticle(selected)
+            ComponentDocArticle(component)
         }
     }
-}
-
-private fun componentDocIdForHash(hash: String): String = when {
-    hash.startsWith("adaptive-accordion-dialog-") -> "adaptive-accordion-dialog"
-    else -> hash
 }
 
 private fun commonNotes(title: String): List<String> = listOf(
@@ -124,9 +126,9 @@ private fun commonNotes(title: String): List<String> = listOf(
     "Light and dark modes are handled by the active AdaptiveTheme color scheme.",
 )
 
-private fun componentDocs(): List<ComponentDoc> = listOf(
+internal fun componentDocs(): List<ComponentDoc> = listOf(
     ComponentDoc(
-        id = "adaptive-theme",
+        id = DocsRegistry.ID_THEME,
         family = "Foundations",
         title = "AdaptiveTheme",
         summary = "Theme root that provides colors, shapes, typography and interaction state tokens.",
@@ -177,7 +179,7 @@ AdaptiveTheme(mode = AdaptiveThemeMode.System) {
         limitations = listOf("AdaptiveKt does not yet expose a full design-token editor or runtime theme builder."),
     ),
     ComponentDoc(
-        id = "adaptive-button",
+        id = DocsRegistry.ID_BUTTON,
         family = "Actions",
         title = "AdaptiveButton",
         summary = "Rounded action button with primary, secondary, ghost and danger variants.",
@@ -220,7 +222,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         limitations = listOf("There is no built-in loading button state yet."),
     ),
     ComponentDoc(
-        id = "adaptive-icon-button",
+        id = DocsRegistry.ID_ICON_BUTTON,
         family = "Actions",
         title = "AdaptiveIconButton",
         summary = "Compact rounded icon action for menus, clear buttons and toolbar actions.",
@@ -249,7 +251,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         limitations = listOf("It is not a general icon library; AdaptiveIcons only cover functional affordances."),
     ),
     simpleDisplayDoc(
-        id = "adaptive-badge",
+        id = DocsRegistry.ID_BADGE,
         family = "Display",
         title = "AdaptiveBadge",
         summary = "Pill status label with neutral, success, warning, danger and info tones.",
@@ -266,7 +268,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         }
     },
     simpleDisplayDoc(
-        id = "adaptive-chip",
+        id = DocsRegistry.ID_CHIP,
         family = "Display",
         title = "AdaptiveChip",
         summary = "Compact pill for filters, tags and selected values.",
@@ -286,7 +288,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         }
     },
     simpleDisplayDoc(
-        id = "adaptive-avatar",
+        id = DocsRegistry.ID_AVATAR,
         family = "Display",
         title = "AdaptiveAvatar",
         summary = "Name-based avatar with initials fallback and optional image slot.",
@@ -305,7 +307,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         }
     },
     simpleDisplayDoc(
-        id = "adaptive-thumbnail",
+        id = DocsRegistry.ID_THUMBNAIL,
         family = "Display",
         title = "AdaptiveThumbnail",
         summary = "Small object thumbnail for products, files and media with label fallback.",
@@ -325,7 +327,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         }
     },
     ComponentDoc(
-        id = "adaptive-card-surface",
+        id = DocsRegistry.ID_CARD_SURFACE,
         family = "Display",
         title = "AdaptiveCard and AdaptiveSurface",
         summary = "Reusable content containers with professional default border, radius and padding.",
@@ -355,7 +357,7 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         limitations = listOf("No heavy elevation or shadow system yet."),
     ),
     ComponentDoc(
-        id = "adaptive-selection-area",
+        id = DocsRegistry.ID_SELECTION_AREA,
         family = "Display",
         title = "AdaptiveSelectionArea",
         summary = "Opt-in text selection wrapper for paragraphs, code-like content and read-only details.",
@@ -429,12 +431,9 @@ AdaptiveSelectionArea {
         accessibilityNotes = listOf("Use selection for read-only copyable content, not for primary controls."),
         limitations = listOf("Touch text-selection affordances are platform-controlled by Compose."),
     ),
-    inputDoc("adaptive-text-field", "AdaptiveTextField", "Foundation text input with label, placeholder, disabled state and validation message.") {
-        var value by remember { mutableStateOf("AdaptiveKt Inc.") }
-        AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")
-    },
+
     ComponentDoc(
-        id = "adaptive-search-field",
+        id = DocsRegistry.ID_SEARCH_FIELD,
         family = "Inputs",
         title = "AdaptiveSearchField",
         summary = "Search input with built-in search icon and optional clear action.",
@@ -454,7 +453,7 @@ AdaptiveSelectionArea {
         limitations = listOf("Does not perform filtering by itself."),
     ),
     ComponentDoc(
-        id = "adaptive-select",
+        id = DocsRegistry.ID_SELECT,
         family = "Inputs",
         title = "AdaptiveSelect",
         summary = "Single-selection dropdown with optional search, clear and custom option rendering.",
@@ -490,7 +489,7 @@ AdaptiveSelect(
         limitations = listOf("Remote async loading is intentionally not part of the component yet."),
     ),
     ComponentDoc(
-        id = "adaptive-multi-select",
+        id = DocsRegistry.ID_MULTI_SELECT,
         family = "Inputs",
         title = "AdaptiveMultiSelect",
         summary = "Multi-selection dropdown with selected chips, search, custom option rows and overflow count.",
@@ -538,7 +537,34 @@ AdaptiveMultiSelect(
         limitations = listOf("Keyboard navigation polish can be expanded in a later accessibility pass."),
     ),
     ComponentDoc(
-        id = "adaptive-form-layout",
+        id = DocsRegistry.ID_TEXT_FIELD,
+        family = "Forms",
+        title = "AdaptiveTextField",
+        summary = "Text input field with support for placeholder, leading/trailing icons, and validation.",
+        usage = "Use inside forms or alone for simple text input.",
+        basicExample = DocsExample(
+            "Basic text field",
+            "Foundation text input with label, placeholder, disabled state and validation message.",
+            """AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")""",
+        ) {
+            var value by remember { mutableStateOf("AdaptiveKt Inc.") }
+            AdaptiveTextField(value = value, onValueChange = { value = it }, label = "Company", placeholder = "Company name")
+        },
+        parameters = listOf(
+            ComponentParameter("value", "String", "required", true, "Current field value."),
+            ComponentParameter("onValueChange", "(String) -> Unit", "required", true, "Callback on value change."),
+            ComponentParameter("placeholder", "String?", "null", false, "Placeholder text."),
+            ComponentParameter("enabled", "Boolean", "true", false, "Whether the field is enabled."),
+            ComponentParameter("isError", "Boolean", "false", false, "Visual error state."),
+            ComponentParameter("leadingIcon / trailingIcon", "(@Composable () -> Unit)?", "null", false, "Icons inside the field."),
+        ),
+        themingNotes = commonNotes("AdaptiveTextField"),
+        responsiveNotes = listOf("Fills available width by default."),
+        accessibilityNotes = listOf("If used outside of AdaptiveFormLayout, ensure proper labels are provided."),
+        limitations = listOf("Advanced input masking is not yet natively supported."),
+    ),
+    ComponentDoc(
+        id = DocsRegistry.ID_FORM_LAYOUT,
         family = "Forms",
         title = "AdaptiveFormLayout",
         summary = "Responsive form sections with field spans, labels, validation messages and action slots.",
@@ -577,7 +603,7 @@ AdaptiveMultiSelect(
         limitations = listOf("AdaptiveSelect integration remains slot-based; there is no form field registry."),
     ),
     ComponentDoc(
-        id = "adaptive-data-view",
+        id = DocsRegistry.ID_DATA_VIEW,
         family = "Data",
         title = "AdaptiveDataView",
         summary = "Responsive data view that renders desktop tables and compact cards from the same column definitions.",
@@ -615,7 +641,7 @@ AdaptiveMultiSelect(
         limitations = listOf("Pagination and sorting are not part of this component yet."),
     ),
     ComponentDoc(
-        id = "adaptive-navigation-scaffold",
+        id = DocsRegistry.ID_NAVIGATION_SCAFFOLD,
         family = "Navigation",
         title = "AdaptiveNavigationScaffold",
         summary = "Responsive navigation shell with configurable sidebar, rail, drawer, bottom bar or hidden placements.",
@@ -707,7 +733,7 @@ AdaptiveNavigationBehavior(
         limitations = listOf("Deep nested sidebar hierarchy is handled by AdaptiveNavigationTree, not the scaffold itself."),
     ),
     ComponentDoc(
-        id = "adaptive-navigation-tree",
+        id = DocsRegistry.ID_NAVIGATION_TREE,
         family = "Navigation",
         title = "AdaptiveNavigationTree",
         summary = "Controlled hierarchical navigation for nested admin sidebars and settings pages.",
@@ -733,7 +759,7 @@ AdaptiveNavigationBehavior(
         limitations = listOf("Keyboard tree navigation can be expanded in a future pass."),
     ),
     simpleDisplayDoc(
-        id = "adaptive-breadcrumbs",
+        id = DocsRegistry.ID_BREADCRUMBS,
         family = "Navigation",
         title = "AdaptiveBreadcrumbs",
         summary = "Horizontal breadcrumb trail for hierarchy and deep links.",
@@ -750,7 +776,7 @@ AdaptiveNavigationBehavior(
         AdaptiveBreadcrumbs(listOf("Home", "Projects", "Billing", "Invoice #123"), selected, { selected = it }, itemLabel = { it })
     },
     simpleDisplayDoc(
-        id = "adaptive-tabs",
+        id = DocsRegistry.ID_TABS,
         family = "Navigation",
         title = "AdaptiveTabs",
         summary = "Segmented horizontal tabs with scroll support for compact widths.",
@@ -767,7 +793,7 @@ AdaptiveNavigationBehavior(
         AdaptiveTabs(tabs, selected, { selected = it }, tabLabel = { it })
     },
     ComponentDoc(
-        id = "adaptive-carousel",
+        id = DocsRegistry.ID_CAROUSEL,
         family = "Display",
         title = "AdaptiveCarousel",
         summary = "Controlled carousel with slide, fade, scale or no transition.",
@@ -816,7 +842,7 @@ AdaptiveNavigationBehavior(
         limitations = listOf("Autoplay is intentionally not included."),
     ),
     ComponentDoc(
-        id = "feedback-states",
+        id = DocsRegistry.ID_FEEDBACK_STATES,
         family = "Feedback",
         title = "AdaptiveEmptyState, AdaptiveLoadingState and AdaptiveErrorState",
         summary = "Polished workflow states with default glyphs, titles, descriptions and optional action slots.",
@@ -849,7 +875,7 @@ AdaptiveNavigationBehavior(
         limitations = listOf("The action slot is caller-owned; AdaptiveKt does not infer button labels."),
     ),
     ComponentDoc(
-        id = "adaptive-accordion-dialog",
+        id = DocsRegistry.ID_ACCORDION_DIALOG,
         family = "Overlay / Disclosure",
         title = "AdaptiveAccordion and AdaptiveDialog",
         summary = "Disclosure and modal primitives for settings, confirmations and long content.",
@@ -876,8 +902,8 @@ if (showDialog) {
             }
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AdaptiveAccordion(
-                    title = "Account settings", 
-                    subtitle = "Manage preferences", 
+                    title = "Account settings",
+                    subtitle = "Manage preferences",
                     defaultExpanded = true,
                     modifier = Modifier.docsClickableCursor()
                 ) {
@@ -1120,3 +1146,4 @@ private fun simpleDisplayDoc(
     accessibilityNotes = listOf("Keep visible labels concise and meaningful."),
     limitations = listOf("No special limitations beyond its intentionally small scope."),
 )
+
