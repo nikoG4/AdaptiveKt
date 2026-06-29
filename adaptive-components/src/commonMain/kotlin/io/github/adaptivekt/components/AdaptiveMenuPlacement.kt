@@ -25,6 +25,7 @@ public data class AdaptiveAnchoredMenuPolicy(
     val maxWidth: Dp = Dp.Unspecified,
     val maxHeight: Dp = 320.dp,
     val offset: DpOffset = DpOffset.Zero,
+    val windowMargin: Dp = 8.dp,
 )
 
 /**
@@ -66,8 +67,17 @@ public data class AdaptiveResolvedMenuPlacement(
 )
 
 /**
+ * The calculated result for menu width constraints.
+ */
+public data class AdaptiveResolvedMenuWidth(
+    val minWidth: Int,
+    val maxWidth: Int
+)
+
+/**
  * Pure function to resolve the optimal placement of a menu relative to its anchor.
- * Ensures the menu fits within the viewport.
+ * Ensures the menu fits within the viewport and respects window margins.
+ * Negative margins are not permitted.
  */
 public fun resolveAdaptiveMenuPlacement(
     anchor: AdaptiveAnchorBounds,
@@ -77,11 +87,32 @@ public fun resolveAdaptiveMenuPlacement(
     offsetX: Int = 0,
     offsetY: Int = 0,
     isRtl: Boolean = false,
-    minWindowMargin: Int = 8
+    windowMarginPx: Int = 8
 ): AdaptiveResolvedMenuPlacement {
-    val spaceAbove = anchor.top - minWindowMargin
-    val spaceBelow = viewport.height - anchor.bottom - minWindowMargin
+    require(windowMarginPx >= 0) { "windowMarginPx must be non-negative" }
+    val margin = windowMarginPx
     
+    val safeWidth = maxOf(0, viewport.width - margin * 2)
+    val safeHeight = maxOf(0, viewport.height - margin * 2)
+
+    val topLimit = margin
+    val bottomLimit = maxOf(margin, viewport.height - margin)
+    val leftLimit = margin
+    val rightLimit = maxOf(margin, viewport.width - margin)
+
+    // Normalize anchor so it's not inverted
+    val normLeft = minOf(anchor.left, anchor.right)
+    val normRight = maxOf(anchor.left, anchor.right)
+    val normTop = minOf(anchor.top, anchor.bottom)
+    val normBottom = maxOf(anchor.top, anchor.bottom)
+
+    // Clamp anchor to viewport visually for available space calculations
+    val anchorTop = normTop.coerceIn(0, viewport.height)
+    val anchorBottom = normBottom.coerceIn(0, viewport.height)
+
+    val spaceAbove = maxOf(0, anchorTop - margin)
+    val spaceBelow = maxOf(0, bottomLimit - anchorBottom)
+
     // Determine vertical placement
     val preferAbove = when (placement) {
         AdaptiveMenuPlacement.AboveStart, AdaptiveMenuPlacement.AboveEnd -> true
@@ -94,55 +125,87 @@ public fun resolveAdaptiveMenuPlacement(
     }
     
     val y = if (preferAbove) {
-        anchor.top - menuSize.height - offsetY
+        normTop - menuSize.height - offsetY
     } else {
-        anchor.bottom + offsetY
+        normBottom + offsetY
     }
     
     // Calculate max height based on available space
-    val maxHeight = if (preferAbove) {
-        maxOf(0, spaceAbove - offsetY)
+    var maxHeight = if (preferAbove) {
+        maxOf(0, normTop - offsetY - margin)
     } else {
-        maxOf(0, spaceBelow - offsetY)
+        maxOf(0, bottomLimit - normBottom - offsetY)
     }
+    maxHeight = minOf(maxHeight, safeHeight)
     
     // Determine horizontal placement
     val isStart = when (placement) {
-        AdaptiveMenuPlacement.BelowStart, AdaptiveMenuPlacement.AboveStart -> true
+        AdaptiveMenuPlacement.BelowStart, AdaptiveMenuPlacement.AboveStart, AdaptiveMenuPlacement.Auto -> true
         AdaptiveMenuPlacement.BelowEnd, AdaptiveMenuPlacement.AboveEnd -> false
-        AdaptiveMenuPlacement.Auto -> true
     }
     
     val alignLeft = if (isRtl) !isStart else isStart
     
     var x = if (alignLeft) {
-        anchor.left + offsetX
+        normLeft + offsetX
     } else {
-        anchor.right - menuSize.width - offsetX
+        normRight - menuSize.width - offsetX
     }
     
-    // Clamp X to viewport horizontally
-    if (x < minWindowMargin) {
-        x = minWindowMargin
-    } else if (x + menuSize.width > viewport.width - minWindowMargin) {
-        x = maxOf(minWindowMargin, viewport.width - minWindowMargin - menuSize.width)
+    // Strict clamp X to viewport bounds
+    val actualWidth = minOf(menuSize.width, safeWidth)
+    if (x + actualWidth > rightLimit) {
+        x = rightLimit - actualWidth
+    }
+    if (x < leftLimit) {
+        x = leftLimit
     }
     
+    // Strict clamp Y to viewport bounds
     var finalY = y
-    // If above and it exceeds the top
-    if (preferAbove && finalY < minWindowMargin) {
-        finalY = minWindowMargin
+    val actualHeight = minOf(menuSize.height, maxHeight)
+    if (finalY + actualHeight > bottomLimit) {
+        finalY = maxOf(topLimit, bottomLimit - actualHeight)
     }
-    // If below and it exceeds the bottom
-    if (!preferAbove && finalY + menuSize.height > viewport.height - minWindowMargin) {
-        // Just let it be, the maxHeight truncation handles the sizing
-        // But we shouldn't push the popup offscreen. Actually popup positioning usually relies on its size.
-        // We will return the top-left y.
+    if (finalY < topLimit) {
+        finalY = topLimit
     }
     
     return AdaptiveResolvedMenuPlacement(
         x = x,
         y = finalY,
         maxHeight = maxHeight
+    )
+}
+
+/**
+ * Pure function to resolve the sizing constraints of the anchored menu based on the policy and available space.
+ */
+public fun resolveAdaptiveAnchoredMenuWidth(
+    matchAnchorWidth: Boolean,
+    anchorWidth: Int,
+    policyMinWidthPx: Int,
+    policyMaxWidthPx: Int,
+    safeViewportWidthPx: Int
+): AdaptiveResolvedMenuWidth {
+    require(safeViewportWidthPx >= 0) { "safeViewportWidthPx must be non-negative" }
+    
+    val baseMin = maxOf(0, policyMinWidthPx)
+    val baseMax = if (policyMaxWidthPx > 0) policyMaxWidthPx else safeViewportWidthPx
+
+    val finalMax = minOf(baseMax, safeViewportWidthPx)
+
+    var finalMin = baseMin
+    if (matchAnchorWidth) {
+        val positiveAnchorWidth = maxOf(0, anchorWidth)
+        finalMin = maxOf(baseMin, positiveAnchorWidth)
+    }
+
+    // Sanity clamp so min is never greater than max
+    finalMin = minOf(finalMin, finalMax)
+
+    return AdaptiveResolvedMenuWidth(
+        minWidth = finalMin,
+        maxWidth = finalMax
     )
 }
