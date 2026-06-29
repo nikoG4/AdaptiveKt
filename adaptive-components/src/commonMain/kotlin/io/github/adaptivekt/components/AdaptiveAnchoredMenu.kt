@@ -127,11 +127,10 @@ public fun <T> AdaptiveAnchoredMenuBox(
     itemKey: ((T) -> Any)? = null,
     policy: AdaptiveAnchoredMenuPolicy = AdaptiveAnchoredMenuPolicy(),
     lazyListState: LazyListState = rememberLazyListState(),
+    headerContent: (@Composable () -> Unit)? = null,
+    emptyContent: (@Composable () -> Unit)? = null,
     itemContent: @Composable (index: Int, item: T) -> Unit
 ) {
-    // We wrap the anchor in a Box just to attach `onGloballyPositioned` if needed, 
-    // but actually Popup doesn't need us to pass anchorBounds manually. 
-    // Popup in Compose attaches to its parent in the composition tree!
     Box {
         anchor()
 
@@ -146,54 +145,53 @@ public fun <T> AdaptiveAnchoredMenuBox(
                 popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true)
             ) {
-                // Read resolved constraints. Initial pass may be -1, meaning we use defaults.
                 val finalMaxHeight = if (positionProvider.resolvedMaxHeightPx >= 0) {
                     val calcDp = with(density) { positionProvider.resolvedMaxHeightPx.toDp() }
                     minOf(policy.maxHeight, calcDp)
                 } else {
                     policy.maxHeight
                 }
-
                 val finalMinWidth = if (positionProvider.resolvedMinWidthPx >= 0) {
                     with(density) { positionProvider.resolvedMinWidthPx.toDp() }
                 } else {
                     policy.minWidth
                 }
-
                 val finalMaxWidth = if (positionProvider.resolvedMaxWidthPx >= 0) {
                     with(density) { positionProvider.resolvedMaxWidthPx.toDp() }
                 } else {
                     policy.maxWidth
                 }
 
-                Box(
+                androidx.compose.foundation.layout.Column(
                     modifier = modifier
                         .widthIn(min = finalMinWidth, max = finalMaxWidth)
                         .heightIn(max = finalMaxHeight)
-                        .background(
-                            color = AdaptiveTheme.colors.surface,
-                            shape = AdaptiveTheme.shapes.medium
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = AdaptiveTheme.colors.border,
-                            shape = AdaptiveTheme.shapes.medium
-                        )
+                        .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.medium)
+                        .border(1.dp, AdaptiveTheme.colors.border, AdaptiveTheme.shapes.medium)
                         .clip(AdaptiveTheme.shapes.medium)
                 ) {
-                    LazyColumn(
-                        state = lazyListState
-                    ) {
-                        if (itemKey != null) {
-                            itemsIndexed(
-                                items = items,
-                                key = { _, item -> itemKey(item) }
-                            ) { index, item ->
-                                itemContent(index, item)
-                            }
-                        } else {
-                            itemsIndexed(items) { index, item ->
-                                itemContent(index, item)
+                    if (headerContent != null) {
+                        headerContent()
+                    }
+                    
+                    if (items.isEmpty() && emptyContent != null) {
+                        emptyContent()
+                    } else {
+                        LazyColumn(
+                            state = lazyListState,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            if (itemKey != null) {
+                                itemsIndexed(
+                                    items = items,
+                                    key = { _, item -> itemKey(item) }
+                                ) { index, item ->
+                                    itemContent(index, item)
+                                }
+                            } else {
+                                itemsIndexed(items) { index, item ->
+                                    itemContent(index, item)
+                                }
                             }
                         }
                     }

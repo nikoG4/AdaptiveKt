@@ -3,9 +3,11 @@ package io.github.adaptivekt.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -25,7 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,11 +63,6 @@ public fun hiddenMultiSelectChipCount(
     maxVisibleChips: Int,
 ): Int = (selectedCount - maxVisibleChips.coerceAtLeast(0)).coerceAtLeast(0)
 
-/**
- * Multi-selection dropdown with local search and removable selected chips.
- *
- * Internally uses [AdaptiveAnchoredDropdownMenu] and keeps the dropdown open while options are toggled.
- */
 @Composable
 public fun <T> AdaptiveMultiSelect(
     options: List<T>,
@@ -82,6 +83,7 @@ public fun <T> AdaptiveMultiSelect(
     optionContent: (@Composable (option: T, selected: Boolean) -> Unit)? = null,
     chipContent: (@Composable (option: T) -> Unit)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
+    optionKey: ((T) -> Any)? = null,
 ) {
     var expanded by remember(initialExpanded) { mutableStateOf(initialExpanded) }
     var searchQuery by remember { mutableStateOf("") }
@@ -98,6 +100,22 @@ public fun <T> AdaptiveMultiSelect(
         searchQuery = ""
     }
 
+    val visibleOptions = remember(options, searchable, searchQuery) {
+        if (searchable) {
+            filterMultiSelectOptions(options, searchQuery, optionLabel)
+        } else {
+            options
+        }
+    }
+    
+    val keySelector: (T) -> Any = optionKey ?: { it as Any }
+    
+    var navState by remember(visibleOptions, expanded) { 
+        mutableStateOf(AdaptiveOptionNavigationState<Any>())
+    }
+
+    val focusRequester = remember { FocusRequester() }
+
     Column(modifier = modifier.fillMaxWidth()) {
         if (label != null) {
             BasicText(
@@ -113,54 +131,72 @@ public fun <T> AdaptiveMultiSelect(
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
         }
 
-        AdaptiveAnchoredDropdownMenu(
+        AdaptiveAnchoredMenuBox(
             expanded = expanded,
-            onExpandedChange = { if (enabled) expanded = it },
-            enabled = enabled,
-            matchAnchorWidth = true,
-            maxHeight = maxMenuHeight,
-            anchor = { _, toggle ->
-                MultiSelectTrigger(
-                    selectedOptions = selectedOptions,
-                    optionLabel = optionLabel,
-                    placeholder = placeholder,
-                    enabled = enabled,
-                    expanded = expanded,
-                    clearable = clearable,
-                    bgColor = bgColor,
-                    borderColor = borderColor,
-                    shape = shape,
-                    maxVisibleChips = maxVisibleChips,
-                    chipContent = chipContent,
-                    onRemove = { option ->
-                        onSelectedOptionsChange(selectedOptions.filterNot { it == option })
-                    },
-                    onClearAll = {
-                        onSelectedOptionsChange(emptyList())
+            onDismissRequest = { expanded = false },
+            items = visibleOptions,
+            itemKey = optionKey,
+            policy = AdaptiveAnchoredMenuPolicy(
+                matchAnchorWidth = true,
+                maxHeight = maxMenuHeight
+            ),
+            modifier = Modifier.onPreviewKeyEvent { event ->
+                if (!expanded) {
+                    if (event.key == Key.DirectionDown || event.key == Key.Enter || event.key == Key.Spacebar) {
+                        expanded = true
+                        return@onPreviewKeyEvent true
+                    }
+                    return@onPreviewKeyEvent false
+                }
+                
+                when (event.key) {
+                    Key.DirectionDown -> {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+                        true
+                    }
+                    Key.DirectionUp -> {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+                        true
+                    }
+                    Key.Enter -> {
+                        val highlighted = navState.highlightedKey
+                        if (highlighted != null) {
+                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                            if (optionToSelect != null) {
+                                val isSelected = selectedOptions.any { it == optionToSelect }
+                                val nextSelection = if (isSelected) {
+                                    selectedOptions.filterNot { it == optionToSelect }
+                                } else {
+                                    selectedOptions + optionToSelect
+                                }
+                                onSelectedOptionsChange(nextSelection)
+                                // We don't close expanded on enter for multi-select
+                            }
+                        }
+                        true
+                    }
+                    Key.Escape -> {
                         expanded = false
-                    },
-                    onClick = toggle,
-                )
+                        focusRequester.requestFocus()
+                        true
+                    }
+                    else -> false
+                }
             },
-        ) {
-            if (searchable) {
-                AdaptiveSearchField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = "Search...",
-                    onClear = { searchQuery = "" },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
-            }
-
-            val visibleOptions = if (searchable) {
-                filterMultiSelectOptions(options, searchQuery, optionLabel)
-            } else {
-                options
-            }
-
-            if (visibleOptions.isEmpty()) {
+            headerContent = if (searchable) {
+                {
+                    AdaptiveSearchField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = "Search...",
+                        onClear = { searchQuery = "" },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = AdaptiveTokens.Spacing.XSmall)
+                    )
+                }
+            } else null,
+            emptyContent = {
                 if (emptyContent != null) {
                     emptyContent()
                 } else {
@@ -176,32 +212,57 @@ public fun <T> AdaptiveMultiSelect(
                         ),
                     )
                 }
-            } else {
-                visibleOptions.forEach { option ->
-                    val isSelected = selectedOptions.any { it == option }
-                    val nextSelection = {
-                        if (isSelected) {
-                            selectedOptions.filterNot { it == option }
-                        } else {
-                            selectedOptions + option
-                        }
-                    }
-
-                    if (optionContent != null) {
-                        MultiSelectOptionWrapper(
-                            selected = isSelected,
-                            onClick = { onSelectedOptionsChange(nextSelection()) },
-                        ) {
-                            optionContent(option, isSelected)
-                        }
-                    } else {
-                        MultiSelectMenuItem(
-                            text = optionLabel(option),
-                            selected = isSelected,
-                            onClick = { onSelectedOptionsChange(nextSelection()) },
-                        )
-                    }
+            },
+            anchor = {
+                MultiSelectTrigger(
+                    selectedOptions = selectedOptions,
+                    optionLabel = optionLabel,
+                    placeholder = placeholder,
+                    enabled = enabled,
+                    expanded = expanded,
+                    clearable = clearable,
+                    bgColor = bgColor,
+                    borderColor = borderColor,
+                    shape = shape,
+                    maxVisibleChips = maxVisibleChips,
+                    chipContent = chipContent,
+                    focusRequester = focusRequester,
+                    onRemove = { option ->
+                        onSelectedOptionsChange(selectedOptions.filterNot { it == option })
+                    },
+                    onClearAll = {
+                        onSelectedOptionsChange(emptyList())
+                        expanded = false
+                    },
+                    onClick = { if (enabled) expanded = !expanded },
+                )
+            },
+        ) { _, option ->
+            val isSelected = selectedOptions.any { it == option }
+            val isHighlighted = navState.highlightedKey == keySelector(option)
+            val nextSelection = {
+                if (isSelected) {
+                    selectedOptions.filterNot { it == option }
+                } else {
+                    selectedOptions + option
                 }
+            }
+
+            if (optionContent != null) {
+                MultiSelectOptionWrapper(
+                    selected = isSelected,
+                    highlighted = isHighlighted,
+                    onClick = { onSelectedOptionsChange(nextSelection()) },
+                ) {
+                    optionContent(option, isSelected)
+                }
+            } else {
+                MultiSelectMenuItem(
+                    text = optionLabel(option),
+                    selected = isSelected,
+                    highlighted = isHighlighted,
+                    onClick = { onSelectedOptionsChange(nextSelection()) },
+                )
             }
         }
 
@@ -233,13 +294,17 @@ private fun <T> MultiSelectTrigger(
     shape: androidx.compose.ui.graphics.Shape,
     maxVisibleChips: Int,
     chipContent: (@Composable (T) -> Unit)?,
+    focusRequester: FocusRequester,
     onRemove: (T) -> Unit,
     onClearAll: () -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
+    
     val actualBg = if (hovered && enabled && !expanded) AdaptiveComponentDefaults.SurfaceSubtle else bgColor
+    val actualBorder = if (focused) AdaptiveComponentDefaults.Primary else borderColor
     val showClear = clearable && selectedOptions.isNotEmpty() && enabled
     val visibleChips = visibleMultiSelectChips(selectedOptions, maxVisibleChips)
     val hiddenCount = hiddenMultiSelectChipCount(selectedOptions.size, maxVisibleChips)
@@ -250,8 +315,10 @@ private fun <T> MultiSelectTrigger(
             .heightIn(min = AdaptiveTokens.Sizes.ButtonHeight)
             .clip(shape)
             .background(actualBg, shape)
-            .border(1.dp, borderColor, shape)
+            .border(if (focused) 2.dp else 1.dp, actualBorder, shape)
             .hoverable(interactionSource)
+            .focusable(enabled = enabled, interactionSource = interactionSource)
+            .focusRequester(focusRequester)
             .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
@@ -366,18 +433,15 @@ private fun MultiSelectCustomChip(
 private fun MultiSelectMenuItem(
     text: String,
     selected: Boolean,
+    highlighted: Boolean,
     onClick: () -> Unit,
 ) {
-    if (!selected) {
-        AdaptiveMenuItem(text = text, onClick = onClick)
-        return
-    }
-
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
     val background = when {
         selected -> AdaptiveComponentDefaults.PrimarySubtle
+        highlighted -> AdaptiveComponentDefaults.SurfaceSubtle
         hovered -> AdaptiveComponentDefaults.SurfaceSubtle
         else -> Color.Transparent
     }
@@ -421,6 +485,7 @@ private fun MultiSelectMenuItem(
 @Composable
 private fun MultiSelectOptionWrapper(
     selected: Boolean,
+    highlighted: Boolean,
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -429,6 +494,7 @@ private fun MultiSelectOptionWrapper(
     val shape = AdaptiveComponentDefaults.MediumShape
     val background = when {
         selected -> AdaptiveComponentDefaults.PrimarySubtle
+        highlighted -> AdaptiveComponentDefaults.SurfaceSubtle
         hovered -> AdaptiveComponentDefaults.SurfaceSubtle
         else -> Color.Transparent
     }
