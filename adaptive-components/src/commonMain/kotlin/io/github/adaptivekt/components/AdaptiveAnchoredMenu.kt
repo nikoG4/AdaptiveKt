@@ -117,7 +117,7 @@ public fun <T> AdaptiveAnchoredMenu(
                 )
                 .border(
                     width = 1.dp,
-                    color = AdaptiveTheme.colors.outlineVariant,
+                    color = AdaptiveTheme.colors.border,
                     shape = AdaptiveTheme.shapes.medium
                 )
                 .clip(AdaptiveTheme.shapes.medium)

@@ -53,7 +53,7 @@ class AdaptiveMenuPlacementTest {
         
         // Should fallback to above because 292 > 160
         assertEquals(100, result.x)
-        assertEquals(300 - 400, result.y) // y = -100, but clamped later or max height used
+        assertEquals(8, result.y) // y = -100, but clamped to minWindowMargin=8
         assertEquals(292, result.maxHeight) // maxHeight is 292 (300 - 8 margin)
     }
 
