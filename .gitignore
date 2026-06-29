@@ -23,3 +23,6 @@ local.properties
 
 # Generated GH Pages
 tmp-gh-pages-root/
+
+# Local agent artifacts
+.agent/ci-watch/
