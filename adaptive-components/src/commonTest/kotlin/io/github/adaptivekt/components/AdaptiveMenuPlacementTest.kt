@@ -3,12 +3,12 @@ package io.github.adaptivekt.components
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class AdaptiveMenuPlacementTest {
 
     @Test
     fun testAutoPlacementFitsBelow() {
-        // Viewport 1000x1000, Anchor 100x40 at (100, 100). Space below is ~860.
         val anchor = AdaptiveAnchorBounds(100, 100, 200, 140)
         val viewport = AdaptiveViewportBounds(1000, 1000)
         val menu = AdaptiveMenuSize(200, 300)
@@ -17,15 +17,13 @@ class AdaptiveMenuPlacementTest {
             anchor, viewport, menu, AdaptiveMenuPlacement.Auto
         )
         
-        // Should place below start
-        assertEquals(100, result.x) // Start aligned
-        assertEquals(140, result.y) // Just below anchor
-        assertTrue(result.maxHeight >= 300)
+        assertEquals(100, result.x)
+        assertEquals(140, result.y)
+        assertEquals(1000 - 140 - 8, result.maxHeight)
     }
 
     @Test
     fun testAutoPlacementFitsAboveWhenNoSpaceBelow() {
-        // Viewport 1000x1000, Anchor at bottom.
         val anchor = AdaptiveAnchorBounds(100, 800, 200, 840)
         val viewport = AdaptiveViewportBounds(1000, 1000)
         val menu = AdaptiveMenuSize(200, 300)
@@ -34,70 +32,229 @@ class AdaptiveMenuPlacementTest {
             anchor, viewport, menu, AdaptiveMenuPlacement.Auto
         )
         
-        // Should place above start
         assertEquals(100, result.x)
         assertEquals(800 - 300, result.y)
-        assertTrue(result.maxHeight >= 300)
+        assertEquals(800 - 8, result.maxHeight)
     }
 
     @Test
     fun testAutoPlacementFallbackToLargestSpace() {
-        // Viewport 1000x500. Anchor at 300. Above space = 292, Below space = 500 - 340 = 160.
         val anchor = AdaptiveAnchorBounds(100, 300, 200, 340)
         val viewport = AdaptiveViewportBounds(1000, 500)
-        val menu = AdaptiveMenuSize(200, 400) // Does not fit fully above or below
+        val menu = AdaptiveMenuSize(200, 400)
         
         val result = resolveAdaptiveMenuPlacement(
             anchor, viewport, menu, AdaptiveMenuPlacement.Auto
         )
         
-        // Should fallback to above because 292 > 160
+        // Above space = 292, Below space = 152. Should go above.
         assertEquals(100, result.x)
-        assertEquals(8, result.y) // y = -100, but clamped to minWindowMargin=8
-        assertEquals(292, result.maxHeight) // maxHeight is 292 (300 - 8 margin)
+        assertEquals(8, result.y) // clamped to margin
+        assertEquals(292, result.maxHeight)
     }
 
     @Test
-    fun testAlignEnd() {
-        val anchor = AdaptiveAnchorBounds(100, 100, 200, 140)
-        val viewport = AdaptiveViewportBounds(1000, 1000)
-        val menu = AdaptiveMenuSize(300, 300)
+    fun testMenuLargerThanViewport() {
+        val anchor = AdaptiveAnchorBounds(10, 10, 20, 20)
+        val viewport = AdaptiveViewportBounds(100, 100)
+        val menu = AdaptiveMenuSize(200, 300)
         
         val result = resolveAdaptiveMenuPlacement(
-            anchor, viewport, menu, AdaptiveMenuPlacement.BelowEnd
+            anchor, viewport, menu, AdaptiveMenuPlacement.Auto
         )
         
-        // Right bound of anchor is 200. Menu width 300. X should be 200 - 300 = -100.
-        // But clamped to minWindowMargin (8).
-        assertEquals(8, result.x)
+        assertEquals(8, result.x) // min margin clamp
+        assertEquals(20, result.y) // below anchor
+        assertEquals(100 - 20 - 8, result.maxHeight)
     }
 
     @Test
-    fun testRtlAuto() {
-        val anchor = AdaptiveAnchorBounds(100, 100, 200, 140)
-        val viewport = AdaptiveViewportBounds(1000, 1000)
-        val menu = AdaptiveMenuSize(300, 300)
+    fun testViewportSmallerThanMargins() {
+        val anchor = AdaptiveAnchorBounds(0, 0, 10, 10)
+        val viewport = AdaptiveViewportBounds(10, 10)
+        val menu = AdaptiveMenuSize(50, 50)
         
         val result = resolveAdaptiveMenuPlacement(
-            anchor, viewport, menu, AdaptiveMenuPlacement.Auto, isRtl = true
+            anchor, viewport, menu, AdaptiveMenuPlacement.BelowStart, windowMarginPx = 8
         )
         
-        // RTL Auto means it aligns End instead of Start.
-        // X = 200 - 300 = -100. Clamped to 8.
+        // Window margin 8 on 10x10 means topLimit=8, bottomLimit=8
         assertEquals(8, result.x)
+        assertEquals(8, result.y)
+        assertEquals(0, result.maxHeight)
     }
 
     @Test
-    fun testOffset() {
-        val anchor = AdaptiveAnchorBounds(100, 100, 200, 140)
+    fun testAnchorPartiallyOutside() {
+        val anchor = AdaptiveAnchorBounds(-50, 50, 50, 90)
         val viewport = AdaptiveViewportBounds(1000, 1000)
         val menu = AdaptiveMenuSize(200, 300)
         
         val result = resolveAdaptiveMenuPlacement(
-            anchor, viewport, menu, AdaptiveMenuPlacement.BelowStart, offsetX = 10, offsetY = 20
+            anchor, viewport, menu, AdaptiveMenuPlacement.BelowStart
         )
         
-        assertEquals(110, result.x)
-        assertEquals(160, result.y) // 140 + 20
+        assertEquals(8, result.x) // Clamped to left margin
+        assertEquals(90, result.y)
+    }
+
+    @Test
+    fun testAnchorCompletelyOutsideNegative() {
+        val anchor = AdaptiveAnchorBounds(-200, -200, -100, -100)
+        val viewport = AdaptiveViewportBounds(1000, 1000)
+        val menu = AdaptiveMenuSize(200, 300)
+        
+        val result = resolveAdaptiveMenuPlacement(
+            anchor, viewport, menu, AdaptiveMenuPlacement.BelowStart
+        )
+        
+        assertEquals(8, result.x) // Clamped
+        assertEquals(8, result.y) // Clamped (Top limit is 8, 0 (clamped anchor bottom) + menu is clamped)
+        assertEquals(1000 - 16, result.maxHeight) // clamped to safeHeight
+    }
+
+    @Test
+    fun testAnchorInvertedBounds() {
+        val anchor = AdaptiveAnchorBounds(200, 140, 100, 100) // inverted
+        val viewport = AdaptiveViewportBounds(1000, 1000)
+        val menu = AdaptiveMenuSize(200, 300)
+        
+        val result = resolveAdaptiveMenuPlacement(
+            anchor, viewport, menu, AdaptiveMenuPlacement.BelowStart
+        )
+        
+        // It normalizes to 100..200, 100..140
+        assertEquals(100, result.x)
+        assertEquals(140, result.y)
+    }
+
+    @Test
+    fun testNegativeMarginThrows() {
+        val anchor = AdaptiveAnchorBounds(100, 100, 200, 140)
+        val viewport = AdaptiveViewportBounds(1000, 1000)
+        val menu = AdaptiveMenuSize(200, 300)
+        
+        assertFailsWith<IllegalArgumentException> {
+            resolveAdaptiveMenuPlacement(anchor, viewport, menu, AdaptiveMenuPlacement.Auto, windowMarginPx = -1)
+        }
+    }
+
+    @Test
+    fun testAutoWithTie() {
+        // Viewport 1000x1000. Anchor centered perfectly vertically 480..520.
+        // Space above = 480 - 8 = 472. Space below = 1000 - 520 - 8 = 472.
+        val anchor = AdaptiveAnchorBounds(100, 480, 200, 520)
+        val viewport = AdaptiveViewportBounds(1000, 1000)
+        val menu = AdaptiveMenuSize(200, 600) // larger than space
+        
+        val result = resolveAdaptiveMenuPlacement(
+            anchor, viewport, menu, AdaptiveMenuPlacement.Auto
+        )
+        
+        // If tie and doesn't fit, Auto preferAbove = spaceAbove > spaceBelow (which is false, so it goes Below)
+        assertEquals(100, result.x)
+        assertEquals(520, result.y)
+        assertEquals(472, result.maxHeight)
+    }
+
+    @Test
+    fun testPlacementExplicitNoSpace() {
+        val anchor = AdaptiveAnchorBounds(100, 100, 200, 140) // Near top
+        val viewport = AdaptiveViewportBounds(1000, 1000)
+        val menu = AdaptiveMenuSize(200, 600)
+        
+        val result = resolveAdaptiveMenuPlacement(
+            anchor, viewport, menu, AdaptiveMenuPlacement.AboveStart
+        )
+        
+        // Forced Above.
+        assertEquals(100, result.x)
+        assertEquals(8, result.y) // clamped to margin 8
+        assertEquals(100 - 8, result.maxHeight) // maxHeight is 92
+    }
+
+    @Test
+    fun testWidthMatchTrue() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = true,
+            anchorWidth = 500,
+            policyMinWidthPx = -1,
+            policyMaxWidthPx = -1,
+            safeViewportWidthPx = 1000
+        )
+        
+        // Min should be anchorWidth
+        assertEquals(500, result.minWidth)
+        assertEquals(1000, result.maxWidth)
+    }
+
+    @Test
+    fun testWidthMatchFalse() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = false,
+            anchorWidth = 500,
+            policyMinWidthPx = 100,
+            policyMaxWidthPx = 600,
+            safeViewportWidthPx = 1000
+        )
+        
+        assertEquals(100, result.minWidth)
+        assertEquals(600, result.maxWidth)
+    }
+
+    @Test
+    fun testAnchorSmallerThanMin() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = true,
+            anchorWidth = 50,
+            policyMinWidthPx = 100,
+            policyMaxWidthPx = 600,
+            safeViewportWidthPx = 1000
+        )
+        
+        assertEquals(100, result.minWidth) // clamped to minWidth
+        assertEquals(600, result.maxWidth)
+    }
+
+    @Test
+    fun testAnchorLargerThanMax() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = true,
+            anchorWidth = 800,
+            policyMinWidthPx = 100,
+            policyMaxWidthPx = 600,
+            safeViewportWidthPx = 1000
+        )
+        
+        assertEquals(600, result.minWidth) // clamped to max
+        assertEquals(600, result.maxWidth)
+    }
+
+    @Test
+    fun testAnchorLargerThanViewport() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = true,
+            anchorWidth = 1200,
+            policyMinWidthPx = -1,
+            policyMaxWidthPx = -1,
+            safeViewportWidthPx = 1000
+        )
+        
+        assertEquals(1000, result.minWidth) // clamped to viewport
+        assertEquals(1000, result.maxWidth)
+    }
+
+    @Test
+    fun testMinLargerThanMax() {
+        val result = resolveAdaptiveAnchoredMenuWidth(
+            matchAnchorWidth = false,
+            anchorWidth = 200,
+            policyMinWidthPx = 800,
+            policyMaxWidthPx = 600,
+            safeViewportWidthPx = 1000
+        )
+        
+        assertEquals(600, result.minWidth) // clamped to max
+        assertEquals(600, result.maxWidth)
     }
 }
