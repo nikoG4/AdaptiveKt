@@ -309,4 +309,74 @@ class AdaptiveDataSelectionTest {
         )
         assertEquals(5001, state.selectedKeys.size)
     }
+
+    @Test
+    fun testResolveAdaptiveRowSelectionOperation_CheckboxAlwaysToggle() {
+        // Shift should not matter
+        var op = resolveAdaptiveRowSelectionOperation("key", true, false, AdaptiveRowSelectionSource.Checkbox)
+        assertTrue(op is AdaptiveDataSelectionOperation.Toggle)
+        assertEquals("key", (op as AdaptiveDataSelectionOperation.Toggle).key)
+        
+        op = resolveAdaptiveRowSelectionOperation("key", false, false, AdaptiveRowSelectionSource.Checkbox)
+        assertTrue(op is AdaptiveDataSelectionOperation.Toggle)
+    }
+
+    @Test
+    fun testResolveAdaptiveRowSelectionOperation_RowNormalReplace() {
+        val op = resolveAdaptiveRowSelectionOperation("key", false, false, AdaptiveRowSelectionSource.Row)
+        assertTrue(op is AdaptiveDataSelectionOperation.Replace)
+        assertEquals("key", (op as AdaptiveDataSelectionOperation.Replace).key)
+    }
+
+    @Test
+    fun testResolveAdaptiveRowSelectionOperation_RowShiftSelectRange() {
+        val op = resolveAdaptiveRowSelectionOperation("key", true, false, AdaptiveRowSelectionSource.Row)
+        assertTrue(op is AdaptiveDataSelectionOperation.SelectRange)
+        assertEquals("key", (op as AdaptiveDataSelectionOperation.SelectRange).targetKey)
+        assertEquals(false, (op as AdaptiveDataSelectionOperation.SelectRange).additive)
+        
+        val opAdd = resolveAdaptiveRowSelectionOperation("key", true, true, AdaptiveRowSelectionSource.Row)
+        assertTrue(opAdd is AdaptiveDataSelectionOperation.SelectRange)
+        assertEquals(true, (opAdd as AdaptiveDataSelectionOperation.SelectRange).additive)
+    }
+
+    @Test
+    fun testResolveAdaptiveRowSelectionOperation_RowCtrlMetaToggle() {
+        val op = resolveAdaptiveRowSelectionOperation("key", false, true, AdaptiveRowSelectionSource.Row)
+        assertTrue(op is AdaptiveDataSelectionOperation.Toggle)
+        assertEquals("key", (op as AdaptiveDataSelectionOperation.Toggle).key)
+    }
+
+    @Test
+    fun testResolveAdaptiveSelectAllState_HeaderChecked() {
+        val state = resolveAdaptiveSelectAllState(
+            selectedKeys = setOf("a", "b"),
+            visibleKeys = listOf("a", "b"),
+            disabledKeys = emptySet(),
+            mode = AdaptiveDataSelectionMode.Multiple
+        )
+        assertEquals(AdaptiveSelectAllState.Checked, state)
+    }
+
+    @Test
+    fun testResolveAdaptiveSelectAllState_HeaderPartial() {
+        val state = resolveAdaptiveSelectAllState(
+            selectedKeys = setOf("a"),
+            visibleKeys = listOf("a", "b"),
+            disabledKeys = emptySet(),
+            mode = AdaptiveDataSelectionMode.Multiple
+        )
+        assertEquals(AdaptiveSelectAllState.Indeterminate, state)
+    }
+
+    @Test
+    fun testResolveAdaptiveSelectAllState_DisabledNoOp() {
+        val state = resolveAdaptiveSelectAllState(
+            selectedKeys = setOf("a"),
+            visibleKeys = listOf("a", "b"),
+            disabledKeys = setOf("a", "b"),
+            mode = AdaptiveDataSelectionMode.Multiple
+        )
+        assertEquals(AdaptiveSelectAllState.Disabled, state)
+    }
 }
