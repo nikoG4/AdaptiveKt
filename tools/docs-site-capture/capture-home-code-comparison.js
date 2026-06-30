@@ -90,8 +90,55 @@ async function capture() {
   let globalPageErrors = 0;
   let globalFailedRequests = 0;
   let globalOverflowFailures = 0;
+  const globalConsoleErrorDetails = [];
 
   const metrics = getKotlinMetrics();
+
+  async function waitForComposeLayoutStable(page, timeoutMs = 30000, sampleIntervalMs = 250, requiredStableSamples = 4) {
+      let stableSamples = 0;
+      let lastState = null;
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < timeoutMs) {
+          try {
+              const currentState = await page.evaluate(() => {
+                  const canvas = document.querySelector('#webApp canvas');
+                  if (!canvas) return null;
+                  const rect = canvas.getBoundingClientRect();
+                  if (rect.width === 0 || rect.height === 0) return null;
+                  return {
+                      scrollWidth: document.documentElement.scrollWidth,
+                      scrollHeight: document.documentElement.scrollHeight,
+                      canvasWidth: rect.width,
+                      canvasHeight: rect.height,
+                  };
+              });
+
+              if (currentState) {
+                  if (lastState && 
+                      lastState.scrollWidth === currentState.scrollWidth &&
+                      lastState.scrollHeight === currentState.scrollHeight &&
+                      lastState.canvasWidth === currentState.canvasWidth &&
+                      lastState.canvasHeight === currentState.canvasHeight) {
+                      stableSamples++;
+                      if (stableSamples >= requiredStableSamples) {
+                          return true;
+                      }
+                  } else {
+                      stableSamples = 0;
+                      lastState = currentState;
+                  }
+              } else {
+                  stableSamples = 0;
+                  lastState = null;
+              }
+          } catch (e) {
+              stableSamples = 0;
+          }
+          await page.waitForTimeout(sampleIntervalMs);
+      }
+      throw new Error(`Compose layout did not stabilize within ${timeoutMs}ms.`);
+  }
 
   for (const theme of themes) {
     for (const viewport of viewports) {
@@ -107,6 +154,14 @@ async function capture() {
       page.on('console', message => {
         if (message.type() === 'error') {
           consoleMessages++;
+          globalConsoleErrorDetails.push({
+              viewport: viewport.name,
+              theme: theme.name,
+              url: page.url(),
+              type: message.type(),
+              text: message.text(),
+              timestamp: new Date().toISOString()
+          });
         }
       });
       page.on('requestfailed', request => {
@@ -131,7 +186,8 @@ async function capture() {
         }
 
         await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-        await page.waitForTimeout(8000); // Allow Compose to settle
+        await waitForComposeLayoutStable(page);
+        await page.waitForTimeout(500); // Brief pause for animations
 
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
         if (overflow) {
@@ -199,7 +255,8 @@ async function capture() {
             // Let's reset page and use methodology toggle
             await page.goto(url, { waitUntil: 'networkidle' });
             await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-            await page.waitForTimeout(8000);
+            await waitForComposeLayoutStable(page);
+            await page.waitForTimeout(500);
             await page.locator('#webApp canvas').click({ position: { x: 10, y: 10 } });
             for (let i = 0; i < 6; i++) {
                 await page.keyboard.press('Tab');
@@ -287,11 +344,12 @@ async function capture() {
     pageErrors: globalPageErrors,
     failedRequests: globalFailedRequests,
     horizontalOverflowFailures: globalOverflowFailures,
-    ignoredRequests: ignoredRequests
+    ignoredRequests: ignoredRequests,
+    consoleErrorDetails: globalConsoleErrorDetails
   };
 
   fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(path.join(outputDir, 'validation.log'), `Validation finished at ${new Date().toISOString()}\nErrors: ${globalConsoleErrors}\nPage Errors: ${globalPageErrors}\nNetwork Failures: ${globalFailedRequests}\nOverflows: ${globalOverflowFailures}`);
+  fs.writeFileSync(path.join(outputDir, 'validation.log'), `Validation finished at ${new Date().toISOString()}\nErrors: ${globalConsoleErrors}\nPage Errors: ${globalPageErrors}\nNetwork Failures: ${globalFailedRequests}\nOverflows: ${globalOverflowFailures}\n\nConsole Errors:\n${JSON.stringify(globalConsoleErrorDetails, null, 2)}`);
 
   if (globalConsoleErrors > 0 || globalPageErrors > 0 || globalFailedRequests > 0 || globalOverflowFailures > 0) {
       console.error("Validation failed due to errors or overflow");
