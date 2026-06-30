@@ -258,25 +258,26 @@ public fun <K : Any> validateAdaptiveRowKeys(keys: List<K>) {
     AdaptiveDataSelectionContext(keys) // Implicitly validates via constructor
 }
 
-public enum class AdaptiveRowSelectionSource {
+public enum class AdaptiveDataRowClickBehavior {
+    Activate,
+    Select,
+    SelectAndActivate,
+}
+
+internal enum class AdaptiveRowSelectionSource {
     Row,
     Checkbox,
     Keyboard,
 }
 
-public fun <K : Any> resolveAdaptiveRowSelectionOperation(
+internal fun <K : Any> resolveAdaptiveRowSelectionOperation(
     key: K,
-    selected: Boolean,
     shiftPressed: Boolean,
     togglePressed: Boolean,
     source: AdaptiveRowSelectionSource,
 ): AdaptiveDataSelectionOperation<K> {
     if (source == AdaptiveRowSelectionSource.Checkbox) {
-        return if (shiftPressed) {
-            AdaptiveDataSelectionOperation.SelectRange(key, additive = togglePressed)
-        } else {
-            AdaptiveDataSelectionOperation.Toggle(key)
-        }
+        return AdaptiveDataSelectionOperation.Toggle(key)
     }
     
     if (shiftPressed) {

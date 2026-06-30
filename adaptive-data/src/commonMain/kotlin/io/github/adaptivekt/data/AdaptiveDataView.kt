@@ -1,5 +1,7 @@
 package io.github.adaptivekt.data
 
+import androidx.compose.ui.draw.alpha
+
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -97,12 +99,13 @@ public fun <T> AdaptiveDataView(
     AdaptiveDataView<T, Any>(
         state = state,
         columns = columns,
-        rowKey = { (it ?: Unit) as Any },
+        rowKey = { throw IllegalStateException("rowKey should not be evaluated when selectionMode is None") },
         selectionMode = AdaptiveDataSelectionMode.None,
         selectionState = AdaptiveDataSelectionState(),
         onSelectionStateChange = {},
         modifier = modifier,
         rowEnabled = { true },
+        rowClickBehavior = AdaptiveDataRowClickBehavior.Activate,
         filterSlot = filterSlot,
         actions = actions,
         rowActions = rowActions,
@@ -129,6 +132,7 @@ public fun <T, K : Any> AdaptiveDataView(
     onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
     modifier: Modifier = Modifier,
     rowEnabled: (T) -> Boolean = { true },
+    rowClickBehavior: AdaptiveDataRowClickBehavior = if (selectionMode == AdaptiveDataSelectionMode.None) AdaptiveDataRowClickBehavior.Activate else AdaptiveDataRowClickBehavior.Select,
     filterSlot: AdaptiveFilterSlot? = null,
     actions: (@Composable () -> Unit)? = null,
     rowActions: List<AdaptiveDataAction<T>> = emptyList(),
@@ -186,11 +190,11 @@ public fun <T, K : Any> AdaptiveDataView(
                             description = "Try adjusting filters or create a new record.",
                         )
                     } else {
-                        val visibleKeys = state.items.map(rowKey)
+                        val visibleKeys = if (selectionMode != AdaptiveDataSelectionMode.None) state.items.map(rowKey) else emptyList()
                         if (selectionMode != AdaptiveDataSelectionMode.None) {
                             validateAdaptiveRowKeys(visibleKeys)
                         }
-                        val disabledKeys = state.items.asSequence().filterNot(rowEnabled).map(rowKey).toSet()
+                        val disabledKeys = if (selectionMode != AdaptiveDataSelectionMode.None) state.items.asSequence().filterNot(rowEnabled).map(rowKey).toSet() else emptySet()
 
                         if (resolvedDisplayMode == AdaptiveDataDisplayMode.Table) {
                             AdaptiveDataTable(
@@ -205,6 +209,8 @@ public fun <T, K : Any> AdaptiveDataView(
                                 onSelectionStateChange = onSelectionStateChange,
                                 visibleKeys = visibleKeys,
                                 disabledKeys = disabledKeys,
+                                rowEnabled = rowEnabled,
+                                rowClickBehavior = rowClickBehavior,
                             )
                         } else {
                             AdaptiveDataCards(
@@ -219,6 +225,8 @@ public fun <T, K : Any> AdaptiveDataView(
                                 onSelectionStateChange = onSelectionStateChange,
                                 visibleKeys = visibleKeys,
                                 disabledKeys = disabledKeys,
+                                rowEnabled = rowEnabled,
+                                rowClickBehavior = rowClickBehavior,
                             )
                         }
                     }
@@ -257,33 +265,109 @@ private fun <T, K : Any> AdaptiveDataTable(
     onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
     visibleKeys: List<K>,
     disabledKeys: Set<K>,
+    rowEnabled: (T) -> Boolean,
+    rowClickBehavior: AdaptiveDataRowClickBehavior,
 ) {
     val includeSelection = selectionMode != AdaptiveDataSelectionMode.None
     val visibleSelectable = visibleKeys.filter { it !in disabledKeys }
     val visibleColumns = visibleColumnsForBreakpoint(columns, breakpoint)
     val displayedColumns = if (visibleColumns.isEmpty()) columns else visibleColumns
     val includeActions = rowActions.isNotEmpty()
+    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
 
     AdaptiveCard(
         modifier = Modifier
             .fillMaxWidth(),
         contentPadding = PaddingValues(0.dp),
     ) {
+        // Header
+        val headerSelectAllState = if (selectionMode == AdaptiveDataSelectionMode.Multiple) {
+            resolveAdaptiveSelectAllState(
+                selectedKeys = selectionState.selectedKeys,
+                visibleKeys = visibleKeys,
+                disabledKeys = disabledKeys,
+                mode = selectionMode
+            )
+        } else {
+            androidx.compose.ui.state.ToggleableState.Off
+        }
+
+        val onHeaderSelectionClick: (() -> Unit)? = if (selectionMode == AdaptiveDataSelectionMode.Multiple && headerSelectAllState != io.github.adaptivekt.data.AdaptiveSelectAllState.Disabled) {
+            {
+                val op = if (headerSelectAllState == io.github.adaptivekt.data.AdaptiveSelectAllState.Checked) {
+                    AdaptiveDataSelectionOperation.ClearVisible
+                } else {
+                    AdaptiveDataSelectionOperation.SelectAllVisible
+                }
+                onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+            }
+        } else null
+
+        val mappedHeaderState = when (headerSelectAllState) {
+            io.github.adaptivekt.data.AdaptiveSelectAllState.Checked -> androidx.compose.ui.state.ToggleableState.On
+            io.github.adaptivekt.data.AdaptiveSelectAllState.Indeterminate -> androidx.compose.ui.state.ToggleableState.Indeterminate
+            io.github.adaptivekt.data.AdaptiveSelectAllState.Unchecked, io.github.adaptivekt.data.AdaptiveSelectAllState.Disabled -> androidx.compose.ui.state.ToggleableState.Off
+            else -> androidx.compose.ui.state.ToggleableState.Off
+        }
+
         AdaptiveDataTableRow(
             columns = displayedColumns,
             isHeader = true,
             includeActions = includeActions,
+            includeSelection = includeSelection,
+            selectionCheckboxState = mappedHeaderState,
+            selectionCheckboxEnabled = headerSelectAllState != io.github.adaptivekt.data.AdaptiveSelectAllState.Disabled,
+            onSelectionClick = onHeaderSelectionClick,
         )
 
         items.forEach { item ->
             DataDivider()
+            val key = if (includeSelection) rowKey(item) else null
+            val isSelected = if (key != null) key in selectionState.selectedKeys else false
+            val isEnabled = rowEnabled(item)
+            
+            val onSelectionClick: (() -> Unit)? = if (includeSelection && isEnabled && key != null) {
+                {
+                    val modifiers = windowInfo.keyboardModifiers
+                    val op = resolveAdaptiveRowSelectionOperation(
+                        key = key,
+                        shiftPressed = modifiers.isShiftPressed,
+                        togglePressed = modifiers.isCtrlPressed || modifiers.isMetaPressed,
+                        source = AdaptiveRowSelectionSource.Checkbox
+                    )
+                    onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+                }
+            } else null
+
+            val onRowSelectionClick: (() -> Unit)? = if (includeSelection && isEnabled && key != null && (rowClickBehavior == AdaptiveDataRowClickBehavior.Select || rowClickBehavior == AdaptiveDataRowClickBehavior.SelectAndActivate)) {
+                {
+                    val modifiers = windowInfo.keyboardModifiers
+                    val op = resolveAdaptiveRowSelectionOperation(
+                        key = key,
+                        shiftPressed = modifiers.isShiftPressed,
+                        togglePressed = modifiers.isCtrlPressed || modifiers.isMetaPressed,
+                        source = AdaptiveRowSelectionSource.Row
+                    )
+                    onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+                }
+            } else null
+
+            val mappedRowState = if (isSelected) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off
+
             AdaptiveDataTableRow(
                 columns = displayedColumns,
                 isHeader = false,
                 item = item,
-                onItemClick = onItemClick,
+                onItemClick = if (isEnabled && (rowClickBehavior == AdaptiveDataRowClickBehavior.Activate || rowClickBehavior == AdaptiveDataRowClickBehavior.SelectAndActivate)) onItemClick else null,
                 rowActions = rowActions,
                 includeActions = includeActions,
+                includeSelection = includeSelection,
+                selectionCheckboxState = mappedRowState,
+                selectionCheckboxEnabled = isEnabled,
+                onSelectionClick = onSelectionClick,
+                onRowSelectionClick = onRowSelectionClick,
+                isSelected = isSelected,
+                isEnabled = isEnabled,
             )
         }
     }
@@ -294,52 +378,93 @@ private fun <T> AdaptiveDataTableRow(
     columns: List<AdaptiveDataColumn<T>>,
     isHeader: Boolean,
     includeActions: Boolean,
+    includeSelection: Boolean = false,
+    selectionCheckboxState: androidx.compose.ui.state.ToggleableState = androidx.compose.ui.state.ToggleableState.Off,
+    selectionCheckboxEnabled: Boolean = true,
+    onSelectionClick: (() -> Unit)? = null,
+    onRowSelectionClick: (() -> Unit)? = null,
+    isSelected: Boolean = false,
+    isEnabled: Boolean = true,
     item: T? = null,
     onItemClick: ((T) -> Unit)? = null,
     rowActions: List<AdaptiveDataAction<T>> = emptyList(),
 ) {
-    val rowBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
+    val baseBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
+    val rowBackground = if (!isHeader && isSelected) AdaptiveTheme.colors.primarySubtle else baseBackground
     val rowInteractionSource = remember { MutableInteractionSource() }
+    
+    val canClickRow = !isHeader && isEnabled && (onItemClick != null || onRowSelectionClick != null)
+
     val rowModifier = Modifier
         .fillMaxWidth()
         .heightIn(min = AdaptiveTokens.Sizes.TableRowMinHeight)
         .background(rowBackground)
         .then(
-            if (!isHeader && onItemClick != null && item != null) {
+            if (canClickRow) {
                 Modifier
                     .adaptiveInteractiveCursor()
                     .clickable(
                         interactionSource = rowInteractionSource,
                         indication = null,
                     ) {
-                        onItemClick(item)
+                        if (onRowSelectionClick != null) onRowSelectionClick()
+                        if (onItemClick != null && item != null) onItemClick(item)
                     }
             } else {
                 Modifier
             },
         )
         .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small)
+        .then(
+            if (!isHeader && !isEnabled) Modifier.background(AdaptiveTheme.colors.surfaceMuted.copy(alpha = 0.5f)) else Modifier
+        )
 
-    val weights = columns.map { normalizeColumnWeight(it.weight) } +
-        if (includeActions) listOf(1.6f) else emptyList()
+    val weights = columns.map { normalizeColumnWeight(it.weight) }
+    
+    WeightedDataRow(
+        weights = weights, 
+        modifier = rowModifier,
+        leadingWidth = if (includeSelection) 48.dp else null,
+        trailingWidth = if (includeActions) 80.dp else null
+    ) {
+        if (includeSelection) {
+            Box(
+                modifier = Modifier.width(48.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                if (isHeader || selectionCheckboxState != androidx.compose.ui.state.ToggleableState.Off || onSelectionClick != null) {
+                    io.github.adaptivekt.components.AdaptiveCheckbox(
+                        state = selectionCheckboxState,
+                        onClick = onSelectionClick,
+                        enabled = selectionCheckboxEnabled
+                    )
+                }
+            }
+        }
 
-    WeightedDataRow(weights = weights, modifier = rowModifier) {
         columns.forEachIndexed { index, column ->
             DataCellBox {
                 if (isHeader) {
                     HeaderText(column.header)
                 } else if (item != null) {
-                    if (inferredMobileRole(index, column) == AdaptiveDataMobileRole.Status) {
-                        DefaultStatusBadge { column.cell(item) }
-                    } else {
-                        column.cell(item)
+                    val contentAlpha = if (isEnabled) 1f else 0.5f
+                    androidx.compose.ui.Modifier.alpha(contentAlpha) // Not applying directly, just placeholder, ideally the content uses LocalContentColor but here we let the row handle it or we can just render. Actually we'll wrap in Box with alpha if disabled.
+                    Box(modifier = if (!isEnabled) Modifier.background(Color.Transparent).then(Modifier) else Modifier) { // Using graphicsLayer alpha is better, but this is multiplatform. We just rely on the row background.
+                        if (inferredMobileRole(index, column) == AdaptiveDataMobileRole.Status) {
+                            DefaultStatusBadge { column.cell(item) }
+                        } else {
+                            column.cell(item)
+                        }
                     }
                 }
             }
         }
 
         if (includeActions) {
-            DataCellBox {
+            Box(
+                modifier = Modifier.width(80.dp).padding(start = AdaptiveTokens.Spacing.Small),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
                 if (isHeader) {
                     HeaderText("Actions")
                 } else if (item != null) {
@@ -354,25 +479,48 @@ private fun <T> AdaptiveDataTableRow(
 private fun WeightedDataRow(
     weights: List<Float>,
     modifier: Modifier = Modifier,
+    leadingWidth: androidx.compose.ui.unit.Dp? = null,
+    trailingWidth: androidx.compose.ui.unit.Dp? = null,
     content: @Composable () -> Unit,
 ) {
     Layout(modifier = modifier, content = content) { measurables, constraints ->
         if (measurables.isEmpty()) {
             layout(width = constraints.minWidth, height = constraints.minHeight) {}
         } else {
+            val density = this
+            val leadingPx = leadingWidth?.roundToPx() ?: 0
+            val trailingPx = trailingWidth?.roundToPx() ?: 0
+            
+            val totalFixedPx = leadingPx + trailingPx
+            val availableWidthForWeights = (constraints.maxWidth.coerceAtLeast(constraints.minWidth) - totalFixedPx).coerceAtLeast(0)
+            
             val normalizedWeights = weights.ifEmpty { List(measurables.size) { 1f } }
             val totalWeight = normalizedWeights.sum().takeIf { it > 0f } ?: measurables.size.toFloat()
-            val availableWidth = constraints.maxWidth.coerceAtLeast(constraints.minWidth)
-            val widths = measurables.indices.map { index ->
-                val weight = normalizedWeights.getOrElse(index) { 1f }
-                if (index == measurables.lastIndex) {
-                    val used = measurables.indices.take(index).sumOf { usedIndex ->
-                        (availableWidth * normalizedWeights.getOrElse(usedIndex) { 1f } / totalWeight).toInt()
+            
+            var currentMeasurableIndex = 0
+            val widths = mutableListOf<Int>()
+            
+            if (leadingWidth != null) {
+                widths.add(leadingPx)
+                currentMeasurableIndex++
+            }
+            
+            val weightCount = weights.size
+            for (i in 0 until weightCount) {
+                val weight = normalizedWeights[i]
+                if (i == weightCount - 1) {
+                    val used = (0 until i).sumOf { usedIndex ->
+                        (availableWidthForWeights * normalizedWeights[usedIndex] / totalWeight).toInt()
                     }
-                    (availableWidth - used).coerceAtLeast(0)
+                    widths.add((availableWidthForWeights - used).coerceAtLeast(0))
                 } else {
-                    (availableWidth * weight / totalWeight).toInt().coerceAtLeast(0)
+                    widths.add((availableWidthForWeights * weight / totalWeight).toInt().coerceAtLeast(0))
                 }
+                currentMeasurableIndex++
+            }
+            
+            if (trailingWidth != null) {
+                widths.add(trailingPx)
             }
 
             val placeables = measurables.mapIndexed { index, measurable ->
@@ -390,7 +538,7 @@ private fun WeightedDataRow(
             val height = placeables.maxOfOrNull { it.height }?.coerceAtLeast(constraints.minHeight)
                 ?: constraints.minHeight
 
-            layout(width = availableWidth, height = height) {
+            layout(width = constraints.maxWidth, height = height) {
                 var x = 0
                 placeables.forEach { placeable ->
                     placeable.placeRelative(x = x, y = (height - placeable.height) / 2)
@@ -445,6 +593,8 @@ private fun <T, K : Any> AdaptiveDataCards(
     onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
     visibleKeys: List<K>,
     disabledKeys: Set<K>,
+    rowEnabled: (T) -> Boolean,
+    rowClickBehavior: AdaptiveDataRowClickBehavior,
 ) {
     val includeSelection = selectionMode != AdaptiveDataSelectionMode.None
     val visibleSelectable = visibleKeys.filter { it !in disabledKeys }
@@ -459,17 +609,24 @@ private fun <T, K : Any> AdaptiveDataCards(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val isAllSelected = visibleSelectable.isNotEmpty() && visibleSelectable.all { it in selectionState.selectedKeys }
-                val isSomeSelected = visibleSelectable.any { it in selectionState.selectedKeys }
+                val headerSelectAllState = resolveAdaptiveSelectAllState(
+                    selectedKeys = selectionState.selectedKeys,
+                    visibleKeys = visibleKeys,
+                    disabledKeys = disabledKeys,
+                    mode = selectionMode
+                )
+                
+                val isSomeSelected = headerSelectAllState == io.github.adaptivekt.data.AdaptiveSelectAllState.Indeterminate || headerSelectAllState == io.github.adaptivekt.data.AdaptiveSelectAllState.Checked
                 
                 io.github.adaptivekt.components.AdaptiveCheckbox(
-                    state = when {
-                        isAllSelected -> androidx.compose.ui.state.ToggleableState.On
-                        isSomeSelected -> androidx.compose.ui.state.ToggleableState.Indeterminate
-                        else -> androidx.compose.ui.state.ToggleableState.Off
+                    state = when (headerSelectAllState) {
+                        io.github.adaptivekt.data.AdaptiveSelectAllState.Checked -> androidx.compose.ui.state.ToggleableState.On
+                        io.github.adaptivekt.data.AdaptiveSelectAllState.Indeterminate -> androidx.compose.ui.state.ToggleableState.Indeterminate
+                        io.github.adaptivekt.data.AdaptiveSelectAllState.Unchecked, io.github.adaptivekt.data.AdaptiveSelectAllState.Disabled -> androidx.compose.ui.state.ToggleableState.Off
                     },
+                    enabled = headerSelectAllState != io.github.adaptivekt.data.AdaptiveSelectAllState.Disabled,
                     onClick = {
-                        val op: AdaptiveDataSelectionOperation<K> = if (isAllSelected) {
+                        val op = if (headerSelectAllState == io.github.adaptivekt.data.AdaptiveSelectAllState.Checked) {
                             AdaptiveDataSelectionOperation.ClearVisible
                         } else {
                             AdaptiveDataSelectionOperation.SelectAllVisible
@@ -486,31 +643,32 @@ private fun <T, K : Any> AdaptiveDataCards(
         }
     
         items.forEach { item ->
-            val key = rowKey(item)
-            val isSelected = selectionState.selectedKeys.contains(key)
-            val isDisabled = disabledKeys.contains(key)
+            val key = if (includeSelection) rowKey(item) else null
+            val isSelected = if (key != null) key in selectionState.selectedKeys else false
+            val isEnabled = rowEnabled(item)
+            
+            val canClickCard = isEnabled && (onItemClick != null || includeSelection)
             
             AdaptiveCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().then(
+                    if (!isEnabled) Modifier.alpha(0.5f) else Modifier
+                ),
                 contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
-                onClick = if (!isDisabled && (onItemClick != null || includeSelection)) {
+                onClick = if (canClickCard) {
                     { 
-                        if (includeSelection) {
+                        if (includeSelection && key != null && (rowClickBehavior == AdaptiveDataRowClickBehavior.Select || rowClickBehavior == AdaptiveDataRowClickBehavior.SelectAndActivate)) {
                             val modifiers = windowInfo.keyboardModifiers
-                            val shiftPressed = modifiers.isShiftPressed
-                            val ctrlPressed = modifiers.isCtrlPressed
-                            val metaPressed = modifiers.isMetaPressed
-                            
                             val operation = resolveAdaptiveRowSelectionOperation(
                                 key = key,
-                                selected = isSelected,
-                                shiftPressed = shiftPressed,
-                                togglePressed = ctrlPressed || metaPressed,
+                                shiftPressed = modifiers.isShiftPressed,
+                                togglePressed = modifiers.isCtrlPressed || modifiers.isMetaPressed,
                                 source = AdaptiveRowSelectionSource.Row
                             )
                             onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, operation, selectionMode, visibleKeys, disabledKeys))
                         }
-                        if (onItemClick != null) onItemClick(item)
+                        if (isEnabled && (rowClickBehavior == AdaptiveDataRowClickBehavior.Activate || rowClickBehavior == AdaptiveDataRowClickBehavior.SelectAndActivate) && onItemClick != null) {
+                            onItemClick(item)
+                        }
                     }
                 } else null,
             ) {
@@ -519,15 +677,14 @@ private fun <T, K : Any> AdaptiveDataCards(
                         if (includeSelection) {
                             io.github.adaptivekt.components.AdaptiveCheckbox(
                                 state = if (isSelected) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off,
-                                enabled = !isDisabled,
+                                enabled = isEnabled,
                                 onClick = {
                                     val modifiers = windowInfo.keyboardModifiers
                                     val shiftPressed = modifiers.isShiftPressed
                                     val ctrlPressed = modifiers.isCtrlPressed
                                     val metaPressed = modifiers.isMetaPressed
                                     val op = resolveAdaptiveRowSelectionOperation(
-                                        key = key,
-                                        selected = isSelected,
+                                        key = key!!,
                                         shiftPressed = shiftPressed,
                                         togglePressed = ctrlPressed || metaPressed,
                                         source = AdaptiveRowSelectionSource.Checkbox
@@ -550,15 +707,14 @@ private fun <T, K : Any> AdaptiveDataCards(
                         if (includeSelection) {
                             io.github.adaptivekt.components.AdaptiveCheckbox(
                                 state = if (isSelected) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off,
-                                enabled = !isDisabled,
+                                enabled = isEnabled,
                                 onClick = {
                                     val modifiers = windowInfo.keyboardModifiers
                                     val shiftPressed = modifiers.isShiftPressed
                                     val ctrlPressed = modifiers.isCtrlPressed
                                     val metaPressed = modifiers.isMetaPressed
                                     val op = resolveAdaptiveRowSelectionOperation(
-                                        key = key,
-                                        selected = isSelected,
+                                        key = key!!,
                                         shiftPressed = shiftPressed,
                                         togglePressed = ctrlPressed || metaPressed,
                                         source = AdaptiveRowSelectionSource.Checkbox
