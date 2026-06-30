@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -31,15 +32,10 @@ import androidx.compose.ui.window.PopupProperties
 import io.github.adaptivekt.core.AdaptiveTheme
 import kotlin.math.roundToInt
 
-internal class AdaptiveAnchoredPositionProvider(
+internal class AdaptivePureAnchoredPositionProvider(
     private val policy: AdaptiveAnchoredMenuPolicy,
     private val density: androidx.compose.ui.unit.Density,
 ) : PopupPositionProvider {
-
-    var resolvedMaxHeightPx by mutableStateOf(-1)
-    var resolvedMinWidthPx by mutableStateOf(-1)
-    var resolvedMaxWidthPx by mutableStateOf(-1)
-
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
@@ -60,9 +56,7 @@ internal class AdaptiveAnchoredPositionProvider(
             width = popupContentSize.width,
             height = popupContentSize.height
         )
-
         val isRtl = layoutDirection == LayoutDirection.Rtl
-
         val offsetX = with(density) { policy.offset.x.roundToPx() }
         val offsetY = with(density) { policy.offset.y.roundToPx() }
         val windowMarginPx = with(density) { policy.windowMargin.roundToPx() }
@@ -77,29 +71,6 @@ internal class AdaptiveAnchoredPositionProvider(
             isRtl = isRtl,
             windowMarginPx = windowMarginPx
         )
-
-        val policyMinWidthPx = if (policy.minWidth.isSpecified) with(density) { policy.minWidth.roundToPx() } else -1
-        val policyMaxWidthPx = if (policy.maxWidth.isSpecified) with(density) { policy.maxWidth.roundToPx() } else -1
-        val safeViewportWidthPx = maxOf(0, windowSize.width - windowMarginPx * 2)
-
-        val widthConstraints = resolveAdaptiveAnchoredMenuWidth(
-            matchAnchorWidth = policy.matchAnchorWidth,
-            anchorWidth = anchor.width,
-            policyMinWidthPx = policyMinWidthPx,
-            policyMaxWidthPx = policyMaxWidthPx,
-            safeViewportWidthPx = safeViewportWidthPx
-        )
-
-        // Update state to trigger recomposition if constraints change
-        if (resolvedMaxHeightPx != placement.maxHeight) {
-            resolvedMaxHeightPx = placement.maxHeight
-        }
-        if (resolvedMinWidthPx != widthConstraints.minWidth) {
-            resolvedMinWidthPx = widthConstraints.minWidth
-        }
-        if (resolvedMaxWidthPx != widthConstraints.maxWidth) {
-            resolvedMaxWidthPx = widthConstraints.maxWidth
-        }
 
         return IntOffset(placement.x, placement.y)
     }
@@ -128,16 +99,83 @@ public fun <T> AdaptiveAnchoredMenuBox(
     policy: AdaptiveAnchoredMenuPolicy = AdaptiveAnchoredMenuPolicy(),
     lazyListState: LazyListState = rememberLazyListState(),
     headerContent: (@Composable () -> Unit)? = null,
+    footerContent: (@Composable () -> Unit)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
     itemContent: @Composable (index: Int, item: T) -> Unit
 ) {
-    Box {
+    var anchorBounds by remember { mutableStateOf(IntRect.Zero) }
+
+    Box(
+        modifier = Modifier.onGloballyPositioned { coords ->
+            val bounds = coords.boundsInWindow()
+            val newBounds = IntRect(
+                bounds.left.roundToInt(), 
+                bounds.top.roundToInt(), 
+                bounds.right.roundToInt(), 
+                bounds.bottom.roundToInt()
+            )
+            if (anchorBounds != newBounds) {
+                anchorBounds = newBounds
+            }
+        }
+    ) {
         anchor()
 
         if (expanded) {
             val density = LocalDensity.current
+            val windowInfo = LocalWindowInfo.current
             val positionProvider = remember(policy, density) {
-                AdaptiveAnchoredPositionProvider(policy, density)
+                AdaptivePureAnchoredPositionProvider(policy, density)
+            }
+
+            val windowSize = windowInfo.containerSize
+            
+            // Calculate constraints purely based on state before Popup layout
+            val windowMarginPx = with(density) { policy.windowMargin.roundToPx() }
+            val offsetX = with(density) { policy.offset.x.roundToPx() }
+            val offsetY = with(density) { policy.offset.y.roundToPx() }
+            
+            // We use a dummy menu size just to compute maxHeight available
+            val placement = resolveAdaptiveMenuPlacement(
+                anchor = AdaptiveAnchorBounds(anchorBounds.left, anchorBounds.top, anchorBounds.right, anchorBounds.bottom),
+                viewport = AdaptiveViewportBounds(windowSize.width, windowSize.height),
+                menuSize = AdaptiveMenuSize(0, 0),
+                placement = policy.placement,
+                offsetX = offsetX,
+                offsetY = offsetY,
+                isRtl = false, // Doesn't affect height available
+                windowMarginPx = windowMarginPx
+            )
+
+            val policyMinWidthPx = if (policy.minWidth.isSpecified) with(density) { policy.minWidth.roundToPx() } else -1
+            val policyMaxWidthPx = if (policy.maxWidth.isSpecified) with(density) { policy.maxWidth.roundToPx() } else -1
+            val safeViewportWidthPx = maxOf(0, windowSize.width - windowMarginPx * 2)
+
+            val widthConstraints = resolveAdaptiveAnchoredMenuWidth(
+                matchAnchorWidth = policy.matchAnchorWidth,
+                anchorWidth = anchorBounds.width,
+                policyMinWidthPx = policyMinWidthPx,
+                policyMaxWidthPx = policyMaxWidthPx,
+                safeViewportWidthPx = safeViewportWidthPx
+            )
+
+            val finalMaxHeight = if (placement.maxHeight >= 0) {
+                val calcDp = with(density) { placement.maxHeight.toDp() }
+                minOf(policy.maxHeight, calcDp)
+            } else {
+                policy.maxHeight
+            }
+            
+            val finalMinWidth = if (widthConstraints.minWidth >= 0) {
+                with(density) { widthConstraints.minWidth.toDp() }
+            } else {
+                policy.minWidth
+            }
+            
+            val finalMaxWidth = if (widthConstraints.maxWidth >= 0) {
+                with(density) { widthConstraints.maxWidth.toDp() }
+            } else {
+                policy.maxWidth
             }
 
             Popup(
@@ -145,23 +183,6 @@ public fun <T> AdaptiveAnchoredMenuBox(
                 popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true)
             ) {
-                val finalMaxHeight = if (positionProvider.resolvedMaxHeightPx >= 0) {
-                    val calcDp = with(density) { positionProvider.resolvedMaxHeightPx.toDp() }
-                    minOf(policy.maxHeight, calcDp)
-                } else {
-                    policy.maxHeight
-                }
-                val finalMinWidth = if (positionProvider.resolvedMinWidthPx >= 0) {
-                    with(density) { positionProvider.resolvedMinWidthPx.toDp() }
-                } else {
-                    policy.minWidth
-                }
-                val finalMaxWidth = if (positionProvider.resolvedMaxWidthPx >= 0) {
-                    with(density) { positionProvider.resolvedMaxWidthPx.toDp() }
-                } else {
-                    policy.maxWidth
-                }
-
                 androidx.compose.foundation.layout.Column(
                     modifier = modifier
                         .widthIn(min = finalMinWidth, max = finalMaxWidth)
@@ -194,6 +215,10 @@ public fun <T> AdaptiveAnchoredMenuBox(
                                 }
                             }
                         }
+                    }
+                    
+                    if (footerContent != null) {
+                        footerContent()
                     }
                 }
             }
