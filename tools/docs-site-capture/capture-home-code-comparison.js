@@ -131,7 +131,7 @@ async function capture() {
         }
 
         await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-        await page.waitForTimeout(3000); // Allow Compose to settle
+        await page.waitForTimeout(8000); // Allow Compose to settle
 
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
         if (overflow) {
@@ -199,7 +199,7 @@ async function capture() {
             // Let's reset page and use methodology toggle
             await page.goto(url, { waitUntil: 'networkidle' });
             await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout(8000);
             await page.locator('#webApp canvas').click({ position: { x: 10, y: 10 } });
             for (let i = 0; i < 6; i++) {
                 await page.keyboard.press('Tab');
