@@ -1,5 +1,9 @@
 package io.github.adaptivekt.data
 
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
+import androidx.compose.ui.input.pointer.isShiftPressed
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -90,6 +94,55 @@ public fun <T> AdaptiveDataView(
     filters: List<AdaptiveFilterOption> = emptyList(),
     sortOptions: List<AdaptiveSortOption> = emptyList(),
 ) {
+    AdaptiveDataView<T, Any>(
+        state = state,
+        columns = columns,
+        rowKey = { (it ?: Unit) as Any },
+        selectionMode = AdaptiveDataSelectionMode.None,
+        selectionState = AdaptiveDataSelectionState(),
+        onSelectionStateChange = {},
+        modifier = modifier,
+        rowEnabled = { true },
+        filterSlot = filterSlot,
+        actions = actions,
+        rowActions = rowActions,
+        onItemClick = onItemClick,
+        cardContent = cardContent,
+        displayMode = displayMode,
+        autoSwitchToCards = autoSwitchToCards,
+        queryState = queryState,
+        onQueryChange = onQueryChange,
+        pagination = pagination,
+        searchEnabled = searchEnabled,
+        filters = filters,
+        sortOptions = sortOptions,
+    )
+}
+
+@Composable
+public fun <T, K : Any> AdaptiveDataView(
+    state: AdaptiveDataState<T>,
+    columns: List<AdaptiveDataColumn<T>>,
+    rowKey: (T) -> K,
+    selectionMode: AdaptiveDataSelectionMode,
+    selectionState: AdaptiveDataSelectionState<K>,
+    onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
+    modifier: Modifier = Modifier,
+    rowEnabled: (T) -> Boolean = { true },
+    filterSlot: AdaptiveFilterSlot? = null,
+    actions: (@Composable () -> Unit)? = null,
+    rowActions: List<AdaptiveDataAction<T>> = emptyList(),
+    onItemClick: ((T) -> Unit)? = null,
+    cardContent: (@Composable (T) -> Unit)? = null,
+    displayMode: AdaptiveDataDisplayMode = AdaptiveDataDisplayMode.Auto,
+    autoSwitchToCards: Boolean = true,
+    queryState: AdaptiveQueryState? = null,
+    onQueryChange: ((AdaptiveQueryState) -> Unit)? = null,
+    pagination: AdaptivePaginationState? = null,
+    searchEnabled: Boolean = false,
+    filters: List<AdaptiveFilterOption> = emptyList(),
+    sortOptions: List<AdaptiveSortOption> = emptyList(),
+) {
     AdaptiveContent(modifier = modifier) {
         val adaptiveInfo = rememberAdaptiveInfo()
         val resolvedDisplayMode = resolveAdaptiveDataDisplayMode(
@@ -132,22 +185,42 @@ public fun <T> AdaptiveDataView(
                             title = "No data available",
                             description = "Try adjusting filters or create a new record.",
                         )
-                    } else if (resolvedDisplayMode == AdaptiveDataDisplayMode.Table) {
-                        AdaptiveDataTable(
-                            items = state.items,
-                            columns = columns,
-                            breakpoint = adaptiveInfo.breakpoint,
-                            onItemClick = onItemClick,
-                            rowActions = rowActions,
-                        )
                     } else {
-                        AdaptiveDataCards(
-                            items = state.items,
-                            columns = columns,
-                            onItemClick = onItemClick,
-                            rowActions = rowActions,
-                            cardContent = cardContent,
-                        )
+                        val visibleKeys = state.items.map(rowKey)
+                        if (selectionMode != AdaptiveDataSelectionMode.None) {
+                            validateAdaptiveRowKeys(visibleKeys)
+                        }
+                        val disabledKeys = state.items.asSequence().filterNot(rowEnabled).map(rowKey).toSet()
+
+                        if (resolvedDisplayMode == AdaptiveDataDisplayMode.Table) {
+                            AdaptiveDataTable(
+                                items = state.items,
+                                rowKey = rowKey,
+                                columns = columns,
+                                breakpoint = adaptiveInfo.breakpoint,
+                                onItemClick = onItemClick,
+                                rowActions = rowActions,
+                                selectionMode = selectionMode,
+                                selectionState = selectionState,
+                                onSelectionStateChange = onSelectionStateChange,
+                                visibleKeys = visibleKeys,
+                                disabledKeys = disabledKeys,
+                            )
+                        } else {
+                            AdaptiveDataCards(
+                                items = state.items,
+                                rowKey = rowKey,
+                                columns = columns,
+                                onItemClick = onItemClick,
+                                rowActions = rowActions,
+                                cardContent = cardContent,
+                                selectionMode = selectionMode,
+                                selectionState = selectionState,
+                                onSelectionStateChange = onSelectionStateChange,
+                                visibleKeys = visibleKeys,
+                                disabledKeys = disabledKeys,
+                            )
+                        }
                     }
                 }
             }
@@ -172,13 +245,21 @@ private fun DataToolbar(
 }
 
 @Composable
-private fun <T> AdaptiveDataTable(
+private fun <T, K : Any> AdaptiveDataTable(
     items: List<T>,
+    rowKey: (T) -> K,
     columns: List<AdaptiveDataColumn<T>>,
     breakpoint: AdaptiveBreakpoint,
     onItemClick: ((T) -> Unit)?,
     rowActions: List<AdaptiveDataAction<T>>,
+    selectionMode: AdaptiveDataSelectionMode,
+    selectionState: AdaptiveDataSelectionState<K>,
+    onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
+    visibleKeys: List<K>,
+    disabledKeys: Set<K>,
 ) {
+    val includeSelection = selectionMode != AdaptiveDataSelectionMode.None
+    val visibleSelectable = visibleKeys.filter { it !in disabledKeys }
     val visibleColumns = visibleColumnsForBreakpoint(columns, breakpoint)
     val displayedColumns = if (visibleColumns.isEmpty()) columns else visibleColumns
     val includeActions = rowActions.isNotEmpty()
@@ -352,112 +433,189 @@ private fun DataDivider() {
 }
 
 @Composable
-private fun <T> AdaptiveDataCards(
+private fun <T, K : Any> AdaptiveDataCards(
     items: List<T>,
+    rowKey: (T) -> K,
     columns: List<AdaptiveDataColumn<T>>,
     onItemClick: ((T) -> Unit)?,
     rowActions: List<AdaptiveDataAction<T>>,
     cardContent: (@Composable (T) -> Unit)? = null,
+    selectionMode: AdaptiveDataSelectionMode,
+    selectionState: AdaptiveDataSelectionState<K>,
+    onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
+    visibleKeys: List<K>,
+    disabledKeys: Set<K>,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    val includeSelection = selectionMode != AdaptiveDataSelectionMode.None
+    val visibleSelectable = visibleKeys.filter { it !in disabledKeys }
+    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+    ) {
+        if (includeSelection && selectionMode == AdaptiveDataSelectionMode.Multiple) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val isAllSelected = visibleSelectable.isNotEmpty() && visibleSelectable.all { it in selectionState.selectedKeys }
+                val isSomeSelected = visibleSelectable.any { it in selectionState.selectedKeys }
+                
+                io.github.adaptivekt.components.AdaptiveCheckbox(
+                    state = when {
+                        isAllSelected -> androidx.compose.ui.state.ToggleableState.On
+                        isSomeSelected -> androidx.compose.ui.state.ToggleableState.Indeterminate
+                        else -> androidx.compose.ui.state.ToggleableState.Off
+                    },
+                    onClick = {
+                        val op: AdaptiveDataSelectionOperation<K> = if (isAllSelected) {
+                            AdaptiveDataSelectionOperation.ClearVisible
+                        } else {
+                            AdaptiveDataSelectionOperation.SelectAllVisible
+                        }
+                        onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+                    }
+                )
+                Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Medium))
+                BasicText(
+                    text = if (isSomeSelected) " selected" else "Select all",
+                    style = TextStyle(fontSize = 14.sp, color = AdaptiveTheme.colors.textMuted)
+                )
+            }
+        }
+    
         items.forEach { item ->
+            val key = rowKey(item)
+            val isSelected = selectionState.selectedKeys.contains(key)
+            val isDisabled = disabledKeys.contains(key)
+            
             AdaptiveCard(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
-                onClick = if (onItemClick != null) {
-                    { onItemClick(item) }
-                } else {
-                    null
-                },
+                onClick = if (!isDisabled && (onItemClick != null || includeSelection)) {
+                    { 
+                        if (includeSelection) {
+                            val modifiers = windowInfo.keyboardModifiers
+                            val shiftPressed = modifiers.isShiftPressed
+                            val ctrlPressed = modifiers.isCtrlPressed
+                            val metaPressed = modifiers.isMetaPressed
+                            
+                            val operation = resolveAdaptiveRowSelectionOperation(
+                                key = key,
+                                selected = isSelected,
+                                shiftPressed = shiftPressed,
+                                togglePressed = ctrlPressed || metaPressed,
+                                source = AdaptiveRowSelectionSource.Row
+                            )
+                            onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, operation, selectionMode, visibleKeys, disabledKeys))
+                        }
+                        if (onItemClick != null) onItemClick(item)
+                    }
+                } else null,
             ) {
                 if (cardContent != null) {
-                    cardContent(item)
+                    Row(verticalAlignment = Alignment.Top) {
+                        if (includeSelection) {
+                            io.github.adaptivekt.components.AdaptiveCheckbox(
+                                state = if (isSelected) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off,
+                                enabled = !isDisabled,
+                                onClick = {
+                                    val modifiers = windowInfo.keyboardModifiers
+                                    val shiftPressed = modifiers.isShiftPressed
+                                    val ctrlPressed = modifiers.isCtrlPressed
+                                    val metaPressed = modifiers.isMetaPressed
+                                    val op = resolveAdaptiveRowSelectionOperation(
+                                        key = key,
+                                        selected = isSelected,
+                                        shiftPressed = shiftPressed,
+                                        togglePressed = ctrlPressed || metaPressed,
+                                        source = AdaptiveRowSelectionSource.Checkbox
+                                    )
+                                    onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+                                },
+                                modifier = Modifier.padding(top = 4.dp, end = AdaptiveTokens.Spacing.Medium)
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            cardContent(item)
+                        }
+                    }
                 } else {
-                    DefaultMobileCardContent(
-                        columns = columns,
-                        item = item,
-                        rowActions = rowActions,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
-        }
-    }
-}
-
-@Composable
-private fun <T> DefaultMobileCardContent(
-    columns: List<AdaptiveDataColumn<T>>,
-    item: T,
-    rowActions: List<AdaptiveDataAction<T>>,
-) {
-    val resolvedColumns = resolveMobileColumns(columns)
-    val titleColumn = resolvedColumns.firstOrNull { it.role == AdaptiveDataMobileRole.Title }
-        ?: resolvedColumns.firstOrNull { it.role != AdaptiveDataMobileRole.Hidden }
-    val subtitleColumn = resolvedColumns.firstOrNull { it.role == AdaptiveDataMobileRole.Subtitle }
-    val statusColumn = resolvedColumns.firstOrNull { it.role == AdaptiveDataMobileRole.Status }
-    val mediaColumn = resolvedColumns.firstOrNull { it.role == AdaptiveDataMobileRole.Media }
-    val metadataColumns = resolvedColumns
-        .filter { it.role == AdaptiveDataMobileRole.Metadata }
-        .take(3)
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
-            verticalAlignment = Alignment.Top,
-        ) {
-            mediaColumn?.column?.let { column ->
-                Box(modifier = Modifier.padding(top = AdaptiveTokens.Spacing.XSmall)) {
-                    column.cell(item)
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = if (statusColumn != null) 112.dp else 0.dp),
-                ) {
-                    titleColumn?.column?.let { column ->
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            column.cell(item)
-                        }
-                    }
-                    subtitleColumn?.column?.let { column ->
-                        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Small))
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            column.cell(item)
-                        }
-                    }
-                }
-
-                statusColumn?.column?.let { column ->
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(start = AdaptiveTokens.Spacing.Medium),
+                    val resolvedCols = resolveMobileColumns(columns)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
                     ) {
-                        DefaultStatusBadge { column.cell(item) }
+                        if (includeSelection) {
+                            io.github.adaptivekt.components.AdaptiveCheckbox(
+                                state = if (isSelected) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off,
+                                enabled = !isDisabled,
+                                onClick = {
+                                    val modifiers = windowInfo.keyboardModifiers
+                                    val shiftPressed = modifiers.isShiftPressed
+                                    val ctrlPressed = modifiers.isCtrlPressed
+                                    val metaPressed = modifiers.isMetaPressed
+                                    val op = resolveAdaptiveRowSelectionOperation(
+                                        key = key,
+                                        selected = isSelected,
+                                        shiftPressed = shiftPressed,
+                                        togglePressed = ctrlPressed || metaPressed,
+                                        source = AdaptiveRowSelectionSource.Checkbox
+                                    )
+                                    onSelectionStateChange(resolveAdaptiveDataSelection(selectionState, op, selectionMode, visibleKeys, disabledKeys))
+                                },
+                                modifier = Modifier.padding(top = 4.dp, end = AdaptiveTokens.Spacing.Medium)
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+                        ) {
+                            val titleCol = resolvedCols.firstOrNull { it.role == AdaptiveDataMobileRole.Title }
+                            val subtitleCol = resolvedCols.firstOrNull { it.role == AdaptiveDataMobileRole.Subtitle }
+                            val statusCol = resolvedCols.firstOrNull { it.role == AdaptiveDataMobileRole.Status }
+
+                            if (titleCol != null || subtitleCol != null || statusCol != null) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        if (titleCol != null) {
+                                            Box(modifier = Modifier.heightIn(min = 20.dp)) {
+                                                titleCol.column.cell(item)
+                                            }
+                                        }
+                                        if (subtitleCol != null) {
+                                            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+                                            Box(modifier = Modifier.heightIn(min = 16.dp)) {
+                                                subtitleCol.column.cell(item)
+                                            }
+                                        }
+                                    }
+                                    if (statusCol != null) {
+                                        Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Medium))
+                                        DefaultStatusBadge {
+                                            statusCol.column.cell(item)
+                                        }
+                                    }
+                                }
+                                AdaptiveDivider(modifier = Modifier.padding(vertical = AdaptiveTokens.Spacing.Small))
+                            }
+
+                            val metaCols = resolvedCols.filter { it.role == AdaptiveDataMobileRole.Metadata }
+                            metaCols.forEach { col ->
+                                MetadataRow(column = col.column, item = item)
+                            }
+                            
+                            MobileActions(rowActions = rowActions, item = item)
+                        }
                     }
                 }
             }
         }
-
-        if (metadataColumns.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-            Column(verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
-                metadataColumns.forEach { resolved ->
-                    MetadataRow(column = resolved.column, item = item)
-                }
-            }
-        }
-
-        MobileActions(rowActions = rowActions, item = item)
     }
 }
 
