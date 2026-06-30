@@ -10,27 +10,28 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * An asynchronous, caller-owned wrapper around [AdaptiveSelect].
+ * An asynchronous, caller-owned wrapper around [AdaptiveMultiSelect].
  * 
  * Supports remote data fetching, pagination, and robust async states.
  * The `query` and network operations are controlled by the caller.
  */
 @Composable
-public fun <T> AdaptiveAsyncSelect(
+public fun <T> AdaptiveAsyncMultiSelect(
     state: AdaptiveOptionsState<T>,
     query: String,
     onQueryChange: (String) -> Unit,
-    selectedOption: T?,
-    onSelectedOptionChange: (T?) -> Unit,
+    selectedOptions: List<T>,
+    onSelectedOptionsChange: (List<T>) -> Unit,
     optionLabel: (T) -> String,
     modifier: Modifier = Modifier,
     label: String? = null,
-    placeholder: String = "Select an option",
+    placeholder: String = "Select options",
     enabled: Boolean = true,
     clearable: Boolean = true,
     isError: Boolean = false,
     supportingText: String? = null,
     maxMenuHeight: Dp = 320.dp,
+    maxVisibleChips: Int = 3,
     optionKey: ((T) -> Any)? = null,
     optionEnabled: (T) -> Boolean = { true },
     onRetry: (() -> Unit)? = null,
@@ -48,15 +49,13 @@ public fun <T> AdaptiveAsyncSelect(
 
     val items = state.currentItems
     val isHardDisabled = !enabled || (state is AdaptiveOptionsState.Error && items.isEmpty())
-    // Notice we do NOT disable the trigger just because it is Loading. 
-    // Users can open the menu and see "Loading...".
 
-    AdaptiveSelect(
+    AdaptiveMultiSelect(
         expanded = effectiveExpanded,
         onExpandedChange = setEffectiveExpanded,
         options = items,
-        selectedOption = selectedOption,
-        onSelectedOptionChange = onSelectedOptionChange,
+        selectedOptions = selectedOptions,
+        onSelectedOptionsChange = onSelectedOptionsChange,
         optionLabel = optionLabel,
         modifier = modifier,
         label = label,
@@ -69,6 +68,7 @@ public fun <T> AdaptiveAsyncSelect(
         isError = isError || state is AdaptiveOptionsState.Error,
         supportingText = supportingText,
         maxMenuHeight = maxMenuHeight,
+        maxVisibleChips = maxVisibleChips,
         optionKey = optionKey,
         optionEnabled = optionEnabled,
         emptyContent = {
