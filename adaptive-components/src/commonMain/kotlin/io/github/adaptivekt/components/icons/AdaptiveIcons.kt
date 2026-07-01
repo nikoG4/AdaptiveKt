@@ -147,19 +147,6 @@ public object AdaptiveIcons {
         }
     }
 
-    @Composable
-    public fun ClearAll(
-        modifier: Modifier = Modifier,
-        size: Dp = 16.dp,
-        tint: Color = Color(0xFF374151),
-        contentDescription: String? = null,
-    ) {
-        FunctionalIcon(modifier, size, tint, contentDescription) { side, stroke ->
-            // Simple X, similar to Close but distinct if needed, or just map to Close visual
-            drawLine(tint, Offset(side * 0.30f, side * 0.30f), Offset(side * 0.70f, side * 0.70f), stroke, StrokeCap.Round)
-            drawLine(tint, Offset(side * 0.70f, side * 0.30f), Offset(side * 0.30f, side * 0.70f), stroke, StrokeCap.Round)
-        }
-    }
 }
 
 @Suppress("UNUSED_PARAMETER")
