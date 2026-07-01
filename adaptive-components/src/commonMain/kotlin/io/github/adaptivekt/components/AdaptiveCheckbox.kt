@@ -13,6 +13,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
@@ -60,6 +63,11 @@ public fun AdaptiveCheckbox(
             .semantics {
                 if (contentDescription != null) {
                     this.contentDescription = contentDescription
+                }
+                if (onClick == null) {
+                    this.role = Role.Checkbox
+                    this.toggleableState = state
+                    if (!enabled) disabled()
                 }
             },
         contentAlignment = Alignment.Center
