@@ -53,6 +53,30 @@ class AdaptiveDataViewCompileTest {
         )
     }
 
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyBulkActionBarWithKeys() {
+        AdaptiveDataBulkActionBar(
+            selectedKeys = setOf("1"),
+            actions = emptyList(),
+            onClearSelection = {}
+        )
+    }
+
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyBulkActionBarWithScope() {
+        val scope = object : AdaptiveDataBulkActionScope<String> {
+            override val selectedKeys = setOf("1")
+            override val selectedCount = 1
+            override fun clearSelection() {}
+        }
+        AdaptiveDataBulkActionBar(
+            scope = scope,
+            actions = emptyList()
+        )
+    }
+
     @Test
     fun passesCompilation() {
         // This test solely checks if the above functions compile.

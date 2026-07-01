@@ -3,6 +3,7 @@ package io.github.adaptivekt.data
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class AdaptiveDataBulkActionBarLogicTest {
@@ -20,7 +21,6 @@ class AdaptiveDataBulkActionBarLogicTest {
         
         action.onClick(selectedKeys)
         
-        // acción recibe Set<K> completo, selected count incluye keys off-page
         assertEquals(3, executedKeys?.size)
         assertTrue(executedKeys!!.contains("off_page_key"))
     }
@@ -34,7 +34,6 @@ class AdaptiveDataBulkActionBarLogicTest {
             enabled = false,
             onClick = { executed = true }
         )
-        // Testing that the composable button would be disabled, but here we just check property.
         assertFalse(action.enabled)
     }
 
@@ -62,20 +61,63 @@ class AdaptiveDataBulkActionBarLogicTest {
     }
     
     @Test
-    fun testPrimarySecondaryOverflowCategorization() {
+    fun testBulkActionLayoutCompact() {
         val actions = listOf(
-            AdaptiveDataBulkAction<String>(id = "1", label = "P", priority = AdaptiveActionPriority.Primary, onClick = {}),
-            AdaptiveDataBulkAction<String>(id = "2", label = "S", priority = AdaptiveActionPriority.Secondary, onClick = {}),
-            AdaptiveDataBulkAction<String>(id = "3", label = "O", priority = AdaptiveActionPriority.Overflow, onClick = {})
+            AdaptiveDataBulkAction<String>(id = "p1", label = "P1", priority = AdaptiveActionPriority.Primary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "p2", label = "P2", priority = AdaptiveActionPriority.Primary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "s1", label = "S1", priority = AdaptiveActionPriority.Secondary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "o1", label = "O1", priority = AdaptiveActionPriority.Overflow, onClick = {})
         )
         
-        val primary = actions.filter { it.priority == AdaptiveActionPriority.Primary }
-        val secondary = actions.filter { it.priority == AdaptiveActionPriority.Secondary }
-        val overflow = actions.filter { it.priority == AdaptiveActionPriority.Overflow }
+        val layout = resolveAdaptiveBulkActionLayout(actions, compact = true)
         
-        assertEquals(1, primary.size)
-        assertEquals("P", primary[0].label)
-        assertEquals(1, secondary.size)
-        assertEquals(1, overflow.size)
+        assertEquals(1, layout.visiblePrimary.size)
+        assertEquals("P1", layout.visiblePrimary[0].label)
+        
+        assertEquals(0, layout.visibleSecondary.size)
+        
+        assertEquals(3, layout.overflow.size)
+        assertEquals("P2", layout.overflow[0].label)
+        assertEquals("S1", layout.overflow[1].label)
+        assertEquals("O1", layout.overflow[2].label)
+    }
+
+    @Test
+    fun testBulkActionLayoutExpanded() {
+        val actions = listOf(
+            AdaptiveDataBulkAction<String>(id = "p1", label = "P1", priority = AdaptiveActionPriority.Primary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "p2", label = "P2", priority = AdaptiveActionPriority.Primary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "s1", label = "S1", priority = AdaptiveActionPriority.Secondary, onClick = {}),
+            AdaptiveDataBulkAction<String>(id = "o1", label = "O1", priority = AdaptiveActionPriority.Overflow, onClick = {})
+        )
+        
+        val layout = resolveAdaptiveBulkActionLayout(actions, compact = false)
+        
+        assertEquals(2, layout.visiblePrimary.size)
+        assertEquals("P1", layout.visiblePrimary[0].label)
+        assertEquals("P2", layout.visiblePrimary[1].label)
+        
+        assertEquals(1, layout.visibleSecondary.size)
+        assertEquals("S1", layout.visibleSecondary[0].label)
+        
+        assertEquals(1, layout.overflow.size)
+        assertEquals("O1", layout.overflow[0].label)
+    }
+
+    @Test
+    fun testSelectAllIntentResolution() {
+        assertEquals(
+            AdaptiveDataSelectionOperation.ClearVisible,
+            resolveAdaptiveSelectAllIntent(AdaptiveSelectAllState.Checked)
+        )
+        assertEquals(
+            AdaptiveDataSelectionOperation.SelectAllVisible,
+            resolveAdaptiveSelectAllIntent(AdaptiveSelectAllState.Unchecked)
+        )
+        assertEquals(
+            AdaptiveDataSelectionOperation.SelectAllVisible,
+            resolveAdaptiveSelectAllIntent(AdaptiveSelectAllState.Indeterminate)
+        )
+        assertNull(resolveAdaptiveSelectAllIntent(AdaptiveSelectAllState.Disabled))
     }
 }
