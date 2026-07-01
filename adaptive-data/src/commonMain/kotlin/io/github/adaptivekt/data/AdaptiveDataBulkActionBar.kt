@@ -4,38 +4,94 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.*
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.LocalAdaptiveLayoutInfo
 
+internal data class AdaptiveBulkActionLayout<K : Any>(
+    val visiblePrimary: List<AdaptiveDataBulkAction<K>>,
+    val visibleSecondary: List<AdaptiveDataBulkAction<K>>,
+    val overflow: List<AdaptiveDataBulkAction<K>>
+)
+
+internal fun <K : Any> resolveAdaptiveBulkActionLayout(
+    actions: List<AdaptiveDataBulkAction<K>>,
+    compact: Boolean
+): AdaptiveBulkActionLayout<K> {
+    val primaryActions = actions.filter { it.priority == AdaptiveActionPriority.Primary }
+    val secondaryActions = actions.filter { it.priority == AdaptiveActionPriority.Secondary }
+    val overflowActions = actions.filter { it.priority == AdaptiveActionPriority.Overflow }
+
+    return if (compact) {
+        val firstPrimary = primaryActions.take(1)
+        val overflowPrimary = primaryActions.drop(1)
+        AdaptiveBulkActionLayout(
+            visiblePrimary = firstPrimary,
+            visibleSecondary = emptyList(),
+            overflow = overflowPrimary + secondaryActions + overflowActions
+        )
+    } else {
+        AdaptiveBulkActionLayout(
+            visiblePrimary = primaryActions,
+            visibleSecondary = secondaryActions,
+            overflow = overflowActions
+        )
+    }
+}
+
+@Composable
+public fun <K : Any> AdaptiveDataBulkActionBar(
+    selectedKeys: Set<K>,
+    actions: List<AdaptiveDataBulkAction<K>>,
+    onClearSelection: () -> Unit,
+    modifier: Modifier = Modifier,
+    selectedCountLabel: (Int) -> String = { count -> "$count selected" },
+) {
+    val scope = remember(selectedKeys, onClearSelection) {
+        object : AdaptiveDataBulkActionScope<K> {
+            override val selectedKeys: Set<K> = selectedKeys
+            override val selectedCount: Int = selectedKeys.size
+            override fun clearSelection() = onClearSelection()
+        }
+    }
+
+    AdaptiveDataBulkActionBar(
+        scope = scope,
+        actions = actions,
+        modifier = modifier,
+        selectedCountLabel = selectedCountLabel,
+    )
+}
+
 @Composable
 public fun <K : Any> AdaptiveDataBulkActionBar(
     scope: AdaptiveDataBulkActionScope<K>,
     actions: List<AdaptiveDataBulkAction<K>>,
     modifier: Modifier = Modifier,
+    selectedCountLabel: (Int) -> String = { count -> "$count selected" },
 ) {
     if (scope.selectedCount == 0) return
 
     val isCompact = LocalAdaptiveLayoutInfo.current.isCompact
-    
-    val primaryActions = actions.filter { it.priority == AdaptiveActionPriority.Primary }
-    val secondaryActions = actions.filter { it.priority == AdaptiveActionPriority.Secondary }
-    val overflowActions = actions.filter { it.priority == AdaptiveActionPriority.Overflow }
+    val layout = resolveAdaptiveBulkActionLayout(actions, isCompact)
 
-    val visiblePrimary = primaryActions
-    val visibleSecondary = if (isCompact) emptyList() else secondaryActions
-    val allOverflow = (if (isCompact) secondaryActions else emptyList()) + overflowActions
+    val clearSelectionContentDescription = "Clear selection"
+    val overflowContentDescription = "More bulk actions"
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(AdaptiveTheme.colors.surfaceMuted, androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+            .background(AdaptiveTheme.colors.surfaceMuted, AdaptiveTheme.shapes.small)
             .padding(
                 horizontal = AdaptiveTokens.Spacing.Medium,
                 vertical = AdaptiveTokens.Spacing.Small
@@ -49,14 +105,17 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
         ) {
             AdaptiveIconButton(
                 onClick = { scope.clearSelection() },
-                content = { AdaptiveIcons.ClearAll() }
+                modifier = Modifier.semantics {
+                    this.contentDescription = clearSelectionContentDescription
+                },
+                content = { AdaptiveIcons.Close() }
             )
-            
+
             BasicText(
-                text = "${scope.selectedCount} selected",
-                style = androidx.compose.ui.text.TextStyle(
-                    fontSize = 14.sp, 
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                text = selectedCountLabel(scope.selectedCount),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
                     color = AdaptiveTheme.colors.textMuted
                 )
             )
@@ -66,7 +125,7 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)
         ) {
-            visiblePrimary.forEach { action ->
+            layout.visiblePrimary.forEach { action ->
                 AdaptiveButton(
                     text = action.label,
                     onClick = { action.onClick(scope.selectedKeys) },
@@ -74,8 +133,8 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
                     enabled = action.enabled
                 )
             }
-            
-            visibleSecondary.forEach { action ->
+
+            layout.visibleSecondary.forEach { action ->
                 AdaptiveButton(
                     text = action.label,
                     onClick = { action.onClick(scope.selectedKeys) },
@@ -84,7 +143,7 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
                 )
             }
 
-            if (allOverflow.isNotEmpty()) {
+            if (layout.overflow.isNotEmpty()) {
                 var menuExpanded by remember { mutableStateOf(false) }
                 AdaptiveAnchoredDropdownMenu(
                     expanded = menuExpanded,
@@ -92,20 +151,24 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
                     anchor = { expanded, toggle ->
                         AdaptiveIconButton(
                             onClick = toggle,
+                            modifier = Modifier.semantics {
+                                this.contentDescription = overflowContentDescription
+                            },
                             content = { AdaptiveIcons.MoreVertical() }
                         )
                     }
                 ) {
-                    allOverflow.forEach { action ->
-                        AdaptiveButton(
+                    layout.overflow.forEach { action ->
+                        AdaptiveMenuItem(
                             text = action.label,
                             onClick = {
-                                menuExpanded = false
-                                action.onClick(scope.selectedKeys)
+                                if (action.enabled) {
+                                    menuExpanded = false
+                                    action.onClick(scope.selectedKeys)
+                                }
                             },
-                            variant = if (action.destructive) AdaptiveButtonVariant.Danger else AdaptiveButtonVariant.Ghost,
-                            enabled = action.enabled,
-                            modifier = Modifier.fillMaxWidth().padding(bottom = AdaptiveTokens.Spacing.XSmall)
+                            destructive = action.destructive,
+                            modifier = if (action.enabled) Modifier else Modifier.alpha(0.5f)
                         )
                     }
                 }
