@@ -33,6 +33,26 @@ class AdaptiveDataViewCompileTest {
         )
     }
 
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyNewSelectionOverloadWithBulkActionSlot() {
+        AdaptiveDataView(
+            state = dummyState,
+            rowKey = { it },
+            columns = emptyList(),
+            selectionMode = AdaptiveDataSelectionMode.Multiple,
+            selectionState = AdaptiveDataSelectionState(setOf("A"), null),
+            onSelectionStateChange = {},
+            rowEnabled = { true },
+            rowClickBehavior = AdaptiveDataRowClickBehavior.SelectAndActivate,
+            bulkActionContent = {
+                val keys = selectedKeys
+                val count = selectedCount
+                clearSelection()
+            }
+        )
+    }
+
     @Test
     fun passesCompilation() {
         // This test solely checks if the above functions compile.
