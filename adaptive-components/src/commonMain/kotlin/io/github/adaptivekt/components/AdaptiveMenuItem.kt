@@ -22,6 +22,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.disabled
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
@@ -33,11 +36,13 @@ public fun AdaptiveMenuItem(
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
     destructive: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
     val background = when {
+        !enabled -> androidx.compose.ui.graphics.Color.Transparent
         destructive && hovered -> AdaptiveTheme.colors.dangerSubtle
         destructive -> androidx.compose.ui.graphics.Color.Transparent
         hovered -> AdaptiveComponentDefaults.SurfaceSubtle
@@ -50,14 +55,18 @@ public fun AdaptiveMenuItem(
             .fillMaxWidth()
             .clip(shape)
             .background(background, shape)
-            .hoverable(interactionSource = interactionSource)
-            .adaptiveInteractiveCursor()
-            .clickable(
+            .then(if (enabled) Modifier.hoverable(interactionSource = interactionSource) else Modifier)
+            .then(if (enabled) Modifier.adaptiveInteractiveCursor() else Modifier)
+            .then(if (enabled) Modifier.clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick,
-            )
-            .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
+            ) else Modifier)
+            .semantics { 
+                if (!enabled) disabled() 
+            }
+            .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small)
+            .then(if (!enabled) Modifier.alpha(0.5f) else Modifier),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
