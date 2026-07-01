@@ -15,7 +15,7 @@ internal fun <K : Any> AdaptiveDataSelectAllCheckbox(
     selectionMode: AdaptiveDataSelectionMode,
     onSelectionStateChange: (AdaptiveDataSelectionState<K>) -> Unit,
     modifier: Modifier = Modifier,
-    contentDescription: String = "Select all visible rows",
+    contentDescription: (AdaptiveSelectAllState) -> String = { resolveAdaptiveSelectAllContentDescription(it) },
 ) {
     val state = if (selectionMode == AdaptiveDataSelectionMode.Multiple) {
         resolveAdaptiveSelectAllState(
@@ -42,7 +42,7 @@ internal fun <K : Any> AdaptiveDataSelectAllCheckbox(
             }
         },
         modifier = modifier.semantics {
-            this.contentDescription = contentDescription
+            this.contentDescription = contentDescription(state)
         }
     )
 }
@@ -52,5 +52,13 @@ internal fun resolveAdaptiveSelectAllIntent(state: AdaptiveSelectAllState): Adap
         AdaptiveSelectAllState.Checked -> AdaptiveDataSelectionOperation.ClearVisible
         AdaptiveSelectAllState.Indeterminate, AdaptiveSelectAllState.Unchecked -> AdaptiveDataSelectionOperation.SelectAllVisible
         AdaptiveSelectAllState.Disabled -> null
+    }
+}
+
+internal fun resolveAdaptiveSelectAllContentDescription(state: AdaptiveSelectAllState): String {
+    return when (state) {
+        AdaptiveSelectAllState.Checked -> "Clear visible row selection"
+        AdaptiveSelectAllState.Indeterminate, AdaptiveSelectAllState.Unchecked -> "Select all visible rows"
+        AdaptiveSelectAllState.Disabled -> "No selectable rows"
     }
 }

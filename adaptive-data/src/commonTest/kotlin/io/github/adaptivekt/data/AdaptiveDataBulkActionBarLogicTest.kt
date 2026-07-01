@@ -120,4 +120,24 @@ class AdaptiveDataBulkActionBarLogicTest {
         )
         assertNull(resolveAdaptiveSelectAllIntent(AdaptiveSelectAllState.Disabled))
     }
+
+    @Test
+    fun testSelectAllContentDescriptionResolution() {
+        assertEquals(
+            "Clear visible row selection",
+            resolveAdaptiveSelectAllContentDescription(AdaptiveSelectAllState.Checked)
+        )
+        assertEquals(
+            "Select all visible rows",
+            resolveAdaptiveSelectAllContentDescription(AdaptiveSelectAllState.Unchecked)
+        )
+        assertEquals(
+            "Select all visible rows",
+            resolveAdaptiveSelectAllContentDescription(AdaptiveSelectAllState.Indeterminate)
+        )
+        assertEquals(
+            "No selectable rows",
+            resolveAdaptiveSelectAllContentDescription(AdaptiveSelectAllState.Disabled)
+        )
+    }
 }

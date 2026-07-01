@@ -309,7 +309,7 @@ private fun <T, K : Any> AdaptiveDataTable(
                 isHeader = true,
                 includeActions = includeActions,
                 includeSelection = includeSelection,
-                headerSelectionSlot = if (includeSelection) {
+                headerSelectionSlot = if (includeSelection && selectionMode == AdaptiveDataSelectionMode.Multiple) {
                     {
                         AdaptiveDataSelectAllCheckbox(
                             selectionState = selectionState,

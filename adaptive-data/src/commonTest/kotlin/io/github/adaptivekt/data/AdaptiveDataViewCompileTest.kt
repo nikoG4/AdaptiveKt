@@ -77,6 +77,45 @@ class AdaptiveDataViewCompileTest {
         )
     }
 
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyNewSelectionOverloadSingleMode() {
+        AdaptiveDataView(
+            state = dummyState,
+            rowKey = { it },
+            columns = emptyList(),
+            selectionMode = AdaptiveDataSelectionMode.Single,
+            selectionState = AdaptiveDataSelectionState(emptySet(), null),
+            onSelectionStateChange = {},
+        )
+    }
+
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyBulkActionBarWithCustomDescriptions() {
+        AdaptiveDataBulkActionBar(
+            selectedKeys = setOf("1"),
+            actions = emptyList(),
+            onClearSelection = {},
+            clearSelectionContentDescription = "Limpiar todo",
+            overflowContentDescription = "Más opciones"
+        )
+    }
+
+    @Suppress("UNUSED")
+    @Composable
+    fun verifyAdaptiveMenuItemSignatures() {
+        io.github.adaptivekt.components.AdaptiveMenuItem(
+            text = "Menu 1",
+            onClick = {},
+        )
+        io.github.adaptivekt.components.AdaptiveMenuItem(
+            text = "Menu 2",
+            onClick = {},
+            enabled = false
+        )
+    }
+
     @Test
     fun passesCompilation() {
         // This test solely checks if the above functions compile.

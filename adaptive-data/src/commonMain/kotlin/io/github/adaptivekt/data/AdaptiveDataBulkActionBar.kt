@@ -56,6 +56,8 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
     onClearSelection: () -> Unit,
     modifier: Modifier = Modifier,
     selectedCountLabel: (Int) -> String = { count -> "$count selected" },
+    clearSelectionContentDescription: String = "Clear selection",
+    overflowContentDescription: String = "More bulk actions",
 ) {
     val scope = remember(selectedKeys, onClearSelection) {
         object : AdaptiveDataBulkActionScope<K> {
@@ -70,6 +72,8 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
         actions = actions,
         modifier = modifier,
         selectedCountLabel = selectedCountLabel,
+        clearSelectionContentDescription = clearSelectionContentDescription,
+        overflowContentDescription = overflowContentDescription,
     )
 }
 
@@ -79,14 +83,13 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
     actions: List<AdaptiveDataBulkAction<K>>,
     modifier: Modifier = Modifier,
     selectedCountLabel: (Int) -> String = { count -> "$count selected" },
+    clearSelectionContentDescription: String = "Clear selection",
+    overflowContentDescription: String = "More bulk actions",
 ) {
     if (scope.selectedCount == 0) return
 
     val isCompact = LocalAdaptiveLayoutInfo.current.isCompact
     val layout = resolveAdaptiveBulkActionLayout(actions, isCompact)
-
-    val clearSelectionContentDescription = "Clear selection"
-    val overflowContentDescription = "More bulk actions"
 
     Row(
         modifier = modifier
@@ -162,13 +165,11 @@ public fun <K : Any> AdaptiveDataBulkActionBar(
                         AdaptiveMenuItem(
                             text = action.label,
                             onClick = {
-                                if (action.enabled) {
-                                    menuExpanded = false
-                                    action.onClick(scope.selectedKeys)
-                                }
+                                menuExpanded = false
+                                action.onClick(scope.selectedKeys)
                             },
                             destructive = action.destructive,
-                            modifier = if (action.enabled) Modifier else Modifier.alpha(0.5f)
+                            enabled = action.enabled
                         )
                     }
                 }
