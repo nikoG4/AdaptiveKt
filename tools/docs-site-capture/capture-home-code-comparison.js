@@ -90,55 +90,8 @@ async function capture() {
   let globalPageErrors = 0;
   let globalFailedRequests = 0;
   let globalOverflowFailures = 0;
-  const globalConsoleErrorDetails = [];
 
   const metrics = getKotlinMetrics();
-
-  async function waitForComposeLayoutStable(page, timeoutMs = 30000, sampleIntervalMs = 250, requiredStableSamples = 4) {
-      let stableSamples = 0;
-      let lastState = null;
-      const startTime = Date.now();
-
-      while (Date.now() - startTime < timeoutMs) {
-          try {
-              const currentState = await page.evaluate(() => {
-                  const canvas = document.querySelector('#webApp canvas');
-                  if (!canvas) return null;
-                  const rect = canvas.getBoundingClientRect();
-                  if (rect.width === 0 || rect.height === 0) return null;
-                  return {
-                      scrollWidth: document.documentElement.scrollWidth,
-                      scrollHeight: document.documentElement.scrollHeight,
-                      canvasWidth: rect.width,
-                      canvasHeight: rect.height,
-                  };
-              });
-
-              if (currentState) {
-                  if (lastState && 
-                      lastState.scrollWidth === currentState.scrollWidth &&
-                      lastState.scrollHeight === currentState.scrollHeight &&
-                      lastState.canvasWidth === currentState.canvasWidth &&
-                      lastState.canvasHeight === currentState.canvasHeight) {
-                      stableSamples++;
-                      if (stableSamples >= requiredStableSamples) {
-                          return true;
-                      }
-                  } else {
-                      stableSamples = 0;
-                      lastState = currentState;
-                  }
-              } else {
-                  stableSamples = 0;
-                  lastState = null;
-              }
-          } catch (e) {
-              stableSamples = 0;
-          }
-          await page.waitForTimeout(sampleIntervalMs);
-      }
-      throw new Error(`Compose layout did not stabilize within ${timeoutMs}ms.`);
-  }
 
   for (const theme of themes) {
     for (const viewport of viewports) {
@@ -154,14 +107,6 @@ async function capture() {
       page.on('console', message => {
         if (message.type() === 'error') {
           consoleMessages++;
-          globalConsoleErrorDetails.push({
-              viewport: viewport.name,
-              theme: theme.name,
-              url: page.url(),
-              type: message.type(),
-              text: message.text(),
-              timestamp: new Date().toISOString()
-          });
         }
       });
       page.on('requestfailed', request => {
@@ -186,8 +131,7 @@ async function capture() {
         }
 
         await page.waitForSelector('#webApp canvas', { timeout: 30000 });
-        await waitForComposeLayoutStable(page);
-        await page.waitForTimeout(500); // Brief pause for animations
+        await page.waitForTimeout(3000); // Allow Compose to settle
 
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
         if (overflow) {
@@ -215,34 +159,95 @@ async function capture() {
         const baseHash = getFileHash(basePath);
 
         if (!isSideBySide) {
-            console.log("Wasm Canvas a11y DOM not exposed. Skipping keyboard tab interactions to avoid unintended navigation.");
-            
+            // Tabbed layout
+            for (let i = 0; i < 5; i++) {
+                await page.keyboard.press('Tab');
+                await page.waitForTimeout(200);
+            }
+            await page.keyboard.press('Enter'); // Select Plain Compose Tab
+            await page.waitForTimeout(1000);
+
             const file = `${viewport.name}-${theme.name}-plain-compose.png`;
             const filePath = path.join(outputDir, file);
             await page.screenshot({ path: filePath, fullPage: true });
             results.push({ viewport: viewport.name, theme: theme.name, state: 'plain-compose', file });
+            const composeHash = getFileHash(filePath);
+
+            if (composeHash === baseHash) {
+                throw new Error("Interaction failed: Plain Compose panel screenshot identical to AdaptiveKt base screenshot.");
+            }
+
+            // Expand
+            await page.keyboard.press('Tab');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Tab');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(1000);
 
             const fileExp = `${viewport.name}-${theme.name}-expanded.png`;
             const fileExpPath = path.join(outputDir, fileExp);
             await page.screenshot({ path: fileExpPath, fullPage: true });
             results.push({ viewport: viewport.name, theme: theme.name, state: 'expanded', file: fileExp });
+            const expHash = getFileHash(fileExpPath);
+
+            if (expHash === composeHash) {
+                throw new Error("Interaction failed: Expanded screenshot identical to collapsed screenshot.");
+            }
+
+            // Methodology
+            // Let's reset page and use methodology toggle
+            await page.goto(url, { waitUntil: 'networkidle' });
+            await page.waitForSelector('#webApp canvas', { timeout: 30000 });
+            await page.waitForTimeout(3000);
+            await page.locator('#webApp canvas').click({ position: { x: 10, y: 10 } });
+            for (let i = 0; i < 6; i++) {
+                await page.keyboard.press('Tab');
+                await page.waitForTimeout(200);
+            }
+            await page.keyboard.press('Enter'); // Methodology Toggle
+            await page.waitForTimeout(1000);
 
             const fileMeth = `${viewport.name}-${theme.name}-methodology.png`;
             const methPath = path.join(outputDir, fileMeth);
             await page.screenshot({ path: methPath, fullPage: true });
             results.push({ viewport: viewport.name, theme: theme.name, state: 'methodology', file: fileMeth });
+            const methHash = getFileHash(methPath);
+            if (methHash === baseHash) {
+                throw new Error("Interaction failed: Methodology expanded screenshot identical to base.");
+            }
+
         } else {
-            console.log("Wasm Canvas a11y DOM not exposed. Skipping keyboard tab interactions to avoid unintended navigation.");
+            // SideBySide layout
+            for (let i = 0; i < 5; i++) {
+                await page.keyboard.press('Tab');
+                await page.waitForTimeout(200);
+            }
+            await page.keyboard.press('Enter'); // Expand AdaptiveKt
+            await page.waitForTimeout(1000);
 
             const fileExpAd = `${viewport.name}-${theme.name}-expanded-adaptive.png`;
             const adPath = path.join(outputDir, fileExpAd);
             await page.screenshot({ path: adPath, fullPage: true });
             results.push({ viewport: viewport.name, theme: theme.name, state: 'expanded-adaptive', file: fileExpAd });
+            const adHash = getFileHash(adPath);
+            if (adHash === baseHash) {
+                throw new Error("Interaction failed: Expanded AdaptiveKt screenshot identical to base.");
+            }
+
+            await page.keyboard.press('Tab');
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Enter'); // Expand Plain Compose
+            await page.waitForTimeout(1000);
 
             const fileExpCo = `${viewport.name}-${theme.name}-expanded-compose.png`;
             const coPath = path.join(outputDir, fileExpCo);
             await page.screenshot({ path: coPath, fullPage: true });
             results.push({ viewport: viewport.name, theme: theme.name, state: 'expanded-compose', file: fileExpCo });
+            const coHash = getFileHash(coPath);
+            if (coHash === adHash) {
+                throw new Error("Interaction failed: Expanded Plain Compose screenshot identical to Expanded AdaptiveKt.");
+            }
         }
 
         globalConsoleErrors += consoleMessages;
@@ -282,12 +287,11 @@ async function capture() {
     pageErrors: globalPageErrors,
     failedRequests: globalFailedRequests,
     horizontalOverflowFailures: globalOverflowFailures,
-    ignoredRequests: ignoredRequests,
-    consoleErrorDetails: globalConsoleErrorDetails
+    ignoredRequests: ignoredRequests
   };
 
   fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(path.join(outputDir, 'validation.log'), `Validation finished at ${new Date().toISOString()}\nErrors: ${globalConsoleErrors}\nPage Errors: ${globalPageErrors}\nNetwork Failures: ${globalFailedRequests}\nOverflows: ${globalOverflowFailures}\n\nConsole Errors:\n${JSON.stringify(globalConsoleErrorDetails, null, 2)}`);
+  fs.writeFileSync(path.join(outputDir, 'validation.log'), `Validation finished at ${new Date().toISOString()}\nErrors: ${globalConsoleErrors}\nPage Errors: ${globalPageErrors}\nNetwork Failures: ${globalFailedRequests}\nOverflows: ${globalOverflowFailures}`);
 
   if (globalConsoleErrors > 0 || globalPageErrors > 0 || globalFailedRequests > 0 || globalOverflowFailures > 0) {
       console.error("Validation failed due to errors or overflow");
