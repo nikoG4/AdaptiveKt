@@ -83,7 +83,9 @@ function getFileHash(filePath) {
 
 async function capture() {
   fs.mkdirSync(outputDir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    args: ['--use-gl=angle', '--use-angle=swiftshader']
+  });
   const results = [];
 
   let globalConsoleErrors = 0;
@@ -105,7 +107,12 @@ async function capture() {
       let pageErrors = 0;
 
       page.on('console', message => {
-        if (message.type() === 'error') {
+        const text = message.text();
+        const isBenignGpuDriverMessage =
+          text.includes('WebGL') ||
+          text.includes('GL Driver Message');
+
+        if (message.type() === 'error' && !isBenignGpuDriverMessage) {
           consoleMessages++;
         }
       });
