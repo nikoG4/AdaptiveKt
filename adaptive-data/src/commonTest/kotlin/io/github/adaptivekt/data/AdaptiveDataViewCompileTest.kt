@@ -116,6 +116,25 @@ class AdaptiveDataViewCompileTest {
         )
     }
 
+    private fun compileColumnStateTypes() {
+        val sort = AdaptiveDataSortState().toggleColumnSort(
+            columnId = "name",
+            sortableColumnIds = setOf("name", "status"),
+        )
+
+        val querySort = sort.toQuerySort()
+
+        val columns = normalizeAdaptiveDataColumnConfigState(
+            listOf(
+                AdaptiveColumnConfig("name"),
+                AdaptiveColumnConfig("status"),
+            )
+        ).setColumnPin("name", AdaptiveColumnPin.Start)
+
+        check(querySort.first == "name")
+        check(columns.columns.isNotEmpty())
+    }
+
     @Test
     fun passesCompilation() {
         // This test solely checks if the above functions compile.
