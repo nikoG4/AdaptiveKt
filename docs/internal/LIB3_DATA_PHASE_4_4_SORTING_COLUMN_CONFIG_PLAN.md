@@ -331,6 +331,24 @@ No hay Step 2-5 en esta rama; esta rama solo entrega Step 1 con el plan.
 
 ---
 
+## Implementation spike status
+
+- Initial Kimi implementation (`spike/data-column-state-impl-kimi`) added pure sort and column config state with helpers and tests; compiled and passed `:adaptive-data:jvmTest`, `:adaptive-data:wasmJsTest` and `:adaptive-data:build`.
+- GLM audit found hardening items `I1`–`I6` plus minor `M3` (compile fixture not executed).
+- Hardening branch `spike/data-column-state-hardening-glm` (based on the Kimi spike) addresses:
+  - **sort state invariants** — `AdaptiveDataSortState` now enforces max `MAX_RANK` columns, unique column ids and unique priorities via `init { require(...) }`; `AdaptiveSortPriority` exposes `MAX_RANK` and `fromIndex(index)` with no `Primary` fallback for invalid indices;
+  - **Secondary/Tertiary toggle behavior** — `toggleColumnSort` now preserves the column's relative position and priority when flipping `Ascending` to `Descending`; promotion to `Primary` is delegated to the separate `promoteColumnSort` helper, matching the plan;
+  - **hidden pin normalization** — `normalizeAdaptiveDataColumnConfigState` now clears pins from hidden columns and resolves `Start`/`End` only among visible columns, so hidden columns never consume or steal a pin slot;
+  - **pin winner by visible order** — when multiple visible columns share a `Start` (or `End`) pin, the one with the lowest `order` wins, regardless of input list order;
+  - **query integration helpers** — added `resolveEffectiveSortState`, `resolveQuerySortFromState`, `resolveSortStateFromQuery`, `AdaptiveQueryState.toSortState` and `AdaptiveQueryState.withSortState`, all using explicit `Pair(...)` to avoid the `to`/`?:` precedence bug;
+  - **accessors** — `AdaptiveDataSortState` exposes `primarySort`, `secondarySort`, `tertiarySort`, `isSorted`; `AdaptiveDataColumnConfigState` exposes `visibleColumns`, `hiddenColumns`, `visibleColumnIds`, `hiddenColumnIds` and `getConfig(columnId)`;
+  - **compile fixture execution** — `compileColumnStateTypes` is now invoked from `passesCompilation()` and exercises the new helpers (`setColumnSortDirection`, `reorderSortPriority`, `resolveQuerySortFromState`, `toSortState`, `withSortState`, `setColumnWidth`, `resetAdaptiveDataColumnConfigState`, etc.).
+- Additional helpers added: `setColumnSortDirection`, `reorderSortPriority`, `setColumnWidth`, `resetAdaptiveDataColumnConfigState`, plus the `width: Int?` property on `AdaptiveColumnConfig` (additive, last position).
+- UI remains a **non-goal** for this step.
+- PR #17 (`feat/production-data-workflows`) remains untouched; no merge, rebase or force push was performed.
+
+---
+
 ## Cierre
 
 Entregable de esta rama: este documento. Implementación y tests viven en ramas futuras derivadas de este plan.
