@@ -87,13 +87,42 @@ async function capture() {
     args: ['--use-gl=angle', '--use-angle=swiftshader']
   });
   const results = [];
+  const consoleErrorDetails = [];
+  const pageErrorDetails = [];
+  const failedRequestDetails = [];
 
   let globalConsoleErrors = 0;
   let globalPageErrors = 0;
   let globalFailedRequests = 0;
   let globalOverflowFailures = 0;
+  let globalIgnoredConsoleErrors = 0;
 
   const metrics = getKotlinMetrics();
+
+  const benignConsoleErrorPatterns = [
+    { pattern: 'WebGL', reason: 'Chromium WebGL GPU driver message' },
+    { pattern: 'GL Driver Message', reason: 'Chromium GL driver diagnostic' },
+    { pattern: 'GPU memory manager', reason: 'Chromium GPU memory manager diagnostic' },
+    { pattern: 'swiftshader', reason: 'SwiftShader software renderer diagnostic' },
+    { pattern: 'Failed to download hardware adapter', reason: 'Chromium hardware adapter probe in CI headless' },
+    { pattern: 'ResizeObserver loop', reason: 'Benign ResizeObserver loop warning from Compose Wasm layout' },
+    { pattern: 'ResizeObserver Loop', reason: 'Benign ResizeObserver loop warning from Compose Wasm layout' },
+    { pattern: 'downloadable font', reason: 'Chromium font loading diagnostic in headless' },
+    { pattern: 'Font', reason: 'Chromium font loading diagnostic in headless' },
+    { pattern: 'gfx', reason: 'Chromium graphics backend diagnostic' },
+    { pattern: 'GpuChannelHost', reason: 'Chromium GPU channel host diagnostic in headless' },
+    { pattern: 'gl_initialize', reason: 'Chromium GL initialization diagnostic in headless' },
+    { pattern: 'Failed to create GLES2', reason: 'Chromium GLES2 context creation failure in SwiftShader headless' },
+    { pattern: 'vulkan', reason: 'Chromium Vulkan backend diagnostic in headless' },
+    { pattern: 'Vulkan', reason: 'Chromium Vulkan backend diagnostic in headless' },
+    { pattern: 'Dawn', reason: 'Chromium Dawn WebGPU backend diagnostic in headless' },
+    { pattern: 'Skia', reason: 'Skia renderer diagnostic in headless' },
+    { pattern: 'Out of process', reason: 'Chromium out-of-process rasterization diagnostic' },
+  ];
+
+  function isBenignConsoleError(text) {
+    return benignConsoleErrorPatterns.find(bp => text.includes(bp.pattern));
+  }
 
   for (const theme of themes) {
     for (const viewport of viewports) {
@@ -108,24 +137,47 @@ async function capture() {
 
       page.on('console', message => {
         const text = message.text();
-        const isBenignGpuDriverMessage =
-          text.includes('WebGL') ||
-          text.includes('GL Driver Message');
-
-        if (message.type() === 'error' && !isBenignGpuDriverMessage) {
-          consoleMessages++;
+        const type = message.type();
+        if (type === 'error') {
+          const benign = isBenignConsoleError(text);
+          if (benign) {
+            globalIgnoredConsoleErrors++;
+          } else {
+            consoleMessages++;
+            consoleErrorDetails.push({
+              viewport: viewport.name,
+              theme: theme.name,
+              type: type,
+              text: text
+            });
+            console.error(`[console.error] (${viewport.name}/${theme.name}): ${text}`);
+          }
         }
       });
       page.on('requestfailed', request => {
         const url = request.url();
+        const errorText = request.failure()?.errorText || 'unknown';
         const isIgnored = ignoredRequests.some(ir => url.includes(ir.url));
         if (!isIgnored) {
-          console.error(`Failed request: ${url} - ${request.failure()?.errorText}`);
+          console.error(`Failed request: ${url} - ${errorText}`);
           requestFailures++;
+          failedRequestDetails.push({
+            viewport: viewport.name,
+            theme: theme.name,
+            url: url,
+            error: errorText
+          });
         }
       });
       page.on('pageerror', error => {
         pageErrors++;
+        pageErrorDetails.push({
+          viewport: viewport.name,
+          theme: theme.name,
+          message: error.message,
+          stack: error.stack ? error.stack.split('\n').slice(0, 3).join('\n') : undefined
+        });
+        console.error(`[pageerror] (${viewport.name}/${theme.name}): ${error.message}`);
       });
 
       const url = `${baseUrl}/${theme.query}`;
@@ -291,17 +343,70 @@ async function capture() {
     sectionLayoutBreakpointDp: 960,
     screenshots: results,
     consoleErrors: globalConsoleErrors,
+    consoleErrorDetails: consoleErrorDetails,
+    ignoredConsoleErrors: globalIgnoredConsoleErrors,
+    benignConsoleErrorPatterns: benignConsoleErrorPatterns.map(bp => ({ pattern: bp.pattern, reason: bp.reason })),
     pageErrors: globalPageErrors,
+    pageErrorDetails: pageErrorDetails,
     failedRequests: globalFailedRequests,
+    failedRequestDetails: failedRequestDetails,
     horizontalOverflowFailures: globalOverflowFailures,
     ignoredRequests: ignoredRequests
   };
 
   fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(path.join(outputDir, 'validation.log'), `Validation finished at ${new Date().toISOString()}\nErrors: ${globalConsoleErrors}\nPage Errors: ${globalPageErrors}\nNetwork Failures: ${globalFailedRequests}\nOverflows: ${globalOverflowFailures}`);
+
+  const validationLines = [
+    `Validation finished at ${new Date().toISOString()}`,
+    `Errors: ${globalConsoleErrors}`,
+    `Ignored benign console errors: ${globalIgnoredConsoleErrors}`,
+    `Page Errors: ${globalPageErrors}`,
+    `Network Failures: ${globalFailedRequests}`,
+    `Overflows: ${globalOverflowFailures}`,
+    ''
+  ];
+
+  if (consoleErrorDetails.length > 0) {
+    validationLines.push('--- Console errors (unclassified) ---');
+    for (const e of consoleErrorDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}] (${e.type}): ${e.text}`);
+    }
+    validationLines.push('');
+  }
+
+  if (pageErrorDetails.length > 0) {
+    validationLines.push('--- Page errors ---');
+    for (const e of pageErrorDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}] ${e.message}`);
+      if (e.stack) validationLines.push(`  ${e.stack}`);
+    }
+    validationLines.push('');
+  }
+
+  if (failedRequestDetails.length > 0) {
+    validationLines.push('--- Failed requests ---');
+    for (const e of failedRequestDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}] ${e.url} - ${e.error}`);
+    }
+    validationLines.push('');
+  }
+
+  if (globalIgnoredConsoleErrors > 0) {
+    validationLines.push(`--- Ignored benign console errors (${globalIgnoredConsoleErrors} total) ---`);
+    validationLines.push(`Patterns: ${benignConsoleErrorPatterns.map(bp => bp.pattern).join(', ')}`);
+    validationLines.push('');
+  }
+
+  fs.writeFileSync(path.join(outputDir, 'validation.log'), validationLines.join('\n'));
 
   if (globalConsoleErrors > 0 || globalPageErrors > 0 || globalFailedRequests > 0 || globalOverflowFailures > 0) {
       console.error("Validation failed due to errors or overflow");
+      if (consoleErrorDetails.length > 0) {
+        console.error(`Unclassified console errors (${consoleErrorDetails.length}):`);
+        for (const e of consoleErrorDetails) {
+          console.error(`  [${e.viewport}/${e.theme}] ${e.text}`);
+        }
+      }
       process.exit(1);
   }
 }
