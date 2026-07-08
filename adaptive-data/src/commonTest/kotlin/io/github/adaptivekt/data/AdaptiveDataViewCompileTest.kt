@@ -117,26 +117,56 @@ class AdaptiveDataViewCompileTest {
     }
 
     private fun compileColumnStateTypes() {
-        val sort = AdaptiveDataSortState().toggleColumnSort(
-            columnId = "name",
-            sortableColumnIds = setOf("name", "status"),
-        )
-
-        val querySort = sort.toQuerySort()
-
-        val columns = normalizeAdaptiveDataColumnConfigState(
+        val config = normalizeAdaptiveDataColumnConfigState(
             listOf(
                 AdaptiveColumnConfig("name"),
                 AdaptiveColumnConfig("status"),
             )
-        ).setColumnPin("name", AdaptiveColumnPin.Start)
+        )
 
-        check(querySort.first == "name")
-        check(columns.columns.isNotEmpty())
+        val sort = AdaptiveDataSortState()
+            .toggleColumnSort(
+                columnId = "name",
+                sortableColumnIds = setOf("name", "status"),
+            )
+            .setColumnSortDirection("name", AdaptiveSortDirection.Descending)
+
+        val promoted = sort.promoteColumnSort("name")
+        val reordered = promoted.reorderSortPriority(fromIndex = 0, toIndex = 0)
+
+        val primary = reordered.primarySort
+        val sorted = reordered.isSorted
+        check(primary != null && sorted)
+
+        val querySort = reordered.toQuerySort()
+        val resolvedQuery = resolveQuerySortFromState(reordered, config)
+        check(querySort == resolvedQuery)
+
+        val queryState = AdaptiveQueryState(sortKey = "name", sortDirection = AdaptiveSortDirection.Ascending)
+        val fromQuery = queryState.toSortState(config)
+        check(fromQuery.isSorted)
+
+        val writtenBack = queryState.withSortState(reordered, config)
+        check(writtenBack.sortKey == "name")
+
+        val emptyQuery = AdaptiveQueryState().withSortState(AdaptiveDataSortState(), config)
+        check(emptyQuery.sortKey == null)
+
+        val pinned = config.setColumnPin("name", AdaptiveColumnPin.Start)
+        check(pinned.visibleColumnIds.contains("name"))
+
+        val widened = pinned.setColumnWidth("name", 200)
+        check(widened.getConfig("name")?.width == 200)
+
+        val reset = resetAdaptiveDataColumnConfigState(
+            listOf(AdaptiveColumnConfig("name"), AdaptiveColumnConfig("status"))
+        )
+        check(reset.columns.isNotEmpty())
     }
 
     @Test
     fun passesCompilation() {
+        compileColumnStateTypes()
         // This test solely checks if the above functions compile.
     }
 }
