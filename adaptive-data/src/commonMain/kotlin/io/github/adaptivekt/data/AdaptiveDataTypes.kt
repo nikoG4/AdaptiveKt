@@ -96,6 +96,21 @@ public data class AdaptiveDataAction<T>(
     val onClick: (T) -> Unit,
 )
 
+public data class AdaptiveDataBulkAction<K : Any>(
+    val id: String,
+    val label: String,
+    val priority: AdaptiveActionPriority = AdaptiveActionPriority.Secondary,
+    val destructive: Boolean = false,
+    val enabled: Boolean = true,
+    val onClick: (Set<K>) -> Unit,
+)
+
+public interface AdaptiveDataBulkActionScope<K : Any> {
+    public val selectedKeys: Set<K>
+    public val selectedCount: Int
+    public fun clearSelection()
+}
+
 /**
  * Represents a column in an adaptive data view.
  *

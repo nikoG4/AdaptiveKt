@@ -146,6 +146,7 @@ public object AdaptiveIcons {
             drawLine(tint, Offset(side * 0.42f, side * 0.68f), Offset(side * 0.75f, side * 0.32f), stroke, StrokeCap.Round)
         }
     }
+
 }
 
 @Suppress("UNUSED_PARAMETER")

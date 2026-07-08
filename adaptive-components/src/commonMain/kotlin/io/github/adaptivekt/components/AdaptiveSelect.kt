@@ -1,73 +1,33 @@
 package io.github.adaptivekt.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
-import io.github.adaptivekt.components.AdaptiveComponentDefaults
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTokens
-import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
 /**
- * Returns true if [label] contains [query] (case-insensitive). Empty [query] always matches.
- */
-public fun selectMatchesQuery(label: String, query: String): Boolean {
-    if (query.isEmpty()) return true
-    return label.contains(query, ignoreCase = true)
-}
-
-/**
- * A single-selection dropdown component styled like [AdaptiveTextField].
- *
- * Internally uses [AdaptiveAnchoredDropdownMenu] for popup positioning.
- *
- * @param options The list of options to display.
- * @param selectedOption The currently selected option, or null for no selection.
- * @param onSelectedOptionChange Called when an option is selected (null when cleared).
- * @param optionLabel Returns the display label for an option.
- * @param modifier Optional modifier.
- * @param label Optional label above the select field.
- * @param placeholder Placeholder text when nothing is selected.
- * @param enabled Whether the select is interactive.
- * @param searchable If true, a search field appears inside the dropdown.
- * @param clearable If true, a clear button appears when an option is selected.
- * @param isError If true, the field shows an error border.
- * @param supportingText Optional supporting or error text below the field.
- * @param maxMenuHeight Maximum height of the dropdown menu.
- * @param initialExpanded Whether the dropdown starts open, useful for deterministic visual capture.
- * @param optionContent Optional custom composable for each option row.
- * @param selectedContent Optional custom composable for the selected value display.
- * @param emptyContent Optional composable shown when no options/search results are available.
+ * Uncontrolled wrapper for [AdaptiveSelect].
  */
 @Composable
 public fun <T> AdaptiveSelect(
@@ -88,25 +48,133 @@ public fun <T> AdaptiveSelect(
     optionContent: (@Composable (option: T, selected: Boolean) -> Unit)? = null,
     selectedContent: (@Composable (option: T) -> Unit)? = null,
     emptyContent: (@Composable () -> Unit)? = null,
+    footerContent: (@Composable () -> Unit)? = null,
+    optionKey: ((T) -> Any)? = null,
+    optionEnabled: (T) -> Boolean = { true },
 ) {
     var expanded by remember(initialExpanded) { mutableStateOf(initialExpanded) }
-    var searchQuery by remember { mutableStateOf("") }
+    
+    AdaptiveSelect(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        options = options,
+        selectedOption = selectedOption,
+        onSelectedOptionChange = onSelectedOptionChange,
+        optionLabel = optionLabel,
+        modifier = modifier,
+        label = label,
+        placeholder = placeholder,
+        enabled = enabled,
+        searchable = searchable,
+        clearable = clearable,
+        isError = isError,
+        supportingText = supportingText,
+        maxMenuHeight = maxMenuHeight,
+        optionContent = optionContent,
+        selectedContent = selectedContent,
+        emptyContent = emptyContent,
+        footerContent = footerContent,
+        optionKey = optionKey,
+        optionEnabled = optionEnabled,
+    )
+}
 
-    val shape = AdaptiveComponentDefaults.MediumShape
-    val borderColor = when {
-        isError -> AdaptiveComponentDefaults.Danger
-        expanded -> AdaptiveComponentDefaults.Primary
-        else -> AdaptiveComponentDefaults.BorderStrong
+/**
+ * A controlled single-selection dropdown component.
+ */
+@Composable
+public fun <T> AdaptiveSelect(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    options: List<T>,
+    selectedOption: T?,
+    onSelectedOptionChange: (T?) -> Unit,
+    optionLabel: (T) -> String,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    placeholder: String = "Select an option",
+    enabled: Boolean = true,
+    searchable: Boolean = false,
+    clearable: Boolean = true,
+    isError: Boolean = false,
+    supportingText: String? = null,
+    maxMenuHeight: Dp = 320.dp,
+    optionContent: (@Composable (option: T, selected: Boolean) -> Unit)? = null,
+    selectedContent: (@Composable (option: T) -> Unit)? = null,
+    emptyContent: (@Composable () -> Unit)? = null,
+    footerContent: (@Composable () -> Unit)? = null,
+    optionKey: ((T) -> Any)? = null,
+    optionEnabled: (T) -> Boolean = { true },
+    searchQuery: String? = null,
+    onSearchQueryChange: ((String) -> Unit)? = null,
+) {
+    var internalSearchQuery by remember { mutableStateOf("") }
+    val effectiveSearchQuery = searchQuery ?: internalSearchQuery
+    val setEffectiveSearchQuery: (String) -> Unit = { 
+        if (onSearchQueryChange != null) onSearchQueryChange(it) 
+        else internalSearchQuery = it 
     }
-    val bgColor = if (enabled) AdaptiveComponentDefaults.Surface else AdaptiveComponentDefaults.DisabledSurface
+    
+    val lazyListState = rememberLazyListState()
+    val focusRequester = remember { FocusRequester() }
 
-    // When closed, reset search query
-    if (!expanded && searchQuery.isNotEmpty()) {
-        searchQuery = ""
+    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
+        if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
+            // Only filter locally if onSearchQueryChange is null (internal search)
+            options.filter { selectMatchesQuery(optionLabel(it), effectiveSearchQuery) }
+        } else {
+            options
+        }
+    }
+    
+    val keySelector: (T) -> Any = optionKey ?: { it as Any }
+    
+    // Validate keys in debug/dev ideally, but we'll do it on composition for safety
+    remember(visibleOptions) {
+        validateOptionKeys(visibleOptions, optionKey)
+    }
+
+    val disabledKeys = remember(visibleOptions, optionEnabled) {
+        visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
+    }
+    
+    var navState by remember(visibleOptions) { 
+        mutableStateOf(
+            AdaptiveOptionNavigationState<Any>(
+                disabledKeys = disabledKeys
+            )
+        ) 
+    }
+
+    // Reset state on collapse
+    LaunchedEffect(expanded) {
+        if (!expanded) {
+            setEffectiveSearchQuery("")
+            // Clear highlight so it recalculates on next open
+            navState = navState.copy(highlightedKey = null)
+        } else {
+            // When opening, initialize highlight to selected or first enabled
+            val initialHighlight = if (selectedOption != null) {
+                keySelector(selectedOption)
+            } else {
+                visibleOptions.firstOrNull(optionEnabled)?.let(keySelector)
+            }
+            navState = navState.copy(highlightedKey = initialHighlight)
+        }
+    }
+
+    // Auto-scroll to highlighted item
+    LaunchedEffect(navState.highlightedKey, expanded) {
+        val highlighted = navState.highlightedKey
+        if (expanded && highlighted != null) {
+            val index = visibleOptions.indexOfFirst { keySelector(it) == highlighted }
+            if (index >= 0) {
+                lazyListState.animateScrollToItem(index)
+            }
+        }
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Label
         if (label != null) {
             BasicText(
                 text = label,
@@ -121,59 +189,73 @@ public fun <T> AdaptiveSelect(
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
         }
 
-        // The anchor trigger + dropdown wrapper
-        AdaptiveAnchoredDropdownMenu(
+        AdaptiveAnchoredMenuBox(
             expanded = expanded,
-            onExpandedChange = { if (enabled) expanded = it },
-            enabled = enabled,
-            matchAnchorWidth = true,
-            maxHeight = maxMenuHeight,
-            anchor = { _, toggle ->
-                SelectTrigger(
-                    selectedOption = selectedOption,
-                    optionLabel = optionLabel,
-                    placeholder = placeholder,
-                    enabled = enabled,
-                    expanded = expanded,
-                    clearable = clearable,
-                    isError = isError,
-                    bgColor = bgColor,
-                    borderColor = borderColor,
-                    shape = shape,
-                    selectedContent = selectedContent,
-                    onClear = {
-                        onSelectedOptionChange(null)
-                        expanded = false
+            onDismissRequest = { 
+                onExpandedChange(false)
+                focusRequester.requestFocus()
+            },
+            items = visibleOptions,
+            itemKey = optionKey,
+            lazyListState = lazyListState,
+            policy = AdaptiveAnchoredMenuPolicy(
+                matchAnchorWidth = true,
+                maxHeight = maxMenuHeight
+            ),
+            modifier = Modifier.onPreviewKeyEvent { event ->
+                resolveAdaptiveSelectKeyboardNavigation(
+                    event = event,
+                    isExpanded = expanded,
+                    onExpand = { onExpandedChange(true) },
+                    onCollapse = { 
+                        onExpandedChange(false)
+                        focusRequester.requestFocus() 
                     },
-                    onClick = toggle,
+                    onNavigateNext = {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+                    },
+                    onNavigatePrevious = {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+                    },
+                    onNavigateFirst = {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
+                    },
+                    onNavigateLast = {
+                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
+                    },
+                    onSelectHighlighted = {
+                        val highlighted = navState.highlightedKey
+                        if (highlighted != null) {
+                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                            if (optionToSelect != null && optionEnabled(optionToSelect)) {
+                                onSelectedOptionChange(optionToSelect)
+                                onExpandedChange(false)
+                                focusRequester.requestFocus()
+                            }
+                        }
+                    },
+                    isSearchFocused = false // For now assume search is not focused natively because we aren't using a focusable input field yet
                 )
             },
-        ) {
-            // Search field at top of menu
-            if (searchable) {
-                AdaptiveSearchField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = "Search...",
-                    onClear = { searchQuery = "" },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
-            }
-
-            // Filtered options
-            val visibleOptions = if (searchable && searchQuery.isNotEmpty()) {
-                options.filter { selectMatchesQuery(optionLabel(it), searchQuery) }
-            } else {
-                options
-            }
-
-            if (visibleOptions.isEmpty()) {
+            headerContent = if (searchable) {
+                {
+                    AdaptiveSearchField(
+                        value = effectiveSearchQuery,
+                        onValueChange = setEffectiveSearchQuery,
+                        placeholder = "Search...",
+                        onClear = { setEffectiveSearchQuery("") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = AdaptiveTokens.Spacing.XSmall)
+                    )
+                }
+            } else null,
+            emptyContent = {
                 if (emptyContent != null) {
                     emptyContent()
                 } else {
                     BasicText(
-                        text = if (searchQuery.isNotEmpty()) "No results for \"$searchQuery\"" else "No options available",
+                        text = if (effectiveSearchQuery.isNotEmpty()) "No results for \"$effectiveSearchQuery\"" else "No options available",
                         style = TextStyle(
                             fontSize = 13.sp,
                             color = AdaptiveComponentDefaults.MutedText,
@@ -184,36 +266,87 @@ public fun <T> AdaptiveSelect(
                         ),
                     )
                 }
-            } else {
-                visibleOptions.forEach { option ->
-                    val isSelected = option == selectedOption
-                    if (optionContent != null) {
-                        SelectOptionWrapper(
-                            selected = isSelected,
-                            onClick = {
-                                onSelectedOptionChange(option)
-                                expanded = false
-                                searchQuery = ""
-                            },
-                        ) {
-                            optionContent(option, isSelected)
+            },
+            footerContent = footerContent,
+            anchor = {
+                AdaptiveSelectTriggerFrame(
+                    enabled = enabled,
+                    expanded = expanded,
+                    isError = isError,
+                    focusRequester = focusRequester,
+                    onClick = { if (enabled) onExpandedChange(!expanded) },
+                ) { _, _, showClearArg, chevronTint ->
+                    val showClearLocal = clearable && selectedOption != null && enabled
+                    
+                    if (selectedOption != null) {
+                        if (selectedContent != null) {
+                            selectedContent(selectedOption)
+                        } else {
+                            BasicText(
+                                text = optionLabel(selectedOption),
+                                style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
                         }
                     } else {
-                        SelectMenuItem(
-                            text = optionLabel(option),
-                            selected = isSelected,
-                            onClick = {
-                                onSelectedOptionChange(option)
-                                expanded = false
-                                searchQuery = ""
-                            },
+                        BasicText(
+                            text = placeholder,
+                            style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
+
+                    if (showClearLocal) {
+                        AdaptiveIconButton(
+                            onClick = {
+                                onSelectedOptionChange(null)
+                                onExpandedChange(false)
+                            },
+                            size = 28.dp,
+                        ) {
+                            AdaptiveIcons.Close(
+                                size = 16.dp,
+                                tint = AdaptiveComponentDefaults.MutedText,
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+
+                    AdaptiveIcons.ChevronDown(
+                        size = 16.dp,
+                        tint = chevronTint,
+                    )
                 }
-            }
+            },
+        ) { _, option ->
+            val isSelected = selectedOption != null && isOptionSame(option, selectedOption, optionKey)
+            val isHighlighted = navState.highlightedKey == keySelector(option)
+            val isEnabled = optionEnabled(option)
+            
+            AdaptiveOptionRow(
+                text = optionLabel(option),
+                selected = isSelected,
+                highlighted = isHighlighted,
+                enabled = isEnabled,
+                onClick = {
+                    if (isEnabled) {
+                        onSelectedOptionChange(option)
+                        onExpandedChange(false)
+                        focusRequester.requestFocus()
+                    }
+                },
+                customContent = if (optionContent != null) {
+                    { optionContent(option, isSelected) }
+                } else null
+            )
         }
 
-        // Supporting / error text
         if (!supportingText.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
             BasicText(
@@ -225,191 +358,6 @@ public fun <T> AdaptiveSelect(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-    }
-}
-
-@Composable
-private fun <T> SelectTrigger(
-    selectedOption: T?,
-    optionLabel: (T) -> String,
-    placeholder: String,
-    enabled: Boolean,
-    expanded: Boolean,
-    clearable: Boolean,
-    isError: Boolean,
-    bgColor: Color,
-    borderColor: Color,
-    shape: androidx.compose.ui.graphics.Shape,
-    selectedContent: (@Composable (T) -> Unit)?,
-    onClear: () -> Unit,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val hovered by interactionSource.collectIsHoveredAsState()
-    val actualBg = if (hovered && enabled && !expanded) AdaptiveComponentDefaults.SurfaceSubtle else bgColor
-    val showClear = clearable && selectedOption != null && enabled
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = AdaptiveTokens.Sizes.ButtonHeight)
-            .clip(shape)
-            .background(actualBg, shape)
-            .border(1.dp, borderColor, shape)
-            .hoverable(interactionSource)
-            .adaptiveInteractiveCursor(enabled)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick,
-            )
-            .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // Selected value or placeholder
-        if (selectedOption != null) {
-            if (selectedContent != null) {
-                selectedContent(selectedOption)
-            } else {
-                BasicText(
-                    text = optionLabel(selectedOption),
-                    style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        } else {
-            BasicText(
-                text = placeholder,
-                style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-        }
-
-        Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
-
-        // Clear button
-        if (showClear) {
-            AdaptiveIconButton(
-                onClick = onClear,
-                size = 28.dp,
-            ) {
-                AdaptiveIcons.Close(
-                    size = 16.dp,
-                    tint = AdaptiveComponentDefaults.MutedText,
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-        }
-
-        // Chevron icon
-        val chevronTint = if (enabled) AdaptiveComponentDefaults.MutedText else AdaptiveComponentDefaults.DisabledText
-        if (expanded) {
-            AdaptiveIcons.ChevronDown(
-                size = 16.dp,
-                tint = AdaptiveComponentDefaults.Primary,
-            )
-        } else {
-            AdaptiveIcons.ChevronDown(
-                size = 16.dp,
-                tint = chevronTint,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SelectMenuItem(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = AdaptiveComponentDefaults.MediumShape
-    val background = when {
-        selected -> AdaptiveComponentDefaults.PrimarySubtle
-        hovered -> AdaptiveComponentDefaults.SurfaceSubtle
-        else -> Color.Transparent
-    }
-    val textColor = if (selected) AdaptiveComponentDefaults.Primary else AdaptiveComponentDefaults.Text
-    val fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(background, shape)
-            .hoverable(interactionSource)
-            .adaptiveInteractiveCursor()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BasicText(
-            text = text,
-            style = TextStyle(
-                fontSize = 13.sp,
-                fontWeight = fontWeight,
-                color = textColor,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        if (selected) {
-            Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
-            AdaptiveIcons.Check(size = 14.dp, tint = AdaptiveComponentDefaults.Primary)
-        }
-    }
-}
-
-@Composable
-private fun SelectOptionWrapper(
-    selected: Boolean,
-    onClick: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val hovered by interactionSource.collectIsHoveredAsState()
-    val shape = AdaptiveComponentDefaults.MediumShape
-    val background = when {
-        selected -> AdaptiveComponentDefaults.PrimarySubtle
-        hovered -> AdaptiveComponentDefaults.SurfaceSubtle
-        else -> Color.Transparent
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(background, shape)
-            .hoverable(interactionSource)
-            .adaptiveInteractiveCursor()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.XSmall),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        content()
-        if (selected) {
-            Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
-            AdaptiveIcons.Check(size = 14.dp, tint = AdaptiveComponentDefaults.Primary)
         }
     }
 }
