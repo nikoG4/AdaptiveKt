@@ -22,6 +22,11 @@ if (Test-Path $manifestPath) {
         exit 1
     }
 
+    if ($manifest.httpErrors -gt 0) {
+        Write-Error "Validation failed: Found $($manifest.httpErrors) HTTP error responses"
+        exit 1
+    }
+
     if ($manifest.horizontalOverflowFailures -gt 0) {
         Write-Error "Validation failed: Found $($manifest.horizontalOverflowFailures) horizontal overflows"
         exit 1
