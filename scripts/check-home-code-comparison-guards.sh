@@ -9,6 +9,7 @@ if [ -f "$MANIFEST_PATH" ]; then
     CONSOLE_ERRORS=$(grep -o '"consoleErrors": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
     PAGE_ERRORS=$(grep -o '"pageErrors": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
     FAILED_REQUESTS=$(grep -o '"failedRequests": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
+    HTTP_ERRORS=$(grep -o '"httpErrors": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
     OVERFLOWS=$(grep -o '"horizontalOverflowFailures": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
     SAVED_LINES=$(grep -o '"savedLines": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
     REDUCTION=$(grep -o '"reductionPercent": *[0-9]*' "$MANIFEST_PATH" | awk -F: '{print $2}' | tr -d ' ' | head -n 1)
@@ -25,6 +26,11 @@ if [ -f "$MANIFEST_PATH" ]; then
 
     if [ "$FAILED_REQUESTS" -gt 0 ]; then
         echo "Validation failed: Found $FAILED_REQUESTS failed requests" >&2
+        exit 1
+    fi
+
+    if [ "$HTTP_ERRORS" -gt 0 ]; then
+        echo "Validation failed: Found $HTTP_ERRORS HTTP error responses" >&2
         exit 1
     fi
 

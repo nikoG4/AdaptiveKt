@@ -7,6 +7,16 @@ const crypto = require('crypto');
 const baseUrl = (process.argv[2] || 'http://localhost:8080').replace(/\/$/, '');
 const outputDir = process.argv[3] || 'artifacts/screenshots/home-code-comparison';
 
+let baseUrlHost = 'localhost';
+let baseUrlOrigin = baseUrl;
+try {
+  const parsed = new URL(baseUrl);
+  baseUrlHost = parsed.host;
+  baseUrlOrigin = parsed.origin;
+} catch {
+  // keep defaults
+}
+
 const viewports = [
   { name: '390x844', width: 390, height: 844 },
   { name: '600x900', width: 600, height: 900 },
@@ -26,10 +36,27 @@ const themes = [
 ];
 
 const ignoredRequests = [
-    { url: "https://github.com/nikoG4/AdaptiveKt/hovercards/citation/sidebar_partial?tree_name=main", reason: "optional external hovercard" },
-    { url: "favicon.ico", reason: "favicon" },
-    { url: "github.com", reason: "external github" }
+    { url: "https://github.com/nikoG4/AdaptiveKt/hovercards/citation/sidebar_partial?tree_name=main", reason: "optional external github hovercard" },
+    { url: "https://github.com/nikoG4/AdaptiveKt", reason: "optional external github repo resource" },
+    { url: "favicon.ico", reason: "optional external favicon" },
+    { url: "github.com", reason: "optional external github resource" }
 ];
+
+function isOwnResource(url) {
+    try {
+        const u = new URL(url);
+        return u.host === baseUrlHost || u.origin === baseUrlOrigin;
+    } catch {
+        return false;
+    }
+}
+
+function classifyResourceError(url) {
+    if (isOwnResource(url)) return { kind: 'own', ignored: false, reason: null };
+    const match = ignoredRequests.find(ir => url.includes(ir.url));
+    if (match) return { kind: 'optional-external', ignored: true, reason: match.reason };
+    return { kind: 'unknown-external', ignored: false, reason: null };
+}
 
 function countMeaningfulLines(code) {
   let inBlock = false;
@@ -90,12 +117,19 @@ async function capture() {
   const consoleErrorDetails = [];
   const pageErrorDetails = [];
   const failedRequestDetails = [];
+  const httpErrorDetails = [];
+  const ignoredHttpErrorDetails = [];
+  const ignoredFailedRequestDetails = [];
+  const ignoredConsoleResourceErrors = [];
 
   let globalConsoleErrors = 0;
   let globalPageErrors = 0;
   let globalFailedRequests = 0;
   let globalOverflowFailures = 0;
   let globalIgnoredConsoleErrors = 0;
+  let globalHttpErrors = 0;
+  let globalIgnoredHttpErrors = 0;
+  let globalIgnoredFailedRequests = 0;
 
   const metrics = getKotlinMetrics();
 
@@ -134,56 +168,121 @@ async function capture() {
       let consoleMessages = 0;
       let requestFailures = 0;
       let pageErrors = 0;
+      let currentState = 'load';
 
       page.on('console', message => {
         const text = message.text();
         const type = message.type();
-        if (type === 'error') {
-          const benign = isBenignConsoleError(text);
-          if (benign) {
+        if (type !== 'error') return;
+        const benign = isBenignConsoleError(text);
+        if (benign) {
+          globalIgnoredConsoleErrors++;
+          return;
+        }
+        const location = message.location() || {};
+        const locUrl = location.url || '';
+        const isFailedResource = /Failed to load resource/.test(text);
+        if (isFailedResource && locUrl) {
+          const cls = classifyResourceError(locUrl);
+          if (cls.ignored) {
             globalIgnoredConsoleErrors++;
-          } else {
-            consoleMessages++;
-            consoleErrorDetails.push({
+            ignoredConsoleResourceErrors.push({
               viewport: viewport.name,
               theme: theme.name,
-              type: type,
-              text: text
+              state: currentState,
+              url: locUrl,
+              text: text,
+              reason: cls.reason
             });
-            console.error(`[console.error] (${viewport.name}/${theme.name}): ${text}`);
+            console.log(`[ignored console.error] (${viewport.name}/${theme.name}/${currentState}): ${text} @ ${locUrl} [${cls.reason}]`);
+            return;
           }
+        }
+        consoleMessages++;
+        consoleErrorDetails.push({
+          viewport: viewport.name,
+          theme: theme.name,
+          state: currentState,
+          type: type,
+          text: text,
+          url: locUrl || undefined,
+          lineNumber: location.lineNumber,
+          columnNumber: location.columnNumber
+        });
+        console.error(`[console.error] (${viewport.name}/${theme.name}/${currentState}): ${text}${locUrl ? ` @ ${locUrl}` : ''}`);
+      });
+      page.on('response', response => {
+        const status = response.status();
+        if (status < 400) return;
+        const url = response.url();
+        const request = response.request();
+        const cls = classifyResourceError(url);
+        const detail = {
+          viewport: viewport.name,
+          theme: theme.name,
+          state: currentState,
+          url: url,
+          status: status,
+          statusText: response.statusText(),
+          resourceType: request.resourceType(),
+          method: request.method()
+        };
+        if (cls.ignored) {
+          globalIgnoredHttpErrors++;
+          detail.reason = cls.reason;
+          ignoredHttpErrorDetails.push(detail);
+          console.log(`[ignored http ${status}] (${viewport.name}/${theme.name}/${currentState}) ${url} [${detail.method} ${detail.resourceType}] ${detail.statusText} [${cls.reason}]`);
+        } else {
+          globalHttpErrors++;
+          httpErrorDetails.push(detail);
+          console.error(`[http ${status}] (${viewport.name}/${theme.name}/${currentState}) ${url} [${detail.method} ${detail.resourceType}] ${detail.statusText}`);
         }
       });
       page.on('requestfailed', request => {
         const url = request.url();
         const errorText = request.failure()?.errorText || 'unknown';
-        const isIgnored = ignoredRequests.some(ir => url.includes(ir.url));
-        if (!isIgnored) {
-          console.error(`Failed request: ${url} - ${errorText}`);
-          requestFailures++;
-          failedRequestDetails.push({
+        const cls = classifyResourceError(url);
+        if (cls.ignored) {
+          globalIgnoredFailedRequests++;
+          ignoredFailedRequestDetails.push({
             viewport: viewport.name,
             theme: theme.name,
+            state: currentState,
             url: url,
-            error: errorText
+            error: errorText,
+            reason: cls.reason
           });
+          console.log(`[ignored failed request] (${viewport.name}/${theme.name}/${currentState}): ${url} - ${errorText} [${cls.reason}]`);
+          return;
         }
+        console.error(`Failed request: ${url} - ${errorText} [${request.resourceType()}] (${viewport.name}/${theme.name}/${currentState})`);
+        requestFailures++;
+        failedRequestDetails.push({
+          viewport: viewport.name,
+          theme: theme.name,
+          state: currentState,
+          url: url,
+          error: errorText,
+          resourceType: request.resourceType()
+        });
       });
       page.on('pageerror', error => {
         pageErrors++;
         pageErrorDetails.push({
           viewport: viewport.name,
           theme: theme.name,
+          state: currentState,
           message: error.message,
           stack: error.stack ? error.stack.split('\n').slice(0, 3).join('\n') : undefined
         });
-        console.error(`[pageerror] (${viewport.name}/${theme.name}): ${error.message}`);
+        console.error(`[pageerror] (${viewport.name}/${theme.name}/${currentState}): ${error.message}`);
       });
 
       const url = `${baseUrl}/${theme.query}`;
       console.log(`Testing ${url} (${viewport.name}, ${theme.name})`);
 
       try {
+        currentState = 'load';
         const response = await page.goto(url, { waitUntil: 'networkidle' });
         if (!response || !response.ok()) {
           throw new Error(`HTTP status ${response ? response.status() : 'unknown'}`);
@@ -211,6 +310,7 @@ async function capture() {
 
         const isSideBySide = viewport.width >= 960;
 
+        currentState = 'base';
         const baseFile = `${viewport.name}-${theme.name}-base.png`;
         const basePath = path.join(outputDir, baseFile);
         await page.screenshot({ path: basePath, fullPage: true });
@@ -219,6 +319,7 @@ async function capture() {
 
         if (!isSideBySide) {
             // Tabbed layout
+            currentState = 'plain-compose';
             for (let i = 0; i < 5; i++) {
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(200);
@@ -237,6 +338,7 @@ async function capture() {
             }
 
             // Expand
+            currentState = 'expanded';
             await page.keyboard.press('Tab');
             await page.waitForTimeout(200);
             await page.keyboard.press('Tab');
@@ -256,6 +358,7 @@ async function capture() {
 
             // Methodology
             // Let's reset page and use methodology toggle
+            currentState = 'methodology';
             await page.goto(url, { waitUntil: 'networkidle' });
             await page.waitForSelector('#webApp canvas', { timeout: 30000 });
             await page.waitForTimeout(3000);
@@ -278,6 +381,7 @@ async function capture() {
 
         } else {
             // SideBySide layout
+            currentState = 'expanded-adaptive';
             for (let i = 0; i < 5; i++) {
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(200);
@@ -294,6 +398,7 @@ async function capture() {
                 throw new Error("Interaction failed: Expanded AdaptiveKt screenshot identical to base.");
             }
 
+            currentState = 'expanded-compose';
             await page.keyboard.press('Tab');
             await page.waitForTimeout(200);
             await page.keyboard.press('Enter'); // Expand Plain Compose
@@ -345,13 +450,25 @@ async function capture() {
     consoleErrors: globalConsoleErrors,
     consoleErrorDetails: consoleErrorDetails,
     ignoredConsoleErrors: globalIgnoredConsoleErrors,
+    ignoredConsoleResourceErrors: ignoredConsoleResourceErrors,
     benignConsoleErrorPatterns: benignConsoleErrorPatterns.map(bp => ({ pattern: bp.pattern, reason: bp.reason })),
     pageErrors: globalPageErrors,
     pageErrorDetails: pageErrorDetails,
     failedRequests: globalFailedRequests,
     failedRequestDetails: failedRequestDetails,
+    httpErrors: globalHttpErrors,
+    httpErrorDetails: httpErrorDetails,
+    ignoredHttpErrors: globalIgnoredHttpErrors,
+    ignoredHttpErrorDetails: ignoredHttpErrorDetails,
+    ignoredFailedRequests: globalIgnoredFailedRequests,
+    ignoredFailedRequestDetails: ignoredFailedRequestDetails,
     horizontalOverflowFailures: globalOverflowFailures,
-    ignoredRequests: ignoredRequests
+    ignoredRequests: ignoredRequests,
+    resourceClassification: {
+      ownOrigin: baseUrlOrigin,
+      ownHost: baseUrlHost,
+      note: 'Own-origin resources (localhost / site-dist assets) are never ignored. Only specific external patterns are ignored.'
+    }
   };
 
   fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
@@ -362,6 +479,9 @@ async function capture() {
     `Ignored benign console errors: ${globalIgnoredConsoleErrors}`,
     `Page Errors: ${globalPageErrors}`,
     `Network Failures: ${globalFailedRequests}`,
+    `HTTP Errors: ${globalHttpErrors}`,
+    `Ignored HTTP Errors: ${globalIgnoredHttpErrors}`,
+    `Ignored Failed Requests: ${globalIgnoredFailedRequests}`,
     `Overflows: ${globalOverflowFailures}`,
     ''
   ];
@@ -369,7 +489,17 @@ async function capture() {
   if (consoleErrorDetails.length > 0) {
     validationLines.push('--- Console errors (unclassified) ---');
     for (const e of consoleErrorDetails) {
-      validationLines.push(`[${e.viewport}/${e.theme}] (${e.type}): ${e.text}`);
+      const loc = e.url ? ` @ ${e.url}` : '';
+      const pos = (e.lineNumber || e.columnNumber) ? `:${e.lineNumber || 0}:${e.columnNumber || 0}` : '';
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] (${e.type}): ${e.text}${loc}${pos}`);
+    }
+    validationLines.push('');
+  }
+
+  if (httpErrorDetails.length > 0) {
+    validationLines.push('--- HTTP errors (own / unknown-external, failing) ---');
+    for (const e of httpErrorDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.method} ${e.url} -> ${e.status} ${e.statusText} [${e.resourceType}]`);
     }
     validationLines.push('');
   }
@@ -377,7 +507,7 @@ async function capture() {
   if (pageErrorDetails.length > 0) {
     validationLines.push('--- Page errors ---');
     for (const e of pageErrorDetails) {
-      validationLines.push(`[${e.viewport}/${e.theme}] ${e.message}`);
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.message}`);
       if (e.stack) validationLines.push(`  ${e.stack}`);
     }
     validationLines.push('');
@@ -386,7 +516,31 @@ async function capture() {
   if (failedRequestDetails.length > 0) {
     validationLines.push('--- Failed requests ---');
     for (const e of failedRequestDetails) {
-      validationLines.push(`[${e.viewport}/${e.theme}] ${e.url} - ${e.error}`);
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.url} - ${e.error} [${e.resourceType}]`);
+    }
+    validationLines.push('');
+  }
+
+  if (ignoredHttpErrorDetails.length > 0) {
+    validationLines.push(`--- Ignored HTTP errors (optional external, ${ignoredHttpErrorDetails.length} total) ---`);
+    for (const e of ignoredHttpErrorDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.method} ${e.url} -> ${e.status} ${e.statusText} [${e.resourceType}] (${e.reason})`);
+    }
+    validationLines.push('');
+  }
+
+  if (ignoredFailedRequestDetails.length > 0) {
+    validationLines.push(`--- Ignored failed requests (optional external, ${ignoredFailedRequestDetails.length} total) ---`);
+    for (const e of ignoredFailedRequestDetails) {
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.url} - ${e.error} (${e.reason})`);
+    }
+    validationLines.push('');
+  }
+
+  if (ignoredConsoleResourceErrors.length > 0) {
+    validationLines.push(`--- Ignored console resource errors (optional external, ${ignoredConsoleResourceErrors.length} total) ---`);
+    for (const e of ignoredConsoleResourceErrors) {
+      validationLines.push(`[${e.viewport}/${e.theme}/${e.state}] ${e.text} @ ${e.url} (${e.reason})`);
     }
     validationLines.push('');
   }
@@ -399,12 +553,25 @@ async function capture() {
 
   fs.writeFileSync(path.join(outputDir, 'validation.log'), validationLines.join('\n'));
 
-  if (globalConsoleErrors > 0 || globalPageErrors > 0 || globalFailedRequests > 0 || globalOverflowFailures > 0) {
+  if (globalConsoleErrors > 0 || globalPageErrors > 0 || globalFailedRequests > 0 || globalHttpErrors > 0 || globalOverflowFailures > 0) {
       console.error("Validation failed due to errors or overflow");
+      if (httpErrorDetails.length > 0) {
+        console.error(`HTTP errors (${httpErrorDetails.length}):`);
+        for (const e of httpErrorDetails) {
+          console.error(`  [${e.viewport}/${e.theme}/${e.state}] ${e.method} ${e.url} -> ${e.status} ${e.statusText} [${e.resourceType}]`);
+        }
+      }
       if (consoleErrorDetails.length > 0) {
         console.error(`Unclassified console errors (${consoleErrorDetails.length}):`);
         for (const e of consoleErrorDetails) {
-          console.error(`  [${e.viewport}/${e.theme}] ${e.text}`);
+          const loc = e.url ? ` @ ${e.url}` : '';
+          console.error(`  [${e.viewport}/${e.theme}/${e.state}] ${e.text}${loc}`);
+        }
+      }
+      if (failedRequestDetails.length > 0) {
+        console.error(`Failed requests (${failedRequestDetails.length}):`);
+        for (const e of failedRequestDetails) {
+          console.error(`  [${e.viewport}/${e.theme}/${e.state}] ${e.url} - ${e.error} [${e.resourceType}]`);
         }
       }
       process.exit(1);
