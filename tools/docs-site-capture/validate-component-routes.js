@@ -5,6 +5,14 @@ const path = require('path');
 const baseUrl = (process.argv[2] || 'http://localhost:8080').replace(/\/$/, '');
 const outputDir = process.argv[3] || 'artifacts/route-validation';
 
+const benignConsoleErrorPatterns = [
+  { pattern: 'failed to attach a stencil buffer', reason: 'Chromium/SwiftShader stencil buffer diagnostic in headless CI (Rendering will be skipped)' },
+];
+
+function isBenignConsoleError(text) {
+  return benignConsoleErrorPatterns.find(bp => text.includes(bp.pattern));
+}
+
 const routes = [
   '#adaptive-theme', '#adaptive-button', '#adaptive-icon-button', '#adaptive-badge',
   '#adaptive-chip', '#adaptive-avatar', '#adaptive-thumbnail', '#adaptive-card',
@@ -23,13 +31,20 @@ async function validate() {
   const results = [];
 
   for (const hash of routes) {
-    const consoleMessages = [];
+    const consoleErrors = [];
+    const ignoredConsoleErrors = [];
     const requestFailures = [];
 
     // Attach listeners
     const consoleHandler = message => {
       if (message.type() === 'error') {
-        consoleMessages.push(message.text());
+        const text = message.text();
+        const benign = isBenignConsoleError(text);
+        if (benign) {
+          ignoredConsoleErrors.push({ text, reason: benign.reason });
+        } else {
+          consoleErrors.push(text);
+        }
       }
     };
     const requestHandler = request => {
@@ -61,14 +76,14 @@ async function validate() {
         throw new Error(`URL did not navigate to expected hash ${hash}`);
       }
       
-      if (consoleMessages.length > 0) {
-        throw new Error(`Console errors detected: ${consoleMessages[0]}`);
+      if (consoleErrors.length > 0) {
+        throw new Error(`Console errors detected: ${consoleErrors[0]}`);
       }
 
-      results.push({ hash, success: true, consoleErrors: 0, networkFailures: requestFailures.length });
+      results.push({ hash, success: true, consoleErrors: 0, ignoredConsoleErrors: ignoredConsoleErrors.length, networkFailures: requestFailures.length });
     } catch (error) {
       console.error(`Failed: ${error.message}`);
-      results.push({ hash, success: false, error: error.message, consoleErrors: consoleMessages.length, networkFailures: requestFailures.length });
+      results.push({ hash, success: false, error: error.message, consoleErrors: consoleErrors.length, ignoredConsoleErrors: ignoredConsoleErrors.length, networkFailures: requestFailures.length });
     } finally {
       page.off('console', consoleHandler);
       page.off('requestfailed', requestHandler);
@@ -80,14 +95,19 @@ async function validate() {
   let report = '# Component Routes Validation Report\n\n';
   report += `Generated on: ${new Date().toISOString()}\n\n`;
   report += `Base URL: ${baseUrl}\n\n`;
-  report += '| Route | Console errors | Network failures | Result |\n';
-  report += '|---|---:|---:|---|\n';
+  report += '| Route | Console errors | Ignored benign | Network failures | Result |\n';
+  report += '|---|---:|---:|---:|---|\n';
 
   let failed = false;
   for (const result of results) {
     const status = result.success ? 'OK' : `FAILED: ${result.error}`;
-    report += `| ${result.hash} | ${result.consoleErrors} | ${result.networkFailures} | ${status} |\n`;
+    report += `| ${result.hash} | ${result.consoleErrors} | ${result.ignoredConsoleErrors} | ${result.networkFailures} | ${status} |\n`;
     if (!result.success || result.consoleErrors > 0 || result.networkFailures > 0) failed = true;
+  }
+
+  report += '\n## Ignored benign console error patterns\n\n';
+  for (const bp of benignConsoleErrorPatterns) {
+    report += `- \`${bp.pattern}\` — ${bp.reason}\n`;
   }
 
   fs.writeFileSync(path.join(outputDir, 'route-validation-report.md'), report);
