@@ -1,17 +1,19 @@
 package io.github.adaptivekt.site
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,15 +21,7 @@ import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveTabs
-import io.github.adaptivekt.components.AdaptiveBadge
-import io.github.adaptivekt.components.AdaptiveBadgeTone
-import io.github.adaptivekt.components.AdaptiveDivider
-import io.github.adaptivekt.components.AdaptiveSelectionArea
-import io.github.adaptivekt.core.AdaptiveTheme
-import io.github.adaptivekt.layout.AdaptiveGrid
 import androidx.compose.foundation.ScrollState
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 
 @Composable
 internal fun HomeCodeComparisonSection() {
@@ -43,7 +37,7 @@ internal fun HomeCodeComparisonSection() {
     Column(modifier = Modifier.fillMaxWidth().semantics { testTag = "home-code-comparison" }) {
         SiteText("Less boilerplate, more focus", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        SiteText("Both examples implement the same table-to-card breakpoint behavior, empty state and status presentation.", color = SiteMuted, fontSize = 14.sp)
+        SiteText("Both examples implement the same table-to-card breakpoint behavior, empty state and status presentation.", color = SiteMuted, fontSize = 14.sp, maxLines = 4)
         Spacer(modifier = Modifier.height(16.dp))
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -62,14 +56,23 @@ internal fun HomeCodeComparisonSection() {
                     composeScrollState = composeScrollState
                 )
             } else {
-                DesktopCodeComparison(
-                    metrics = metrics,
-                    expandedAdaptiveKt = expandedAdaptiveKt,
-                    onExpandedAdaptiveKtChange = { expandedAdaptiveKt = it },
-                    expandedPlainCompose = expandedPlainCompose,
-                    onExpandedPlainComposeChange = { expandedPlainCompose = it },
-                    adaptiveScrollState = adaptiveScrollState,
-                    composeScrollState = composeScrollState
+                CodeComparisonViewer(
+                    beforeTitle = ComparisonImplementation.AdaptiveKt.label,
+                    beforeCode = AdaptiveDataViewComparisonCode,
+                    beforeBadge = formatMeaningfulLineCount(metrics.adaptiveLines),
+                    beforeExpanded = expandedAdaptiveKt,
+                    onBeforeExpandedChange = { expandedAdaptiveKt = it },
+                    afterTitle = ComparisonImplementation.PlainCompose.label,
+                    afterCode = PlainComposeDataViewComparisonCode,
+                    afterBadge = formatMeaningfulLineCount(metrics.composeLines),
+                    afterExpanded = expandedPlainCompose,
+                    onAfterExpandedChange = { expandedPlainCompose = it },
+                    beforePanelTag = "comparison-panel-adaptivekt",
+                    afterPanelTag = "comparison-panel-plain-compose",
+                    beforeExpandTag = "comparison-expand-adaptivekt",
+                    afterExpandTag = "comparison-expand-plain-compose",
+                    beforeScrollState = adaptiveScrollState,
+                    afterScrollState = composeScrollState,
                 )
             }
         }
@@ -86,6 +89,7 @@ internal fun HomeCodeComparisonSection() {
             SiteText(
                 text = "AdaptiveKt: ${metrics.adaptiveLines} meaningful lines vs Plain Compose: ${metrics.composeLines} meaningful lines (${metrics.savedLines} fewer lines).",
                 color = SiteMuted,
+                maxLines = 4,
             )
             Spacer(modifier = Modifier.height(8.dp))
             AdaptiveButton(
@@ -100,43 +104,10 @@ internal fun HomeCodeComparisonSection() {
                     text = "Imports, package declarations, blank lines and full-line comments are excluded. Required helper composables are included.",
                     color = SiteMuted,
                     fontSize = 14.sp,
+                    maxLines = 6,
                     modifier = Modifier.semantics { testTag = "comparison-metrics" }
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun DesktopCodeComparison(
-    metrics: CodeReductionMetrics,
-    expandedAdaptiveKt: Boolean,
-    onExpandedAdaptiveKtChange: (Boolean) -> Unit,
-    expandedPlainCompose: Boolean,
-    onExpandedPlainComposeChange: (Boolean) -> Unit,
-    adaptiveScrollState: ScrollState,
-    composeScrollState: ScrollState
-) {
-    AdaptiveGrid(columns = 12, horizontalGap = 16.dp, verticalGap = 16.dp) {
-        item(span = 6) {
-            CodeComparisonPanel(
-                implementation = ComparisonImplementation.AdaptiveKt,
-                metricsText = formatMeaningfulLineCount(metrics.adaptiveLines),
-                code = AdaptiveDataViewComparisonCode,
-                expanded = expandedAdaptiveKt,
-                onExpandedChange = onExpandedAdaptiveKtChange,
-                scrollState = adaptiveScrollState
-            )
-        }
-        item(span = 6) {
-            CodeComparisonPanel(
-                implementation = ComparisonImplementation.PlainCompose,
-                metricsText = formatMeaningfulLineCount(metrics.composeLines),
-                code = PlainComposeDataViewComparisonCode,
-                expanded = expandedPlainCompose,
-                onExpandedChange = onExpandedPlainComposeChange,
-                scrollState = composeScrollState
-            )
         }
     }
 }
@@ -173,115 +144,20 @@ private fun CompactCodeComparison(
             else onExpandedPlainComposeChange(e)
         }
         val scrollState = if (selectedTab == ComparisonImplementation.AdaptiveKt) adaptiveScrollState else composeScrollState
+        val panelTag = if (selectedTab == ComparisonImplementation.AdaptiveKt) "comparison-panel-adaptivekt" else "comparison-panel-plain-compose"
+        val expandTag = if (selectedTab == ComparisonImplementation.AdaptiveKt) "comparison-expand-adaptivekt" else "comparison-expand-plain-compose"
 
-        CodeComparisonPanel(
-            implementation = selectedTab,
-            metricsText = formatMeaningfulLineCount(linesText),
+        CodeViewer(
             code = code,
+            title = selectedTab.label,
+            badge = formatMeaningfulLineCount(linesText),
+            showLineNumbers = true,
+            collapsedMaxLines = 28,
             expanded = expanded,
             onExpandedChange = onExpandedChange,
-            scrollState = scrollState
+            expandTag = expandTag,
+            scrollState = scrollState,
+            modifier = Modifier.semantics { testTag = panelTag },
         )
-    }
-}
-
-@Composable
-private fun CodeComparisonPanel(
-    implementation: ComparisonImplementation,
-    metricsText: String,
-    code: String,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    scrollState: ScrollState
-) {
-    val lines = code.lines()
-    val maxCollapsedLines = 28
-    val isCollapsible = lines.size > maxCollapsedLines
-    val displayedCode = if (expanded || !isCollapsible) code else lines.take(maxCollapsedLines).joinToString("\n")
-    val panelTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-panel-adaptivekt" else "comparison-panel-plain-compose"
-    val expandTag = if (implementation == ComparisonImplementation.AdaptiveKt) "comparison-expand-adaptivekt" else "comparison-expand-plain-compose"
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(AdaptiveTheme.shapes.medium)
-            .background(AdaptiveTheme.colors.surface)
-            .border(1.dp, SiteLine, AdaptiveTheme.shapes.medium)
-            .semantics { testTag = panelTag }
-    ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AdaptiveTheme.colors.surfaceMuted)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            if (maxWidth < 200.dp) {
-                Column {
-                    SiteText(implementation.label, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    AdaptiveBadge(metricsText, tone = AdaptiveBadgeTone.Info)
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SiteText(implementation.label, fontWeight = FontWeight.Bold)
-                    AdaptiveBadge(metricsText, tone = AdaptiveBadgeTone.Info)
-                }
-            }
-        }
-
-        AdaptiveDivider()
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(scrollState)
-                .padding(16.dp)
-        ) {
-            AdaptiveSelectionArea {
-                BasicText(
-                    text = displayedCode,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        color = AdaptiveTheme.colors.textPrimary,
-                        fontFamily = FontFamily.Monospace,
-                    ),
-                    softWrap = false,
-                )
-            }
-        }
-
-        if (isCollapsible && !expanded) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(AdaptiveTheme.colors.surfaceMuted.copy(alpha = 0.5f))
-                    .padding(vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                SiteText("// ... ${lines.size - maxCollapsedLines} more lines", color = AdaptiveTheme.colors.textMuted, fontSize = 12.sp)
-            }
-        }
-
-        if (isCollapsible) {
-            AdaptiveDivider()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                AdaptiveButton(
-                    modifier = Modifier.semantics { testTag = expandTag },
-                    text = if (expanded) "Collapse" else "Show full code",
-                    variant = AdaptiveButtonVariant.Ghost,
-                    onClick = { onExpandedChange(!expanded) }
-                )
-            }
-        }
     }
 }
