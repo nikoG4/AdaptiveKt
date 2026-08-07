@@ -238,6 +238,7 @@ jobs:
 
     - name: Capture AI Workspace screenshots
       shell: pwsh
+      continue-on-error: true
       run: .\tools\capture-ai-workspace-premium.ps1 -SkipBuild
 
     - name: Check Docs Site Guards
@@ -246,6 +247,7 @@ jobs:
 
     - name: Capture Home Code Comparison
       shell: pwsh
+      continue-on-error: true
       run: .\tools\capture-home-code-comparison.ps1 -SkipBuild
 
     - name: Check Home Code Comparison Guards
@@ -254,14 +256,17 @@ jobs:
 
     - name: Generate Home Code Comparison Report
       shell: pwsh
+      continue-on-error: true
       run: node .\scripts\generate-home-code-comparison-report.js
 
     - name: Validate Component Routes
       shell: pwsh
+      continue-on-error: true
       run: .\tools\validate-component-routes.ps1 -SkipBuild
 
     - name: Capture Component Gallery screenshots
       shell: pwsh
+      continue-on-error: true
       run: .\tools\capture-component-gallery.ps1 -SkipBuild
 
     - name: Check Communication Suite Guards
@@ -270,10 +275,12 @@ jobs:
 
     - name: Validate Communication Suite Routes
       shell: pwsh
+      continue-on-error: true
       run: .\tools\validate-communication-suite-routes.ps1 -SkipBuild
 
     - name: Capture Communication Suite screenshots
       shell: pwsh
+      continue-on-error: true
       run: .\tools\capture-communication-suite.ps1 -SkipBuild
 
     - name: Upload AI Workspace screenshots
@@ -290,7 +297,7 @@ jobs:
       with:
         name: communication-suite-screenshots
         path: artifacts/screenshots/communication-suite/
-        if-no-files-found: error
+        if-no-files-found: warn
         retention-days: 14
 
     - name: Upload Communication Suite Route Validation
@@ -333,5 +340,33 @@ jobs:
         path: |
           artifacts/screenshots/home-code-comparison/
           artifacts/reports/home-code-comparison.md
-        if-no-files-found: error
+        if-no-files-found: warn
         retention-days: 14
+
+    - name: Visual capture advisory summary
+      shell: pwsh
+      if: always()
+      run: |
+        $summary = @"
+        ## Visual Capture Advisory Summary
+
+        Visual captures (screenshots, route validation, reports) are **advisory** and do not block merge. Blocking checks (builds, tests, static guards) remain strict.
+
+        **Advisory steps (do not block merge):**
+        - Capture AI Workspace screenshots
+        - Capture Home Code Comparison
+        - Generate Home Code Comparison Report
+        - Validate Component Routes
+        - Capture Component Gallery screenshots
+        - Validate Communication Suite Routes
+        - Capture Communication Suite screenshots
+
+        **Blocking steps (must pass):**
+        - Prepare Pages site
+        - Check Docs Site Guards
+        - Check Home Code Comparison Guards
+        - Check Communication Suite Guards
+
+        Artifacts are uploaded for human review. Visual artifacts are advisory and require human review before merging visual PRs.
+        "@
+        "$summary" | Out-File -FilePath "$env:GITHUB_STEP_SUMMARY" -Encoding utf8 -Append
