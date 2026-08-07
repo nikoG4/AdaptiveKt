@@ -50,6 +50,7 @@ import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSelect
 import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveSurface
+import io.github.adaptivekt.components.AdaptiveSurfaceDefaults
 import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
@@ -328,8 +329,8 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
         id = "adaptive-card-surface",
         family = "Display",
         title = "AdaptiveCard and AdaptiveSurface",
-        summary = "Reusable content containers with professional default border, radius and padding.",
-        usage = "Use AdaptiveCard for vertical content and optional click behavior; use AdaptiveSurface for neutral framed regions.",
+        summary = "Reusable content containers with professional defaults and optional visual surface treatments.",
+        usage = "Use AdaptiveCard for vertical content and optional click behavior; use AdaptiveSurface for neutral, elevated, gradient, or glass regions.",
         basicExample = DocsExample(
             "Card and surface",
             "Both containers are Foundation-only and follow AdaptiveTheme shapes and surface colors.",
@@ -341,18 +342,31 @@ AdaptiveButton("Delete", variant = AdaptiveButtonVariant.Danger, onClick = {})
                 AdaptiveSurface(contentPadding = PaddingValues(10.dp)) {
                     SiteText("Neutral surface content", color = SiteMuted)
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                AdaptiveSurface(style = AdaptiveSurfaceDefaults.glass(), contentPadding = PaddingValues(10.dp)) {
+                    SiteText("Glass visual surface", fontWeight = FontWeight.Medium)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                AdaptiveSurface(style = AdaptiveSurfaceDefaults.elevated(), contentPadding = PaddingValues(10.dp)) {
+                    SiteText("Elevated surface", fontWeight = FontWeight.Medium)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                AdaptiveSurface(style = AdaptiveSurfaceDefaults.gradient(), contentPadding = PaddingValues(10.dp)) {
+                    SiteText("Gradient surface", fontWeight = FontWeight.Medium)
+                }
             }
         },
         parameters = listOf(
             ComponentParameter("modifier", "Modifier", "Modifier", false, "Root modifier."),
             ComponentParameter("contentPadding", "PaddingValues", "Spacing.Large", false, "Internal padding."),
+            ComponentParameter("style", "AdaptiveSurfaceStyle", "solid()", false, "Optional solid, elevated, gradient, or glass visual treatment."),
             ComponentParameter("onClick", "(() -> Unit)?", "null", false, "AdaptiveCard only: optional clickable behavior."),
             ComponentParameter("content", "@Composable scope", "required", true, "Child content."),
         ),
         themingNotes = commonNotes("AdaptiveCard"),
         responsiveNotes = listOf("Containers fill available width and work inside one-column mobile layouts."),
         accessibilityNotes = listOf("If clickable, make content label text explicit."),
-        limitations = listOf("No heavy elevation or shadow system yet."),
+        limitations = listOf("Glass is visual-only; real backdrop blur remains platform-specific and is not required."),
     ),
     ComponentDoc(
         id = "adaptive-selection-area",
