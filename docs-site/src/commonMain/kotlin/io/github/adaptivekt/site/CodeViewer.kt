@@ -2,6 +2,7 @@ package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.AnnotatedString
@@ -36,12 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.adaptivekt.components.AdaptiveBadge
-import io.github.adaptivekt.components.AdaptiveBadgeTone
 import androidx.compose.foundation.ScrollState
-import io.github.adaptivekt.components.AdaptiveButton
-import io.github.adaptivekt.components.AdaptiveButtonVariant
-import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -52,7 +51,7 @@ import kotlinx.coroutines.delay
  * Internal docs-site code viewer with an editor-like appearance.
  *
  * Not public library API. Theme-aware (legible in dark and light), with optional
- * header, badge, line-number gutter, horizontal scroll, light Kotlin syntax
+ * header, metadata, line-number gutter, horizontal scroll, light Kotlin syntax
  * highlighting (no external dependency), optional copy button and optional
  * collapse/expand.
  */
@@ -84,16 +83,16 @@ internal fun CodeViewer(
     }
 
     val shape = AdaptiveTheme.shapes.medium
-    val editorBg = AdaptiveTheme.colors.surface
-    val editorHeaderBg = AdaptiveTheme.colors.surfaceMuted
-    val syntax = rememberSyntaxColors()
+    val colors = rememberCodeViewerColors()
+    val syntax = colors.syntax
 
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(colors.elevation, shape, clip = false, ambientColor = colors.shadow, spotColor = colors.shadow)
             .clip(shape)
-            .background(editorBg, shape)
-            .border(1.dp, SiteLine, shape)
+            .background(colors.background, shape)
+            .border(1.dp, colors.border, shape)
     ) {
         if (title != null || badge != null) {
             CodeViewerHeader(
@@ -101,34 +100,46 @@ internal fun CodeViewer(
                 badge = badge,
                 copyEnabled = copyEnabled,
                 code = code,
-                headerBg = editorHeaderBg,
+                colors = colors,
+                collapsible = isCollapsible,
+                expanded = isExpanded,
+                expandTag = expandTag,
+                onExpandedChange = resolvedOnExpandedChange,
             )
-            AdaptiveDivider()
         }
 
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(scrollState)
-                .padding(14.dp)
         ) {
+            if (showLineNumbers) {
+                BasicText(
+                    text = remember(displayedCode, isCollapsible, isExpanded, syntax) {
+                        renderLineNumbers(
+                            lineCount = displayedCode.lineCount(),
+                            totalLineCount = if (isCollapsible && !isExpanded) lines.size else null,
+                        )
+                    },
+                    modifier = Modifier
+                        .background(colors.gutter)
+                        .border(1.dp, colors.gutterBorder)
+                        .padding(start = 12.dp, end = 10.dp, top = 15.dp, bottom = 15.dp),
+                    style = codeTextStyle(colors.gutterText),
+                    softWrap = false,
+                )
+            }
             AdaptiveSelectionArea {
                 val annotated = remember(displayedCode, showLineNumbers, syntax) {
                     renderCode(
                         code = displayedCode,
-                        showLineNumbers = showLineNumbers,
-                        totalLineCount = if (isCollapsible && !isExpanded) lines.size else null,
                         colors = syntax,
                     )
                 }
                 BasicText(
                     text = annotated,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp,
-                        color = AdaptiveTheme.colors.textPrimary,
-                        fontFamily = FontFamily.Monospace,
-                    ),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 15.dp),
+                    style = codeTextStyle(colors.codeText),
                     softWrap = false,
                 )
             }
@@ -138,34 +149,11 @@ internal fun CodeViewer(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(editorHeaderBg.copy(alpha = 0.5f))
-                    .padding(vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                SiteText(
-                    text = "// ... ${lines.size - maxCollapsed} more lines",
-                    color = AdaptiveTheme.colors.textMuted,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                )
-            }
-        }
-
-        if (isCollapsible) {
-            AdaptiveDivider()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                AdaptiveButton(
-                    modifier = if (expandTag != null) Modifier.semantics { testTag = expandTag } else Modifier,
-                    text = if (isExpanded) "Collapse" else "Show full code",
-                    variant = AdaptiveButtonVariant.Ghost,
-                    onClick = { resolvedOnExpandedChange(!isExpanded) }
-                )
-            }
+                    .height(18.dp)
+                    .background(
+                        Brush.verticalGradient(listOf(Color.Transparent, colors.background)),
+                    ),
+            )
         }
     }
 }
@@ -176,7 +164,11 @@ private fun CodeViewerHeader(
     badge: String?,
     copyEnabled: Boolean,
     code: String,
-    headerBg: Color,
+    colors: CodeViewerColors,
+    collapsible: Boolean,
+    expanded: Boolean,
+    expandTag: String?,
+    onExpandedChange: (Boolean) -> Unit,
 ) {
     var copied by remember { mutableStateOf(false) }
     LaunchedEffect(copied) {
@@ -188,15 +180,27 @@ private fun CodeViewerHeader(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .background(headerBg)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .background(colors.header)
+            .border(1.dp, colors.headerBorder)
+            .padding(horizontal = 14.dp, vertical = 9.dp)
     ) {
         val compact = maxWidth < 220.dp
-        if (compact && title != null && badge != null) {
+        if (compact && title != null) {
             Column {
                 SiteText(title, fontWeight = FontWeight.Bold, maxLines = 1)
-                Spacer(modifier = Modifier.height(4.dp))
-                AdaptiveBadge(badge, tone = AdaptiveBadgeTone.Info)
+                if (badge != null) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    CodeViewerMetadata(badge, colors)
+                }
+                if (collapsible) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CodeViewerExpandControl(
+                        expanded = expanded,
+                        colors = colors,
+                        expandTag = expandTag,
+                        onExpandedChange = onExpandedChange,
+                    )
+                }
             }
         } else {
             Row(
@@ -212,7 +216,7 @@ private fun CodeViewerHeader(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (badge != null) {
-                        AdaptiveBadge(badge, tone = AdaptiveBadgeTone.Info)
+                        CodeViewerMetadata(badge, colors)
                     }
                     if (copyEnabled) {
                         AdaptiveIconButton(
@@ -232,6 +236,14 @@ private fun CodeViewerHeader(
                             }
                         )
                     }
+                    if (collapsible) {
+                        CodeViewerExpandControl(
+                            expanded = expanded,
+                            colors = colors,
+                            expandTag = expandTag,
+                            onExpandedChange = onExpandedChange,
+                        )
+                    }
                 }
             }
         }
@@ -239,19 +251,87 @@ private fun CodeViewerHeader(
 }
 
 @Composable
-private fun rememberSyntaxColors(): SyntaxColors {
+private fun CodeViewerExpandControl(
+    expanded: Boolean,
+    colors: CodeViewerColors,
+    expandTag: String?,
+    onExpandedChange: (Boolean) -> Unit,
+) {
+    SiteText(
+        text = if (expanded) "Collapse" else "Expand",
+        color = colors.controlText,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        maxLines = 1,
+        modifier = (if (expandTag != null) Modifier.semantics { testTag = expandTag } else Modifier)
+            .clip(AdaptiveTheme.shapes.pill)
+            .clickable { onExpandedChange(!expanded) }
+            .docsClickableCursor()
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+    )
+}
+
+@Composable
+private fun CodeViewerMetadata(text: String, colors: CodeViewerColors) {
+    SiteText(
+        text = text.replace(" meaningful", ""),
+        color = colors.metadata,
+        fontSize = 12.sp,
+        maxLines = 1,
+    )
+}
+
+@Composable
+private fun rememberCodeViewerColors(): CodeViewerColors {
     val theme = AdaptiveTheme.colors
     return remember(theme) {
-        SyntaxColors(
-            keyword = theme.primary,
-            string = theme.success,
-            comment = theme.textMuted,
-            number = theme.info,
-            annotation = theme.warning,
-            gutter = theme.textMuted,
+        val dark = theme.background.luminance() < 0.3f
+        val syntax = if (dark) {
+            SyntaxColors(
+                keyword = Color(0xFF93C5FD), annotation = Color(0xFFFDE68A), string = Color(0xFF86EFAC),
+                number = Color(0xFFC4B5FD), type = Color(0xFF67E8F9), function = Color(0xFFBFDBFE),
+                literal = Color(0xFFFDA4AF), comment = Color(0xFF7F8EA3), punctuation = Color(0xFF94A3B8),
+            )
+        } else {
+            SyntaxColors(
+                keyword = Color(0xFF4338CA), annotation = Color(0xFF9A3412), string = Color(0xFF047857),
+                number = Color(0xFF7C3AED), type = Color(0xFF0369A1), function = Color(0xFF1D4ED8),
+                literal = Color(0xFFBE123C), comment = Color(0xFF64748B), punctuation = Color(0xFF475569),
+            )
+        }
+        CodeViewerColors(
+            background = if (dark) Color(0xFF101827) else Color(0xFFF6F8FC),
+            header = if (dark) Color(0xFF172235) else Color(0xFFEEF3FA),
+            gutter = if (dark) Color(0xFF0C1422) else Color(0xFFEDF2F8),
+            border = if (dark) Color(0xFF334155) else Color(0xFFD6E0EC),
+            headerBorder = if (dark) Color(0xFF2B3B52) else Color(0xFFDDE6F0),
+            gutterBorder = if (dark) Color(0xFF243247) else Color(0xFFDCE5EF),
+            codeText = theme.textPrimary,
+            gutterText = if (dark) Color(0xFF74839A) else Color(0xFF718096),
+            metadata = if (dark) Color(0xFFAAB9CC) else Color(0xFF64748B),
+            controlText = if (dark) Color(0xFFBFDBFE) else Color(0xFF315FDC),
+            shadow = if (dark) Color(0x99000000) else Color(0x180F172A),
+            elevation = if (dark) 10.dp else 6.dp,
+            syntax = syntax,
         )
     }
 }
+
+private data class CodeViewerColors(
+    val background: Color,
+    val header: Color,
+    val gutter: Color,
+    val border: Color,
+    val headerBorder: Color,
+    val gutterBorder: Color,
+    val codeText: Color,
+    val gutterText: Color,
+    val metadata: Color,
+    val controlText: Color,
+    val shadow: Color,
+    val elevation: androidx.compose.ui.unit.Dp,
+    val syntax: SyntaxColors,
+)
 
 private data class SyntaxColors(
     val keyword: Color,
@@ -259,7 +339,17 @@ private data class SyntaxColors(
     val comment: Color,
     val number: Color,
     val annotation: Color,
-    val gutter: Color,
+    val type: Color,
+    val function: Color,
+    val literal: Color,
+    val punctuation: Color,
+)
+
+private fun codeTextStyle(color: Color) = TextStyle(
+    fontSize = 12.sp,
+    lineHeight = 18.sp,
+    color = color,
+    fontFamily = FontFamily.Monospace,
 )
 
 private val KOTLIN_KEYWORDS = setOf(
@@ -273,24 +363,24 @@ private val KOTLIN_KEYWORDS = setOf(
 
 private fun renderCode(
     code: String,
-    showLineNumbers: Boolean,
-    totalLineCount: Int?,
     colors: SyntaxColors,
 ): AnnotatedString = buildAnnotatedString {
     val lines = code.split("\n")
-    val gutterWidth = if (showLineNumbers) {
-        val total = totalLineCount ?: lines.size
-        total.toString().length
-    } else 0
     lines.forEachIndexed { index, line ->
-        if (showLineNumbers) {
-            val lineNumber = (index + 1).toString().padStart(gutterWidth, ' ')
-            withStyle(SpanStyle(color = colors.gutter)) { append("$lineNumber ") }
-        }
         appendHighlightedLine(line, colors)
         if (index < lines.lastIndex) append("\n")
     }
 }
+
+private fun renderLineNumbers(lineCount: Int, totalLineCount: Int?): AnnotatedString = buildAnnotatedString {
+    val width = (totalLineCount ?: lineCount).toString().length
+    repeat(lineCount) { index ->
+        append((index + 1).toString().padStart(width, ' '))
+        if (index < lineCount - 1) append("\n")
+    }
+}
+
+private fun String.lineCount(): Int = if (isEmpty()) 1 else count { it == '\n' } + 1
 
 private fun AnnotatedString.Builder.appendHighlightedLine(line: String, colors: SyntaxColors) {
     var i = 0
@@ -328,6 +418,12 @@ private fun AnnotatedString.Builder.appendHighlightedLine(line: String, colors: 
             val word = line.substring(i, end)
             if (word in KOTLIN_KEYWORDS) {
                 withStyle(SpanStyle(color = colors.keyword, fontWeight = FontWeight.Bold)) { append(word) }
+            } else if (word in KOTLIN_LITERALS) {
+                withStyle(SpanStyle(color = colors.literal)) { append(word) }
+            } else if (word.first().isUpperCase()) {
+                withStyle(SpanStyle(color = colors.type)) { append(word) }
+            } else if (line.drop(end).trimStart().startsWith("(")) {
+                withStyle(SpanStyle(color = colors.function)) { append(word) }
             } else {
                 append(word)
             }
@@ -340,10 +436,13 @@ private fun AnnotatedString.Builder.appendHighlightedLine(line: String, colors: 
             i = end
             continue
         }
-        append(c)
+        if (c in PUNCTUATION) withStyle(SpanStyle(color = colors.punctuation)) { append(c) } else append(c)
         i++
     }
 }
+
+private val KOTLIN_LITERALS = setOf("true", "false", "null")
+private const val PUNCTUATION = "(){}[],:.=+-*/<>?!"
 
 private fun findStringEnd(line: String, start: Int): Int {
     var i = start + 1
