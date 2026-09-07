@@ -124,7 +124,7 @@ private fun commonNotes(title: String): List<String> = listOf(
     "Light and dark modes are handled by the active AdaptiveTheme color scheme.",
 )
 
-private fun componentDocs(): List<ComponentDoc> = listOf(
+internal fun componentDocs(): List<ComponentDoc> = listOf(
     ComponentDoc(
         id = "adaptive-theme",
         family = "Foundations",

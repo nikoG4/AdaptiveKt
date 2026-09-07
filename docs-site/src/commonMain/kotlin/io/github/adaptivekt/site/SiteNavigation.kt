@@ -33,6 +33,7 @@ internal fun SiteNavigation(
     darkTheme: Boolean,
     onThemeToggle: () -> Unit,
     onNavigate: (SiteRoute) -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -58,6 +59,13 @@ internal fun SiteNavigation(
             verticalArrangement = Arrangement.spacedBy(6.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
+            AdaptiveButton(
+                text = "Search…  Ctrl K",
+                size = AdaptiveButtonSize.Small,
+                variant = AdaptiveButtonVariant.Secondary,
+                onClick = onSearchClick,
+                modifier = Modifier.docsClickableCursor(),
+            )
             SiteRoute.entries.forEach { item ->
                 AdaptiveButton(
                     text = item.label,

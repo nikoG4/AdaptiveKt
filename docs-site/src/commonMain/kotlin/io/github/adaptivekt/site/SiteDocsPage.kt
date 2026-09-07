@@ -50,7 +50,7 @@ internal fun SiteDocsPage(
         navGroups = navGroups,
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
-        onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
+        onThisPage = selected.tocItems ?: listOf("Overview"),
         onTocItemClick = { /* Local focal navigation only; preserves primary route */ },
     ) {
         AdaptiveCard {
@@ -65,7 +65,7 @@ internal fun SiteDocsPage(
     }
 }
 
-private fun docsTopics(): List<DocsTopic> = listOf(
+internal fun docsTopics(): List<DocsTopic> = listOf(
     DocsTopic(
         id = "getting-started",
         family = "Getting started",
