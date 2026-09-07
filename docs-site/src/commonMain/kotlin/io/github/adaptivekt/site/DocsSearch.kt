@@ -58,7 +58,8 @@ internal fun DocsSearchDialog(onDismiss: () -> Unit, onNavigate: (SiteRoute, Str
                 }
             }) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                SiteText("Search documentation", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                SiteText("Search documentation", fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f), maxLines = 2)
                 AdaptiveButton("Close", onClick = onDismiss, variant = AdaptiveButtonVariant.Ghost)
             }
             Spacer(Modifier.height(12.dp))

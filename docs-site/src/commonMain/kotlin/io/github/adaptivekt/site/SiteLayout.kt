@@ -1,6 +1,9 @@
 package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,6 +71,8 @@ internal fun SiteLayout(
     content: @Composable () -> Unit,
 ) {
     var searchOpen by remember { mutableStateOf(false) }
+    val shortcutFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { shortcutFocus.requestFocus() }
     if (searchOpen) DocsSearchDialog(onDismiss = { searchOpen = false }, onNavigate = { route, id ->
         searchOpen = false
         onSearchNavigate(route, id)
@@ -81,7 +86,9 @@ internal fun SiteLayout(
                     searchOpen = true
                     true
                 } else false
-            },
+            }
+            .focusRequester(shortcutFocus)
+            .focusable(),
     ) {
         SiteNavigation(
             route = route,
