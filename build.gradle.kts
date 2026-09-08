@@ -118,7 +118,7 @@ subprojects {
                     developers {
                         developer {
                             id.set("nikoG4")
-                            name.set("Niko Ovelar")
+                            name.set("nikoG4")
                         }
                     }
                     scm {
