@@ -10,27 +10,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,27 +42,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.adaptivekt.components.AdaptiveAccordion
 import io.github.adaptivekt.components.AdaptiveBadge
 import io.github.adaptivekt.components.AdaptiveBadgeTone
-import io.github.adaptivekt.components.AdaptiveButton
-import io.github.adaptivekt.components.AdaptiveButtonSize
-import io.github.adaptivekt.components.AdaptiveButtonVariant
 import io.github.adaptivekt.components.AdaptiveCard
-import io.github.adaptivekt.components.AdaptiveChip
-import io.github.adaptivekt.components.AdaptiveChipTone
 import io.github.adaptivekt.components.AdaptiveDivider
 import io.github.adaptivekt.components.AdaptiveIconButton
 import io.github.adaptivekt.components.AdaptiveSelectionArea
 import io.github.adaptivekt.components.AdaptiveSurface
-import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
-
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 
 internal val LocalDocsVisualState = staticCompositionLocalOf { "" }
 
@@ -84,8 +76,15 @@ internal fun DocsShell(
     }
     val articleScroll = rememberScrollState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var menuOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(selectedId) { articleScroll.scrollTo(0); menuOpen = false }
+    var menuOpen by remember(selectedId) { mutableStateOf(false) }
+    var tocOpen by remember(selectedId) { mutableStateOf(false) }
+
+    LaunchedEffect(selectedId) {
+        articleScroll.scrollTo(0)
+        menuOpen = false
+        tocOpen = false
+    }
+
     val jump: (String) -> Unit = { heading ->
         scope.launch {
             if (heading == "Overview") articleScroll.animateScrollTo(0)
@@ -93,47 +92,97 @@ internal fun DocsShell(
         }
         onTocItemClick?.invoke(heading)
     }
+
     androidx.compose.runtime.CompositionLocalProvider(LocalDocsAnchors provides anchors) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val compact = maxWidth < 880.dp
             val showRightToc = maxWidth >= 1150.dp
+
             if (compact) {
-                Column(Modifier.fillMaxSize()) {
-                    AdaptiveButton(
-                        text = if (menuOpen) "Close navigation" else "Browse $eyebrow",
-                        onClick = { menuOpen = !menuOpen },
-                        variant = AdaptiveButtonVariant.Ghost,
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    )
-                    if (menuOpen) {
-                        DocsSidebar(navGroups, selectedId, { onSelectedIdChange(it); menuOpen = false },
-                            Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()))
-                    } else {
-                        Column(Modifier.weight(1f).verticalScroll(articleScroll).padding(16.dp)) {
-                            if (!onThisPage.isNullOrEmpty()) {
-                                DocsOnThisPage(onThisPage, true, jump)
-                                Spacer(Modifier.height(20.dp))
-                            }
-                            content()
-                            Spacer(Modifier.height(32.dp))
-                            SiteFooter()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(articleScroll)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    AdaptiveAccordion(
+                        title = "Browse $eyebrow",
+                        subtitle = "Open the documentation tree",
+                        expanded = menuOpen,
+                        onExpandedChange = { menuOpen = it },
+                    ) {
+                        DocsSidebar(
+                            navGroups = navGroups,
+                            selectedId = selectedId,
+                            onSelectedIdChange = {
+                                onSelectedIdChange(it)
+                                menuOpen = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 420.dp)
+                                .verticalScroll(rememberScrollState()),
+                        )
+                    }
+
+                    if (!onThisPage.isNullOrEmpty()) {
+                        Spacer(Modifier.height(10.dp))
+                        AdaptiveAccordion(
+                            title = "On this page",
+                            subtitle = "${onThisPage.size} ${if (onThisPage.size == 1) "section" else "sections"}",
+                            expanded = tocOpen,
+                            onExpandedChange = { tocOpen = it },
+                        ) {
+                            DocsOnThisPage(
+                                items = onThisPage,
+                                compact = true,
+                                onItemClick = {
+                                    tocOpen = false
+                                    jump(it)
+                                },
+                            )
                         }
                     }
+
+                    Spacer(Modifier.height(22.dp))
+                    content()
+                    Spacer(Modifier.height(32.dp))
+                    SiteFooter()
                 }
             } else {
                 Row(Modifier.fillMaxSize()) {
-                    DocsSidebar(navGroups, selectedId, onSelectedIdChange,
-                        Modifier.width(272.dp).fillMaxHeight().verticalScroll(rememberScrollState()))
+                    DocsSidebar(
+                        navGroups = navGroups,
+                        selectedId = selectedId,
+                        onSelectedIdChange = onSelectedIdChange,
+                        modifier = Modifier
+                            .width(272.dp)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                    )
                     Box(Modifier.width(1.dp).fillMaxHeight().background(SiteLine))
-                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(articleScroll).padding(28.dp)) {
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .verticalScroll(articleScroll)
+                            .padding(28.dp),
+                    ) {
                         content()
                         Spacer(Modifier.height(48.dp))
                         SiteFooter()
                     }
                     if (!onThisPage.isNullOrEmpty() && showRightToc) {
                         Box(Modifier.width(1.dp).fillMaxHeight().background(SiteLine))
-                        DocsOnThisPage(onThisPage, false, jump,
-                            Modifier.width(208.dp).fillMaxHeight().verticalScroll(rememberScrollState()))
+                        DocsOnThisPage(
+                            items = onThisPage,
+                            compact = false,
+                            onItemClick = jump,
+                            modifier = Modifier
+                                .width(208.dp)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState()),
+                        )
                     }
                 }
             }
@@ -161,7 +210,7 @@ internal fun DocsHeroHeader(
                 lineHeight = (if (compact) 34.sp else 48.sp) * 1.15f,
                 fontWeight = FontWeight.ExtraBold,
                 brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                    colors = listOf(primary, info, success)
+                    colors = listOf(primary, info, success),
                 ),
             ),
             maxLines = if (compact) 4 else 2,
@@ -187,18 +236,23 @@ private fun DocsSidebar(
     val tree = remember(navGroups) {
         navGroups.map { group ->
             io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem(
-                id = "group:${group.title}", label = group.title,
-                children = group.items.map { io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem(it.id, it.label) },
+                id = "group:${group.title}",
+                label = group.title,
+                children = group.items.map {
+                    io.github.adaptivekt.navigation.AdaptiveNavigationTreeItem(it.id, it.label)
+                },
             )
         }
     }
     var expanded by remember { mutableStateOf(tree.map { it.id }.toSet()) }
+
     LaunchedEffect(selectedId, navGroups) {
         navGroups.firstOrNull { group -> group.items.any { it.id == selectedId } }?.let {
             expanded = expanded + "group:${it.title}"
         }
     }
-    Column(modifier.padding(horizontal = 12.dp, vertical = 20.dp)) {
+
+    Column(modifier.padding(horizontal = 12.dp, vertical = 16.dp)) {
         io.github.adaptivekt.navigation.AdaptiveNavigationTree(
             items = tree,
             selectedItemId = selectedId,
@@ -217,12 +271,24 @@ internal fun DocsOnThisPage(
     onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SiteText("On this page", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Column(
+        modifier = modifier.padding(if (compact) 0.dp else 16.dp),
+        verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 8.dp),
+    ) {
+        if (!compact) {
+            SiteText("On this page", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        }
         items.forEach { item ->
-            SiteText(item, color = SiteMuted, maxLines = 2,
-                modifier = Modifier.fillMaxWidth().docsClickableCursor()
-                    .clickable { onItemClick(item) }.padding(vertical = 8.dp))
+            SiteText(
+                item,
+                color = SiteMuted,
+                maxLines = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .docsClickableCursor()
+                    .clickable { onItemClick(item) }
+                    .padding(vertical = if (compact) 6.dp else 8.dp),
+            )
         }
     }
 }
@@ -235,8 +301,13 @@ internal fun DocsSection(
 ) {
     val anchor = LocalDocsAnchors.current[title]
     Column(modifier = Modifier.fillMaxWidth()) {
-        SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, maxLines = 3,
-            modifier = if (anchor != null) Modifier.bringIntoViewRequester(anchor) else Modifier)
+        SiteText(
+            title,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 28.sp,
+            maxLines = 3,
+            modifier = if (anchor != null) Modifier.bringIntoViewRequester(anchor) else Modifier,
+        )
         if (description != null) {
             Spacer(modifier = Modifier.height(8.dp))
             SiteText(description, color = SiteMuted, fontSize = 15.sp, maxLines = 6)
@@ -285,14 +356,14 @@ internal fun DocsCodeBlock(
     title: String = "Kotlin",
 ) {
     var copied by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(copied) {
         if (copied) {
             delay(2000)
             copied = false
         }
     }
-    
+
     val shape = RoundedCornerShape(10.dp)
     Column(
         modifier = Modifier
@@ -311,7 +382,11 @@ internal fun DocsCodeBlock(
         ) {
             BasicText(
                 text = title,
-                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFCBD5E1)),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFCBD5E1),
+                ),
             )
             AdaptiveIconButton(
                 onClick = {
@@ -325,9 +400,9 @@ internal fun DocsCodeBlock(
                         imageVector = if (copied) DocsIcons.Check else DocsIcons.Copy,
                         contentDescription = if (copied) "Copied" else "Copy code",
                         colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
-                }
+                },
             )
         }
         Box(
@@ -360,7 +435,10 @@ internal fun DocsParameterTable(parameters: List<ComponentParameter>) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 parameters.forEach { parameter ->
                     AdaptiveCard {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
                             SiteText(parameter.name, fontWeight = FontWeight.Bold, maxLines = 2)
                             AdaptiveBadge(if (parameter.required) "Required" else "Optional")
                         }
@@ -429,19 +507,38 @@ private fun ParameterRow(values: List<String>, header: Boolean = false) {
 }
 
 @Composable
+internal fun DocsArticleHeader(
+    family: String,
+    title: String,
+    summary: String,
+    usage: String? = null,
+) {
+    AdaptiveSelectionArea {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            AdaptiveBadge(family, tone = AdaptiveBadgeTone.Info)
+            Spacer(modifier = Modifier.height(12.dp))
+            SiteText(title, fontWeight = FontWeight.ExtraBold, fontSize = 38.sp, maxLines = 10)
+            Spacer(modifier = Modifier.height(10.dp))
+            SiteText(summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
+            if (!usage.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                SiteText(usage, color = SiteMuted, maxLines = 20)
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            AdaptiveDivider()
+        }
+    }
+}
+
+@Composable
 internal fun ComponentDocArticle(doc: ComponentDoc) {
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        AdaptiveCard(contentSelectionEnabled = true) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                AdaptiveBadge(doc.family, tone = AdaptiveBadgeTone.Info)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 10)
-                Spacer(modifier = Modifier.height(10.dp))
-                SiteText(doc.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 20)
-                Spacer(modifier = Modifier.height(12.dp))
-                SiteText(doc.usage, color = SiteMuted, maxLines = 20)
-            }
-        }
+        DocsArticleHeader(
+            family = doc.family,
+            title = doc.title,
+            summary = doc.summary,
+            usage = doc.usage,
+        )
 
         DocsSection("Basic usage", "A minimal example rendered with the real component API.") {
             DocsExampleBlock(doc.basicExample)
