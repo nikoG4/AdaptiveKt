@@ -1,6 +1,9 @@
 package io.github.adaptivekt.site
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +19,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.input.key.*
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,18 +67,35 @@ internal fun SiteLayout(
     darkTheme: Boolean,
     onNavigate: (SiteRoute) -> Unit,
     onThemeToggle: () -> Unit,
+    onSearchNavigate: (SiteRoute, String) -> Unit,
     content: @Composable () -> Unit,
 ) {
+    var searchOpen by remember { mutableStateOf(false) }
+    val shortcutFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { shortcutFocus.requestFocus() }
+    if (searchOpen) DocsSearchDialog(onDismiss = { searchOpen = false }, onNavigate = { route, id ->
+        searchOpen = false
+        onSearchNavigate(route, id)
+    })
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SiteSoft),
+            .background(SiteSoft)
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown && event.key == Key.K && (event.isCtrlPressed || event.isMetaPressed)) {
+                    searchOpen = true
+                    true
+                } else false
+            }
+            .focusRequester(shortcutFocus)
+            .focusable(),
     ) {
         SiteNavigation(
             route = route,
             darkTheme = darkTheme,
             onThemeToggle = onThemeToggle,
             onNavigate = onNavigate,
+            onSearchClick = { searchOpen = true },
         )
         Box(
             modifier = Modifier
@@ -86,7 +107,10 @@ internal fun SiteLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .widthIn(max = 1360.dp)
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                    .padding(
+                        horizontal = if (route == SiteRoute.Docs || route == SiteRoute.Components) 0.dp else 24.dp,
+                        vertical = if (route == SiteRoute.Docs || route == SiteRoute.Components) 0.dp else 28.dp,
+                    ),
             ) {
                 content()
             }

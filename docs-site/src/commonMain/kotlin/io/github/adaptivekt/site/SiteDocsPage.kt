@@ -50,22 +50,20 @@ internal fun SiteDocsPage(
         navGroups = navGroups,
         selectedId = selected.id,
         onSelectedIdChange = onSelectedHashChange,
-        onThisPage = selected.tocItems ?: listOf("Overview", "Basic usage", "Parameters", "Examples", "Theming", "Limitations"),
+        onThisPage = selected.tocItems ?: listOf("Overview"),
         onTocItemClick = { /* Local focal navigation only; preserves primary route */ },
     ) {
-        AdaptiveCard {
-            AdaptiveBadge(selected.family, tone = AdaptiveBadgeTone.Info)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(12.dp))
-            SiteText(selected.title, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, maxLines = 3)
-            Spacer(modifier = androidx.compose.ui.Modifier.height(10.dp))
-            SiteText(selected.summary, color = SiteMuted, fontSize = 16.sp, maxLines = 8)
-        }
+        DocsArticleHeader(
+            family = selected.family,
+            title = selected.title,
+            summary = selected.summary,
+        )
         Spacer(modifier = androidx.compose.ui.Modifier.height(24.dp))
         selected.content()
     }
 }
 
-private fun docsTopics(): List<DocsTopic> = listOf(
+internal fun docsTopics(): List<DocsTopic> = listOf(
     DocsTopic(
         id = "getting-started",
         family = "Getting started",

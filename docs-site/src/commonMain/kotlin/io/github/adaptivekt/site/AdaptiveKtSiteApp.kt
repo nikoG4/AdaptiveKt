@@ -38,6 +38,7 @@ public fun AdaptiveKtSiteApp() {
                 onNavigate = {
                     navigateTo(it, "")
                 },
+                onSearchNavigate = navigateTo,
                 onThemeToggle = {
                     val nextDarkTheme = !darkTheme
                     darkTheme = nextDarkTheme
