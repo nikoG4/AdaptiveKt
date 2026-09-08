@@ -4,7 +4,7 @@ AdaptiveKt is currently a maintainer-led open-source project.
 
 ## Maintainer
 
-- Niko Ovelar (`nikoG4`)
+- `nikoG4`
 
 ## Decision Making
 
