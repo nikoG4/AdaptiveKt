@@ -3,13 +3,7 @@ package io.github.adaptivekt.site
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.AdaptiveAnchoredDropdownMenu
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonSize
@@ -47,13 +42,13 @@ internal fun SiteNavigation(
             .border(1.dp, SiteLine)
             .padding(horizontal = if (compact) 16.dp else 24.dp, vertical = 12.dp),
         leadingContent = {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .clip(AdaptiveTheme.shapes.medium)
                     .docsClickableCursor()
                     .clickable { onNavigate(SiteRoute.Home) },
             ) {
-                AdaptiveKtLogo(symbolSize = 34.dp, wordmarkSize = 18.dp.value.sp)
+                AdaptiveKtLogo(symbolSize = 34.dp, wordmarkSize = 18.sp)
             }
             Spacer(modifier = Modifier.width(if (compact) 10.dp else 24.dp))
             AdaptiveButton(
