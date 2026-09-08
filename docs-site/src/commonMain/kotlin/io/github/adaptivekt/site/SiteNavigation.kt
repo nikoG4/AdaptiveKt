@@ -33,7 +33,9 @@ internal fun SiteNavigation(
     onNavigate: (SiteRoute) -> Unit,
     onSearchClick: () -> Unit,
 ) {
-    val compact = LocalAdaptiveLayoutInfo.current.isCompact
+    val layoutInfo = LocalAdaptiveLayoutInfo.current
+    val compact = layoutInfo.isCompact
+    val collapseRoutes = layoutInfo.isCompact || layoutInfo.isMedium
     var routeMenuOpen by remember { mutableStateOf(false) }
 
     AdaptiveActionBar(
@@ -41,7 +43,14 @@ internal fun SiteNavigation(
             .fillMaxWidth()
             .background(AdaptiveTheme.colors.surface)
             .border(1.dp, SiteLine)
-            .padding(horizontal = if (compact) 16.dp else 24.dp, vertical = 12.dp),
+            .padding(
+                horizontal = when {
+                    compact -> 16.dp
+                    layoutInfo.isMedium -> 20.dp
+                    else -> 24.dp
+                },
+                vertical = 12.dp,
+            ),
         leadingContent = {
             Box(
                 modifier = Modifier
@@ -51,21 +60,21 @@ internal fun SiteNavigation(
             ) {
                 AdaptiveKtLogo(symbolSize = 34.dp, wordmarkSize = 18.sp)
             }
-            Spacer(modifier = Modifier.width(if (compact) 10.dp else 24.dp))
+            Spacer(modifier = Modifier.width(if (compact) 10.dp else 20.dp))
             AdaptiveButton(
-                text = if (compact) "Search…" else "Search documentation…   Ctrl K",
+                text = if (collapseRoutes) "Search…" else "Search documentation…   Ctrl K",
                 size = AdaptiveButtonSize.Small,
                 variant = AdaptiveButtonVariant.Secondary,
                 onClick = onSearchClick,
-                modifier = if (compact) {
-                    Modifier.weight(1f).docsClickableCursor()
-                } else {
-                    Modifier.widthIn(min = 300.dp, max = 460.dp).docsClickableCursor()
+                modifier = when {
+                    compact -> Modifier.weight(1f).docsClickableCursor()
+                    layoutInfo.isMedium -> Modifier.widthIn(min = 220.dp, max = 280.dp).docsClickableCursor()
+                    else -> Modifier.widthIn(min = 300.dp, max = 460.dp).docsClickableCursor()
                 },
             )
         },
         secondaryActions = {
-            if (compact) {
+            if (collapseRoutes) {
                 AdaptiveAnchoredDropdownMenu(
                     expanded = routeMenuOpen,
                     onExpandedChange = { routeMenuOpen = it },
