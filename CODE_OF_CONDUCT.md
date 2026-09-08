@@ -30,6 +30,6 @@ Project maintainers may remove comments, close issues, reject contributions, or 
 
 ## Reporting
 
-If you experience or observe unacceptable behavior, contact the maintainer privately at `nikoovelarrealg4@gmail.com`. Do not open a public issue for sensitive conduct reports.
+Do not publish sensitive conduct reports or personal information in a public issue. For conduct that violates GitHub's policies, use GitHub's built-in reporting and blocking tools. For project-specific concerns, use a private contact channel listed on the maintainer's GitHub profile if one is available; otherwise, open a minimal issue requesting a private contact method without disclosing sensitive details.
 
 This project also takes inspiration from the Kotlin community expectation of respectful, safe, and welcoming participation.
