@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -68,7 +69,7 @@ internal fun SiteNavigation(
                 AdaptiveAnchoredDropdownMenu(
                     expanded = routeMenuOpen,
                     onExpandedChange = { routeMenuOpen = it },
-                    placement = AdaptiveDropdownPlacement.BottomEnd,
+                    placement = AdaptiveDropdownPlacement.BottomStart,
                     anchor = { _, toggle ->
                         AdaptiveButton(
                             text = route.label,
@@ -101,33 +102,39 @@ internal fun SiteNavigation(
                     )
                 }
             }
-
-            AdaptiveIconButton(
-                onClick = onThemeToggle,
-                size = 32.dp,
-                modifier = Modifier.docsClickableCursor(),
-                content = {
-                    androidx.compose.foundation.Image(
-                        imageVector = if (darkTheme) DocsIcons.Moon else DocsIcons.Sun,
-                        contentDescription = if (darkTheme) "Switch to light theme" else "Switch to dark theme",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-            )
-            AdaptiveIconButton(
-                onClick = { openSiteUrl("https://github.com/nikoG4/AdaptiveKt") },
-                size = 32.dp,
-                modifier = Modifier.docsClickableCursor(),
-                content = {
-                    androidx.compose.foundation.Image(
-                        imageVector = DocsIcons.GitHub,
-                        contentDescription = "GitHub",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-            )
+        },
+        primaryAction = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AdaptiveIconButton(
+                    onClick = onThemeToggle,
+                    size = 32.dp,
+                    modifier = Modifier.docsClickableCursor(),
+                    content = {
+                        androidx.compose.foundation.Image(
+                            imageVector = if (darkTheme) DocsIcons.Moon else DocsIcons.Sun,
+                            contentDescription = if (darkTheme) "Switch to light theme" else "Switch to dark theme",
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
+                )
+                AdaptiveIconButton(
+                    onClick = { openSiteUrl("https://github.com/nikoG4/AdaptiveKt") },
+                    size = 32.dp,
+                    modifier = Modifier.docsClickableCursor(),
+                    content = {
+                        androidx.compose.foundation.Image(
+                            imageVector = DocsIcons.GitHub,
+                            contentDescription = "GitHub",
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(AdaptiveTheme.colors.textPrimary),
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
+                )
+            }
         },
     )
 }
