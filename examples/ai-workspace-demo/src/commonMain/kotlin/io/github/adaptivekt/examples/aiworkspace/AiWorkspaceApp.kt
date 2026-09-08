@@ -209,7 +209,7 @@ private fun AiWorkspaceTopBar(
                 },
             )
             Spacer(modifier = Modifier.size(AdaptiveTokens.Spacing.Medium))
-            AdaptiveAvatar(name = "Niko Ovelar", size = 32.dp)
+            AdaptiveAvatar(name = "Demo User", size = 32.dp)
         } else {
             Spacer(modifier = Modifier.weight(1f))
             AdaptiveBadge(text = "Online", tone = AdaptiveBadgeTone.Success)
