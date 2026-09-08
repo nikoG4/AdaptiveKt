@@ -12,7 +12,7 @@ AdaptiveKt is a UI library, so most issues are not traditional server-side vulne
 
 Please do not open a public issue for vulnerabilities or sensitive supply-chain concerns.
 
-Use GitHub Security Advisories if available for the repository, or contact the maintainer privately at `nikoovelarrealg4@gmail.com`.
+Use GitHub's private vulnerability reporting for this repository (`Security` → `Report a vulnerability`) when available. If private reporting is temporarily unavailable, do not publish sensitive details; open a minimal public issue asking the maintainer to enable or provide a private reporting channel.
 
 Please include:
 
