@@ -2,8 +2,9 @@ package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -15,22 +16,25 @@ import io.github.adaptivekt.core.AdaptiveTokens
 /**
  * Neutral framed surface for grouped content.
  *
- * Surface content follows normal vertical flow, matching the grouped-panel use case and avoiding
- * accidental overlap when callers provide more than one child.
+ * The public [BoxScope] content API is retained for source compatibility, while direct sibling
+ * content is hosted in a vertical flow so grouped text and controls do not accidentally overlap.
  */
 @Composable
 public fun AdaptiveSurface(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Large),
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val shape = AdaptiveComponentDefaults.MediumShape
-    Column(
+    Box(
         modifier = modifier
             .clip(shape)
             .background(AdaptiveComponentDefaults.Surface, shape)
-            .border(1.dp, AdaptiveComponentDefaults.Border, shape)
-            .padding(contentPadding),
-        content = content,
-    )
+            .border(1.dp, AdaptiveComponentDefaults.Border, shape),
+    ) {
+        val surfaceScope = this
+        Column(modifier = Modifier.padding(contentPadding)) {
+            content(surfaceScope)
+        }
+    }
 }
