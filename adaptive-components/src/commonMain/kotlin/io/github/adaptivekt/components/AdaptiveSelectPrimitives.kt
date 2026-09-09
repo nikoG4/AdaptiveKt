@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
@@ -143,7 +142,7 @@ internal fun AdaptiveSelectTriggerFrame(
                 onClick = onClick,
             )
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val chevronTint = if (expanded) AdaptiveComponentDefaults.Primary else if (enabled) AdaptiveComponentDefaults.MutedText else AdaptiveComponentDefaults.DisabledText
@@ -163,16 +162,16 @@ internal fun AdaptiveOptionRow(
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
-    
+
     val isEffectivelyHighlighted = highlighted || (hovered && enabled)
-    
+
     val background = when {
         selected && enabled -> AdaptiveComponentDefaults.PrimarySubtle
         selected && !enabled -> AdaptiveComponentDefaults.SurfaceSubtle
         isEffectivelyHighlighted -> AdaptiveComponentDefaults.SurfaceSubtle
         else -> Color.Transparent
     }
-    
+
     val textColor = when {
         !enabled -> AdaptiveComponentDefaults.DisabledText
         selected -> AdaptiveComponentDefaults.Primary
@@ -194,7 +193,7 @@ internal fun AdaptiveOptionRow(
                 onClick = onClick,
             )
             .padding(
-                horizontal = if (customContent != null) AdaptiveTokens.Spacing.Small else AdaptiveTokens.Spacing.Medium, 
+                horizontal = if (customContent != null) AdaptiveTokens.Spacing.Small else AdaptiveTokens.Spacing.Medium,
                 vertical = if (customContent != null) AdaptiveTokens.Spacing.XSmall else AdaptiveTokens.Spacing.Small
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -215,11 +214,11 @@ internal fun AdaptiveOptionRow(
                 modifier = Modifier.weight(1f),
             )
         }
-        
+
         if (selected) {
             Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
             AdaptiveIcons.Check(
-                size = 14.dp, 
+                size = 14.dp,
                 tint = if (enabled) AdaptiveComponentDefaults.Primary else AdaptiveComponentDefaults.DisabledText
             )
         }
