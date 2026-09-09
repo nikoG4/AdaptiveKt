@@ -1,5 +1,6 @@
 package io.github.adaptivekt.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -53,7 +55,7 @@ public fun <T> AdaptiveSelect(
     optionEnabled: (T) -> Boolean = { true },
 ) {
     var expanded by remember(initialExpanded) { mutableStateOf(initialExpanded) }
-    
+
     AdaptiveSelect(
         expanded = expanded,
         onExpandedChange = { expanded = it },
@@ -110,11 +112,11 @@ public fun <T> AdaptiveSelect(
 ) {
     var internalSearchQuery by remember { mutableStateOf("") }
     val effectiveSearchQuery = searchQuery ?: internalSearchQuery
-    val setEffectiveSearchQuery: (String) -> Unit = { 
-        if (onSearchQueryChange != null) onSearchQueryChange(it) 
-        else internalSearchQuery = it 
+    val setEffectiveSearchQuery: (String) -> Unit = {
+        if (onSearchQueryChange != null) onSearchQueryChange(it)
+        else internalSearchQuery = it
     }
-    
+
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
 
@@ -126,9 +128,9 @@ public fun <T> AdaptiveSelect(
             options
         }
     }
-    
+
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
-    
+
     // Validate keys in debug/dev ideally, but we'll do it on composition for safety
     remember(visibleOptions) {
         validateOptionKeys(visibleOptions, optionKey)
@@ -137,13 +139,13 @@ public fun <T> AdaptiveSelect(
     val disabledKeys = remember(visibleOptions, optionEnabled) {
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
-    
-    var navState by remember(visibleOptions) { 
+
+    var navState by remember(visibleOptions) {
         mutableStateOf(
             AdaptiveOptionNavigationState<Any>(
                 disabledKeys = disabledKeys
             )
-        ) 
+        )
     }
 
     // Reset state on collapse
@@ -191,7 +193,7 @@ public fun <T> AdaptiveSelect(
 
         AdaptiveAnchoredMenuBox(
             expanded = expanded,
-            onDismissRequest = { 
+            onDismissRequest = {
                 onExpandedChange(false)
                 focusRequester.requestFocus()
             },
@@ -207,9 +209,9 @@ public fun <T> AdaptiveSelect(
                     event = event,
                     isExpanded = expanded,
                     onExpand = { onExpandedChange(true) },
-                    onCollapse = { 
+                    onCollapse = {
                         onExpandedChange(false)
-                        focusRequester.requestFocus() 
+                        focusRequester.requestFocus()
                     },
                     onNavigateNext = {
                         navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
@@ -275,29 +277,35 @@ public fun <T> AdaptiveSelect(
                     isError = isError,
                     focusRequester = focusRequester,
                     onClick = { if (enabled) onExpandedChange(!expanded) },
-                ) { _, _, showClearArg, chevronTint ->
+                ) { _, _, _, chevronTint ->
                     val showClearLocal = clearable && selectedOption != null && enabled
-                    
-                    if (selectedOption != null) {
-                        if (selectedContent != null) {
-                            selectedContent(selectedOption)
+
+                    // The selected-value slot always owns the flexible leading region. This keeps
+                    // trailing controls (clear + chevron) pinned together at the end even when a
+                    // custom selectedContent has only intrinsic width.
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        if (selectedOption != null) {
+                            if (selectedContent != null) {
+                                selectedContent(selectedOption)
+                            } else {
+                                BasicText(
+                                    text = optionLabel(selectedOption),
+                                    style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         } else {
                             BasicText(
-                                text = optionLabel(selectedOption),
-                                style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.Text),
+                                text = placeholder,
+                                style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f),
                             )
                         }
-                    } else {
-                        BasicText(
-                            text = placeholder,
-                            style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
                     }
 
                     Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
@@ -313,6 +321,7 @@ public fun <T> AdaptiveSelect(
                             AdaptiveIcons.Close(
                                 size = 16.dp,
                                 tint = AdaptiveComponentDefaults.MutedText,
+                                contentDescription = "Clear selection",
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
@@ -328,7 +337,7 @@ public fun <T> AdaptiveSelect(
             val isSelected = selectedOption != null && isOptionSame(option, selectedOption, optionKey)
             val isHighlighted = navState.highlightedKey == keySelector(option)
             val isEnabled = optionEnabled(option)
-            
+
             AdaptiveOptionRow(
                 text = optionLabel(option),
                 selected = isSelected,
