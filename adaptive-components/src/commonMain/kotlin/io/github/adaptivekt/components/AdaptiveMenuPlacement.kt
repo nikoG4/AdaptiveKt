@@ -91,7 +91,7 @@ public fun resolveAdaptiveMenuPlacement(
 ): AdaptiveResolvedMenuPlacement {
     require(windowMarginPx >= 0) { "windowMarginPx must be non-negative" }
     val margin = windowMarginPx
-    
+
     val safeWidth = maxOf(0, viewport.width - margin * 2)
     val safeHeight = maxOf(0, viewport.height - margin * 2)
 
@@ -123,13 +123,13 @@ public fun resolveAdaptiveMenuPlacement(
             else spaceAbove > spaceBelow // Fallback to wherever there is more space
         }
     }
-    
+
     val y = if (preferAbove) {
         normTop - menuSize.height - offsetY
     } else {
         normBottom + offsetY
     }
-    
+
     // Calculate max height based on available space
     var maxHeight = if (preferAbove) {
         maxOf(0, normTop - offsetY - margin)
@@ -137,21 +137,21 @@ public fun resolveAdaptiveMenuPlacement(
         maxOf(0, bottomLimit - normBottom - offsetY)
     }
     maxHeight = minOf(maxHeight, safeHeight)
-    
+
     // Determine horizontal placement
     val isStart = when (placement) {
         AdaptiveMenuPlacement.BelowStart, AdaptiveMenuPlacement.AboveStart, AdaptiveMenuPlacement.Auto -> true
         AdaptiveMenuPlacement.BelowEnd, AdaptiveMenuPlacement.AboveEnd -> false
     }
-    
+
     val alignLeft = if (isRtl) !isStart else isStart
-    
+
     var x = if (alignLeft) {
         normLeft + offsetX
     } else {
         normRight - menuSize.width - offsetX
     }
-    
+
     // Strict clamp X to viewport bounds
     val actualWidth = minOf(menuSize.width, safeWidth)
     if (x + actualWidth > rightLimit) {
@@ -160,7 +160,7 @@ public fun resolveAdaptiveMenuPlacement(
     if (x < leftLimit) {
         x = leftLimit
     }
-    
+
     // Strict clamp Y to viewport bounds
     var finalY = y
     val actualHeight = minOf(menuSize.height, maxHeight)
@@ -170,7 +170,7 @@ public fun resolveAdaptiveMenuPlacement(
     if (finalY < topLimit) {
         finalY = topLimit
     }
-    
+
     return AdaptiveResolvedMenuPlacement(
         x = x,
         y = finalY,
@@ -180,6 +180,10 @@ public fun resolveAdaptiveMenuPlacement(
 
 /**
  * Pure function to resolve the sizing constraints of the anchored menu based on the policy and available space.
+ *
+ * When [matchAnchorWidth] is true the menu is intentionally constrained to the resolved anchor width,
+ * rather than only using the anchor as a minimum. This keeps select/multi-select popups attached to
+ * their field instead of allowing fillMaxWidth content to expand the popup to the viewport width.
  */
 public fun resolveAdaptiveAnchoredMenuWidth(
     matchAnchorWidth: Boolean,
@@ -189,21 +193,21 @@ public fun resolveAdaptiveAnchoredMenuWidth(
     safeViewportWidthPx: Int
 ): AdaptiveResolvedMenuWidth {
     require(safeViewportWidthPx >= 0) { "safeViewportWidthPx must be non-negative" }
-    
+
     val baseMin = maxOf(0, policyMinWidthPx)
     val baseMax = if (policyMaxWidthPx > 0) policyMaxWidthPx else safeViewportWidthPx
-
     val finalMax = minOf(baseMax, safeViewportWidthPx)
 
-    var finalMin = baseMin
     if (matchAnchorWidth) {
-        val positiveAnchorWidth = maxOf(0, anchorWidth)
-        finalMin = maxOf(baseMin, positiveAnchorWidth)
+        val resolvedAnchorWidth = maxOf(baseMin, maxOf(0, anchorWidth))
+            .coerceAtMost(finalMax)
+        return AdaptiveResolvedMenuWidth(
+            minWidth = resolvedAnchorWidth,
+            maxWidth = resolvedAnchorWidth,
+        )
     }
 
-    // Sanity clamp so min is never greater than max
-    finalMin = minOf(finalMin, finalMax)
-
+    val finalMin = minOf(baseMin, finalMax)
     return AdaptiveResolvedMenuWidth(
         minWidth = finalMin,
         maxWidth = finalMax

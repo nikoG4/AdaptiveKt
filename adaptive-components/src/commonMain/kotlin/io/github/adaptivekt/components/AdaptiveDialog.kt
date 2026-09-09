@@ -93,8 +93,8 @@ public fun AdaptiveDialog(
         ) {
             Box(
                 modifier = modifier
-                    .fillMaxWidth()
                     .widthIn(max = AdaptiveOverlayDefaults.DialogMaxWidth)
+                    .fillMaxWidth()
                     .heightIn(max = AdaptiveOverlayDefaults.DialogMaxHeight)
                     .clip(AdaptiveComponentDefaults.MediumShape)
                     .background(AdaptiveComponentDefaults.Surface)

@@ -327,7 +327,7 @@ private fun <T, K : Any> AdaptiveDataTable(
                 val key = if (includeSelection) rowKey(item) else null
                 val isSelected = if (key != null) key in selectionState.selectedKeys else false
                 val isEnabled = rowEnabled(item)
-                
+
                 val onSelectionClick: (() -> Unit)? = if (includeSelection && isEnabled && key != null) {
                     {
                         val modifiers = windowInfo.keyboardModifiers
@@ -396,7 +396,7 @@ private fun <T> AdaptiveDataTableRow(
     val baseBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
     val rowBackground = if (!isHeader && isSelected) AdaptiveTheme.colors.primarySubtle else baseBackground
     val rowInteractionSource = remember { MutableInteractionSource() }
-    
+
     val canClickRow = !isHeader && isEnabled && (onItemClick != null || onRowSelectionClick != null)
 
     val rowModifier = Modifier
@@ -424,12 +424,13 @@ private fun <T> AdaptiveDataTableRow(
         )
 
     val weights = columns.map { normalizeColumnWeight(it.weight) }
-    
+    val actionColumnWidth = 136.dp
+
     WeightedDataRow(
-        weights = weights, 
+        weights = weights,
         modifier = rowModifier,
         leadingWidth = if (includeSelection) 48.dp else null,
-        trailingWidth = if (includeActions) 80.dp else null
+        trailingWidth = if (includeActions) actionColumnWidth else null
     ) {
         if (includeSelection) {
             Box(
@@ -466,7 +467,9 @@ private fun <T> AdaptiveDataTableRow(
 
         if (includeActions) {
             Box(
-                modifier = Modifier.width(80.dp).padding(start = AdaptiveTokens.Spacing.Small),
+                modifier = Modifier
+                    .width(actionColumnWidth)
+                    .padding(start = AdaptiveTokens.Spacing.Medium),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 if (isHeader) {
@@ -494,19 +497,19 @@ private fun WeightedDataRow(
             val density = this
             val leadingPx = leadingWidth?.roundToPx() ?: 0
             val trailingPx = trailingWidth?.roundToPx() ?: 0
-            
+
             val totalFixedPx = leadingPx + trailingPx
             val availableWidthForWeights = (constraints.maxWidth.coerceAtLeast(constraints.minWidth) - totalFixedPx).coerceAtLeast(0)
-            
+
             val normalizedWeights = weights.ifEmpty { List(measurables.size) { 1f } }
             val totalWeight = normalizedWeights.sum().takeIf { it > 0f } ?: measurables.size.toFloat()
-            
+
             val widths = mutableListOf<Int>()
-            
+
             if (leadingWidth != null) {
                 widths.add(leadingPx)
             }
-            
+
             val weightCount = weights.size
             for (i in 0 until weightCount) {
                 val weight = normalizedWeights[i]
@@ -519,7 +522,7 @@ private fun WeightedDataRow(
                     widths.add((availableWidthForWeights * weight / totalWeight).toInt().coerceAtLeast(0))
                 }
             }
-            
+
             if (trailingWidth != null) {
                 widths.add(trailingPx)
             }
@@ -624,21 +627,21 @@ private fun <T, K : Any> AdaptiveDataCards(
                 )
             }
         }
-    
+
         items.forEach { item ->
             val key = if (includeSelection) rowKey(item) else null
             val isSelected = if (key != null) key in selectionState.selectedKeys else false
             val isEnabled = rowEnabled(item)
-            
+
             val canClickCard = isEnabled && (onItemClick != null || includeSelection)
-            
+
             AdaptiveCard(
                 modifier = Modifier.fillMaxWidth().then(
                     if (!isEnabled) Modifier.alpha(0.5f) else Modifier
                 ),
                 contentPadding = PaddingValues(AdaptiveTokens.Spacing.Medium),
                 onClick = if (canClickCard) {
-                    { 
+                    {
                         if (includeSelection && key != null && (rowClickBehavior == AdaptiveDataRowClickBehavior.Select || rowClickBehavior == AdaptiveDataRowClickBehavior.SelectAndActivate)) {
                             val modifiers = windowInfo.keyboardModifiers
                             val operation = resolveAdaptiveRowSelectionOperation(
@@ -748,7 +751,7 @@ private fun <T, K : Any> AdaptiveDataCards(
                             metaCols.forEach { col ->
                                 MetadataRow(column = col.column, item = item)
                             }
-                            
+
                             MobileActions(rowActions = rowActions, item = item)
                         }
                     }
@@ -792,7 +795,10 @@ private fun <T> DesktopActions(
 ) {
     if (rowActions.isEmpty()) return
 
-    Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         rowActions
             .filter { it.priority != AdaptiveActionPriority.Overflow }
             .forEach { action ->
@@ -889,17 +895,18 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
     val density = LocalDensity.current
     val menuWidth = 148.dp
+    val triggerSize = 32.dp
     val popupOffset = IntOffset(
         x = 0,
-        y = with(density) { (AdaptiveTokens.Sizes.ButtonHeight + AdaptiveTokens.Spacing.Small).roundToPx() },
+        y = with(density) { (triggerSize + AdaptiveTokens.Spacing.Small).roundToPx() },
     )
 
     Box {
         AdaptiveIconButton(
             onClick = { setExpanded(!expanded) },
-            size = AdaptiveTokens.Sizes.ButtonHeight,
+            size = triggerSize,
         ) {
-            AdaptiveIcons.MoreVertical(size = 18.dp, tint = AdaptiveTheme.colors.primaryText)
+            AdaptiveIcons.MoreVertical(size = 16.dp, tint = AdaptiveTheme.colors.textSecondary)
         }
         if (expanded) {
             val shape = AdaptiveTheme.shapes.medium
@@ -921,8 +928,8 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
                             text = action.label,
                             destructive = action.destructive,
                             onClick = {
-                                    action.onClick(item)
-                                    setExpanded(false)
+                                action.onClick(item)
+                                setExpanded(false)
                             },
                         )
                     }
