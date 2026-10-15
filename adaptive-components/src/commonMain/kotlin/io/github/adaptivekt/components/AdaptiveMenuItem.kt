@@ -1,10 +1,14 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,8 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
@@ -40,31 +44,43 @@ public fun AdaptiveMenuItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
     val shape = AdaptiveComponentDefaults.MediumShape
     val background = when {
         !enabled -> androidx.compose.ui.graphics.Color.Transparent
-        destructive && hovered -> AdaptiveTheme.colors.dangerSubtle
+        destructive && (hovered || focused) -> AdaptiveTheme.colors.dangerSubtle
         destructive -> androidx.compose.ui.graphics.Color.Transparent
-        hovered -> AdaptiveComponentDefaults.SurfaceSubtle
+        hovered || focused -> AdaptiveComponentDefaults.SurfaceSubtle
         else -> androidx.compose.ui.graphics.Color.Transparent
     }
     val contentColor = if (destructive) AdaptiveComponentDefaults.Danger else AdaptiveComponentDefaults.Text
+    val motionTokens = AdaptiveTheme.motion
+    val transitionMs = motionTokens.durationMillis(motionTokens.fastMillis)
+    val backgroundColor by animateColorAsState(
+        targetValue = background,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "backgroundColor",
+    )
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(background, shape)
-            .then(if (enabled) Modifier.hoverable(interactionSource = interactionSource) else Modifier)
-            .then(if (enabled) Modifier.adaptiveInteractiveCursor() else Modifier)
-            .then(if (enabled) Modifier.clickable(
+            .background(backgroundColor, shape)
+            .border(
+                if (focused && enabled) AdaptiveTheme.states.focusBorderWidth else 0.dp,
+                if (focused && enabled) AdaptiveTheme.colors.focusRing else androidx.compose.ui.graphics.Color.Transparent,
+                shape,
+            )
+            .hoverable(interactionSource = interactionSource, enabled = enabled)
+            .adaptiveInteractiveCursor(enabled)
+            .clickable(
                 interactionSource = interactionSource,
                 indication = null,
+                enabled = enabled,
+                role = Role.Button,
                 onClick = onClick,
-            ) else Modifier)
-            .semantics { 
-                if (!enabled) disabled() 
-            }
+            )
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small)
             .then(if (!enabled) Modifier.alpha(0.5f) else Modifier),
         horizontalArrangement = Arrangement.Start,

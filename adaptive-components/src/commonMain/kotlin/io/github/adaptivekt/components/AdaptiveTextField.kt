@@ -1,6 +1,8 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -22,12 +24,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.AdaptiveTheme
 
 /**
  * Foundation text input component with label, placeholder, disabled state and validation message.
@@ -60,9 +66,17 @@ public fun AdaptiveTextField(
     val hasError = !validationMessage.isNullOrBlank()
     val border = when {
         hasError -> AdaptiveComponentDefaults.Danger
-        focused -> AdaptiveComponentDefaults.Primary
+        focused -> AdaptiveTheme.colors.focusRing
         else -> AdaptiveComponentDefaults.BorderStrong
     }
+
+    val motionTokens = AdaptiveTheme.motion
+    val transitionMs = motionTokens.durationMillis(motionTokens.fastMillis)
+    val borderColor by animateColorAsState(
+        targetValue = border,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "borderColor",
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (label != null) {
@@ -85,7 +99,7 @@ public fun AdaptiveTextField(
                 .heightIn(min = AdaptiveTokens.Sizes.ButtonHeight)
                 .clip(shape)
                 .background(if (enabled) AdaptiveComponentDefaults.Surface else AdaptiveComponentDefaults.DisabledSurface, shape)
-                .border(1.dp, border, shape)
+                .border(if (focused) AdaptiveTheme.states.focusBorderWidth else 1.dp, borderColor, shape)
                 .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -98,7 +112,12 @@ public fun AdaptiveTextField(
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics {
+                        if (label != null) contentDescription = label
+                        if (hasError) error(validationMessage.orEmpty())
+                    },
                 enabled = enabled,
                 textStyle = TextStyle(
                     fontSize = 14.sp,
