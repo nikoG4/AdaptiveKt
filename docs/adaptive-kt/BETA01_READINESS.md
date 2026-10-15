@@ -1,0 +1,37 @@
+# 0.2.0-beta01 release gates
+
+This is a verification checklist, not a statement that AdaptiveKt is beta-ready.
+Prefer hardening existing public APIs over expanding the component catalog.
+
+## API contract
+- [ ] Review public naming, slots, defaults, overloads, and module boundaries.
+- [ ] Publish a beta compatibility/migration policy and KDoc for core API usage.
+
+## Interaction and accessibility
+- [ ] Audit focus, keyboard, touch and semantics in selects, menus, dialogs, forms and navigation.
+- [ ] Verify reduced-motion behavior for each migrated animation.
+
+## Platform support
+- [ ] Validate consumer builds and rendering on Desktop/JVM, Android and Web/Wasm.
+- [ ] Validate iOS publication AND native app rendering on macOS before claiming support.
+- [ ] Document known unsupported platform functionality.
+
+## Regression and docs
+- [ ] Review light/dark screenshot baselines at compact, medium and expanded sizes.
+- [ ] Graduate critical interaction/visual checks to release blockers.
+- [ ] Check install docs, end-to-end examples and common customizations.
+
+## Release
+- [ ] One clean CI validation of the beta commit and a clean consumer smoke test.
+- [ ] Verify signed artifacts published on Maven Central.
+- [ ] Tag the beta with changelog and migration notes.
+
+## Minimal Actions policy
+
+Accumulate related changes before pushing. Prefer static/local verification,
+run CI once for a cohesive PR, inspect failed jobs before any rerun, and avoid
+manually triggering publishing or Pages pipelines during development.
+
+Existing infrastructure: published alpha, seven public modules, several demos,
+documentation site, release workflow, and CI. This milestone starts with visual
+elevation/motion tokens; none of the remaining gates are marked as verified yet.

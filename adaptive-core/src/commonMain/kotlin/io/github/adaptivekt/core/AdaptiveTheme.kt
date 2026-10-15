@@ -10,6 +10,8 @@ private val LocalAdaptiveColors = staticCompositionLocalOf { AdaptiveColorScheme
 private val LocalAdaptiveShapes = staticCompositionLocalOf { AdaptiveShapeScheme.default() }
 private val LocalAdaptiveTypography = staticCompositionLocalOf { AdaptiveTypography.default() }
 private val LocalAdaptiveStates = staticCompositionLocalOf { AdaptiveStateScheme.default() }
+private val LocalAdaptiveElevations = staticCompositionLocalOf { AdaptiveElevationScheme.defaultLight() }
+private val LocalAdaptiveMotion = staticCompositionLocalOf { AdaptiveMotionScheme.default() }
 
 /**
  * Root theme provider that supplies colors, shapes, typography, and state tokens to the composition.
@@ -19,6 +21,8 @@ private val LocalAdaptiveStates = staticCompositionLocalOf { AdaptiveStateScheme
  * @param typography Typography defaults for labels, body text, and headings.
  * @param states State tokens for hover, pressed, selected, disabled, and focus behaviors.
  * @param mode Theme mode used when colorScheme is not provided. System follows the platform color scheme.
+ * @param elevations Optional elevation scheme; defaults follow the selected light/dark mode.
+ * @param motion Shared animation durations and explicit reduced-motion policy.
  * @param content The UI subtree that consumes the theme values.
  */
 @Composable
@@ -28,12 +32,20 @@ public fun AdaptiveTheme(
     typography: AdaptiveTypography = AdaptiveTypography.default(),
     states: AdaptiveStateScheme = AdaptiveStateScheme.default(),
     mode: AdaptiveThemeMode = AdaptiveThemeMode.System,
+    elevations: AdaptiveElevationScheme? = null,
+    motion: AdaptiveMotionScheme = AdaptiveMotionScheme.default(),
     content: @Composable () -> Unit,
 ) {
-    val resolvedColorScheme = colorScheme ?: if (resolveAdaptiveThemeDarkMode(mode, isSystemInDarkTheme())) {
+    val isDark = resolveAdaptiveThemeDarkMode(mode, isSystemInDarkTheme())
+    val resolvedColorScheme = colorScheme ?: if (isDark) {
         AdaptiveColorSchemes.defaultDark()
     } else {
         AdaptiveColorSchemes.defaultLight()
+    }
+    val resolvedElevations = elevations ?: if (isDark) {
+        AdaptiveElevationScheme.defaultDark()
+    } else {
+        AdaptiveElevationScheme.defaultLight()
     }
 
     CompositionLocalProvider(
@@ -41,6 +53,8 @@ public fun AdaptiveTheme(
         LocalAdaptiveShapes provides shapes,
         LocalAdaptiveTypography provides typography,
         LocalAdaptiveStates provides states,
+        LocalAdaptiveElevations provides resolvedElevations,
+        LocalAdaptiveMotion provides motion,
         content = content,
     )
 }
@@ -65,4 +79,14 @@ public object AdaptiveTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalAdaptiveStates.current
+
+    public val elevations: AdaptiveElevationScheme
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAdaptiveElevations.current
+
+    public val motion: AdaptiveMotionScheme
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAdaptiveMotion.current
 }

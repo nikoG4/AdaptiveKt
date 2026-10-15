@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Shared elevation and motion theme schemes, accessible through AdaptiveTheme.
+- Opt-in elevation for AdaptiveSurface, plus new card elevation levels and beta milestone docs.
+- Pure tests for visual elevation/timing tokens.
 - `AdaptiveSelectionArea` for opt-in selectable text in content-heavy surfaces without making controls selectable by default.
 - `AdaptiveOverlayDefaults` for dialog sizing, spacing and overlay policy.
 - `Modifier.adaptiveInteractiveCursor` and `AdaptiveInteractionDefaults` for shared pointer/hand cursor behavior on interactive AdaptiveKt controls.
@@ -20,6 +23,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- AdaptiveCard now defaults to subtle Low elevation (use None to restore its old flat style).
 - `AdaptiveCard` and `AdaptiveDialog` now expose opt-in content selection for static/readable body content.
 - Clickable AdaptiveKt controls now consistently request an interactive cursor on pointer-capable platforms while static content and text inputs keep their default cursor.
 - AI Workspace Chats and Prompt Library now use pane-aware list primitives so list items fill the useful pane width.
