@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveElevationLevel
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -29,7 +30,11 @@ public fun AdaptiveSurface(
     elevation: AdaptiveElevationLevel = AdaptiveElevationLevel.None,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val shape = AdaptiveComponentDefaults.MediumShape
+    val shape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+        AdaptiveComponentDefaults.LargeShape
+    } else {
+        AdaptiveComponentDefaults.MediumShape
+    }
     val elevationTokens = AdaptiveTheme.elevations
     val surfaceColor = if (elevation == AdaptiveElevationLevel.None) {
         AdaptiveComponentDefaults.Surface

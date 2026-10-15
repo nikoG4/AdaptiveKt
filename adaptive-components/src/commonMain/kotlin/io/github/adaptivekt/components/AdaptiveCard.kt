@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveElevationLevel
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
@@ -38,7 +39,11 @@ public fun AdaptiveCard(
     elevation: AdaptiveElevationLevel = AdaptiveElevationLevel.Low,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = AdaptiveComponentDefaults.MediumShape
+    val shape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+        AdaptiveComponentDefaults.LargeShape
+    } else {
+        AdaptiveComponentDefaults.MediumShape
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveColorScheme
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
@@ -78,7 +79,11 @@ public fun AdaptiveButton(
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val shape = AdaptiveComponentDefaults.PillShape
+    val shape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+        AdaptiveComponentDefaults.MediumShape
+    } else {
+        AdaptiveComponentDefaults.PillShape
+    }
     val palette = AdaptiveTheme.colors
     val colors = buttonColors(variant, enabled, hovered, pressed, palette)
     val metrics = buttonMetrics(size)
@@ -194,7 +199,7 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Secondary -> ButtonColors(
             background = when {
-                pressed -> colorScheme.surfaceRaised
+                pressed -> lerp(colorScheme.surfaceMuted, colorScheme.primarySubtle, 0.45f)
                 hovered -> colorScheme.surfaceRaised
                 else -> colorScheme.surfaceMuted
             },
@@ -215,8 +220,8 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Danger -> ButtonColors(
             background = when {
-                pressed -> colorScheme.dangerSubtle
-                hovered -> colorScheme.dangerSubtle
+                pressed -> lerp(colorScheme.dangerSubtle, colorScheme.danger, 0.20f)
+                hovered -> lerp(colorScheme.dangerSubtle, colorScheme.danger, 0.08f)
                 else -> colorScheme.dangerSubtle
             },
             content = colorScheme.danger,

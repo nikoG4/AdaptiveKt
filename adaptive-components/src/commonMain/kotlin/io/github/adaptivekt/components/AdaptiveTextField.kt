@@ -67,7 +67,7 @@ public fun AdaptiveTextField(
     val border = when {
         hasError -> AdaptiveComponentDefaults.Danger
         focused -> AdaptiveTheme.colors.focusRing
-        else -> AdaptiveComponentDefaults.BorderStrong
+        else -> AdaptiveComponentDefaults.Border
     }
 
     val motionTokens = AdaptiveTheme.motion
@@ -82,11 +82,7 @@ public fun AdaptiveTextField(
         if (label != null) {
             BasicText(
                 text = label,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.label.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
