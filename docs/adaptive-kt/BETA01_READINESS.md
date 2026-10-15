@@ -57,3 +57,13 @@ The first draft-PR CI attempt failed before compilation because the previous
 Android setup action tried to install the removed SDK `tools` package.
 The workflow now uses android-actions/setup-android@v4, which avoids the
 removed package. Build validation remains **pending** until a new CI run passes.
+
+## Phase 1: visual preset rollout
+
+- [x] Added selectable Modern/Classic themes and kept app-level token overrides.
+- [x] Updated button corners, card/surface shapes and input labels to use theme values.
+- [x] Added side-by-side real Compose comparisons in the component gallery.
+- [x] Added a modern color contrast regression guard and style token tests.
+- [ ] Review rendered screenshot output on light/dark, compact/expanded widths.
+- [ ] Check that the gallery and all public modules build after the visual changes.
+- [ ] Validate focus rings, contrast and shadow clipping on Web/Wasm and Android.

@@ -2,6 +2,32 @@
 
 This is an incremental Compose-native design foundation, **not** a finished UI overhaul.
 
+## Modern visual preset
+
+The modern preset is the new default in the beta development branch.
+It focuses on the illustrated admin and communication mockups:
+balanced blue accents, soft but deliberate shadows, white/pale panels,
+dark navy alternatives, approachable rounded corners, crisp readable type,
+and quick interactions. It remains entirely Compose Multiplatform code.
+
+```kotlin
+AdaptiveTheme(visualStyle = AdaptiveVisualStyle.Modern) {
+    AdaptiveCard(elevation = AdaptiveElevationLevel.Medium) {
+        AdaptiveButton(text = "Continue", onClick = {})
+    }
+}
+```
+
+Use `AdaptiveVisualStyle.Classic` for the previous alpha look, or customize
+`colorScheme`, `shapes`, `typography`, `states` and `elevations` without
+giving up the rest of the preset. The default semantic palette and the Modern
+preset are both preserved as public helpers. The demo now has an explicit
+Modern/Classic switch on expanded widths, and the UI Kit renders a comparison
+of both presets even on compact screens.
+
+The preset is an incremental style foundation; real screenshots, polish,
+motion accessibility and user-testing are still mandatory for beta.
+
 ## Elevation
 
 AdaptiveTheme.elevations exposes configurable light/dark elevations: None, Low, Medium, High, Floating.

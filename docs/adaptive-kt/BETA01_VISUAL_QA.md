@@ -42,3 +42,21 @@ Use the existing capture tooling once on the reviewed commit, not repeatedly
 per minor UI tweak. In CI, draft PRs skip expensive visual/demo jobs. Mark the PR
 ready for review only when the source changes have been consolidated and a full
 visual validation run is justified.
+
+## Modern / Classic visual comparison
+
+The admin demo defaults to Modern; expanded navigation top bars expose a
+Modern/Classic switch. The UI Kit Cards route and main component gallery
+render side-by-side independent preview components under the corresponding
+AdaptiveTheme. Use these as comparison baselines for both color modes.
+
+- [ ] Modern vs Classic has distinct card shape and button shape.
+- [ ] Modern palette uses intended background/surface hierarchy in Light and Dark.
+- [ ] Cards/elevated dropdowns cast shadows without clipping against adjacent panels.
+- [ ] Primary, secondary and danger states remain readable on hover/press.
+- [ ] Input labels, section headers and panel headings have consistent hierarchy.
+- [ ] Controls remain reachable on compact layouts (gallery rows scroll horizontally).
+- [ ] Theme toggling does not switch to an inconsistent elevation scheme.
+
+Record screenshot hashes and the tested commit SHA; the visual capture job is
+advisory, so human inspection remains a gate before merging.

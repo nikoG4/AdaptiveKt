@@ -13,11 +13,17 @@ import kotlin.test.assertTrue
 class AdaptiveDefaultPaletteContrastTest {
     @Test
     fun defaultThemePrimaryTextMeetsFourPointFiveContrast() {
-        for (scheme in listOf(AdaptiveColorSchemes.defaultLight(), AdaptiveColorSchemes.defaultDark())) {
+        for (scheme in listOf(
+            AdaptiveColorSchemes.defaultLight(),
+            AdaptiveColorSchemes.defaultDark(),
+            AdaptiveVisualPresets.modernLight(),
+            AdaptiveVisualPresets.modernDark(),
+        )) {
             assertTrue(contrast(scheme.textPrimary, scheme.background) >= 4.5)
             assertTrue(contrast(scheme.textPrimary, scheme.surface) >= 4.5)
             assertTrue(contrast(scheme.textPrimary, scheme.surfaceRaised) >= 4.5)
             assertTrue(contrast(scheme.textInverse, scheme.primary) >= 4.5)
+            assertTrue(contrast(scheme.textSecondary, scheme.surface) >= 4.5)
         }
     }
 

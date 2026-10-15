@@ -25,7 +25,8 @@ The UI defaults are intentionally more polished:
 | --- | --- | --- |
 | AdaptiveCard | Flat framed surface | Low elevation by default; pass elevation = AdaptiveElevationLevel.None for flat style |
 | AdaptiveSurface | Flat frame | Still flat by default; optional elevation |
-| AdaptiveTheme | Colors, shapes, typography, states | Adds optional elevations and motion; trailing lambda remains |
+| AdaptiveTheme | Colors, shapes, typography, states | Adds elevations, motion and Modern/Classic styling; trailing lambda still works |
+| Visual defaults | Alpha appearance | Modern is the default; pass `visualStyle = AdaptiveVisualStyle.Classic` to restore it |
 | AdaptiveIconButton | Icon-only interaction | Optional contentDescription for accessibility; use for every icon-only action |
 | AdaptiveTabs | Clickable UI row | Selectable tab semantics with animated state |
 | AdaptiveDialog | Immediate display | Animated entrance; caller still owns dismissal |
@@ -42,3 +43,31 @@ does not automatically read an OS reduced-motion flag for the application.
 Confirm these contracts in real consumers, add migration notes for every future
 breaking API change, and run platform verification. Draft PR status is not an
 indicator that binary/API compatibility has been tested.
+
+## Preset migration examples
+
+```kotlin
+// New premium baseline, light/dark automatically follows the system.
+AdaptiveTheme {
+    MyApp()
+}
+
+// Previous alpha visual defaults without reverting the new APIs.
+AdaptiveTheme(visualStyle = AdaptiveVisualStyle.Classic) {
+    MyApp()
+}
+
+// App-specific branding takes precedence over either preset.
+AdaptiveTheme(
+    visualStyle = AdaptiveVisualStyle.Modern,
+    colorScheme = AdaptiveVisualPresets.modernLight().copy(primary = brandColor),
+) {
+    MyApp()
+}
+```
+
+This is a visual default change made **before** the first beta.
+The theme parameter types for shapes/typography/states now accept null as an
+internal indication to use the selected style defaults. Callers still pass
+non-null customization values as before. Platform runtime verification is
+still required before claiming a stable compatibility contract.

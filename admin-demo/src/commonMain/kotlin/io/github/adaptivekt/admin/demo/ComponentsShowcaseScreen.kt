@@ -993,7 +993,17 @@ private fun ShowcaseCard(
     content: @Composable () -> Unit,
 ) {
     AdaptiveCard {
-        AdaptiveSectionHeader(title = title, description = description)
+        BasicText(
+            text = title,
+            style = AdaptiveTheme.typography.subtitle.copy(color = AdaptiveTheme.colors.textPrimary),
+            maxLines = 2,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+        BasicText(
+            text = description,
+            style = AdaptiveTheme.typography.bodySmall.copy(color = AdaptiveTheme.colors.textMuted),
+            maxLines = 3,
+        )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         content()
     }
