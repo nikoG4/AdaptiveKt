@@ -73,3 +73,11 @@ elevation levels. Review it in both themes, with keyboard and narrow widths.
 The code has not been tested on all targets. Focus behavior may differ across
 Wasm, Android and iOS. Overlay and popup focus traps, reduced-motion OS detection,
 locale-specific accessibility text and visual baselines remain beta release gates.
+
+## Review documents
+
+See the [beta compatibility proposal](BETA01_COMPATIBILITY.md) for source
+migration rules and the [visual QA matrix](BETA01_VISUAL_QA.md) for screenshots
+and manual interaction checks. These documents are more important than a
+single attractive mockup: the visual language must remain functional across
+touch, keyboard, desktop and mobile.

@@ -1,5 +1,9 @@
 # 0.2.0-beta01 release gates
 
+Supporting documents: [compatibility proposal](BETA01_COMPATIBILITY.md),
+[visual QA matrix](BETA01_VISUAL_QA.md), and
+[release runbook](BETA01_RELEASE_RUNBOOK.md).
+
 This is a verification checklist, not a statement that AdaptiveKt is beta-ready.
 Prefer hardening existing public APIs over expanding the component catalog.
 
@@ -46,3 +50,10 @@ elevation/motion tokens; none of the remaining gates are marked as verified yet.
 - [ ] Confirm compilation and smoke test behavior on actual supported targets.
 - [ ] Check dialog stacking, keyboard traversal, and screen reader behavior.
 - [ ] Capture visual baselines before declaring the interaction pass complete.
+
+## CI infrastructure follow-up
+
+The first draft-PR CI attempt failed before compilation because the previous
+Android setup action tried to install the removed SDK `tools` package.
+The workflow now uses android-actions/setup-android@v4, which avoids the
+removed package. Build validation remains **pending** until a new CI run passes.

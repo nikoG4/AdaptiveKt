@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### CI and quality
+- Upgrade Android setup to setup-android@v4 to avoid a removed SDK package.
+- Reduce draft PR CI consumption by delaying expensive showcase and visual
+  jobs until ready-for-review, while retaining core build checks.
+- Add common tests for default palette foreground/background contrast and
+  beta compatibility, visual QA and release documents.
+
 ### Added
 - Shared animated hover, press, focus and selection treatments for main controls.
 - Shadowed popup, dropdown and dialog surfaces with semantic elevation levels.
