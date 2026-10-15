@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveApp
 import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveThemeMode
 import io.github.adaptivekt.layout.AdaptiveContainer
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
@@ -32,6 +33,7 @@ public fun AdminDemoApp(
     AdaptiveApp {
         AdaptiveTheme(
             colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
+            mode = if (darkTheme) AdaptiveThemeMode.Dark else AdaptiveThemeMode.Light,
         ) {
             AdminDemoThemedApp(
                 initialScreen = initialScreen,

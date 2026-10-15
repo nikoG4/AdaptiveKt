@@ -8,6 +8,12 @@ Prioritize the [beta readiness gates](docs/adaptive-kt/BETA01_READINESS.md), and
 [visual foundations](docs/adaptive-kt/VISUAL_FOUNDATIONS.md) without broadening scope.
 Beta is an API and reliability milestone, not a component-count target.
 
+### Visual beta work in progress
+
+A cohesive interaction and elevation pass is being developed on a feature branch.
+It must pass component compilation, accessible interaction review, visual captures
+and consumer verification before a beta release.
+
 ## 0.1 Alpha Hardening
 
 - Document public APIs and current module boundaries.

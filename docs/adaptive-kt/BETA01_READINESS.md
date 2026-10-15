@@ -35,3 +35,14 @@ manually triggering publishing or Pages pipelines during development.
 Existing infrastructure: published alpha, seven public modules, several demos,
 documentation site, release workflow, and CI. This milestone starts with visual
 elevation/motion tokens; none of the remaining gates are marked as verified yet.
+
+## Implemented source work awaiting build + visual verification
+
+- [x] Define theme-driven elevation and motion values.
+- [x] Apply visual states to buttons, chips, tabs, checkboxes, inputs, cards and overlays.
+- [x] Add keyboard roles and selected semantics for representative controls.
+- [x] Show elevated surface variants in admin-demo UI Kit and label its icon controls.
+- [x] Pass explicit theme mode with the demo's manual dark/light toggle.
+- [ ] Confirm compilation and smoke test behavior on actual supported targets.
+- [ ] Check dialog stacking, keyboard traversal, and screen reader behavior.
+- [ ] Capture visual baselines before declaring the interaction pass complete.

@@ -57,6 +57,7 @@ import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveElevationLevel
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
@@ -206,11 +207,11 @@ private fun ButtonsSection() {
 private fun IconButtonsSection() {
     ShowcaseCard(title = "Icon buttons", description = "Shape-safe icon actions for overflow, clear, close, and disabled states.") {
         ShowcaseRow {
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Close() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.ChevronDown() }
-            AdaptiveIconButton(onClick = {}, enabled = false) {
+            AdaptiveIconButton(onClick = {}, contentDescription = "More options") { AdaptiveIcons.MoreVertical() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Close") { AdaptiveIcons.Close() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Search") { AdaptiveIcons.Search() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Expand") { AdaptiveIcons.ChevronDown() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Add", enabled = false) {
                 AdaptiveIcons.Plus(tint = AdaptiveTheme.colors.disabledText)
             }
         }
@@ -264,17 +265,27 @@ private fun AvatarsSection() {
 private fun CardsAndSurfacesSection() {
     var clicked by remember { mutableStateOf(false) }
 
-    ShowcaseCard(title = "Cards and surfaces", description = "Shared containers with professional defaults.") {
-        AdaptiveSurface {
+    ShowcaseCard(title = "Cards and surfaces", description = "Flat, raised and interactive containers using shared semantic elevation.") {
+        AdaptiveSurface(elevation = AdaptiveElevationLevel.None) {
             Column {
                 Label("AdaptiveSurface")
                 Body("A neutral panel for grouped admin content.")
             }
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-        AdaptiveCard {
-            Label("AdaptiveCard")
-            Body("Default padding, border, and radius.")
+        AdaptiveCard(elevation = AdaptiveElevationLevel.Low) {
+            Label("Low elevation — default card")
+            Body("Subtle shadow and raised surface for content sections.")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCard(elevation = AdaptiveElevationLevel.Medium) {
+            Label("Medium elevation")
+            Body("A visible sense of depth without a heavy outline.")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCard(elevation = AdaptiveElevationLevel.High) {
+            Label("High elevation")
+            Body("A stronger raised surface for visual comparisons.")
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveCard(onClick = { clicked = !clicked }) {

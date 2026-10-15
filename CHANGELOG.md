@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Shared animated hover, press, focus and selection treatments for main controls.
+- Shadowed popup, dropdown and dialog surfaces with semantic elevation levels.
+- Accordion expand/collapse/chevron animations driven by motion tokens.
+- Visual API compile fixture and improved elevation comparison in the admin UI Kit.
 - Shared elevation and motion theme schemes, accessible through AdaptiveTheme.
 - Opt-in elevation for AdaptiveSurface, plus new card elevation levels and beta milestone docs.
 - Pure tests for visual elevation/timing tokens.
@@ -34,6 +38,8 @@
 - Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.
 
 ### Fixed
+- The admin demo now pairs explicit light/dark palettes with matching theme modes so elevation colors follow its theme toggle.
+- Previously identical primary button idle/hover/press colors now have distinct states.
 - `AdaptiveDialog` now renders as a true modal overlay instead of inline layout-flow content that can push the page down.
 
 ## 0.1.0-alpha01
