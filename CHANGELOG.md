@@ -2,7 +2,34 @@
 
 ## Unreleased
 
+### Visual validation
+- Add reproducible Modern/Classic browser screenshots from the real admin-demo Web/Wasm canvas.
+- Capture cards, dashboards and dialogs at compact/desktop sizes in Light/Dark modes.
+- Classic cards now retain the original flat default; Modern cards retain Low elevation.
+
+### Visual design system
+- Add Modern and Classic preset themes; Modern is the new default, Classic preserves alpha appearance.
+- Introduce neutral premium light/dark colors, typographic hierarchy, corners and 2dp focus states.
+- Apply the new theme to cards, framed surfaces, buttons, text field labels and page headings.
+- Add an actual Compose side-by-side preset preview in the admin UI Kit with mobile-safe scrolling.
+- Give the admin demo a Modern/Classic switch alongside the Light/Dark toggle.
+- Add tests for the new style tokens and foreground contrast of both old and new palettes.
+
+### CI and quality
+- Upgrade Android setup to setup-android@v4 to avoid a removed SDK package.
+- Reduce draft PR CI consumption by delaying expensive showcase and visual
+  jobs until ready-for-review, while retaining core build checks.
+- Add common tests for default palette foreground/background contrast and
+  beta compatibility, visual QA and release documents.
+
 ### Added
+- Shared animated hover, press, focus and selection treatments for main controls.
+- Shadowed popup, dropdown and dialog surfaces with semantic elevation levels.
+- Accordion expand/collapse/chevron animations driven by motion tokens.
+- Visual API compile fixture and improved elevation comparison in the admin UI Kit.
+- Shared elevation and motion theme schemes, accessible through AdaptiveTheme.
+- Opt-in elevation for AdaptiveSurface, plus new card elevation levels and beta milestone docs.
+- Pure tests for visual elevation/timing tokens.
 - `AdaptiveSelectionArea` for opt-in selectable text in content-heavy surfaces without making controls selectable by default.
 - `AdaptiveOverlayDefaults` for dialog sizing, spacing and overlay policy.
 - `Modifier.adaptiveInteractiveCursor` and `AdaptiveInteractionDefaults` for shared pointer/hand cursor behavior on interactive AdaptiveKt controls.
@@ -20,6 +47,7 @@
 - README installation guidance for the published Maven Central alpha.
 
 ### Changed
+- AdaptiveCard now defaults to subtle Low elevation (use None to restore its old flat style).
 - `AdaptiveCard` and `AdaptiveDialog` now expose opt-in content selection for static/readable body content.
 - Clickable AdaptiveKt controls now consistently request an interactive cursor on pointer-capable platforms while static content and text inputs keep their default cursor.
 - AI Workspace Chats and Prompt Library now use pane-aware list primitives so list items fill the useful pane width.
@@ -30,6 +58,8 @@
 - Repositioned README around AdaptiveKt's alpha Maven Central publication and grant-readiness roadmap.
 
 ### Fixed
+- The admin demo now pairs explicit light/dark palettes with matching theme modes so elevation colors follow its theme toggle.
+- Previously identical primary button idle/hover/press colors now have distinct states.
 - `AdaptiveDialog` now renders as a true modal overlay instead of inline layout-flow content that can push the page down.
 
 ## 0.1.0-alpha01

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.AdaptiveTheme
 
 @Composable
 public fun AdaptiveSectionHeader(
@@ -31,11 +32,7 @@ public fun AdaptiveSectionHeader(
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = title,
-                style = TextStyle(
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.title.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -43,7 +40,7 @@ public fun AdaptiveSectionHeader(
                 Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
                 BasicText(
                     text = description,
-                    style = TextStyle(fontSize = 14.sp, color = AdaptiveComponentDefaults.MutedText),
+                    style = AdaptiveTheme.typography.body.copy(color = AdaptiveComponentDefaults.MutedText),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )

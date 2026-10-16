@@ -2,6 +2,18 @@
 
 AdaptiveKt is alpha-stage. This roadmap is intentionally realistic: the project is published, but not yet API-stable.
 
+## Next milestone: 0.2.0-beta01
+
+Prioritize the [beta readiness gates](docs/adaptive-kt/BETA01_READINESS.md), and evolve the
+[visual foundations](docs/adaptive-kt/VISUAL_FOUNDATIONS.md) without broadening scope.
+Beta is an API and reliability milestone, not a component-count target.
+
+### Visual beta work in progress
+
+A cohesive interaction and elevation pass is being developed on a feature branch.
+It must pass component compilation, accessible interaction review, visual captures
+and consumer verification before a beta release.
+
 ## 0.1 Alpha Hardening
 
 - Document public APIs and current module boundaries.

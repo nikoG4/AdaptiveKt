@@ -1,12 +1,15 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -22,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveColorScheme
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
@@ -72,28 +78,52 @@ public fun AdaptiveButton(
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val shape = AdaptiveComponentDefaults.PillShape
-    val colors = buttonColors(variant, enabled, hovered, pressed, AdaptiveTheme.colors)
+    val focused by interactionSource.collectIsFocusedAsState()
+    val shape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+        AdaptiveComponentDefaults.MediumShape
+    } else {
+        AdaptiveComponentDefaults.PillShape
+    }
+    val palette = AdaptiveTheme.colors
+    val colors = buttonColors(variant, enabled, hovered, pressed, palette)
     val metrics = buttonMetrics(size)
+    val motionTokens = AdaptiveTheme.motion
+    val transitionMs = motionTokens.durationMillis(motionTokens.fastMillis)
+    val backgroundColor by animateColorAsState(
+        targetValue = colors.background,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "backgroundColor",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = colors.content,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "contentColor",
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (focused && enabled) palette.focusRing else colors.border,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "borderColor",
+    )
 
     Box(
         modifier = modifier
             .heightIn(min = metrics.minHeight)
             .clip(shape)
-            .background(colors.background, shape)
-            .border(colors.borderWidth, colors.border, shape)
+            .background(backgroundColor, shape)
+            .border(if (focused && enabled) AdaptiveTheme.states.focusBorderWidth else colors.borderWidth, borderColor, shape)
             .hoverable(interactionSource = interactionSource, enabled = enabled)
             .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
+                role = Role.Button,
                 onClick = onClick,
             )
             .padding(horizontal = metrics.horizontalPadding, vertical = metrics.verticalPadding),
         contentAlignment = Alignment.Center,
     ) {
-        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides colors.content) {
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides contentColor) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -107,7 +137,7 @@ public fun AdaptiveButton(
                     style = TextStyle(
                         fontSize = metrics.fontSize,
                         fontWeight = FontWeight.SemiBold,
-                        color = colors.content,
+                        color = contentColor,
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -159,8 +189,8 @@ private fun buttonColors(
     return when (variant) {
         AdaptiveButtonVariant.Primary -> ButtonColors(
             background = when {
-                pressed -> colorScheme.primary
-                hovered -> colorScheme.primary
+                pressed -> lerp(colorScheme.primary, colorScheme.textPrimary, 0.20f)
+                hovered -> lerp(colorScheme.primary, colorScheme.textPrimary, 0.09f)
                 else -> colorScheme.primary
             },
             content = colorScheme.textInverse,
@@ -169,7 +199,7 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Secondary -> ButtonColors(
             background = when {
-                pressed -> colorScheme.surfaceRaised
+                pressed -> lerp(colorScheme.surfaceMuted, colorScheme.primarySubtle, 0.45f)
                 hovered -> colorScheme.surfaceRaised
                 else -> colorScheme.surfaceMuted
             },
@@ -190,8 +220,8 @@ private fun buttonColors(
 
         AdaptiveButtonVariant.Danger -> ButtonColors(
             background = when {
-                pressed -> colorScheme.dangerSubtle
-                hovered -> colorScheme.dangerSubtle
+                pressed -> lerp(colorScheme.dangerSubtle, colorScheme.danger, 0.20f)
+                hovered -> lerp(colorScheme.dangerSubtle, colorScheme.danger, 0.08f)
                 else -> colorScheme.dangerSubtle
             },
             content = colorScheme.danger,

@@ -1,6 +1,12 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
@@ -63,6 +72,12 @@ public fun AdaptiveAccordion(
     }
 
     val shape = AdaptiveComponentDefaults.MediumShape
+    val transitionMs = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.standardMillis)
+    val chevronAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "Accordion chevron",
+    )
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -75,7 +90,8 @@ public fun AdaptiveAccordion(
             modifier = Modifier
                 .fillMaxWidth()
                 .adaptiveInteractiveCursor()
-                .clickable { updateExpanded(!isExpanded) },
+                .semantics { stateDescription = if (isExpanded) "Expanded" else "Collapsed" }
+                .clickable(role = Role.Button) { updateExpanded(!isExpanded) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -102,10 +118,16 @@ public fun AdaptiveAccordion(
             AdaptiveIcons.ChevronDown(
                 size = 18.dp,
                 tint = AdaptiveTheme.colors.textSecondary,
-                modifier = Modifier.rotate(if (isExpanded) 180f else 0f),
+                modifier = Modifier.rotate(chevronAngle),
             )
         }
-        AnimatedVisibility(visible = isExpanded) {
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = expandVertically(animationSpec = tween(durationMillis = transitionMs)) +
+                fadeIn(animationSpec = tween(durationMillis = transitionMs)),
+            exit = shrinkVertically(animationSpec = tween(durationMillis = transitionMs)) +
+                fadeOut(animationSpec = tween(durationMillis = transitionMs)),
+        ) {
             Column(modifier = Modifier.padding(top = AdaptiveTokens.Spacing.Medium)) {
                 content()
             }

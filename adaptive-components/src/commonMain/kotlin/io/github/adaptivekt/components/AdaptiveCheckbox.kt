@@ -1,12 +1,15 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,19 @@ public fun AdaptiveCheckbox(
         else -> AdaptiveTheme.colors.borderStrong
     }
     
+    val motionTokens = AdaptiveTheme.motion
+    val transitionMs = motionTokens.durationMillis(motionTokens.fastMillis)
+    val animatedBackground by animateColorAsState(
+        targetValue = backgroundColor,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "animatedBackground",
+    )
+    val animatedBorder by animateColorAsState(
+        targetValue = borderColor,
+        animationSpec = tween(durationMillis = transitionMs),
+        label = "animatedBorder",
+    )
+
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minTouchTarget, minHeight = minTouchTarget)
@@ -76,8 +92,8 @@ public fun AdaptiveCheckbox(
             modifier = Modifier
                 .size(size)
                 .clip(shape)
-                .background(backgroundColor)
-                .border(1.dp, borderColor, shape),
+                .background(animatedBackground)
+                .border(1.dp, animatedBorder, shape),
             contentAlignment = Alignment.Center
         ) {
             if (state == ToggleableState.On) {

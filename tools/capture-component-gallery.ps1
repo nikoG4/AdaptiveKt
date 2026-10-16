@@ -71,9 +71,16 @@ try {
     Push-Location tools\docs-site-capture
     node .\capture-component-gallery.js $captureBaseUrl (Join-Path $root $OutputDir)
     $captureExitCode = $LASTEXITCODE
+    Write-Host "Capturing real Modern/Classic admin-demo surfaces..." -ForegroundColor Cyan
+    $betaOutputDir = Join-Path (Join-Path $root $OutputDir) "beta-ui-kit"
+    node .\capture-beta-ui-kit.js $captureBaseUrl $betaOutputDir
+    $betaCaptureExitCode = $LASTEXITCODE
     Pop-Location
     if ($captureExitCode -ne 0) {
         throw "Component gallery Playwright capture failed with exit code $captureExitCode."
+    }
+    if ($betaCaptureExitCode -ne 0) {
+        throw "Beta UI Kit Playwright capture failed with exit code $betaCaptureExitCode."
     }
 
     $resolvedOutputDir = Resolve-Path $OutputDir

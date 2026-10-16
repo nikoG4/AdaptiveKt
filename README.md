@@ -191,6 +191,34 @@ To build and stage this locally without committing the binary artifacts (which a
 .\tools\prepare-pages-site.ps1
 ```
 
+## Beta development (in progress)
+
+The 0.2.0-beta01 milestone is tracked in the
+[readiness checklist](docs/adaptive-kt/BETA01_READINESS.md),
+[compatibility proposal](docs/adaptive-kt/BETA01_COMPATIBILITY.md),
+[visual QA matrix](docs/adaptive-kt/BETA01_VISUAL_QA.md) and
+[release runbook](docs/adaptive-kt/BETA01_RELEASE_RUNBOOK.md).
+None of these documents implies that beta has shipped; 0.1.0-alpha01 remains
+the published release.
+
+## Modern visual design — beta development
+
+The default look on this development branch is a polished, Compose-native
+`AdaptiveVisualStyle.Modern` preset: coordinated palettes, shapes, typography
+and focus tokens in light and dark mode. The previous alpha appearance
+continues to be available:
+
+```kotlin
+AdaptiveTheme(visualStyle = AdaptiveVisualStyle.Classic) {
+    AppContent()
+}
+```
+
+The [visual foundations guide](docs/adaptive-kt/VISUAL_FOUNDATIONS.md) and
+[visual QA checklist](docs/adaptive-kt/BETA01_VISUAL_QA.md) explain the new
+tokens, gallery preview and remaining validation. This is **not** a published
+beta release.
+
 ## Project Status
 
 Current published version: `0.1.0-alpha01`.

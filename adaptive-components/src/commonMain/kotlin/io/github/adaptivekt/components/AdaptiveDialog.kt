@@ -1,6 +1,10 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,10 +25,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveElevationLevel
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
@@ -66,6 +76,9 @@ public fun AdaptiveDialog(
     content: @Composable () -> Unit,
 ) {
     val surfaceInteractionSource = remember { MutableInteractionSource() }
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
+    val enterDuration = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.emphasizedMillis)
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -91,11 +104,25 @@ public fun AdaptiveDialog(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = modifier
+            AnimatedVisibility(
+                visible = appeared,
+                enter = fadeIn(animationSpec = tween(durationMillis = enterDuration)) +
+                    scaleIn(
+                        initialScale = 0.98f,
+                        animationSpec = tween(durationMillis = enterDuration),
+                    ),
+            ) {
+                Box(
+                    modifier = modifier
                     .widthIn(max = AdaptiveOverlayDefaults.DialogMaxWidth)
                     .fillMaxWidth()
                     .heightIn(max = AdaptiveOverlayDefaults.DialogMaxHeight)
+                    .shadow(
+                        elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.Floating),
+                        shape = AdaptiveComponentDefaults.MediumShape,
+                        ambientColor = AdaptiveTheme.elevations.shadowColor,
+                        spotColor = AdaptiveTheme.elevations.shadowColor,
+                    )
                     .clip(AdaptiveComponentDefaults.MediumShape)
                     .background(AdaptiveComponentDefaults.Surface)
                     .border(1.dp, AdaptiveComponentDefaults.Border, AdaptiveComponentDefaults.MediumShape)
@@ -134,6 +161,7 @@ public fun AdaptiveDialog(
                         Spacer(modifier = Modifier.width(AdaptiveTokens.Spacing.Small))
                         confirmButton()
                     }
+                }
                 }
             }
         }

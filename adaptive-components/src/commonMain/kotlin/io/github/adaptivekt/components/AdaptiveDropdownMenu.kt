@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -31,6 +32,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import io.github.adaptivekt.core.AdaptiveTokens
+import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveElevationLevel
 
 public enum class AdaptiveDropdownPlacement {
     BottomStart,
@@ -111,6 +114,12 @@ public fun AdaptiveDropdownMenu(
     Column(
         modifier = modifier
             .widthIn(min = 180.dp, max = 280.dp)
+            .shadow(
+                elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.High),
+                shape = shape,
+                ambientColor = AdaptiveTheme.elevations.shadowColor,
+                spotColor = AdaptiveTheme.elevations.shadowColor,
+            )
             .clip(shape)
             .background(AdaptiveComponentDefaults.Surface, shape)
             .border(1.dp, AdaptiveComponentDefaults.Border, shape)
@@ -166,6 +175,12 @@ public fun AdaptiveAnchoredDropdownMenu(
                 Column(
                     modifier = menuModifier
                         .heightIn(max = maxHeight)
+                        .shadow(
+                            elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.High),
+                            shape = shape,
+                            ambientColor = AdaptiveTheme.elevations.shadowColor,
+                            spotColor = AdaptiveTheme.elevations.shadowColor,
+                        )
                         .clip(shape)
                         .background(AdaptiveComponentDefaults.Surface, shape)
                         .border(1.dp, AdaptiveComponentDefaults.Border, shape)

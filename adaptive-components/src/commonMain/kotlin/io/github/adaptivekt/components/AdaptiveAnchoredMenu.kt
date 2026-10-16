@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -30,6 +31,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveElevationLevel
 import kotlin.math.roundToInt
 
 internal class AdaptivePureAnchoredPositionProvider(
@@ -187,9 +189,15 @@ public fun <T> AdaptiveAnchoredMenuBox(
                     modifier = modifier
                         .widthIn(min = finalMinWidth, max = finalMaxWidth)
                         .heightIn(max = finalMaxHeight)
+                        .shadow(
+                            elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.High),
+                            shape = AdaptiveTheme.shapes.medium,
+                            ambientColor = AdaptiveTheme.elevations.shadowColor,
+                            spotColor = AdaptiveTheme.elevations.shadowColor,
+                        )
+                        .clip(AdaptiveTheme.shapes.medium)
                         .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.medium)
                         .border(1.dp, AdaptiveTheme.colors.border, AdaptiveTheme.shapes.medium)
-                        .clip(AdaptiveTheme.shapes.medium)
                 ) {
                     if (headerContent != null) {
                         headerContent()
