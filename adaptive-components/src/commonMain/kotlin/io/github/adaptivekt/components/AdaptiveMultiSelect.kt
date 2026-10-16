@@ -152,6 +152,10 @@ public fun <T> AdaptiveMultiSelect(
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
     var searchHasFocus by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(expanded, searchable) {
+        if (expanded && searchable) searchFocusRequester.requestFocus()
+    }
 
     val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
         if (searchable && onSearchQueryChange == null) {
@@ -198,38 +202,38 @@ public fun <T> AdaptiveMultiSelect(
     }
 
     val handleKeyEvent: (KeyEvent) -> Boolean = { event ->
-                resolveAdaptiveSelectKeyboardNavigation(
-                    event = event,
-                    isExpanded = expanded,
-                    onExpand = { onExpandedChange(true) },
-                    onCollapse = { 
-                        onExpandedChange(false)
-                        focusRequester.requestFocus() 
-                    },
-                    onNavigateNext = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
-                    },
-                    onNavigatePrevious = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
-                    },
-                    onNavigateFirst = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
-                    },
-                    onNavigateLast = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
-                    },
-                    onSelectHighlighted = {
-                        val highlighted = navState.highlightedKey
-                        if (highlighted != null) {
-                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
-                            if (optionToSelect != null && optionEnabled(optionToSelect)) {
-                                onSelectedOptionsChange(toggleOptionByKey(selectedOptions, optionToSelect, optionKey))
-                                // Multi-select does NOT collapse on enter by default
-                            }
-                        }
-                    },
-                    isSearchFocused = searchHasFocus
-                )
+        resolveAdaptiveSelectKeyboardNavigation(
+            event = event,
+            isExpanded = expanded,
+            onExpand = { onExpandedChange(true) },
+            onCollapse = { 
+                onExpandedChange(false)
+                focusRequester.requestFocus() 
+            },
+            onNavigateNext = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+            },
+            onNavigatePrevious = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+            },
+            onNavigateFirst = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
+            },
+            onNavigateLast = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
+            },
+            onSelectHighlighted = {
+                val highlighted = navState.highlightedKey
+                if (highlighted != null) {
+                    val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                    if (optionToSelect != null && optionEnabled(optionToSelect)) {
+                        onSelectedOptionsChange(toggleOptionByKey(selectedOptions, optionToSelect, optionKey))
+                        // Multi-select does NOT collapse on enter by default
+                    }
+                }
+            },
+            isSearchFocused = searchHasFocus
+        )
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -269,6 +273,7 @@ public fun <T> AdaptiveMultiSelect(
                         placeholder = "Search...",
                         onClear = { setEffectiveSearchQuery("") },
                         onFocusChanged = { searchHasFocus = it },
+                        inputFocusRequester = searchFocusRequester,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)

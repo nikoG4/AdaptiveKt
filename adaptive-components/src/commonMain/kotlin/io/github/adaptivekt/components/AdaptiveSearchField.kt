@@ -2,6 +2,7 @@ package io.github.adaptivekt.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
@@ -24,6 +25,7 @@ public fun AdaptiveSearchField(
     enabled: Boolean = true,
     onClear: (() -> Unit)? = null,
     onFocusChanged: ((Boolean) -> Unit)? = null,
+    inputFocusRequester: FocusRequester? = null,
 ) {
     AdaptiveTextField(
         value = value,
@@ -32,10 +34,11 @@ public fun AdaptiveSearchField(
         placeholder = placeholder,
         enabled = enabled,
         onInputFocusChanged = onFocusChanged,
+        inputFocusRequester = inputFocusRequester,
         leadingIcon = {
             AdaptiveIcons.Search(size = 16.dp, tint = AdaptiveTheme.colors.textMuted)
         },
-        trailingIcon = if (onClear != null && value.isNotEmpty()) {
+        trailingIcon = if (onClear != null && enabled && value.isNotEmpty()) {
             {
                 AdaptiveIconButton(
                     onClick = onClear,

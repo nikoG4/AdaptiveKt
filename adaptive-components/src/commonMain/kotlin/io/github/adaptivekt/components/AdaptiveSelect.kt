@@ -121,6 +121,10 @@ public fun <T> AdaptiveSelect(
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
     var searchHasFocus by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(expanded, searchable) {
+        if (expanded && searchable) searchFocusRequester.requestFocus()
+    }
 
     val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
         if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
@@ -170,39 +174,39 @@ public fun <T> AdaptiveSelect(
     }
 
     val handleKeyEvent: (KeyEvent) -> Boolean = { event ->
-                resolveAdaptiveSelectKeyboardNavigation(
-                    event = event,
-                    isExpanded = expanded,
-                    onExpand = { onExpandedChange(true) },
-                    onCollapse = {
+        resolveAdaptiveSelectKeyboardNavigation(
+            event = event,
+            isExpanded = expanded,
+            onExpand = { onExpandedChange(true) },
+            onCollapse = {
+                onExpandedChange(false)
+                focusRequester.requestFocus()
+            },
+            onNavigateNext = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+            },
+            onNavigatePrevious = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+            },
+            onNavigateFirst = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
+            },
+            onNavigateLast = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
+            },
+            onSelectHighlighted = {
+                val highlighted = navState.highlightedKey
+                if (highlighted != null) {
+                    val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                    if (optionToSelect != null && optionEnabled(optionToSelect)) {
+                        onSelectedOptionChange(optionToSelect)
                         onExpandedChange(false)
                         focusRequester.requestFocus()
-                    },
-                    onNavigateNext = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
-                    },
-                    onNavigatePrevious = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
-                    },
-                    onNavigateFirst = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
-                    },
-                    onNavigateLast = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
-                    },
-                    onSelectHighlighted = {
-                        val highlighted = navState.highlightedKey
-                        if (highlighted != null) {
-                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
-                            if (optionToSelect != null && optionEnabled(optionToSelect)) {
-                                onSelectedOptionChange(optionToSelect)
-                                onExpandedChange(false)
-                                focusRequester.requestFocus()
-                            }
-                        }
-                    },
-                    isSearchFocused = searchHasFocus
-                )
+                    }
+                }
+            },
+            isSearchFocused = searchHasFocus
+        )
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -242,6 +246,7 @@ public fun <T> AdaptiveSelect(
                         placeholder = "Search...",
                         onClear = { setEffectiveSearchQuery("") },
                         onFocusChanged = { searchHasFocus = it },
+                        inputFocusRequester = searchFocusRequester,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)
