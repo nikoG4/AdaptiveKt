@@ -67,3 +67,10 @@ removed package. Build validation remains **pending** until a new CI run passes.
 - [ ] Review rendered screenshot output on light/dark, compact/expanded widths.
 - [ ] Check that the gallery and all public modules build after the visual changes.
 - [ ] Validate focus rings, contrast and shadow clipping on Web/Wasm and Android.
+
+## Visual screenshot pipeline
+
+- [x] Add deterministic Modern/Classic startup parameter for admin-demo Wasm.
+- [x] Add 16-image screenshot matrix of real admin-demo UI Kit, dashboard and dialogs.
+- [ ] Run captures in the full ready-for-review Windows CI.
+- [ ] Inspect contact images for theme contrast, shadow clipping and layout defects.

@@ -30,13 +30,17 @@ import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.adaptiveInteractiveCursor
 
+/**
+ * An elevated panel. By default Modern cards use low elevation; Classic cards stay flat.
+ * Pass a non-null [elevation] to override the default in either visual style.
+ */
 @Composable
 public fun AdaptiveCard(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(AdaptiveTokens.Spacing.Large),
     onClick: (() -> Unit)? = null,
     contentSelectionEnabled: Boolean = false,
-    elevation: AdaptiveElevationLevel = AdaptiveElevationLevel.Low,
+    elevation: AdaptiveElevationLevel? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
@@ -49,7 +53,11 @@ public fun AdaptiveCard(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val elevationTokens = AdaptiveTheme.elevations
-    val baseElevation = elevationTokens.resolve(elevation)
+    val resolvedElevation = elevation ?: when (AdaptiveTheme.visualStyle) {
+        AdaptiveVisualStyle.Modern -> AdaptiveElevationLevel.Low
+        AdaptiveVisualStyle.Classic -> AdaptiveElevationLevel.None
+    }
+    val baseElevation = elevationTokens.resolve(resolvedElevation)
     val targetElevation = if (onClick != null && (hovered || focused) && !pressed) {
         baseElevation + elevationTokens.low
     } else {
@@ -60,7 +68,7 @@ public fun AdaptiveCard(
         animationSpec = tween(durationMillis = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.fastMillis)),
         label = "Card elevation",
     )
-    val surfaceColor = if (elevation == AdaptiveElevationLevel.None) {
+    val surfaceColor = if (resolvedElevation == AdaptiveElevationLevel.None) {
         AdaptiveComponentDefaults.Surface
     } else {
         AdaptiveTheme.colors.surfaceRaised

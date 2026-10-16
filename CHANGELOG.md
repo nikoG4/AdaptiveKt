@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Visual validation
+- Add reproducible Modern/Classic browser screenshots from the real admin-demo Web/Wasm canvas.
+- Capture cards, dashboards and dialogs at compact/desktop sizes in Light/Dark modes.
+- Classic cards now retain the original flat default; Modern cards retain Low elevation.
+
 ### Visual design system
 - Add Modern and Classic preset themes; Modern is the new default, Classic preserves alpha appearance.
 - Introduce neutral premium light/dark colors, typographic hierarchy, corners and 2dp focus states.

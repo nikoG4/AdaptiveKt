@@ -28,9 +28,10 @@ public fun AdminDemoApp(
     initialAccountMenuOpen: Boolean = false,
     initialDarkTheme: Boolean = false,
     contentScrollEnabled: Boolean = false,
+    initialModernStyle: Boolean = true,
 ) {
     var darkTheme by remember { mutableStateOf(initialDarkTheme) }
-    var modernStyle by remember { mutableStateOf(true) }
+    var modernStyle by remember(initialModernStyle) { mutableStateOf(initialModernStyle) }
     AdaptiveApp {
         AdaptiveTheme(
             mode = if (darkTheme) AdaptiveThemeMode.Dark else AdaptiveThemeMode.Light,

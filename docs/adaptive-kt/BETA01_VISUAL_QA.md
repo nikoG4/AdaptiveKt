@@ -60,3 +60,22 @@ AdaptiveTheme. Use these as comparison baselines for both color modes.
 
 Record screenshot hashes and the tested commit SHA; the visual capture job is
 advisory, so human inspection remains a gate before merging.
+
+## Automated admin-demo visual evidence
+
+The previous screenshot script covered docs-site component pages, not the real
+admin-demo Modern/Classic style comparison. The existing capture workflow now
+also runs `capture-beta-ui-kit.js` against the compiled `/demo/app/` route.
+
+The 16 targeted screenshots cover:
+- Cards: Modern and Classic, Light and Dark, compact and desktop
+- Dashboard: Modern, Light and Dark, compact and desktop
+- Open dialog: Modern, Light and Dark, compact and desktop
+
+Each screenshot uses explicit URL parameters `screen`, `theme`, and `style`.
+The capture saves PNGs and a JSON/Markdown manifest under
+`artifacts/screenshots/component-gallery/beta-ui-kit/`.
+
+A nonblank canvas and browser-runtime error checks are automatic, but screenshots
+still need a person to inspect visual consistency. Only a successful reviewed
+capture is evidence for the Web/Wasm visual QA gate.

@@ -23,7 +23,7 @@ The UI defaults are intentionally more polished:
 
 | Change | Old behavior | New behavior / migration |
 | --- | --- | --- |
-| AdaptiveCard | Flat framed surface | Low elevation by default; pass elevation = AdaptiveElevationLevel.None for flat style |
+| AdaptiveCard | Flat framed surface | Modern defaults to Low; Classic defaults to None; explicitly pass an elevation to override |
 | AdaptiveSurface | Flat frame | Still flat by default; optional elevation |
 | AdaptiveTheme | Colors, shapes, typography, states | Adds elevations, motion and Modern/Classic styling; trailing lambda still works |
 | Visual defaults | Alpha appearance | Modern is the default; pass `visualStyle = AdaptiveVisualStyle.Classic` to restore it |
