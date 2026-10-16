@@ -78,6 +78,18 @@ internal fun resolveAdaptiveSelectKeyAction(
     }
 }
 
+/** Shared local-vs-external query policy for Select and MultiSelect. */
+internal fun <T> resolveVisibleSelectOptions(
+    options: List<T>,
+    query: String,
+    searchable: Boolean,
+    externallyFiltered: Boolean,
+    optionLabel: (T) -> String,
+): List<T> {
+    if (!searchable || externallyFiltered || query.isEmpty()) return options
+    return options.filter { selectMatchesQuery(optionLabel(it), query) }
+}
+
 internal fun isSelectCommandPress(type: KeyEventType): Boolean = type == KeyEventType.KeyDown
 
 internal fun resolveAdaptiveSelectKeyboardNavigation(

@@ -154,14 +154,18 @@ public fun <T> AdaptiveMultiSelect(
     var searchHasFocus by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
-        if (searchable && onSearchQueryChange == null) {
-            filterMultiSelectOptions(options, effectiveSearchQuery, optionLabel)
-        } else {
-            options
-        }
+    val visibleOptions = remember(
+        options, searchable, effectiveSearchQuery, optionLabel, onSearchQueryChange,
+    ) {
+        resolveVisibleSelectOptions(
+            options = options,
+            query = effectiveSearchQuery,
+            searchable = searchable,
+            externallyFiltered = onSearchQueryChange != null,
+            optionLabel = optionLabel,
+        )
     }
-    
+
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
     
     // Key identity can change without the option list changing.
@@ -237,11 +241,7 @@ public fun <T> AdaptiveMultiSelect(
         if (label != null) {
             BasicText(
                 text = label,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.label.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

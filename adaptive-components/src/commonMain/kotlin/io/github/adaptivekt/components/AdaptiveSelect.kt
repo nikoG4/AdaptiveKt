@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -123,13 +124,16 @@ public fun <T> AdaptiveSelect(
     var searchHasFocus by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
-        if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
-            // Only filter locally if onSearchQueryChange is null (internal search)
-            options.filter { selectMatchesQuery(optionLabel(it), effectiveSearchQuery) }
-        } else {
-            options
-        }
+    val visibleOptions = remember(
+        options, searchable, effectiveSearchQuery, optionLabel, onSearchQueryChange,
+    ) {
+        resolveVisibleSelectOptions(
+            options = options,
+            query = effectiveSearchQuery,
+            searchable = searchable,
+            externallyFiltered = onSearchQueryChange != null,
+            optionLabel = optionLabel,
+        )
     }
 
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
@@ -210,11 +214,7 @@ public fun <T> AdaptiveSelect(
         if (label != null) {
             BasicText(
                 text = label,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.label.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
