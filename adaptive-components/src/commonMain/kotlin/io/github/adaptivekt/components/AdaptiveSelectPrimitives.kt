@@ -29,6 +29,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import io.github.adaptivekt.core.AdaptiveTheme
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +54,30 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
     return label.contains(query, ignoreCase = true)
 }
 
+/** A pure keyboard command that can be verified without a platform KeyEvent. */
+internal enum class AdaptiveSelectKeyAction { Expand, Collapse, Next, Previous, First, Last, Select }
+
+internal fun resolveAdaptiveSelectKeyAction(
+    key: Key,
+    isExpanded: Boolean,
+    isSearchFocused: Boolean,
+): AdaptiveSelectKeyAction? {
+    if (!isExpanded) return when (key) {
+        Key.DirectionDown, Key.Enter, Key.Spacebar -> AdaptiveSelectKeyAction.Expand
+        else -> null
+    }
+    return when (key) {
+        Key.Escape -> AdaptiveSelectKeyAction.Collapse
+        Key.DirectionDown -> AdaptiveSelectKeyAction.Next
+        Key.DirectionUp -> AdaptiveSelectKeyAction.Previous
+        Key.MoveHome -> if (isSearchFocused) null else AdaptiveSelectKeyAction.First
+        Key.MoveEnd -> if (isSearchFocused) null else AdaptiveSelectKeyAction.Last
+        Key.Enter -> AdaptiveSelectKeyAction.Select
+        Key.Spacebar -> if (isSearchFocused) null else AdaptiveSelectKeyAction.Select
+        else -> null
+    }
+}
+
 internal fun resolveAdaptiveSelectKeyboardNavigation(
     event: KeyEvent,
     isExpanded: Boolean,
@@ -55,48 +90,16 @@ internal fun resolveAdaptiveSelectKeyboardNavigation(
     onSelectHighlighted: () -> Unit,
     isSearchFocused: Boolean = false,
 ): Boolean {
-    if (!isExpanded) {
-        if (event.key == Key.DirectionDown || event.key == Key.Enter || event.key == Key.Spacebar) {
-            onExpand()
-            return true
-        }
-        return false
-    }
-
-    return when (event.key) {
-        Key.DirectionDown -> {
-            onNavigateNext()
-            true
-        }
-        Key.DirectionUp -> {
-            onNavigatePrevious()
-            true
-        }
-        Key.MoveHome -> {
-            onNavigateFirst()
-            true
-        }
-        Key.MoveEnd -> {
-            onNavigateLast()
-            true
-        }
-        Key.Enter -> {
-            onSelectHighlighted()
-            true
-        }
-        Key.Spacebar -> {
-            if (!isSearchFocused) {
-                onSelectHighlighted()
-                true
-            } else {
-                false
-            }
-        }
-        Key.Escape -> {
-            onCollapse()
-            true
-        }
-        else -> false
+    if (event.type != KeyEventType.KeyDown) return false
+    return when (resolveAdaptiveSelectKeyAction(event.key, isExpanded, isSearchFocused)) {
+        AdaptiveSelectKeyAction.Expand -> { onExpand(); true }
+        AdaptiveSelectKeyAction.Collapse -> { onCollapse(); true }
+        AdaptiveSelectKeyAction.Next -> { onNavigateNext(); true }
+        AdaptiveSelectKeyAction.Previous -> { onNavigatePrevious(); true }
+        AdaptiveSelectKeyAction.First -> { onNavigateFirst(); true }
+        AdaptiveSelectKeyAction.Last -> { onNavigateLast(); true }
+        AdaptiveSelectKeyAction.Select -> { onSelectHighlighted(); true }
+        null -> false
     }
 }
 
@@ -107,6 +110,8 @@ internal fun AdaptiveSelectTriggerFrame(
     isError: Boolean,
     focusRequester: FocusRequester,
     onClick: () -> Unit,
+    onPreviewKeyEvent: ((KeyEvent) -> Boolean)? = null,
+    contentDescription: String? = null,
     content: @Composable RowScope.(actualBg: Color, actualBorder: Color, showClear: Boolean, chevronTint: Color) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -116,29 +121,42 @@ internal fun AdaptiveSelectTriggerFrame(
     val shape = AdaptiveComponentDefaults.MediumShape
     val baseBorderColor = when {
         isError -> AdaptiveComponentDefaults.Danger
-        expanded -> AdaptiveComponentDefaults.Primary
-        else -> AdaptiveComponentDefaults.BorderStrong
+        expanded -> AdaptiveTheme.colors.focusRing
+        else -> AdaptiveComponentDefaults.Border
     }
     val bgColor = if (enabled) AdaptiveComponentDefaults.Surface else AdaptiveComponentDefaults.DisabledSurface
 
     val actualBg = if (hovered && enabled && !expanded) AdaptiveComponentDefaults.SurfaceSubtle else bgColor
-    val actualBorder = if (focused) AdaptiveComponentDefaults.Primary else baseBorderColor
+    val actualBorder = if (focused) AdaptiveTheme.colors.focusRing else baseBorderColor
+    val transitionMs = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.fastMillis)
+    val animatedBackground by animateColorAsState(
+        actualBg, animationSpec = tween(durationMillis = transitionMs), label = "Select background",
+    )
+    val animatedBorder by animateColorAsState(
+        actualBorder, animationSpec = tween(durationMillis = transitionMs), label = "Select border",
+    )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = AdaptiveTokens.Sizes.ButtonHeight)
             .clip(shape)
-            .background(actualBg, shape)
-            .border(if (focused) 2.dp else 1.dp, actualBorder, shape)
-            .hoverable(interactionSource)
-            .focusable(enabled = enabled, interactionSource = interactionSource)
+            .background(animatedBackground, shape)
+            .border(if (focused) AdaptiveTheme.states.focusBorderWidth else 1.dp, animatedBorder, shape)
+            .semantics {
+                stateDescription = if (expanded) "Expanded" else "Collapsed"
+                if (contentDescription != null) this.contentDescription = contentDescription
+            }
+            .hoverable(interactionSource, enabled = enabled)
             .focusRequester(focusRequester)
+            .then(if (onPreviewKeyEvent != null) Modifier.onPreviewKeyEvent(onPreviewKeyEvent) else Modifier)
+            .focusable(enabled = enabled, interactionSource = interactionSource)
             .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
+                role = Role.Button,
                 onClick = onClick,
             )
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
@@ -158,6 +176,7 @@ internal fun AdaptiveOptionRow(
     enabled: Boolean,
     onClick: () -> Unit,
     customContent: (@Composable () -> Unit)? = null,
+    multiSelect: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -184,12 +203,14 @@ internal fun AdaptiveOptionRow(
             .fillMaxWidth()
             .clip(shape)
             .background(background, shape)
-            .hoverable(interactionSource)
+            .semantics { this.selected = selected }
+            .hoverable(interactionSource, enabled = enabled)
             .adaptiveInteractiveCursor(enabled)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
+                role = if (multiSelect) Role.Checkbox else Role.RadioButton,
                 onClick = onClick,
             )
             .padding(
