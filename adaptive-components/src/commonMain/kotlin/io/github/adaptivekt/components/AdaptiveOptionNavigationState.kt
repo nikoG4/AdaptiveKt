@@ -104,7 +104,7 @@ private fun <K> findNextEnabled(
  * Replace stale highlights after filtering, disabling or replacing options.
  * The disabled key set is derived from the current visible options.
  */
-public fun <K> reconcileOptionNavigationState(
+internal fun <K> reconcileOptionNavigationState(
     state: AdaptiveOptionNavigationState<K>,
     visibleKeys: List<K>,
     disabledKeys: Set<K>,

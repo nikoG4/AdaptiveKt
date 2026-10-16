@@ -78,6 +78,8 @@ internal fun resolveAdaptiveSelectKeyAction(
     }
 }
 
+internal fun isSelectCommandPress(type: KeyEventType): Boolean = type == KeyEventType.KeyDown
+
 internal fun resolveAdaptiveSelectKeyboardNavigation(
     event: KeyEvent,
     isExpanded: Boolean,
@@ -90,7 +92,7 @@ internal fun resolveAdaptiveSelectKeyboardNavigation(
     onSelectHighlighted: () -> Unit,
     isSearchFocused: Boolean = false,
 ): Boolean {
-    if (event.type != KeyEventType.KeyDown) return false
+    if (!isSelectCommandPress(event.type)) return false
     return when (resolveAdaptiveSelectKeyAction(event.key, isExpanded, isSearchFocused)) {
         AdaptiveSelectKeyAction.Expand -> { onExpand(); true }
         AdaptiveSelectKeyAction.Collapse -> { onCollapse(); true }

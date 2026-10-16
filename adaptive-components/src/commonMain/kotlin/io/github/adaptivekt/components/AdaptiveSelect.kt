@@ -122,9 +122,6 @@ public fun <T> AdaptiveSelect(
     val focusRequester = remember { FocusRequester() }
     var searchHasFocus by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(expanded, searchable) {
-        if (expanded && searchable) searchFocusRequester.requestFocus()
-    }
 
     val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
         if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
@@ -247,6 +244,7 @@ public fun <T> AdaptiveSelect(
                         onClear = { setEffectiveSearchQuery("") },
                         onFocusChanged = { searchHasFocus = it },
                         inputFocusRequester = searchFocusRequester,
+                        requestFocusOnMount = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)

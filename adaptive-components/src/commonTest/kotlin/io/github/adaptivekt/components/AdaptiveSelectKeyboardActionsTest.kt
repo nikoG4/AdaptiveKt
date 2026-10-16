@@ -1,11 +1,20 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class AdaptiveSelectKeyboardActionsTest {
+    @Test
+    fun onlyKeyDownActivatesSelectionAndNavigation() {
+        assertTrue(isSelectCommandPress(KeyEventType.KeyDown))
+        assertFalse(isSelectCommandPress(KeyEventType.KeyUp))
+    }
+
     @Test
     fun collapsedInputOpensOnlyForExpectedKeys() {
         for (key in listOf(Key.Enter, Key.Spacebar, Key.DirectionDown)) {
