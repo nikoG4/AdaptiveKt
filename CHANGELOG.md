@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Keyboard and accessibility (stacked, unverified)
+- Add RTL-aware arrow/Home/End keyboard and focus navigation for AdaptiveTabs, plus regression tests.
 - Process only KeyDown for select navigation to avoid duplicate open/selection.
 - Improve keyboard focus, search-field typing and Esc dismissal in select popups.
 - Give Select/MultiSelect options explicit selected semantics and radio/checkbox roles.

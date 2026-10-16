@@ -13,6 +13,7 @@ Keep this PR unmerged until its checks and manual keyboard matrix are reviewed.
 | MultiSelect popup | Same traversal; Enter toggles without closing; Escape closes | Search input focused on opening | Option rows expose selected + checkbox role | Source implemented; manual test pending |
 | Search input in popup | Space types a space; Home/End move caret; Escape closes | Focus requested from inside the popup on mount | Input label and errors | Source implemented; manual test pending |
 | Filtering | Local query filters by labels; external callback opts out of local filtering | Highlight is reconciled to visible, enabled options | Disabled option cannot be selected by keyboard | Unit tests added; platform run pending |
+| Tabs | Left/Right (respecting RTL), Home/End | Focus moves to the newly selected tab | Tab selected semantics | Pure tests added; runtime test pending |
 | Dialogs | Platform back/Escape dismissal | Platform Dialog semantics | Existing button semantics | Focus trap & restored focus still require manual evidence |
 
 Important implementation details:
@@ -58,3 +59,14 @@ This branch is stacked on the visual PR and targets its feature branch. It
 intentionally does not trigger `main`-targeted CI. When the visual PR is
 approved, rebase/retarget this change, run **one** focused test build, and only
 then evaluate integrating it into main. Do not duplicate the visual capture run.
+
+## Tabs keyboard matrix
+
+- [ ] Keyboard focus inside the tabs row plus Right/Left selects adjacent items.
+- [ ] Right/Left logic reverses correctly for RTL layout direction.
+- [ ] Home selects and focuses the first tab; End selects and focuses the last.
+- [ ] Moving beyond either edge wraps around (documented implementation policy).
+- [ ] Only KeyDown changes selection; KeyUp does not change anything.
+- [ ] Selecting a tab brings it into view when horizontal scrolling is needed.
+- [ ] Click/touch selection remains unaffected on compact layouts.
+- [ ] Empty and single-tab lists never throw.

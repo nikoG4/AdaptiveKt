@@ -88,3 +88,10 @@ Source-level progress on Select and MultiSelect:
 - [ ] Complete real keyboard/IME interaction review before beta.
 
 See [interaction audit](BETA01_INTERACTION_AUDIT.md).
+
+## Phase 2 extension — tabs (stacked branch)
+
+- [x] Add keyboard arrow/Home/End navigation and RTL directional mapping.
+- [x] Manage a per-tab FocusRequester so selection moves focus to the new tab.
+- [x] Add pure index navigation tests for empty, one-tab, wrapping and boundaries.
+- [ ] Inspect focus visibility and horizontal scroll on actual Desktop/Web/Android.

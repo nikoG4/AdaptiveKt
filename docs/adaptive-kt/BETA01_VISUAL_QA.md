@@ -94,3 +94,10 @@ capture is evidence for the Web/Wasm visual QA gate.
 
 See [interaction audit](BETA01_INTERACTION_AUDIT.md) for implementation details
 and an explicit list of what is not yet verified.
+
+## Tabs interaction checks
+
+- [ ] LTR Right/Left and RTL Right/Left move the correct direction.
+- [ ] Home/End focus and select the respective edge tabs.
+- [ ] The selected tab is scrolled into view when needed.
+- [ ] KeyUp does not cause an additional selection.
