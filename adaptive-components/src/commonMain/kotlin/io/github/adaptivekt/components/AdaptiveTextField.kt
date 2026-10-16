@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,9 +61,12 @@ public fun AdaptiveTextField(
     validationMessage: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    onInputFocusChanged: ((Boolean) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
+    val currentFocusCallback by rememberUpdatedState(onInputFocusChanged)
+    LaunchedEffect(focused) { currentFocusCallback?.invoke(focused) }
     val shape = AdaptiveComponentDefaults.MediumShape
     val hasError = !validationMessage.isNullOrBlank()
     val border = when {

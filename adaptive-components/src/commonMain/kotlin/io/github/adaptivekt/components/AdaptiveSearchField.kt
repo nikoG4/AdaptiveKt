@@ -23,6 +23,7 @@ public fun AdaptiveSearchField(
     placeholder: String = "Search...",
     enabled: Boolean = true,
     onClear: (() -> Unit)? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null,
 ) {
     AdaptiveTextField(
         value = value,
@@ -30,6 +31,7 @@ public fun AdaptiveSearchField(
         modifier = modifier,
         placeholder = placeholder,
         enabled = enabled,
+        onInputFocusChanged = onFocusChanged,
         leadingIcon = {
             AdaptiveIcons.Search(size = 16.dp, tint = AdaptiveTheme.colors.textMuted)
         },
@@ -37,6 +39,7 @@ public fun AdaptiveSearchField(
             {
                 AdaptiveIconButton(
                     onClick = onClear,
+                    contentDescription = "Clear search",
                     size = 28.dp,
                 ) {
                     AdaptiveIcons.Close(size = 18.dp, tint = AdaptiveTheme.colors.textMuted)
