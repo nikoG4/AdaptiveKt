@@ -71,3 +71,19 @@ The theme parameter types for shapes/typography/states now accept null as an
 internal indication to use the selected style defaults. Callers still pass
 non-null customization values as before. Platform runtime verification is
 still required before claiming a stable compatibility contract.
+
+## Interaction API additions (stacked branch)
+
+`AdaptiveTextField` now optionally takes `onInputFocusChanged` and
+`inputFocusRequester`. `AdaptiveSearchField` accepts corresponding
+`onFocusChanged`, `inputFocusRequester`, and `requestFocusOnMount`
+parameters. These parameters default to null/false and preserve existing
+normal call sites.
+
+`AdaptiveSelect` and `AdaptiveMultiSelect` preserve their controlled and
+uncontrolled overloads. Their keyboard/focus handling changes internally
+without requiring consumer migration. When the caller supplies
+`onSearchQueryChange`, filtering stays caller-controlled; otherwise options
+are filtered locally by `optionLabel`.
+
+The keyboard audit details the expected behavior and outstanding runtime tests.
