@@ -1,6 +1,7 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -185,8 +189,16 @@ public fun <T> AdaptiveAnchoredMenuBox(
                 popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true)
             ) {
+                // The popup must own a Compose focus target for keyboard navigation
+                // when there is no search field. Searchable menus focus their input.
+                val popupFocusRequester = remember { FocusRequester() }
+                LaunchedEffect(Unit) {
+                    if (headerContent == null) popupFocusRequester.requestFocus()
+                }
                 androidx.compose.foundation.layout.Column(
                     modifier = modifier
+                        .focusRequester(popupFocusRequester)
+                        .focusable()
                         .widthIn(min = finalMinWidth, max = finalMaxWidth)
                         .heightIn(max = finalMaxHeight)
                         .shadow(

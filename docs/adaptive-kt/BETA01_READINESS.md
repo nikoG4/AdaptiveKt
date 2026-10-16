@@ -74,3 +74,24 @@ removed package. Build validation remains **pending** until a new CI run passes.
 - [x] Add 16-image screenshot matrix of real admin-demo UI Kit, dashboard and dialogs.
 - [ ] Run captures in the full ready-for-review Windows CI.
 - [ ] Inspect contact images for theme contrast, shadow clipping and layout defects.
+
+## Phase 2 — interaction hardening (stacked branch, needs independent CI)
+
+Source-level progress on Select and MultiSelect:
+- [x] Ignore KeyUp and centralize typed keyboard actions.
+- [x] Reconcile highlighted options after filtering and disabled-state updates.
+- [x] Give searchable popups a keyboard-first focus target.
+- [x] Use explicit radio/checkbox roles and selected semantics for option rows.
+- [x] Align local and external filtering policies across both controls.
+- [x] Add keyboard intent, option-reconciliation and query-policy tests.
+- [ ] Execute new common tests and build the stacked interaction PR.
+- [ ] Complete real keyboard/IME interaction review before beta.
+
+See [interaction audit](BETA01_INTERACTION_AUDIT.md).
+
+## Phase 2 extension — tabs (stacked branch)
+
+- [x] Add keyboard arrow/Home/End navigation and RTL directional mapping.
+- [x] Manage a per-tab FocusRequester so selection moves focus to the new tab.
+- [x] Add pure index navigation tests for empty, one-tab, wrapping and boundaries.
+- [ ] Inspect focus visibility and horizontal scroll on actual Desktop/Web/Android.
