@@ -47,6 +47,15 @@ import io.github.adaptivekt.layout.AdaptiveGrid
 
 @Composable
 internal fun DashboardScreen() {
+    if (io.github.adaptivekt.core.AdaptiveTheme.visualStyle == io.github.adaptivekt.core.AdaptiveVisualStyle.Modern) {
+        PremiumDashboardScreen()
+    } else {
+        ClassicDashboardScreen()
+    }
+}
+
+@Composable
+private fun ClassicDashboardScreen() {
     val metrics = AdminDemoData.dashboardMetrics
     val adaptiveInfo = rememberAdaptiveInfo()
     val span = when {
