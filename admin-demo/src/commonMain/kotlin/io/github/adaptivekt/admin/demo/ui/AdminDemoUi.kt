@@ -46,6 +46,7 @@ import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveElevationLevel
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.core.AdaptiveTokens
 
@@ -56,15 +57,17 @@ public fun DemoText(
     emphasis: Emphasis = Emphasis.Default,
     maxLines: Int = 1,
 ) {
+    val modern = AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern
     BasicText(
         text = text,
         modifier = modifier,
         style = TextStyle(
             fontSize = when (emphasis) {
-                Emphasis.Strong -> 18.sp
-                Emphasis.Subtle -> 12.sp
-                else -> 14.sp
+                Emphasis.Strong -> if (modern) 17.sp else 18.sp
+                Emphasis.Subtle -> if (modern) AdaptiveTheme.typography.caption.fontSize else 12.sp
+                else -> if (modern) AdaptiveTheme.typography.body.fontSize else 14.sp
             },
+            lineHeight = if (modern) AdaptiveTheme.typography.body.lineHeight else TextStyle.Default.lineHeight,
             fontWeight = when (emphasis) {
                 Emphasis.Strong -> FontWeight.SemiBold
                 else -> FontWeight.Normal
