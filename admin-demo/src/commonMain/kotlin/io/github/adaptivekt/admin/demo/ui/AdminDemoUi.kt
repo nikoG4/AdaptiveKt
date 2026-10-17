@@ -3,6 +3,11 @@ package io.github.adaptivekt.admin.demo.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -127,10 +132,41 @@ public fun AdminDemoTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        DemoText(
-            text = if (compact) "AdaptiveKt" else "AdaptiveKt Admin Demo",
-            emphasis = Emphasis.Strong,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
+        ) {
+            if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(AdaptiveTheme.shapes.medium)
+                        .background(AdaptiveTheme.colors.primarySubtle),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BasicText(
+                        text = "A",
+                        style = AdaptiveTheme.typography.subtitle.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = AdaptiveTheme.colors.primaryText,
+                        ),
+                    )
+                }
+            }
+            Column {
+                DemoText(
+                    text = if (compact) "AdaptiveKt" else "AdaptiveKt Workspace",
+                    emphasis = Emphasis.Strong,
+                )
+                if (!compact && AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+                    BasicText(
+                        text = "COMPONENT SYSTEM · BETA PREVIEW",
+                        style = AdaptiveTheme.typography.caption.copy(color = AdaptiveTheme.colors.textMuted),
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
@@ -171,6 +207,7 @@ private fun AccountMenu(
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
+                    role = Role.Button,
                 ) { setExpanded(!expanded) }
                 .padding(horizontal = AdaptiveTokens.Spacing.Small, vertical = AdaptiveTokens.Spacing.XSmall),
             verticalAlignment = Alignment.CenterVertically,
@@ -320,27 +357,45 @@ public fun DemoToggleChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val colors = AdaptiveTheme.colors
+    val shape = AdaptiveTheme.shapes.pill
+    val source = remember { MutableInteractionSource() }
+    val focused by source.collectIsFocusedAsState()
+    val ms = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.fastMillis)
+    val background by animateColorAsState(
+        targetValue = if (selected) colors.primary else colors.surfaceMuted,
+        animationSpec = tween(durationMillis = ms),
+        label = "Demo chip background",
+    )
+    val foreground by animateColorAsState(
+        targetValue = if (selected) colors.textInverse else colors.textSecondary,
+        animationSpec = tween(durationMillis = ms),
+        label = "Demo chip foreground",
+    )
+
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(AdaptiveTokens.Radius.Pill))
-            .clickable(onClick = onClick)
-            .background(
-                if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.surfaceMuted,
-                RoundedCornerShape(AdaptiveTokens.Radius.Pill),
-            )
+            .clip(shape)
+            .background(background, shape)
             .border(
-                1.dp,
-                if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.borderStrong,
-                RoundedCornerShape(AdaptiveTokens.Radius.Pill),
+                if (focused) AdaptiveTheme.states.focusBorderWidth else 1.dp,
+                if (focused) colors.focusRing else if (selected) colors.primary else colors.border,
+                shape,
+            )
+            .selectable(
+                selected = selected,
+                interactionSource = source,
+                indication = null,
+                role = Role.RadioButton,
+                onClick = onClick,
             )
             .padding(horizontal = AdaptiveTokens.Spacing.Medium, vertical = AdaptiveTokens.Spacing.Small),
     ) {
         BasicText(
             text = text,
-            style = TextStyle(
-                fontSize = 12.sp,
+            style = AdaptiveTheme.typography.label.copy(
                 fontWeight = FontWeight.SemiBold,
-                color = if (selected) AdaptiveTheme.colors.textInverse else AdaptiveTheme.colors.textSecondary,
+                color = foreground,
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
