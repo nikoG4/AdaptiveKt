@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Premium visual polish (stacked, pending CI)
+- Replace the Modern dashboard's sparse desktop grid with four responsive KPI cards,
+  a health banner, period-switchable revenue bars, activity and inventory panels.
+- Keep the alpha-style Classic dashboard intact for before/after comparison.
+- Tune Modern elevation, overlay opacity, radii and heading typography.
+- Improve modal heading and footer hierarchy; consume backdrop taps without
+  exposing a meaningless dialog-surface click action.
+- Refine admin top-bar branding, theme-toggle focus and selection semantics.
+- Expand browser screenshot scenarios to compare Modern and Classic dashboards
+  in both themes and widths.
+- Add dashboard responsiveness, chart-scaling and filter-range tests.
+
 ### Visual validation
 - Add reproducible Modern/Classic browser screenshots from the real admin-demo Web/Wasm canvas.
 - Capture cards, dashboards and dialogs at compact/desktop sizes in Light/Dark modes.

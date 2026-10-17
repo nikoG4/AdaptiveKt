@@ -23,6 +23,13 @@ class PremiumDashboardLayoutTest {
     }
 
     @Test
+    fun switchingRangeAlsoUpdatesTheTotal() {
+        val totals = PremiumTrendRange.entries.map(::premiumRevenueTotal)
+        assertEquals(totals.size, totals.toSet().size)
+        assertTrue(totals.all { it.startsWith("$") })
+    }
+
+    @Test
     fun chartHeightsRemainSafeWithEmptyOrUnexpectedValues() {
         assertEquals(0, premiumChartBarHeight(5, maxValue = 10, chartHeight = 0))
         assertEquals(4, premiumChartBarHeight(4, maxValue = 0))

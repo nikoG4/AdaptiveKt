@@ -284,6 +284,12 @@ internal data class PremiumTrendSeries(val labels: List<String>, val values: Lis
     init { require(labels.size == values.size && values.all { it >= 0 }) }
 }
 
+internal fun premiumRevenueTotal(range: PremiumTrendRange): String = when (range) {
+    PremiumTrendRange.Week -> "$18,420"
+    PremiumTrendRange.Month -> "$72,300"
+    PremiumTrendRange.Quarter -> "$210,800"
+}
+
 internal fun premiumRevenueSeries(range: PremiumTrendRange): PremiumTrendSeries = when (range) {
     PremiumTrendRange.Week -> PremiumTrendSeries(
         labels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
@@ -328,7 +334,7 @@ private fun PremiumRevenuePanel(range: PremiumTrendRange, onRangeChange: (Premiu
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
         Row(verticalAlignment = Alignment.Bottom) {
             BasicText(
-                text = "$72,300",
+                text = premiumRevenueTotal(range),
                 style = AdaptiveTheme.typography.title.copy(
                     color = colors.textPrimary,
                     fontWeight = FontWeight.Bold,
