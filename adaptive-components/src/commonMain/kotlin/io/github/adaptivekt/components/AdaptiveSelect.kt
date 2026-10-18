@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 
 /**
@@ -119,50 +121,46 @@ public fun <T> AdaptiveSelect(
 
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
+    var searchHasFocus by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
-        if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
-            // Only filter locally if onSearchQueryChange is null (internal search)
-            options.filter { selectMatchesQuery(optionLabel(it), effectiveSearchQuery) }
-        } else {
-            options
-        }
+    val visibleOptions = remember(
+        options, searchable, effectiveSearchQuery, optionLabel, onSearchQueryChange,
+    ) {
+        resolveVisibleSelectOptions(
+            options = options,
+            query = effectiveSearchQuery,
+            searchable = searchable,
+            externallyFiltered = onSearchQueryChange != null,
+            optionLabel = optionLabel,
+        )
     }
 
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
 
     // Validate keys in debug/dev ideally, but we'll do it on composition for safety
-    remember(visibleOptions) {
+    // Key identity can change without the option list changing.
+    remember(visibleOptions, optionKey) {
         validateOptionKeys(visibleOptions, optionKey)
     }
 
-    val disabledKeys = remember(visibleOptions, optionEnabled) {
+    val disabledKeys = remember(visibleOptions, optionEnabled, optionKey) {
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
 
-    var navState by remember(visibleOptions) {
-        mutableStateOf(
-            AdaptiveOptionNavigationState<Any>(
-                disabledKeys = disabledKeys
-            )
-        )
-    }
+    var navState by remember { mutableStateOf(AdaptiveOptionNavigationState<Any>()) }
 
-    // Reset state on collapse
-    LaunchedEffect(expanded) {
-        if (!expanded) {
-            setEffectiveSearchQuery("")
-            // Clear highlight so it recalculates on next open
-            navState = navState.copy(highlightedKey = null)
-        } else {
-            // When opening, initialize highlight to selected or first enabled
-            val initialHighlight = if (selectedOption != null) {
-                keySelector(selectedOption)
-            } else {
-                visibleOptions.firstOrNull(optionEnabled)?.let(keySelector)
-            }
-            navState = navState.copy(highlightedKey = initialHighlight)
-        }
+    // Reconcile after async option replacement, filtering, disabling, or popup lifecycle.
+    LaunchedEffect(expanded, visibleOptions, disabledKeys, selectedOption) {
+        val preferred = selectedOption?.let(keySelector)
+        navState = reconcileOptionNavigationState(
+            state = navState,
+            visibleKeys = visibleOptions.map(keySelector),
+            disabledKeys = disabledKeys,
+            preferredKey = preferred,
+            expanded = expanded,
+        )
+        if (!expanded) searchHasFocus = false
     }
 
     // Auto-scroll to highlighted item
@@ -176,15 +174,47 @@ public fun <T> AdaptiveSelect(
         }
     }
 
+    val handleKeyEvent: (KeyEvent) -> Boolean = { event ->
+        resolveAdaptiveSelectKeyboardNavigation(
+            event = event,
+            isExpanded = expanded,
+            onExpand = { onExpandedChange(true) },
+            onCollapse = {
+                onExpandedChange(false)
+                focusRequester.requestFocus()
+            },
+            onNavigateNext = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+            },
+            onNavigatePrevious = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+            },
+            onNavigateFirst = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
+            },
+            onNavigateLast = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
+            },
+            onSelectHighlighted = {
+                val highlighted = navState.highlightedKey
+                if (highlighted != null) {
+                    val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                    if (optionToSelect != null && optionEnabled(optionToSelect)) {
+                        onSelectedOptionChange(optionToSelect)
+                        onExpandedChange(false)
+                        focusRequester.requestFocus()
+                    }
+                }
+            },
+            isSearchFocused = searchHasFocus
+        )
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         if (label != null) {
             BasicText(
                 text = label,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.label.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -204,41 +234,7 @@ public fun <T> AdaptiveSelect(
                 matchAnchorWidth = true,
                 maxHeight = maxMenuHeight
             ),
-            modifier = Modifier.onPreviewKeyEvent { event ->
-                resolveAdaptiveSelectKeyboardNavigation(
-                    event = event,
-                    isExpanded = expanded,
-                    onExpand = { onExpandedChange(true) },
-                    onCollapse = {
-                        onExpandedChange(false)
-                        focusRequester.requestFocus()
-                    },
-                    onNavigateNext = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
-                    },
-                    onNavigatePrevious = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
-                    },
-                    onNavigateFirst = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
-                    },
-                    onNavigateLast = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
-                    },
-                    onSelectHighlighted = {
-                        val highlighted = navState.highlightedKey
-                        if (highlighted != null) {
-                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
-                            if (optionToSelect != null && optionEnabled(optionToSelect)) {
-                                onSelectedOptionChange(optionToSelect)
-                                onExpandedChange(false)
-                                focusRequester.requestFocus()
-                            }
-                        }
-                    },
-                    isSearchFocused = false // For now assume search is not focused natively because we aren't using a focusable input field yet
-                )
-            },
+            modifier = Modifier.onPreviewKeyEvent(handleKeyEvent),
             headerContent = if (searchable) {
                 {
                     AdaptiveSearchField(
@@ -246,6 +242,9 @@ public fun <T> AdaptiveSelect(
                         onValueChange = setEffectiveSearchQuery,
                         placeholder = "Search...",
                         onClear = { setEffectiveSearchQuery("") },
+                        onFocusChanged = { searchHasFocus = it },
+                        inputFocusRequester = searchFocusRequester,
+                        requestFocusOnMount = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)
@@ -276,6 +275,8 @@ public fun <T> AdaptiveSelect(
                     expanded = expanded,
                     isError = isError,
                     focusRequester = focusRequester,
+                    onPreviewKeyEvent = { event -> if (enabled) handleKeyEvent(event) else false },
+                    contentDescription = label ?: placeholder,
                     onClick = { if (enabled) onExpandedChange(!expanded) },
                 ) { _, _, _, chevronTint ->
                     val showClearLocal = clearable && selectedOption != null && enabled
@@ -317,6 +318,7 @@ public fun <T> AdaptiveSelect(
                                 onExpandedChange(false)
                             },
                             size = 28.dp,
+                            contentDescription = "Clear selection",
                         ) {
                             AdaptiveIcons.Close(
                                 size = 16.dp,

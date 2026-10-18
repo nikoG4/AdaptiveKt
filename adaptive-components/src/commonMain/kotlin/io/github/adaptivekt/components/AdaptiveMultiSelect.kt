@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -150,41 +151,45 @@ public fun <T> AdaptiveMultiSelect(
     
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
+    var searchHasFocus by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
-        if (searchable && onSearchQueryChange == null) {
-            filterMultiSelectOptions(options, effectiveSearchQuery, optionLabel)
-        } else {
-            options
-        }
+    val visibleOptions = remember(
+        options, searchable, effectiveSearchQuery, optionLabel, onSearchQueryChange,
+    ) {
+        resolveVisibleSelectOptions(
+            options = options,
+            query = effectiveSearchQuery,
+            searchable = searchable,
+            externallyFiltered = onSearchQueryChange != null,
+            optionLabel = optionLabel,
+        )
     }
-    
+
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
     
-    remember(visibleOptions) {
+    // Key identity can change without the option list changing.
+    remember(visibleOptions, optionKey) {
         validateOptionKeys(visibleOptions, optionKey)
     }
 
-    val disabledKeys = remember(visibleOptions, optionEnabled) {
+    val disabledKeys = remember(visibleOptions, optionEnabled, optionKey) {
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
     
-    var navState by remember(visibleOptions) { 
-        mutableStateOf(
-            AdaptiveOptionNavigationState<Any>(
-                disabledKeys = disabledKeys
-            )
-        ) 
-    }
+    var navState by remember { mutableStateOf(AdaptiveOptionNavigationState<Any>()) }
 
-    LaunchedEffect(expanded) {
-        if (!expanded) {
-            setEffectiveSearchQuery("")
-            navState = navState.copy(highlightedKey = null)
-        } else {
-            val initialHighlight = visibleOptions.firstOrNull(optionEnabled)?.let(keySelector)
-            navState = navState.copy(highlightedKey = initialHighlight)
-        }
+    // Reconcile after async option replacement, filtering, disabling, or popup lifecycle.
+    LaunchedEffect(expanded, visibleOptions, disabledKeys, selectedOptions) {
+        val preferred = visibleOptions.firstOrNull(optionEnabled)?.let(keySelector)
+        navState = reconcileOptionNavigationState(
+            state = navState,
+            visibleKeys = visibleOptions.map(keySelector),
+            disabledKeys = disabledKeys,
+            preferredKey = preferred,
+            expanded = expanded,
+        )
+        if (!expanded) searchHasFocus = false
     }
 
     LaunchedEffect(navState.highlightedKey, expanded) {
@@ -197,15 +202,46 @@ public fun <T> AdaptiveMultiSelect(
         }
     }
 
+    val handleKeyEvent: (KeyEvent) -> Boolean = { event ->
+        resolveAdaptiveSelectKeyboardNavigation(
+            event = event,
+            isExpanded = expanded,
+            onExpand = { onExpandedChange(true) },
+            onCollapse = { 
+                onExpandedChange(false)
+                focusRequester.requestFocus() 
+            },
+            onNavigateNext = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
+            },
+            onNavigatePrevious = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
+            },
+            onNavigateFirst = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
+            },
+            onNavigateLast = {
+                navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
+            },
+            onSelectHighlighted = {
+                val highlighted = navState.highlightedKey
+                if (highlighted != null) {
+                    val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
+                    if (optionToSelect != null && optionEnabled(optionToSelect)) {
+                        onSelectedOptionsChange(toggleOptionByKey(selectedOptions, optionToSelect, optionKey))
+                        // Multi-select does NOT collapse on enter by default
+                    }
+                }
+            },
+            isSearchFocused = searchHasFocus
+        )
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         if (label != null) {
             BasicText(
                 text = label,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AdaptiveComponentDefaults.Text,
-                ),
+                style = AdaptiveTheme.typography.label.copy(color = AdaptiveComponentDefaults.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -225,40 +261,7 @@ public fun <T> AdaptiveMultiSelect(
                 matchAnchorWidth = true,
                 maxHeight = maxMenuHeight
             ),
-            modifier = Modifier.onPreviewKeyEvent { event ->
-                resolveAdaptiveSelectKeyboardNavigation(
-                    event = event,
-                    isExpanded = expanded,
-                    onExpand = { onExpandedChange(true) },
-                    onCollapse = { 
-                        onExpandedChange(false)
-                        focusRequester.requestFocus() 
-                    },
-                    onNavigateNext = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Next)
-                    },
-                    onNavigatePrevious = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Previous)
-                    },
-                    onNavigateFirst = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.First)
-                    },
-                    onNavigateLast = {
-                        navState = resolveOptionNavigation(navState, visibleOptions, keySelector, OptionNavigationOperation.Last)
-                    },
-                    onSelectHighlighted = {
-                        val highlighted = navState.highlightedKey
-                        if (highlighted != null) {
-                            val optionToSelect = visibleOptions.find { keySelector(it) == highlighted }
-                            if (optionToSelect != null && optionEnabled(optionToSelect)) {
-                                onSelectedOptionsChange(toggleOptionByKey(selectedOptions, optionToSelect, optionKey))
-                                // Multi-select does NOT collapse on enter by default
-                            }
-                        }
-                    },
-                    isSearchFocused = false
-                )
-            },
+            modifier = Modifier.onPreviewKeyEvent(handleKeyEvent),
             headerContent = if (searchable) {
                 {
                     AdaptiveSearchField(
@@ -266,6 +269,9 @@ public fun <T> AdaptiveMultiSelect(
                         onValueChange = setEffectiveSearchQuery,
                         placeholder = "Search...",
                         onClear = { setEffectiveSearchQuery("") },
+                        onFocusChanged = { searchHasFocus = it },
+                        inputFocusRequester = searchFocusRequester,
+                        requestFocusOnMount = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)
@@ -296,6 +302,8 @@ public fun <T> AdaptiveMultiSelect(
                     expanded = expanded,
                     isError = isError,
                     focusRequester = focusRequester,
+                    onPreviewKeyEvent = { event -> if (enabled) handleKeyEvent(event) else false },
+                    contentDescription = label ?: placeholder,
                     onClick = { if (enabled) onExpandedChange(!expanded) },
                 ) { _, _, _, chevronTint ->
                     val showClearLocal = clearable && selectedOptions.isNotEmpty() && enabled
@@ -364,6 +372,7 @@ public fun <T> AdaptiveMultiSelect(
                                 focusRequester.requestFocus()
                             },
                             size = 28.dp,
+                            contentDescription = "Clear selection",
                         ) {
                             AdaptiveIcons.Close(
                                 size = 16.dp,
@@ -390,6 +399,7 @@ public fun <T> AdaptiveMultiSelect(
                 selected = isSelected,
                 highlighted = isHighlighted,
                 enabled = isEnabled,
+                multiSelect = true,
                 onClick = {
                     if (isEnabled) {
                         onSelectedOptionsChange(toggleOptionByKey(selectedOptions, option, optionKey))

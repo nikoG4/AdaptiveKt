@@ -39,23 +39,24 @@ public fun <T, K> resolveOptionNavigation(
     }
 
     val currentIndex = state.highlightedKey?.let { allKeys.indexOf(it) } ?: -1
+    val validHighlight = state.highlightedKey?.takeIf { it in allKeys && it !in state.disabledKeys }
 
     return when (operation) {
         OptionNavigationOperation.Next -> {
             val nextKey = findNextEnabled(currentIndex, allKeys, state.disabledKeys, 1, wrap)
-            state.copy(highlightedKey = nextKey ?: state.highlightedKey)
+            state.copy(highlightedKey = nextKey ?: validHighlight)
         }
         OptionNavigationOperation.Previous -> {
-            val nextKey = findNextEnabled(currentIndex, allKeys, state.disabledKeys, -1, wrap)
-            state.copy(highlightedKey = nextKey ?: state.highlightedKey)
+            val nextKey = findNextEnabled(if (currentIndex == -1) allKeys.size else currentIndex, allKeys, state.disabledKeys, -1, wrap)
+            state.copy(highlightedKey = nextKey ?: validHighlight)
         }
         OptionNavigationOperation.First -> {
             val nextKey = findNextEnabled(-1, allKeys, state.disabledKeys, 1, false)
-            state.copy(highlightedKey = nextKey ?: state.highlightedKey)
+            state.copy(highlightedKey = nextKey ?: validHighlight)
         }
         OptionNavigationOperation.Last -> {
             val nextKey = findNextEnabled(allKeys.size, allKeys, state.disabledKeys, -1, false)
-            state.copy(highlightedKey = nextKey ?: state.highlightedKey)
+            state.copy(highlightedKey = nextKey ?: validHighlight)
         }
         is OptionNavigationOperation.Highlight<*> -> {
             @Suppress("UNCHECKED_CAST")
@@ -97,4 +98,25 @@ private fun <K> findNextEnabled(
         }
     }
     return null
+}
+
+/**
+ * Replace stale highlights after filtering, disabling or replacing options.
+ * The disabled key set is derived from the current visible options.
+ */
+internal fun <K> reconcileOptionNavigationState(
+    state: AdaptiveOptionNavigationState<K>,
+    visibleKeys: List<K>,
+    disabledKeys: Set<K>,
+    preferredKey: K? = null,
+    expanded: Boolean = true,
+): AdaptiveOptionNavigationState<K> {
+    if (!expanded) return AdaptiveOptionNavigationState(highlightedKey = null, disabledKeys = disabledKeys)
+    val enabled = visibleKeys.filterNot { it in disabledKeys }
+    val highlighted = when {
+        state.highlightedKey in enabled -> state.highlightedKey
+        preferredKey in enabled -> preferredKey
+        else -> enabled.firstOrNull()
+    }
+    return AdaptiveOptionNavigationState(highlightedKey = highlighted, disabledKeys = disabledKeys)
 }

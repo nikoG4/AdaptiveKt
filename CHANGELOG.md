@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Keyboard and accessibility (stacked, unverified)
+- Add RTL-aware arrow/Home/End keyboard and focus navigation for AdaptiveTabs, plus regression tests.
+- Process only KeyDown for select navigation to avoid duplicate open/selection.
+- Improve keyboard focus, search-field typing and Esc dismissal in select popups.
+- Give Select/MultiSelect options explicit selected semantics and radio/checkbox roles.
+- Reconcile highlights after filtering/disabled updates and fix reverse traversal with no active highlight.
+- Unify local versus externally controlled option filtering and support focus callbacks.
+- Add pure regression tests and a documented keyboard/IME QA matrix.
+
 ### Visual validation
 - Add reproducible Modern/Classic browser screenshots from the real admin-demo Web/Wasm canvas.
 - Capture cards, dashboards and dialogs at compact/desktop sizes in Light/Dark modes.
