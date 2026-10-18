@@ -79,3 +79,39 @@ The capture saves PNGs and a JSON/Markdown manifest under
 A nonblank canvas and browser-runtime error checks are automatic, but screenshots
 still need a person to inspect visual consistency. Only a successful reviewed
 capture is evidence for the Web/Wasm visual QA gate.
+
+## Keyboard/IME verification for Select and MultiSelect
+
+- [ ] Enter/Space/Down open a focused collapsed trigger exactly once.
+- [ ] KeyUp does not toggle the popup or selected option.
+- [ ] Up/Down/Home/End navigate highlighted enabled options without selecting them.
+- [ ] Disabled, filtered-out and dynamically replaced options cannot be selected.
+- [ ] Search text accepts spaces; Home/End move cursor inside focused text field.
+- [ ] Enter selects (or toggles in MultiSelect) exactly once.
+- [ ] Escape closes and restores focus to the trigger.
+- [ ] The popup and option roles are announced with correct selection state.
+- [ ] Touch and IME behavior remain normal on Android and iOS.
+
+See [interaction audit](BETA01_INTERACTION_AUDIT.md) for implementation details
+and an explicit list of what is not yet verified.
+
+## Tabs interaction checks
+
+- [ ] LTR Right/Left and RTL Right/Left move the correct direction.
+- [ ] Home/End focus and select the respective edge tabs.
+- [ ] The selected tab is scrolled into view when needed.
+- [ ] KeyUp does not cause an additional selection.
+
+## Premium dashboard visual QA (separate stacked PR)
+
+- [ ] At 1280 px viewport the Modern dashboard shows four KPI cards per row.
+- [ ] At medium width it shows two KPI cards, compact shows one per row.
+- [ ] Modern shows welcome banner, switchable revenue chart, activities, invoices
+  and inventory, while Classic retains its earlier compact layout.
+- [ ] 7/30/90 day period buttons update both bar series and monetary total.
+- [ ] Report button opens a functional modal; close, outside dismiss and Escape work.
+- [ ] Modern/Classic dashboard comparisons are available at 390 and 1280 px,
+  light and dark; screenshot manifest contains 20 scenes in total.
+- [ ] No clipped/shrunk chart labels, overflowing chips or cut-off actions.
+- [ ] Dialog surfaces do not appear as fake actionable buttons to screen readers.
+- [ ] CTA text contrast is acceptable across palettes and disabled states.

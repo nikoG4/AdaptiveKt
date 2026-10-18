@@ -74,3 +74,38 @@ removed package. Build validation remains **pending** until a new CI run passes.
 - [x] Add 16-image screenshot matrix of real admin-demo UI Kit, dashboard and dialogs.
 - [ ] Run captures in the full ready-for-review Windows CI.
 - [ ] Inspect contact images for theme contrast, shadow clipping and layout defects.
+
+## Phase 2 — interaction hardening (stacked branch, needs independent CI)
+
+Source-level progress on Select and MultiSelect:
+- [x] Ignore KeyUp and centralize typed keyboard actions.
+- [x] Reconcile highlighted options after filtering and disabled-state updates.
+- [x] Give searchable popups a keyboard-first focus target.
+- [x] Use explicit radio/checkbox roles and selected semantics for option rows.
+- [x] Align local and external filtering policies across both controls.
+- [x] Add keyboard intent, option-reconciliation and query-policy tests.
+- [ ] Execute new common tests and build the stacked interaction PR.
+- [ ] Complete real keyboard/IME interaction review before beta.
+
+See [interaction audit](BETA01_INTERACTION_AUDIT.md).
+
+## Phase 2 extension — tabs (stacked branch)
+
+- [x] Add keyboard arrow/Home/End navigation and RTL directional mapping.
+- [x] Manage a per-tab FocusRequester so selection moves focus to the new tab.
+- [x] Add pure index navigation tests for empty, one-tab, wrapping and boundaries.
+- [ ] Inspect focus visibility and horizontal scroll on actual Desktop/Web/Android.
+
+## Phase 3 — Premium dashboard and modern surface polish (stacked branch)
+
+- [x] Replace generic two-column expanded dashboard with four KPI tiles and a rich Modern overview.
+- [x] Add responsive banner, activity, billing and inventory cards with period-selectable chart.
+- [x] Preserve the Classic dashboard unchanged behind AdaptiveVisualStyle.Classic.
+- [x] Introduce Modern-specific elevations and softer modal backdrops.
+- [x] Refine dialog title hierarchy and remove phantom accessible surface click targets.
+- [x] Improve admin top-bar branding and accessible animated theme toggles.
+- [x] Add a second dashboard style to automated screenshot coverage (20 scenes total).
+- [x] Add common tests for responsive KPI spans, chart bounds and range data.
+- [ ] Run common/JVM/Wasm builds on the premium branch and inspect screenshots.
+- [ ] Confirm light/dark modal dismiss behavior and keyboard accessibility.
+- [ ] Verify compact dashboard content and scrolling on a real device/browser.

@@ -7,7 +7,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -75,10 +77,14 @@ public fun AdaptiveDialog(
     contentSelectionEnabled: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val surfaceInteractionSource = remember { MutableInteractionSource() }
     var appeared by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { appeared = true }
     val enterDuration = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.emphasizedMillis)
+    val dialogShape = if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+        AdaptiveComponentDefaults.LargeShape
+    } else {
+        AdaptiveComponentDefaults.MediumShape
+    }
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -119,19 +125,16 @@ public fun AdaptiveDialog(
                     .heightIn(max = AdaptiveOverlayDefaults.DialogMaxHeight)
                     .shadow(
                         elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.Floating),
-                        shape = AdaptiveComponentDefaults.MediumShape,
+                        shape = dialogShape,
                         ambientColor = AdaptiveTheme.elevations.shadowColor,
                         spotColor = AdaptiveTheme.elevations.shadowColor,
                     )
-                    .clip(AdaptiveComponentDefaults.MediumShape)
+                    .clip(dialogShape)
                     .background(AdaptiveComponentDefaults.Surface)
-                    .border(1.dp, AdaptiveComponentDefaults.Border, AdaptiveComponentDefaults.MediumShape)
-                    .adaptiveInteractiveCursor(false)
-                    .clickable(
-                        interactionSource = surfaceInteractionSource,
-                        indication = null,
-                        onClick = {},
-                    )
+                    .border(1.dp, AdaptiveComponentDefaults.Border, dialogShape)
+                    // Consume taps without creating an unnecessary accessible
+                    // "button" for the noninteractive modal surface.
+                    .pointerInput(Unit) { detectTapGestures(onTap = {}) }
                     .padding(AdaptiveOverlayDefaults.DialogContentPadding)
                     .verticalScroll(rememberScrollState()),
             ) {
@@ -139,10 +142,9 @@ public fun AdaptiveDialog(
                     if (title != null) {
                         BasicText(
                             text = title,
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
+                            style = AdaptiveTheme.typography.subtitle.copy(
                                 color = AdaptiveTheme.colors.textPrimary,
+                                fontWeight = FontWeight.SemiBold,
                             ),
                         )
                         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
@@ -153,6 +155,15 @@ public fun AdaptiveDialog(
                         }
                     }
                     Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+                    if (AdaptiveTheme.visualStyle == AdaptiveVisualStyle.Modern) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(AdaptiveTheme.colors.border),
+                        )
+                        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,

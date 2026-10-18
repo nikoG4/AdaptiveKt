@@ -11,6 +11,9 @@ class AdaptiveVisualPresetsTest {
         assertTrue(AdaptiveVisualPresets.modernShapes().medium != AdaptiveShapeScheme.default().medium)
         assertEquals(2.dp, AdaptiveVisualPresets.modernStates().focusBorderWidth)
         assertEquals(1.dp, AdaptiveStateScheme.default().focusBorderWidth)
+        assertEquals(2.dp, AdaptiveVisualPresets.modernLightElevations().low)
+        assertEquals(2.dp, AdaptiveVisualPresets.modernDarkElevations().low)
+        assertEquals(1.dp, AdaptiveElevationScheme.defaultLight().low)
     }
 
     @Test
@@ -22,5 +25,8 @@ class AdaptiveVisualPresetsTest {
         assertTrue(light.surface != light.background)
         assertTrue(dark.surface != dark.background)
         assertTrue(light.primary != dark.primary)
+        assertTrue(light.overlay != dark.overlay)
+        assertTrue(light.overlay.alpha > 0f && light.overlay.alpha < 1f)
+        assertTrue(dark.overlay.alpha > 0f && dark.overlay.alpha < 1f)
     }
 }

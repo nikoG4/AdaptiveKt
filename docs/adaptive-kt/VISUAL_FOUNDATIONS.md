@@ -107,3 +107,26 @@ migration rules and the [visual QA matrix](BETA01_VISUAL_QA.md) for screenshots
 and manual interaction checks. These documents are more important than a
 single attractive mockup: the visual language must remain functional across
 touch, keyboard, desktop and mobile.
+
+## Premium dashboard and distinct Modern identity
+
+The previous UI Kit rendering established basic parity but Modern's dashboard
+left too much desktop whitespace. The next stacked branch introduces a full
+Modern workspace showcase: four KPI cards per expanded row, a tinted health
+banner, a sample revenue bar chart with selectable periods, activity feed,
+recent invoices and inventory indicators.
+
+All chart values are **demo data** from the repository; no backend or live
+revenue claims. Every chart period and report button has a local UI action
+to demonstrate Compose state updates.
+
+Classic intentionally keeps the original dashboard structure, so the
+comparison is meaningful and migrations remain visually inspectable.
+
+Modern-specific elevations (2/6/12/22 dp in light mode), increased large
+radius (20 dp), 29 sp display title and softened light/dark overlay improve
+depth and typographic hierarchy while retaining theme override support.
+
+The modal's surface consumes pointer taps without pretending to be a
+focusable button. This needs manual popup dismiss and screen-reader review
+before beta. See [visual QA checklist](BETA01_VISUAL_QA.md).

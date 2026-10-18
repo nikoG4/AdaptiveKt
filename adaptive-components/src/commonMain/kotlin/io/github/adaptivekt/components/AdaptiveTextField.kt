@@ -18,11 +18,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -47,6 +51,8 @@ import io.github.adaptivekt.core.AdaptiveTheme
  * @param validationMessage Optional validation message; when present, field renders in error state.
  * @param leadingIcon Optional composable slot for a leading icon inside the field.
  * @param trailingIcon Optional composable slot for a trailing icon inside the field.
+ * @param onInputFocusChanged Optional callback reporting actual input focus.
+ * @param inputFocusRequester Optional requester for keyboard-first input workflows.
  */
 @Composable
 public fun AdaptiveTextField(
@@ -59,9 +65,13 @@ public fun AdaptiveTextField(
     validationMessage: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    onInputFocusChanged: ((Boolean) -> Unit)? = null,
+    inputFocusRequester: FocusRequester? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
+    val currentFocusCallback by rememberUpdatedState(onInputFocusChanged)
+    LaunchedEffect(focused) { currentFocusCallback?.invoke(focused) }
     val shape = AdaptiveComponentDefaults.MediumShape
     val hasError = !validationMessage.isNullOrBlank()
     val border = when {
@@ -110,6 +120,7 @@ public fun AdaptiveTextField(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .weight(1f)
+                    .then(if (inputFocusRequester != null) Modifier.focusRequester(inputFocusRequester) else Modifier)
                     .semantics {
                         if (label != null) contentDescription = label
                         if (hasError) error(validationMessage.orEmpty())
