@@ -74,3 +74,17 @@ removed package. Build validation remains **pending** until a new CI run passes.
 - [x] Add 16-image screenshot matrix of real admin-demo UI Kit, dashboard and dialogs.
 - [ ] Run captures in the full ready-for-review Windows CI.
 - [ ] Inspect contact images for theme contrast, shadow clipping and layout defects.
+
+## Phase 3 — Premium dashboard and modern surface polish (stacked branch)
+
+- [x] Replace generic two-column expanded dashboard with four KPI tiles and a rich Modern overview.
+- [x] Add responsive banner, activity, billing and inventory cards with period-selectable chart.
+- [x] Preserve the Classic dashboard unchanged behind AdaptiveVisualStyle.Classic.
+- [x] Introduce Modern-specific elevations and softer modal backdrops.
+- [x] Refine dialog title hierarchy and remove phantom accessible surface click targets.
+- [x] Improve admin top-bar branding and accessible animated theme toggles.
+- [x] Add a second dashboard style to automated screenshot coverage (20 scenes total).
+- [x] Add common tests for responsive KPI spans, chart bounds and range data.
+- [ ] Run common/JVM/Wasm builds on the premium branch and inspect screenshots.
+- [ ] Confirm light/dark modal dismiss behavior and keyboard accessibility.
+- [ ] Verify compact dashboard content and scrolling on a real device/browser.

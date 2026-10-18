@@ -20,7 +20,7 @@ public object AdaptiveVisualPresets {
         surface = Color(0xFFFFFFFF),
         surfaceRaised = Color(0xFFFFFFFF),
         surfaceMuted = Color(0xFFF7F9FC),
-        border = Color(0xFFE5EAF2),
+        border = Color(0xFFDFE7F2),
         borderStrong = Color(0xFFC8D3E2),
         textPrimary = Color(0xFF111B2D),
         textSecondary = Color(0xFF34445C),
@@ -31,6 +31,7 @@ public object AdaptiveVisualPresets {
         focusRing = Color(0xFF245FEA),
         disabledBackground = Color(0xFFF0F3F8),
         disabledText = Color(0xFF8795AC),
+        overlay = Color(0x570E1C33),
     )
 
     public fun modernDark(): AdaptiveColorScheme = AdaptiveColorSchemes.defaultDark().copy(
@@ -50,23 +51,34 @@ public object AdaptiveVisualPresets {
         focusRing = Color(0xFF82B4FF),
         disabledBackground = Color(0xFF253044),
         disabledText = Color(0xFF91A1B9),
+        overlay = Color(0x81050C18),
     )
 
     public fun modernShapes(): AdaptiveShapeScheme = AdaptiveShapeScheme(
         small = RoundedCornerShape(9.dp),
         medium = RoundedCornerShape(13.dp),
-        large = RoundedCornerShape(18.dp),
+        large = RoundedCornerShape(20.dp),
         pill = RoundedCornerShape(999.dp),
         circle = RoundedCornerShape(999.dp),
     )
 
     public fun modernTypography(): AdaptiveTypography = AdaptiveTypography(
-        title = TextStyle(fontSize = 27.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
-        subtitle = TextStyle(fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold),
+        title = TextStyle(fontSize = 29.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold),
+        subtitle = TextStyle(fontSize = 18.sp, lineHeight = 25.sp, fontWeight = FontWeight.SemiBold),
         body = TextStyle(fontSize = 14.sp, lineHeight = 21.sp),
         bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 19.sp),
         label = TextStyle(fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.SemiBold),
         caption = TextStyle(fontSize = 12.sp, lineHeight = 17.sp),
+    )
+
+    public fun modernLightElevations(): AdaptiveElevationScheme = AdaptiveElevationScheme(
+        low = 2.dp, medium = 6.dp, high = 12.dp, floating = 22.dp,
+        shadowColor = Color(0x291D3355),
+    )
+
+    public fun modernDarkElevations(): AdaptiveElevationScheme = AdaptiveElevationScheme(
+        low = 2.dp, medium = 5.dp, high = 11.dp, floating = 20.dp,
+        shadowColor = Color(0x80030917),
     )
 
     public fun modernStates(): AdaptiveStateScheme =

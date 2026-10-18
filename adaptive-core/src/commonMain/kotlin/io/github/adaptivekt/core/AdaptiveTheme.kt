@@ -22,7 +22,7 @@ private val LocalAdaptiveVisualStyle = staticCompositionLocalOf { AdaptiveVisual
  * @param typography Optional typography override; visual style supplies the default.
  * @param states Optional state override; visual style supplies the default.
  * @param mode Theme mode used when colorScheme is not provided. System follows the platform color scheme.
- * @param elevations Optional elevation scheme; defaults follow the selected light/dark mode.
+ * @param elevations Optional elevation override; defaults follow the selected style and light/dark mode.
  * @param motion Shared animation durations and explicit reduced-motion policy.
  * @param visualStyle Modern by default; Classic retains the alpha presentation.
  * @param content The UI subtree that consumes the theme values.
@@ -56,10 +56,17 @@ public fun AdaptiveTheme(
         AdaptiveVisualStyle.Modern -> AdaptiveVisualPresets.modernStates()
         AdaptiveVisualStyle.Classic -> AdaptiveStateScheme.default()
     }
-    val resolvedElevations = elevations ?: if (isDark) {
-        AdaptiveElevationScheme.defaultDark()
-    } else {
-        AdaptiveElevationScheme.defaultLight()
+    val resolvedElevations = elevations ?: when (visualStyle) {
+        AdaptiveVisualStyle.Modern -> if (isDark) {
+            AdaptiveVisualPresets.modernDarkElevations()
+        } else {
+            AdaptiveVisualPresets.modernLightElevations()
+        }
+        AdaptiveVisualStyle.Classic -> if (isDark) {
+            AdaptiveElevationScheme.defaultDark()
+        } else {
+            AdaptiveElevationScheme.defaultLight()
+        }
     }
 
     CompositionLocalProvider(
