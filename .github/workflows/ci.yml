@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main, master, dev ]
   pull_request:
-    branches: [ main, master, dev ]
+    # Allow stacked beta PRs to validate without retargeting them to main.
+    branches: [ main, master, dev, 'feat/beta01-visual-foundations' ]
     types: [ opened, synchronize, reopened, ready_for_review ]
 
 jobs:
