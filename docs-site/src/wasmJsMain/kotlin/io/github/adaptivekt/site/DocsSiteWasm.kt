@@ -6,6 +6,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.window
+import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 public fun main() {
@@ -30,6 +31,13 @@ internal actual fun initialSiteRoute(): SiteRoute {
         path.endsWith("/demo/") -> SiteRoute.Demo
         else -> SiteRoute.Home
     }
+}
+
+internal actual fun publishRenderedComponentRoute(id: String, title: String) {
+    // Updated after a successful Compose composition, rather than guessed
+    // from window.location.hash. This is metadata, not an HTML text renderer.
+    document.documentElement?.setAttribute("data-adaptive-component-route", id)
+    document.title = "$title | AdaptiveKt Components"
 }
 
 internal actual fun initialSiteDarkTheme(): Boolean {

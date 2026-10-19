@@ -128,4 +128,34 @@ class AdaptiveOptionNavigationStateTest {
             resolveOptionNavigation(state, invalidItems, keySelector, OptionNavigationOperation.Next)
         }
     }
+    @Test
+    fun previousFromEmptyHighlightStartsAtLastEnabled() {
+        assertEquals("C", resolveOptionNavigation(
+            AdaptiveOptionNavigationState(disabledKeys = setOf("D")),
+            items, keySelector, OptionNavigationOperation.Previous,
+        ).highlightedKey)
+    }
+
+    @Test
+    fun filteringAndDisablingDoNotLeaveStaleHighlight() {
+        val original = AdaptiveOptionNavigationState(highlightedKey = "B")
+        assertEquals("A", reconcileOptionNavigationState(original, listOf("A", "C"), setOf("C")).highlightedKey)
+        assertNull(reconcileOptionNavigationState(original, items, items.toSet()).highlightedKey)
+    }
+
+    @Test
+    fun preferredKeyIsHonoredOnlyWhenEnabledAndVisible() {
+        val empty = AdaptiveOptionNavigationState<String>()
+        assertEquals("C", reconcileOptionNavigationState(empty, items, setOf("B"), preferredKey = "C").highlightedKey)
+        assertEquals("A", reconcileOptionNavigationState(empty, items, setOf("C"), preferredKey = "C").highlightedKey)
+    }
+
+    @Test
+    fun collapseClearsHighlightButRetainsCurrentDisabledKeys() {
+        val state = AdaptiveOptionNavigationState(highlightedKey = "B", disabledKeys = setOf("C"))
+        val result = reconcileOptionNavigationState(state, items, setOf("A", "C"), expanded = false)
+        assertNull(result.highlightedKey)
+        assertEquals(setOf("A", "C"), result.disabledKeys)
+    }
 }
+

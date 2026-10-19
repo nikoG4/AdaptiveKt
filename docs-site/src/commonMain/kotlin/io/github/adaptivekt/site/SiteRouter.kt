@@ -13,6 +13,9 @@ internal expect fun initialSiteRoute(): SiteRoute
 
 internal expect fun initialSiteHash(): String
 
+/** Reflects the last Compose-selected component into readable browser metadata for route smoke tests. */
+internal expect fun publishRenderedComponentRoute(id: String, title: String)
+
 internal expect fun initialSiteDarkTheme(): Boolean
 
 internal expect fun pushSiteRouteAndHash(route: SiteRoute, hash: String, darkTheme: Boolean)

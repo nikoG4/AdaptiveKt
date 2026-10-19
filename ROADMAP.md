@@ -14,6 +14,12 @@ A cohesive interaction and elevation pass is being developed on a feature branch
 It must pass component compilation, accessible interaction review, visual captures
 and consumer verification before a beta release.
 
+### Beta01 interaction checkpoint
+
+Keyboard and focus reliability for selects/multi-selects is tracked in the
+[interaction audit](docs/adaptive-kt/BETA01_INTERACTION_AUDIT.md). The stacked
+branch intentionally defers CI until the visual branch is reviewed.
+
 ## 0.1 Alpha Hardening
 
 - Document public APIs and current module boundaries.
