@@ -41,9 +41,9 @@ function assertManifestMatchesDocumentation() {
   const source = fs.readFileSync(path.join(__dirname,
     '../../docs-site/src/commonMain/kotlin/io/github/adaptivekt/site/SiteComponentsPage.kt'), 'utf8');
   const documented = [
-    ...[...source.matchAll(/(?:ComponentDoc|simpleDisplayDoc)\\(\\s*id\\s*=\\s*"([^"]+)"[\\s\\S]*?title\\s*=\\s*"([^"]+)"/g)]
+    ...[...source.matchAll(/(?:ComponentDoc|simpleDisplayDoc)\(\s*id\s*=\s*"([^"]+)"[\s\S]*?title\s*=\s*"([^"]+)"/g)]
       .map(([, id, title]) => [id, title]),
-    ...[...source.matchAll(/inputDoc\\(\\s*"([^"]+)"\\s*,\\s*"([^"]+)"/g)]
+    ...[...source.matchAll(/inputDoc\(\s*"([^"]+)"\s*,\s*"([^"]+)"/g)]
       .map(([, id, title]) => [id, title])
   ];
   const serialize = ([id, title]) => `${id}: ${title}`;
