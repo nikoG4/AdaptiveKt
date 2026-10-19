@@ -27,12 +27,33 @@ const routes = [
   ['#adaptive-tabs', 'AdaptiveTabs'],
   ['#adaptive-accordion-dialog', 'AdaptiveAccordion and AdaptiveDialog'],
   ['#adaptive-navigation-scaffold', 'AdaptiveNavigationScaffold'],
+  ['#adaptive-navigation-tree', 'AdaptiveNavigationTree'],
+  ['#adaptive-breadcrumbs', 'AdaptiveBreadcrumbs'],
   ['#adaptive-data-view', 'AdaptiveDataView'],
   ['#adaptive-form-layout', 'AdaptiveFormLayout'],
-  ['#adaptive-empty-state', 'AdaptiveEmptyState'],
-  ['#adaptive-loading-state', 'AdaptiveLoadingState'],
-  ['#adaptive-error-state', 'AdaptiveErrorState']
+  ['#feedback-states', 'AdaptiveEmptyState, AdaptiveLoadingState and AdaptiveErrorState']
 ];
+
+// Catch a stale hard-coded route list before spinning up a browser.
+// Documented page IDs can be declared via ComponentDoc, simpleDisplayDoc
+// or inputDoc. This guard is about route coverage, not visual correctness.
+function assertManifestMatchesDocumentation() {
+  const source = fs.readFileSync(path.join(__dirname,
+    '../../docs-site/src/commonMain/kotlin/io/github/adaptivekt/site/SiteComponentsPage.kt'), 'utf8');
+  const documented = [
+    ...[...source.matchAll(/(?:ComponentDoc|simpleDisplayDoc)\\(\\s*id\\s*=\\s*"([^"]+)"[\\s\\S]*?title\\s*=\\s*"([^"]+)"/g)]
+      .map(([, id, title]) => [id, title]),
+    ...[...source.matchAll(/inputDoc\\(\\s*"([^"]+)"\\s*,\\s*"([^"]+)"/g)]
+      .map(([, id, title]) => [id, title])
+  ];
+  const serialize = ([id, title]) => `${id}: ${title}`;
+  const fromCode = documented.map(serialize).sort();
+  const fromRoutes = routes.map(([hash, title]) => serialize([hash.slice(1), title])).sort();
+  if (new Set(fromCode).size !== fromCode.length || fromCode.length !== fromRoutes.length ||
+      fromCode.some((entry, i) => entry !== fromRoutes[i])) {
+    throw new Error(`Documentation/route-manifest mismatch: expected ${fromCode.join('; ')}, got ${fromRoutes.join('; ')}`);
+  }
+}
 
 async function assertResolvedComponentRoute(page, hash, expectedTitle) {
   const expectedId = hash.slice(1);
@@ -56,6 +77,7 @@ async function assertResolvedComponentRoute(page, hash, expectedTitle) {
 }
 
 async function validate() {
+  assertManifestMatchesDocumentation();
   fs.mkdirSync(outputDir, { recursive: true });
   const browser = await chromium.launch();
   const context = await browser.newContext();

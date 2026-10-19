@@ -127,3 +127,8 @@ hasn't fallen back to another hash. Route validation is a blocking CI step.
 This does **not** prove that the component title was visibly painted or that
 overlay interactions work. Keep screenshot inspection and manual interaction
 checks separate from these route state smoke tests.
+
+The canonical component documentation has 22 pages. The browser route manifest
+now includes NavigationTree and Breadcrumbs, and treats feedback states as one
+`#feedback-states` page rather than three non-existent individual URLs.
+A source/manifest parity guard prevents silently omitting added docs pages.
