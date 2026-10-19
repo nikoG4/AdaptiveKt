@@ -5,8 +5,10 @@ const path = require('path');
 const baseUrl = (process.argv[2] || 'http://localhost:8080').replace(/\/$/, '');
 const outputDir = process.argv[3] || 'artifacts/route-validation';
 
-// Canonical route ids from SiteComponentsPage.kt. The expected rendered heading prevents a stale/unknown
-// hash from silently falling back to the first component while still passing URL/canvas checks.
+// Canonical route ids from SiteComponentsPage.kt. Compose/Wasm renders labels
+// into a canvas, so Playwright cannot use getByText() to verify a heading.
+// The app publishes the actual resolved component id/title after composition.
+// A stale/unknown route falls back to the first component and fails this check.
 const routes = [
   ['#adaptive-theme', 'AdaptiveTheme'],
   ['#adaptive-button', 'AdaptiveButton'],
@@ -32,14 +34,25 @@ const routes = [
   ['#adaptive-error-state', 'AdaptiveErrorState']
 ];
 
-async function hasRenderedText(page, text) {
-  const candidates = page.getByText(text, { exact: true });
-  const count = await candidates.count();
-  for (let i = 0; i < count; i += 1) {
-    const box = await candidates.nth(i).boundingBox();
-    if (box && box.width > 0 && box.height > 0) return true;
+async function assertResolvedComponentRoute(page, hash, expectedTitle) {
+  const expectedId = hash.slice(1);
+  const expectedPageTitle = `${expectedTitle} | AdaptiveKt Components`;
+  try {
+    await page.waitForFunction(
+      ([id, title]) => document.documentElement.getAttribute('data-adaptive-component-route') === id &&
+        document.title === title,
+      [expectedId, expectedPageTitle],
+      { timeout: 15000 }
+    );
+  } catch (error) {
+    const actual = await page.evaluate(() => ({
+      id: document.documentElement.getAttribute('data-adaptive-component-route'),
+      title: document.title
+    }));
+    throw new Error(
+      `Route ${hash} did not resolve to ${expectedTitle} (actual id=${actual.id}, title=${actual.title})`
+    );
   }
-  return false;
 }
 
 async function validate() {
@@ -83,9 +96,7 @@ async function validate() {
         throw new Error(`URL did not navigate to expected hash ${hash}`);
       }
 
-      if (!(await hasRenderedText(page, expectedText))) {
-        throw new Error(`Route ${hash} did not render expected heading: ${expectedText}`);
-      }
+      await assertResolvedComponentRoute(page, hash, expectedText);
 
       if (consoleMessages.length > 0) {
         throw new Error(`Console errors detected: ${consoleMessages[0]}`);
@@ -111,6 +122,8 @@ async function validate() {
   await browser.close();
 
   let report = '# Component Routes Validation Report\n\n';
+  report += 'The resolved component id and title are published after Compose canvas composition. ';
+  report += 'This test does not rely on DOM text nodes and is not an OCR/visual assertion.\n\n';
   report += `Generated on: ${new Date().toISOString()}\n\n`;
   report += `Base URL: ${baseUrl}\n\n`;
   report += '| Route | Expected heading | Console errors | Network failures | Result |\n';

@@ -115,3 +115,15 @@ and an explicit list of what is not yet verified.
 - [ ] No clipped/shrunk chart labels, overflowing chips or cut-off actions.
 - [ ] Dialog surfaces do not appear as fake actionable buttons to screen readers.
 - [ ] CTA text contrast is acceptable across palettes and disabled states.
+
+## Component routing smoke-test hardening
+
+The previous component route validation incorrectly looked for DOM text from
+Compose/Wasm canvas rendering, which produced 22 false failures. The browser
+now checks the actual Compose-resolved component id and title (published in
+page metadata after composition), that the canvas exists, and that the URL
+hasn't fallen back to another hash. Route validation is a blocking CI step.
+
+This does **not** prove that the component title was visibly painted or that
+overlay interactions work. Keep screenshot inspection and manual interaction
+checks separate from these route state smoke tests.

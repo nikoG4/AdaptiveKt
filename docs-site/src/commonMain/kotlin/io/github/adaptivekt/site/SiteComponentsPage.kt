@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,6 +92,9 @@ internal fun SiteComponentsPage(
     val docs = remember { componentDocs() }
     val selectedId = componentDocIdForHash(selectedHash).ifEmpty { docs.first().id }
     val selected = docs.firstOrNull { it.id == selectedId } ?: docs.first()
+    // Compose/Wasm paints text into canvas, not DOM text nodes. Publish the
+    // *resolved* component from composition for browser route verification.
+    SideEffect { publishRenderedComponentRoute(selected.id, selected.title) }
     val navGroups = docs.groupBy { it.family }.map { (family, items) ->
         DocsNavGroup(
             title = family,

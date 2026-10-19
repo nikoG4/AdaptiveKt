@@ -263,7 +263,6 @@ jobs:
 
     - name: Validate Component Routes
       shell: pwsh
-      continue-on-error: true
       run: .\tools\validate-component-routes.ps1 -SkipBuild
 
     - name: Capture Component Gallery screenshots
@@ -358,12 +357,12 @@ jobs:
         - Capture AI Workspace screenshots
         - Capture Home Code Comparison
         - Generate Home Code Comparison Report
-        - Validate Component Routes
         - Capture Component Gallery screenshots
         - Validate Communication Suite Routes
         - Capture Communication Suite screenshots
 
         **Blocking steps (must pass):**
+        - Validate Component Routes (Compose-resolved selection and canvas)
         - Prepare Pages site
         - Check Docs Site Guards
         - Check Home Code Comparison Guards
