@@ -28,6 +28,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +57,9 @@ internal fun resolveAdaptiveSelectKeyboardNavigation(
     onSelectHighlighted: () -> Unit,
     isSearchFocused: Boolean = false,
 ): Boolean {
+    // Key-up must not repeat navigation or selection performed on key-down.
+    if (event.type != KeyEventType.KeyDown) return false
+
     if (!isExpanded) {
         if (event.key == Key.DirectionDown || event.key == Key.Enter || event.key == Key.Spacebar) {
             onExpand()
