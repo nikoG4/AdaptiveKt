@@ -13,8 +13,8 @@ const themes = ['light', 'dark'];
 
 const scenes = [
   { id: 'cards', screen: 'components-cards', styles: ['modern', 'classic'] },
-  { id: 'dashboard', screen: 'dashboard', styles: ['modern'] },
-  { id: 'dialog', screen: 'components-dialogs-open', styles: ['modern'] },
+  { id: 'dashboard', screen: 'dashboard', styles: ['modern', 'classic'] },
+  { id: 'dialog', screen: 'components-dialogs-open', styles: ['modern', 'classic'] },
 ];
 
 async function capture() {
