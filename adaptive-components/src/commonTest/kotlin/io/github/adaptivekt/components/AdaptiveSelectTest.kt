@@ -1,10 +1,18 @@
 package io.github.adaptivekt.components
 
+import androidx.compose.ui.input.key.KeyEventType
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AdaptiveSelectTest {
+
+    @Test
+    fun keyboardNavigation_acceptsOnlyKeyDown() {
+        assertTrue(shouldHandleAdaptiveSelectKeyEvent(KeyEventType.KeyDown))
+        assertFalse(shouldHandleAdaptiveSelectKeyEvent(KeyEventType.KeyUp))
+        assertFalse(shouldHandleAdaptiveSelectKeyEvent(KeyEventType.Unknown))
+    }
 
     @Test
     fun selectMatchesQuery_emptyQuery_alwaysMatches() {
