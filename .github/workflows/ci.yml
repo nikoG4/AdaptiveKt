@@ -103,6 +103,9 @@ jobs:
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
 
+    - name: Validate beta screenshot matrix (no browser required)
+      run: node tools/docs-site-capture/capture-beta-ui-kit.js --verify-matrix
+
     - name: Run docs-site checks
       run: |
         chmod +x ./gradlew

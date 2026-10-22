@@ -93,3 +93,10 @@ Before beta acceptance, verify with a physical keyboard on Desktop and Web:
 - Test focus return after dismissing a popup and switching themes.
 
 The green draft CI validates compilation/tests only; it does not establish these manual interaction checks or the 24-image capture. Retain the actual screenshot manifest and tested commit SHA before checking visual boxes.
+
+## Capture integrity checks (before visual approval)
+
+- The lightweight draft CI runs `node tools/docs-site-capture/capture-beta-ui-kit.js --verify-matrix` to catch missing/duplicate route, style, theme or viewport combinations without a browser.
+- The actual capture verifies PNG signatures, exact viewport dimensions and per-image SHA-256, recorded in `manifest.json`.
+- The manifest highlights identical screenshot hashes across different scenarios for human inspection. A matching hash is not automatically a visual defect.
+- A passing capture step only establishes technical image integrity; reviewers must still inspect contrast, layout, text and interaction.

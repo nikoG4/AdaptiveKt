@@ -56,7 +56,7 @@ elevation/motion tokens; none of the remaining gates are marked as verified yet.
 The first draft-PR CI attempt failed before compilation because the previous
 Android setup action tried to install the removed SDK `tools` package.
 The workflow now uses android-actions/setup-android@v4, which avoids the
-removed package. Build validation remains **pending** until a new CI run passes.
+removed package. Draft CI passed on commit `8da8f84` (2026-10-22, run 39703887144); newer commits still require confirmation.
 
 ## Phase 1: visual preset rollout
 
@@ -71,6 +71,6 @@ removed package. Build validation remains **pending** until a new CI run passes.
 ## Visual screenshot pipeline
 
 - [x] Add deterministic Modern/Classic startup parameter for admin-demo Wasm.
-- [x] Add 16-image screenshot matrix of real admin-demo UI Kit, dashboard and dialogs.
-- [ ] Run captures in the full ready-for-review Windows CI.
+- [x] Configure 24-image screenshot matrix of Cards, Dashboard and Dialog (Modern/Classic, Light/Dark, compact/desktop).
+- [ ] Capture all 24 scenes from the latest commit using ready-for-review Windows CI (the older 16 PNGs were from a previous revision).
 - [ ] Inspect contact images for theme contrast, shadow clipping and layout defects.
