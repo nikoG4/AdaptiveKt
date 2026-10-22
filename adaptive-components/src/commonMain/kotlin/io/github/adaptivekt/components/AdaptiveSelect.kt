@@ -134,7 +134,7 @@ public fun <T> AdaptiveSelect(
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
 
     // Validate keys in debug/dev ideally, but we'll do it on composition for safety
-    remember(visibleOptions, disabledKeys) {
+    remember(visibleOptions) {
         validateOptionKeys(visibleOptions, optionKey)
     }
 
@@ -142,7 +142,7 @@ public fun <T> AdaptiveSelect(
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
 
-    var navState by remember(visibleOptions) {
+    var navState by remember(visibleOptions, disabledKeys) {
         mutableStateOf(
             AdaptiveOptionNavigationState<Any>(
                 disabledKeys = disabledKeys

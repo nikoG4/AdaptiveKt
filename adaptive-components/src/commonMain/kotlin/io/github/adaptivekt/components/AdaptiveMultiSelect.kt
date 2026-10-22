@@ -163,7 +163,7 @@ public fun <T> AdaptiveMultiSelect(
     
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
     
-    remember(visibleOptions, disabledKeys) {
+    remember(visibleOptions) {
         validateOptionKeys(visibleOptions, optionKey)
     }
 
@@ -171,7 +171,7 @@ public fun <T> AdaptiveMultiSelect(
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
     
-    var navState by remember(visibleOptions) { 
+    var navState by remember(visibleOptions, disabledKeys) { 
         mutableStateOf(
             AdaptiveOptionNavigationState<Any>(
                 disabledKeys = disabledKeys
