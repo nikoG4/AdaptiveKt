@@ -45,6 +45,9 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
     return label.contains(query, ignoreCase = true)
 }
 
+internal fun shouldHandleAdaptiveSelectKeyEvent(type: KeyEventType): Boolean =
+    type == KeyEventType.KeyDown
+
 internal fun resolveAdaptiveSelectKeyboardNavigation(
     event: KeyEvent,
     isExpanded: Boolean,
@@ -58,7 +61,7 @@ internal fun resolveAdaptiveSelectKeyboardNavigation(
     isSearchFocused: Boolean = false,
 ): Boolean {
     // Key-up must not repeat navigation or selection performed on key-down.
-    if (event.type != KeyEventType.KeyDown) return false
+    if (!shouldHandleAdaptiveSelectKeyEvent(event.type)) return false
 
     if (!isExpanded) {
         if (event.key == Key.DirectionDown || event.key == Key.Enter || event.key == Key.Spacebar) {
