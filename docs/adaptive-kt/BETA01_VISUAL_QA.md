@@ -67,10 +67,10 @@ The previous screenshot script covered docs-site component pages, not the real
 admin-demo Modern/Classic style comparison. The existing capture workflow now
 also runs `capture-beta-ui-kit.js` against the compiled `/demo/app/` route.
 
-The 16 targeted screenshots cover:
+The 24 targeted screenshots cover:
 - Cards: Modern and Classic, Light and Dark, compact and desktop
-- Dashboard: Modern, Light and Dark, compact and desktop
-- Open dialog: Modern, Light and Dark, compact and desktop
+- Dashboard: Modern and Classic, Light and Dark, compact and desktop
+- Open dialog: Modern and Classic, Light and Dark, compact and desktop
 
 Each screenshot uses explicit URL parameters `screen`, `theme`, and `style`.
 The capture saves PNGs and a JSON/Markdown manifest under
@@ -79,3 +79,17 @@ The capture saves PNGs and a JSON/Markdown manifest under
 A nonblank canvas and browser-runtime error checks are automatic, but screenshots
 still need a person to inspect visual consistency. Only a successful reviewed
 capture is evidence for the Web/Wasm visual QA gate.
+
+## Keyboard regression gate
+
+The shared Select/MultiSelect keyboard resolver ignores non-KeyDown events.
+Before beta acceptance, verify with a physical keyboard on Desktop and Web:
+
+- Closed Select: Down/Enter/Space opens exactly once per key press.
+- Open Select: Up/Down/Home/End changes highlight once; Enter selects once.
+- Open Select: Escape closes once; key release does not reopen or reselect.
+- Search input: Space inserts text rather than selecting an option.
+- MultiSelect: repeated keyboard selection never toggles twice on a single press.
+- Test focus return after dismissing a popup and switching themes.
+
+The green draft CI validates compilation/tests only; it does not establish these manual interaction checks or the 24-image capture. Retain the actual screenshot manifest and tested commit SHA before checking visual boxes.
