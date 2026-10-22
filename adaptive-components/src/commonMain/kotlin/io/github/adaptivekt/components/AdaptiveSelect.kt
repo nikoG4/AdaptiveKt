@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -119,8 +120,9 @@ public fun <T> AdaptiveSelect(
 
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
+    val visibleOptions = remember(options, searchable, effectiveSearchQuery, onSearchQueryChange, optionLabel) {
         if (searchable && effectiveSearchQuery.isNotEmpty() && onSearchQueryChange == null) {
             // Only filter locally if onSearchQueryChange is null (internal search)
             options.filter { selectMatchesQuery(optionLabel(it), effectiveSearchQuery) }
@@ -132,7 +134,7 @@ public fun <T> AdaptiveSelect(
     val keySelector: (T) -> Any = optionKey ?: { it as Any }
 
     // Validate keys in debug/dev ideally, but we'll do it on composition for safety
-    remember(visibleOptions) {
+    remember(visibleOptions, disabledKeys) {
         validateOptionKeys(visibleOptions, optionKey)
     }
 
@@ -236,7 +238,7 @@ public fun <T> AdaptiveSelect(
                             }
                         }
                     },
-                    isSearchFocused = false // For now assume search is not focused natively because we aren't using a focusable input field yet
+                    isSearchFocused = isSearchFocused
                 )
             },
             headerContent = if (searchable) {
@@ -248,6 +250,7 @@ public fun <T> AdaptiveSelect(
                         onClear = { setEffectiveSearchQuery("") },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .onFocusChanged { isSearchFocused = it.hasFocus }
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)
                     )
                 }

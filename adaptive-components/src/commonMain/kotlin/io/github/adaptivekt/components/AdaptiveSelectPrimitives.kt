@@ -48,6 +48,32 @@ public fun selectMatchesQuery(label: String, query: String): Boolean {
 internal fun shouldHandleAdaptiveSelectKeyEvent(type: KeyEventType): Boolean =
     type == KeyEventType.KeyDown
 
+internal enum class AdaptiveSelectKeyboardAction { Expand, Collapse, Next, Previous, First, Last, Select }
+
+/** Pure keyboard navigation: only key-down produces an action. */
+internal fun resolveAdaptiveSelectKeyboardAction(
+    type: KeyEventType,
+    key: Key,
+    isExpanded: Boolean,
+    isSearchFocused: Boolean = false,
+): AdaptiveSelectKeyboardAction? {
+    if (!shouldHandleAdaptiveSelectKeyEvent(type)) return null
+    if (!isExpanded) return when (key) {
+        Key.DirectionDown, Key.Enter, Key.Spacebar -> AdaptiveSelectKeyboardAction.Expand
+        else -> null
+    }
+    return when (key) {
+        Key.DirectionDown -> AdaptiveSelectKeyboardAction.Next
+        Key.DirectionUp -> AdaptiveSelectKeyboardAction.Previous
+        Key.MoveHome -> AdaptiveSelectKeyboardAction.First
+        Key.MoveEnd -> AdaptiveSelectKeyboardAction.Last
+        Key.Enter -> AdaptiveSelectKeyboardAction.Select
+        Key.Spacebar -> if (isSearchFocused) null else AdaptiveSelectKeyboardAction.Select
+        Key.Escape -> AdaptiveSelectKeyboardAction.Collapse
+        else -> null
+    }
+}
+
 internal fun resolveAdaptiveSelectKeyboardNavigation(
     event: KeyEvent,
     isExpanded: Boolean,
@@ -60,52 +86,18 @@ internal fun resolveAdaptiveSelectKeyboardNavigation(
     onSelectHighlighted: () -> Unit,
     isSearchFocused: Boolean = false,
 ): Boolean {
-    // Key-up must not repeat navigation or selection performed on key-down.
-    if (!shouldHandleAdaptiveSelectKeyEvent(event.type)) return false
-
-    if (!isExpanded) {
-        if (event.key == Key.DirectionDown || event.key == Key.Enter || event.key == Key.Spacebar) {
-            onExpand()
-            return true
-        }
-        return false
+    val action = resolveAdaptiveSelectKeyboardAction(event.type, event.key, isExpanded, isSearchFocused)
+        ?: return false
+    when (action) {
+        AdaptiveSelectKeyboardAction.Expand -> onExpand()
+        AdaptiveSelectKeyboardAction.Collapse -> onCollapse()
+        AdaptiveSelectKeyboardAction.Next -> onNavigateNext()
+        AdaptiveSelectKeyboardAction.Previous -> onNavigatePrevious()
+        AdaptiveSelectKeyboardAction.First -> onNavigateFirst()
+        AdaptiveSelectKeyboardAction.Last -> onNavigateLast()
+        AdaptiveSelectKeyboardAction.Select -> onSelectHighlighted()
     }
-
-    return when (event.key) {
-        Key.DirectionDown -> {
-            onNavigateNext()
-            true
-        }
-        Key.DirectionUp -> {
-            onNavigatePrevious()
-            true
-        }
-        Key.MoveHome -> {
-            onNavigateFirst()
-            true
-        }
-        Key.MoveEnd -> {
-            onNavigateLast()
-            true
-        }
-        Key.Enter -> {
-            onSelectHighlighted()
-            true
-        }
-        Key.Spacebar -> {
-            if (!isSearchFocused) {
-                onSelectHighlighted()
-                true
-            } else {
-                false
-            }
-        }
-        Key.Escape -> {
-            onCollapse()
-            true
-        }
-        else -> false
-    }
+    return true
 }
 
 @Composable
