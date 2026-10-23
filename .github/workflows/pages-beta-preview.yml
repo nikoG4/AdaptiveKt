@@ -60,27 +60,62 @@ jobs:
           for path in expected:
               if not (root / path).is_file():
                   raise SystemExit(f"Missing compiled beta route: {path}")
+          # All assets live under a versioned prefix, not the old main URLs.
+          # It prevents WebAssembly/JS cached by the browser from silently
+          # displaying an outdated demo after a successful Pages deployment.
+          version = "beta-1b12b9d"
+          prefix = "/AdaptiveKt/" + version + "/"
           for path in root.rglob("index.html"):
               relative = path.parent.relative_to(root).as_posix()
-              base = "/AdaptiveKt/" + (relative + "/" if relative != "." else "")
+              base = prefix + (relative + "/" if relative != "." else "")
               html = path.read_text(encoding="utf-8-sig")
               html, count = re.subn(r'<base\s+href="[^"]*"\s*/?>',
                                     f'<base href="{base}">', html, count=1, flags=re.I)
               if count != 1:
                   raise SystemExit(f"Missing base href: {path}")
               path.write_text(html, encoding="utf-8")
-              print(f"Route {path}: {base}")
+              print(f"Versioned route {path}: {base}")
 
           wasm = list(root.rglob("*.wasm"))
           if len(wasm) < 5:
               raise SystemExit(f"Expected >=5 WebAssembly binaries, found {len(wasm)}")
+          # Move files instead of copying 20+ MB of binary data twice.
+          import shutil
+          temp = Path("site-dist-versioned-staging")
+          root.rename(temp)
+          root.mkdir()
+          versioned = root / version
+          temp.rename(versioned)
+
+          # Preserve existing public entry points and query parameters by
+          # redirecting to the exact validated, versioned beta UI.
+          for route in ["", "components", "docs", "demo", "demo/app",
+                        "examples/ecommerce", "examples/ai-workspace",
+                        "examples/communication-suite"]:
+              route_dir = root / route
+              route_dir.mkdir(parents=True, exist_ok=True)
+              target = prefix + (route + "/" if route else "")
+              (route_dir / "index.html").write_text(
+                  '<!doctype html><html><head><meta charset="utf-8">'
+                  '<title>AdaptiveKt Beta Preview</title>'
+                  '<meta http-equiv="refresh" content="0;url=' + target + '">'
+                  '</head><body>'
+                  '<p>Opening AdaptiveKt beta preview...</p>'
+                  '<script>location.replace(' + json.dumps(target) +
+                  ' + location.search + location.hash);</script>'
+                  '<a href="' + target + '">Open the beta preview</a>'
+                  '</body></html>', encoding="utf-8")
+
           (root / ".nojekyll").touch()
-          (root / "beta-build.json").write_text(json.dumps({
+          marker = json.dumps({
               "source_commit": "1b12b9d695296c3b672bdc5ad29e0e22b28d5e4c",
               "source_ci_run": 39783655205,
               "preview": True,
+              "versioned_path": prefix,
               "wasm_count": len(wasm),
-          }, indent=2) + "\n", encoding="utf-8")
+          }, indent=2) + "\n"
+          (root / "beta-build.json").write_text(marker, encoding="utf-8")
+          (versioned / "beta-build.json").write_text(marker, encoding="utf-8")
           print(f"Prepared {len(expected)} routes and {len(wasm)} Wasm binaries")
           PY
 
