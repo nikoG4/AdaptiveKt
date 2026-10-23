@@ -1,0 +1,97 @@
+name: Deploy AdaptiveKt beta preview to Pages
+
+# One-time preview from the already validated CI artifact; no second Gradle build.
+# GitHub Pages hosts one site per repository, so this preview temporarily replaces
+# the root Pages content until the next main deployment.
+on:
+  push:
+    branches:
+      - feat/beta01-visual-foundations
+    paths:
+      - .github/workflows/pages-beta-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy-beta:
+    name: Publish validated Web/Wasm beta
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download validated beta Pages distribution
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-site-dist-preview
+          repository: nikoG4/AdaptiveKt
+          run-id: 39783655205
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: site-dist
+
+      - name: Adapt routing for GitHub Pages project base path
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+
+          root = Path("site-dist")
+          expected = [
+              "index.html",
+              "components/index.html",
+              "docs/index.html",
+              "demo/index.html",
+              "demo/app/index.html",
+              "examples/ecommerce/index.html",
+              "examples/ai-workspace/index.html",
+              "examples/communication-suite/index.html",
+          ]
+          for path in expected:
+              if not (root / path).is_file():
+                  raise SystemExit(f"Missing compiled beta route: {path}")
+          for path in root.rglob("index.html"):
+              relative = path.parent.relative_to(root).as_posix()
+              base = "/AdaptiveKt/" + (relative + "/" if relative != "." else "")
+              html = path.read_text(encoding="utf-8-sig")
+              html, count = re.subn(r'<base\s+href="[^"]*"\s*/?>',
+                                    f'<base href="{base}">', html, count=1, flags=re.I)
+              if count != 1:
+                  raise SystemExit(f"Missing base href: {path}")
+              path.write_text(html, encoding="utf-8")
+              print(f"Route {path}: {base}")
+
+          wasm = list(root.rglob("*.wasm"))
+          if len(wasm) < 5:
+              raise SystemExit(f"Expected >=5 WebAssembly binaries, found {len(wasm)}")
+          (root / ".nojekyll").touch()
+          (root / "beta-build.json").write_text(json.dumps({
+              "source_commit": "1b12b9d695296c3b672bdc5ad29e0e22b28d5e4c",
+              "source_ci_run": 39783655205,
+              "preview": True,
+              "wasm_count": len(wasm),
+          }, indent=2) + "\n", encoding="utf-8")
+          print(f"Prepared {len(expected)} routes and {len(wasm)} Wasm binaries")
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site-dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
