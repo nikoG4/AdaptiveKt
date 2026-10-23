@@ -26,7 +26,7 @@ jobs:
     name: Publish validated Web/Wasm beta
     runs-on: ubuntu-latest
     environment:
-      name: github-pages
+      name: adaptivekt-beta-preview
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download validated beta Pages distribution
