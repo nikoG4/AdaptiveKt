@@ -406,7 +406,7 @@ private fun <T> AdaptiveDataTableRow(
 ) {
     val baseBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
     val rowInteractionSource = remember { MutableInteractionSource() }
-    val isHovered by rowInteractionSource.collectIsHoveredAsState()
+    val isHovered = rowInteractionSource.collectIsHoveredAsState().value
     val rowBackground = when {
         !isHeader && isSelected -> AdaptiveTheme.colors.primarySubtle
         !isHeader && isEnabled && isHovered -> AdaptiveTheme.colors.surfaceMuted
