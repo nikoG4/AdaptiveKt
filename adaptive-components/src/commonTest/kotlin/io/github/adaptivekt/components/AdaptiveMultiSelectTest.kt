@@ -1,9 +1,21 @@
 package io.github.adaptivekt.components
 
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AdaptiveMultiSelectTest {
+    @Test
+    fun keyboardSelection_oneDownOneToggleNoKeyUpToggle() {
+        assertEquals(AdaptiveSelectKeyboardAction.Select,
+            resolveAdaptiveSelectKeyboardAction(KeyEventType.KeyDown, Key.Enter, isExpanded = true))
+        assertEquals(null,
+            resolveAdaptiveSelectKeyboardAction(KeyEventType.KeyUp, Key.Enter, isExpanded = true))
+        assertEquals(null,
+            resolveAdaptiveSelectKeyboardAction(KeyEventType.KeyDown, Key.Spacebar, isExpanded = true, isSearchFocused = true))
+    }
+
 
     @Test
     fun filterMultiSelectOptions_emptyQuery_returnsAllOptions() {

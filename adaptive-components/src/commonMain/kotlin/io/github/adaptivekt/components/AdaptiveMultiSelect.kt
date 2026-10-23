@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -150,8 +151,9 @@ public fun <T> AdaptiveMultiSelect(
     
     val lazyListState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
 
-    val visibleOptions = remember(options, searchable, effectiveSearchQuery) {
+    val visibleOptions = remember(options, searchable, effectiveSearchQuery, onSearchQueryChange, optionLabel) {
         if (searchable && onSearchQueryChange == null) {
             filterMultiSelectOptions(options, effectiveSearchQuery, optionLabel)
         } else {
@@ -169,7 +171,7 @@ public fun <T> AdaptiveMultiSelect(
         visibleOptions.filterNot(optionEnabled).map(keySelector).toSet()
     }
     
-    var navState by remember(visibleOptions) { 
+    var navState by remember(visibleOptions, disabledKeys) { 
         mutableStateOf(
             AdaptiveOptionNavigationState<Any>(
                 disabledKeys = disabledKeys
@@ -256,7 +258,7 @@ public fun <T> AdaptiveMultiSelect(
                             }
                         }
                     },
-                    isSearchFocused = false
+                    isSearchFocused = isSearchFocused
                 )
             },
             headerContent = if (searchable) {
@@ -268,6 +270,7 @@ public fun <T> AdaptiveMultiSelect(
                         onClear = { setEffectiveSearchQuery("") },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .onFocusChanged { isSearchFocused = it.hasFocus }
                             .padding(bottom = AdaptiveTokens.Spacing.XSmall)
                     )
                 }

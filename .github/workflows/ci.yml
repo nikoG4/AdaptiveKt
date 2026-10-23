@@ -4,7 +4,9 @@ on:
   push:
     branches: [ main, master, dev ]
   pull_request:
-    branches: [ main, master, dev ]
+    # Allow stacked beta PRs to validate without retargeting them to main.
+    branches: [ main, master, dev, 'feat/beta01-visual-foundations' ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
 
 jobs:
   changes:
@@ -101,6 +103,9 @@ jobs:
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
 
+    - name: Validate beta screenshot matrix (no browser required)
+      run: node tools/docs-site-capture/capture-beta-ui-kit.js --verify-matrix
+
     - name: Run docs-site checks
       run: |
         chmod +x ./gradlew
@@ -129,7 +134,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
 
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v4
 
     - name: Run Gradle build
       run: |
@@ -161,7 +166,7 @@ jobs:
   ai-workspace-demo:
     name: Build AI Workspace demo
     needs: changes
-    if: needs.changes.outputs.ai_workspace == 'true'
+    if: needs.changes.outputs.ai_workspace == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
 
     steps:
@@ -187,7 +192,7 @@ jobs:
   communication-suite-demo:
     name: Build Communication Suite demo
     needs: changes
-    if: needs.changes.outputs.communication_suite == 'true'
+    if: needs.changes.outputs.communication_suite == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
 
     steps:
@@ -202,7 +207,7 @@ jobs:
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v4
 
     - name: Build Communication Suite Demo
       working-directory: examples/communication-suite-demo
@@ -214,7 +219,7 @@ jobs:
   visual-artifacts:
     name: Capture visual validation artifacts
     needs: changes
-    if: needs.changes.outputs.visual == 'true'
+    if: needs.changes.outputs.visual == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: windows-latest
 
     steps:
@@ -230,7 +235,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
 
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v4
 
     - name: Prepare Pages site
       shell: pwsh

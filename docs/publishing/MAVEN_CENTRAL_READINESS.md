@@ -1,6 +1,6 @@
 # Maven Central Readiness
 
-Status: local dry-run publishing is configured. Conditional signing and a guarded Central Portal workflow are prepared. No Maven Central upload, remote snapshot publishing, release, or tag has been executed.
+Status update: 0.1.0-alpha01 has since been published to Maven Central, as documented in the README and CHANGELOG. The remainder of this document records the original publishing preparation and dry-run setup; confirm current CI and Central Portal state again before a future beta release.
 
 ## Strategy Chosen
 

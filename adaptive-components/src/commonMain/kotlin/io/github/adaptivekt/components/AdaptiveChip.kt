@@ -1,6 +1,12 @@
 package io.github.adaptivekt.components
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.BasicText
@@ -11,10 +17,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,22 +74,46 @@ public fun AdaptiveChip(
     onClick: (() -> Unit)? = null,
 ) {
     val colorScheme = AdaptiveTheme.colors
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
     val chipColor = chipBackgroundColor(selected, enabled, tone, colorScheme)
     val chipBorderColor = chipBorderColor(selected, enabled, tone, colorScheme)
     val chipTextColor = chipTextColor(selected, enabled, tone, colorScheme)
     val shape = RoundedCornerShape(AdaptiveTokens.Radius.Pill)
+    val transitionMs = AdaptiveTheme.motion.durationMillis(AdaptiveTheme.motion.fastMillis)
+    val targetBackground = if (onClick != null && enabled && (hovered || focused)) {
+        lerp(chipColor, colorScheme.surfaceRaised, 0.2f)
+    } else {
+        chipColor
+    }
+    val background by animateColorAsState(targetBackground, tween(durationMillis = transitionMs), label = "Chip background")
+    val border by animateColorAsState(
+        if (focused && enabled) colorScheme.focusRing else chipBorderColor,
+        tween(durationMillis = transitionMs),
+        label = "Chip border",
+    )
+    val contentColor by animateColorAsState(chipTextColor, tween(durationMillis = transitionMs), label = "Chip text")
 
     Row(
         modifier = modifier
             .heightIn(min = 32.dp)
             .clip(shape)
-            .background(chipColor, shape)
-            .border(1.dp, chipBorderColor, shape)
+            .background(background, shape)
+            .border(if (focused && enabled) AdaptiveTheme.states.focusBorderWidth else 1.dp, border, shape)
             .then(
                 if (onClick != null) {
                     Modifier
+                        .hoverable(interactionSource = interactionSource, enabled = enabled)
                         .adaptiveInteractiveCursor(enabled)
-                        .clickable(enabled = enabled, onClick = onClick)
+                        .semantics { this.selected = selected }
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            enabled = enabled,
+                            role = Role.Button,
+                            onClick = onClick,
+                        )
                 } else {
                     Modifier
                 },
@@ -94,7 +130,7 @@ public fun AdaptiveChip(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = chipTextColor,
+                color = contentColor,
             ),
             maxLines = 1,
         )

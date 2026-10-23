@@ -9,6 +9,8 @@ public fun main() {
     val params = window.location.search.removePrefix("?").split("&")
     val screenParam = params.find { it.startsWith("screen=") }?.substringAfter("=")
     val darkTheme = params.any { it == "theme=dark" }
+    // The query parameter makes visual regression captures deterministic.
+    val modernStyle = params.none { it == "style=classic" }
     val initialScreen = AdminDemoScreen.fromId(screenParam)
 
     ComposeViewport(viewportContainerId = "webApp") {
@@ -16,6 +18,7 @@ public fun main() {
             initialScreen = initialScreen,
             initialDarkTheme = darkTheme,
             contentScrollEnabled = true,
+            initialModernStyle = modernStyle,
         )
     }
 }

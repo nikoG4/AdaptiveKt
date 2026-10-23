@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,8 @@ import io.github.adaptivekt.components.AdaptiveCard
 import io.github.adaptivekt.components.AdaptiveMenuItem
 import io.github.adaptivekt.components.icons.AdaptiveIcons
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveElevationLevel
+import io.github.adaptivekt.core.rememberAdaptiveInfo
 import io.github.adaptivekt.core.AdaptiveTokens
 
 @Composable
@@ -110,7 +113,10 @@ public fun AdminDemoTopBar(
     initialAccountMenuOpen: Boolean = false,
     darkTheme: Boolean = false,
     onThemeToggle: () -> Unit = {},
+    modernStyle: Boolean = true,
+    onVisualStyleToggle: () -> Unit = {},
 ) {
+    val compact = rememberAdaptiveInfo().isCompact
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -119,13 +125,20 @@ public fun AdminDemoTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         DemoText(
-            text = "AdaptiveKt Admin Demo",
+            text = if (compact) "AdaptiveKt" else "AdaptiveKt Admin Demo",
             emphasis = Emphasis.Strong,
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
         ) {
+            if (!compact) {
+                DemoToggleChip(
+                    text = if (modernStyle) "Modern" else "Classic",
+                    selected = modernStyle,
+                    onClick = onVisualStyleToggle,
+                )
+            }
             DemoToggleChip(
                 text = if (darkTheme) "Dark" else "Light",
                 selected = darkTheme,
@@ -175,6 +188,12 @@ private fun AccountMenu(
                 Column(
                     modifier = Modifier
                         .width(220.dp)
+                        .shadow(
+                            elevation = AdaptiveTheme.elevations.resolve(AdaptiveElevationLevel.High),
+                            shape = AdaptiveTheme.shapes.large,
+                            ambientColor = AdaptiveTheme.elevations.shadowColor,
+                            spotColor = AdaptiveTheme.elevations.shadowColor,
+                        )
                         .clip(AdaptiveTheme.shapes.large)
                         .background(AdaptiveTheme.colors.surface, AdaptiveTheme.shapes.large)
                         .border(1.dp, AdaptiveTheme.colors.border, AdaptiveTheme.shapes.large)
@@ -300,6 +319,7 @@ public fun DemoToggleChip(
 ) {
     Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(AdaptiveTokens.Radius.Pill))
             .clickable(onClick = onClick)
             .background(
                 if (selected) AdaptiveTheme.colors.primary else AdaptiveTheme.colors.surfaceMuted,

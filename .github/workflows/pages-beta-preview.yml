@@ -1,0 +1,154 @@
+name: Deploy AdaptiveKt beta preview to Pages
+
+# One-time preview from the already validated CI artifact; no second Gradle build.
+# GitHub Pages hosts one site per repository, so this preview temporarily replaces
+# the root Pages content until the next main deployment.
+on:
+  push:
+    branches:
+      - feat/beta01-visual-foundations
+    paths:
+      - .github/workflows/pages-beta-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy-beta:
+    name: Publish validated Web/Wasm beta
+    runs-on: ubuntu-latest
+    environment:
+      name: adaptivekt-beta-preview
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download validated beta Pages distribution
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-site-dist-preview
+          repository: nikoG4/AdaptiveKt
+          run-id: 39783655205
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: site-dist
+
+      - name: Download latest fixed docs and admin demo binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-distribution
+          repository: nikoG4/AdaptiveKt
+          run-id: 39975511692
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: wasm-fixed
+
+      - name: Adapt routing for GitHub Pages project base path
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+          import shutil
+
+          root = Path("site-dist")
+          # Replace ONLY docs/admin binaries with the fixes validated in CI.
+          # Other showcase apps remain from the previously validated site bundle.
+          for source, destination in [
+              ("docs-site", root),
+              ("admin-demo", root / "demo/app"),
+          ]:
+              compiled = Path("wasm-fixed") / source / "build/dist/wasmJs/productionExecutable"
+              if not (compiled / "index.html").is_file():
+                  raise SystemExit(f"Fixed build missing {source} binaries: {compiled}")
+              shutil.copytree(compiled, destination, dirs_exist_ok=True)
+              print(f"Overlay fixed {source} from CI 39975511692")
+          expected = [
+              "index.html",
+              "components/index.html",
+              "docs/index.html",
+              "demo/index.html",
+              "demo/app/index.html",
+              "examples/ecommerce/index.html",
+              "examples/ai-workspace/index.html",
+              "examples/communication-suite/index.html",
+          ]
+          for path in expected:
+              if not (root / path).is_file():
+                  raise SystemExit(f"Missing compiled beta route: {path}")
+          # All assets live under a versioned prefix, not the old main URLs.
+          # It prevents WebAssembly/JS cached by the browser from silently
+          # displaying an outdated demo after a successful Pages deployment.
+          version = "beta-ee1b6c4"
+          prefix = "/AdaptiveKt/" + version + "/"
+          for path in root.rglob("index.html"):
+              relative = path.parent.relative_to(root).as_posix()
+              base = prefix + (relative + "/" if relative != "." else "")
+              html = path.read_text(encoding="utf-8-sig")
+              html, count = re.subn(r'<base\s+href="[^"]*"\s*/?>',
+                                    f'<base href="{base}">', html, count=1, flags=re.I)
+              if count == 0:
+                  html, head_count = re.subn(r'(<head[^>]*>)', lambda m: m.group(1) + chr(10) + f'<base href="{base}">', html, count=1, flags=re.I)
+                  if head_count != 1:
+                      raise SystemExit(f"Missing HTML head: {path}")
+              path.write_text(html, encoding="utf-8")
+              print(f"Versioned route {path}: {base}")
+
+          wasm = list(root.rglob("*.wasm"))
+          if len(wasm) < 5:
+              raise SystemExit(f"Expected >=5 WebAssembly binaries, found {len(wasm)}")
+          # Move files instead of copying 20+ MB of binary data twice.
+          temp = Path("site-dist-versioned-staging")
+          root.rename(temp)
+          root.mkdir()
+          versioned = root / version
+          temp.rename(versioned)
+
+          # Preserve existing public entry points and query parameters by
+          # redirecting to the exact validated, versioned beta UI.
+          for route in ["", "components", "docs", "demo", "demo/app",
+                        "examples/ecommerce", "examples/ai-workspace",
+                        "examples/communication-suite"]:
+              route_dir = root / route
+              route_dir.mkdir(parents=True, exist_ok=True)
+              target = prefix + (route + "/" if route else "")
+              (route_dir / "index.html").write_text(
+                  '<!doctype html><html><head><meta charset="utf-8">'
+                  '<title>AdaptiveKt Beta Preview</title>'
+                  '<meta http-equiv="refresh" content="0;url=' + target + '">'
+                  '</head><body>'
+                  '<p>Opening AdaptiveKt beta preview...</p>'
+                  '<script>location.replace(' + json.dumps(target) +
+                  ' + location.search + location.hash);</script>'
+                  '<a href="' + target + '">Open the beta preview</a>'
+                  '</body></html>', encoding="utf-8")
+
+          (root / ".nojekyll").touch()
+          marker = json.dumps({
+              "source_commit": "ee1b6c49acfee3fe2e336af6c10594523c57cb27",
+              "source_ci_run": 39975511692,
+              "preview": True,
+              "versioned_path": prefix,
+              "wasm_count": len(wasm),
+          }, indent=2) + "\n"
+          (root / "beta-build.json").write_text(marker, encoding="utf-8")
+          (versioned / "beta-build.json").write_text(marker, encoding="utf-8")
+          print(f"Prepared {len(expected)} routes and {len(wasm)} Wasm binaries")
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site-dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

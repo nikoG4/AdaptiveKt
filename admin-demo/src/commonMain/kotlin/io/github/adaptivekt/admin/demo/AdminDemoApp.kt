@@ -14,8 +14,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveApp
-import io.github.adaptivekt.core.AdaptiveColorSchemes
 import io.github.adaptivekt.core.AdaptiveTheme
+import io.github.adaptivekt.core.AdaptiveThemeMode
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.layout.AdaptiveContainer
 import io.github.adaptivekt.navigation.AdaptiveNavItem
 import io.github.adaptivekt.navigation.AdaptiveNavigationScaffold
@@ -27,17 +28,22 @@ public fun AdminDemoApp(
     initialAccountMenuOpen: Boolean = false,
     initialDarkTheme: Boolean = false,
     contentScrollEnabled: Boolean = false,
+    initialModernStyle: Boolean = true,
 ) {
     var darkTheme by remember { mutableStateOf(initialDarkTheme) }
+    var modernStyle by remember(initialModernStyle) { mutableStateOf(initialModernStyle) }
     AdaptiveApp {
         AdaptiveTheme(
-            colorScheme = if (darkTheme) AdaptiveColorSchemes.defaultDark() else AdaptiveColorSchemes.defaultLight(),
+            mode = if (darkTheme) AdaptiveThemeMode.Dark else AdaptiveThemeMode.Light,
+            visualStyle = if (modernStyle) AdaptiveVisualStyle.Modern else AdaptiveVisualStyle.Classic,
         ) {
             AdminDemoThemedApp(
                 initialScreen = initialScreen,
                 initialAccountMenuOpen = initialAccountMenuOpen,
                 darkTheme = darkTheme,
                 onThemeToggle = { darkTheme = !darkTheme },
+                modernStyle = modernStyle,
+                onVisualStyleToggle = { modernStyle = !modernStyle },
                 contentScrollEnabled = contentScrollEnabled,
             )
         }
@@ -50,6 +56,8 @@ private fun AdminDemoThemedApp(
     initialAccountMenuOpen: Boolean,
     darkTheme: Boolean,
     onThemeToggle: () -> Unit,
+    modernStyle: Boolean,
+    onVisualStyleToggle: () -> Unit,
     contentScrollEnabled: Boolean,
 ) {
     var selectedItemId by remember {
@@ -80,6 +88,8 @@ private fun AdminDemoThemedApp(
                 initialAccountMenuOpen = initialAccountMenuOpen,
                 darkTheme = darkTheme,
                 onThemeToggle = onThemeToggle,
+                modernStyle = modernStyle,
+                onVisualStyleToggle = onVisualStyleToggle,
             )
         },
     ) { padding ->
@@ -103,6 +113,7 @@ private fun AdminDemoThemedApp(
                         initialMultiSelectExpanded = initialScreen == AdminDemoScreen.ComponentsMultiSelectsOpen,
                         initialDialogOpen = initialScreen == AdminDemoScreen.ComponentsDialogsOpen,
                         externalContentScroll = contentScrollEnabled,
+                        darkTheme = darkTheme,
                     )
                     else -> DashboardScreen()
                 }

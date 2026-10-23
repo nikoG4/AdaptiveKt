@@ -1,6 +1,7 @@
 package io.github.adaptivekt.admin.demo
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +58,9 @@ import io.github.adaptivekt.components.AdaptiveTabs
 import io.github.adaptivekt.components.AdaptiveTextField
 import io.github.adaptivekt.components.AdaptiveThumbnail
 import io.github.adaptivekt.components.icons.AdaptiveIcons
+import io.github.adaptivekt.core.AdaptiveElevationLevel
+import io.github.adaptivekt.core.AdaptiveThemeMode
+import io.github.adaptivekt.core.AdaptiveVisualStyle
 import io.github.adaptivekt.core.AdaptiveTheme
 import io.github.adaptivekt.core.AdaptiveTokens
 import io.github.adaptivekt.core.rememberAdaptiveInfo
@@ -96,6 +100,7 @@ internal fun ComponentsShowcaseScreen(
     initialMultiSelectExpanded: Boolean = false,
     initialDialogOpen: Boolean = false,
     externalContentScroll: Boolean = false,
+    darkTheme: Boolean = false,
 ) {
     val adaptiveInfo = rememberAdaptiveInfo()
     val cardSpan = if (adaptiveInfo.isCompact) 12 else 6
@@ -115,6 +120,11 @@ internal fun ComponentsShowcaseScreen(
             },
         )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+
+        if (focusSection == null || focusSection == ComponentsShowcaseSection.Cards) {
+            VisualLanguageSection(darkTheme)
+            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+        }
 
         AdaptiveGrid(columns = 12, horizontalGap = AdaptiveTokens.Spacing.Large, verticalGap = AdaptiveTokens.Spacing.Large) {
             if (focusSection == null || focusSection == ComponentsShowcaseSection.Buttons) {
@@ -172,6 +182,84 @@ internal fun ComponentsShowcaseScreen(
     }
 }
 
+/**
+ * A real Compose comparison of Modern and Classic. Not a screenshot mockup.
+ * Keep this visible in the main UI Kit route as a visual regression target.
+ */
+@Composable
+private fun VisualLanguageSection(darkTheme: Boolean) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        AdaptiveSectionHeader(
+            title = "Visual foundations",
+            description = "Compare real Compose controls, palettes and surface elevation.",
+            action = { AdaptiveBadge("Beta preview", tone = AdaptiveBadgeTone.Info) },
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        val span = if (rememberAdaptiveInfo().isCompact) 12 else 6
+        AdaptiveGrid(columns = 12, horizontalGap = AdaptiveTokens.Spacing.Medium, verticalGap = AdaptiveTokens.Spacing.Medium) {
+            item(span = span) {
+                VisualPresetPreview(AdaptiveVisualStyle.Modern, "Modern", darkTheme)
+            }
+            item(span = span) {
+                VisualPresetPreview(AdaptiveVisualStyle.Classic, "Classic", darkTheme)
+            }
+        }
+    }
+}
+
+@Composable
+private fun VisualPresetPreview(style: AdaptiveVisualStyle, name: String, darkTheme: Boolean) {
+    val mode = if (darkTheme) AdaptiveThemeMode.Dark else AdaptiveThemeMode.Light
+    AdaptiveTheme(visualStyle = style, mode = mode) {
+        AdaptiveSurface(elevation = AdaptiveElevationLevel.Low) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column {
+                        Label(name)
+                        Body(if (style == AdaptiveVisualStyle.Modern) "Refined UI system" else "Original alpha styling")
+                    }
+                    AdaptiveBadge(if (style == AdaptiveVisualStyle.Modern) "New" else "Legacy")
+                }
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+                Row(horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small)) {
+                    listOf(
+                        AdaptiveTheme.colors.primary,
+                        AdaptiveTheme.colors.primarySubtle,
+                        AdaptiveTheme.colors.surfaceMuted,
+                        AdaptiveTheme.colors.success,
+                        AdaptiveTheme.colors.warning,
+                    ).forEach { swatch ->
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(AdaptiveTheme.shapes.small)
+                                .background(swatch)
+                                .border(1.dp, AdaptiveTheme.colors.border, AdaptiveTheme.shapes.small),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+                ShowcaseRow {
+                    AdaptiveButton("Continue", onClick = {}, size = AdaptiveButtonSize.Small)
+                    AdaptiveButton(
+                        "Cancel", onClick = {}, size = AdaptiveButtonSize.Small,
+                        variant = AdaptiveButtonVariant.Secondary,
+                    )
+                }
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+                AdaptiveCard(elevation = AdaptiveElevationLevel.Low) {
+                    Label("Workspace overview")
+                    Body("Shared corners, typography, borders and layered surfaces.")
+                }
+            }
+        }
+    }
+}
+
 private fun sectionSpan(focusSection: ComponentsShowcaseSection?, defaultSpan: Int): Int =
     if (focusSection == null) defaultSpan else 12
 
@@ -206,11 +294,11 @@ private fun ButtonsSection() {
 private fun IconButtonsSection() {
     ShowcaseCard(title = "Icon buttons", description = "Shape-safe icon actions for overflow, clear, close, and disabled states.") {
         ShowcaseRow {
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.MoreVertical() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Close() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.Search() }
-            AdaptiveIconButton(onClick = {}) { AdaptiveIcons.ChevronDown() }
-            AdaptiveIconButton(onClick = {}, enabled = false) {
+            AdaptiveIconButton(onClick = {}, contentDescription = "More options") { AdaptiveIcons.MoreVertical() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Close") { AdaptiveIcons.Close() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Search") { AdaptiveIcons.Search() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Expand") { AdaptiveIcons.ChevronDown() }
+            AdaptiveIconButton(onClick = {}, contentDescription = "Add", enabled = false) {
                 AdaptiveIcons.Plus(tint = AdaptiveTheme.colors.disabledText)
             }
         }
@@ -264,17 +352,27 @@ private fun AvatarsSection() {
 private fun CardsAndSurfacesSection() {
     var clicked by remember { mutableStateOf(false) }
 
-    ShowcaseCard(title = "Cards and surfaces", description = "Shared containers with professional defaults.") {
-        AdaptiveSurface {
+    ShowcaseCard(title = "Cards and surfaces", description = "Flat, raised and interactive containers using shared semantic elevation.") {
+        AdaptiveSurface(elevation = AdaptiveElevationLevel.None) {
             Column {
                 Label("AdaptiveSurface")
                 Body("A neutral panel for grouped admin content.")
             }
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-        AdaptiveCard {
-            Label("AdaptiveCard")
-            Body("Default padding, border, and radius.")
+        AdaptiveCard(elevation = AdaptiveElevationLevel.Low) {
+            Label("Low elevation — default card")
+            Body("Subtle shadow and raised surface for content sections.")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCard(elevation = AdaptiveElevationLevel.Medium) {
+            Label("Medium elevation")
+            Body("A visible sense of depth without a heavy outline.")
+        }
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        AdaptiveCard(elevation = AdaptiveElevationLevel.High) {
+            Label("High elevation")
+            Body("A stronger raised surface for visual comparisons.")
         }
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         AdaptiveCard(onClick = { clicked = !clicked }) {
@@ -895,7 +993,17 @@ private fun ShowcaseCard(
     content: @Composable () -> Unit,
 ) {
     AdaptiveCard {
-        AdaptiveSectionHeader(title = title, description = description)
+        BasicText(
+            text = title,
+            style = AdaptiveTheme.typography.subtitle.copy(color = AdaptiveTheme.colors.textPrimary),
+            maxLines = 2,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+        BasicText(
+            text = description,
+            style = AdaptiveTheme.typography.bodySmall.copy(color = AdaptiveTheme.colors.textMuted),
+            maxLines = 3,
+        )
         Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
         content()
     }
@@ -904,7 +1012,9 @@ private fun ShowcaseCard(
 @Composable
 private fun ShowcaseRow(content: @Composable () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Small),
         verticalAlignment = Alignment.CenterVertically,
     ) {

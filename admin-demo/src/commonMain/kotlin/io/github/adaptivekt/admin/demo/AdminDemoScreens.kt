@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +26,7 @@ import io.github.adaptivekt.admin.demo.ui.DemoToggleChip
 import io.github.adaptivekt.admin.demo.ui.Emphasis
 import io.github.adaptivekt.components.AdaptiveButton
 import io.github.adaptivekt.components.AdaptiveButtonVariant
+import io.github.adaptivekt.components.AdaptiveDialog
 import io.github.adaptivekt.components.AdaptiveSearchField
 import io.github.adaptivekt.components.AdaptiveSectionHeader
 import io.github.adaptivekt.components.AdaptiveTextField
@@ -134,10 +136,34 @@ internal fun DashboardScreen() {
 
 @Composable
 internal fun EmployeesScreen() {
+    // This is a fully interactive local demo; changes reset on refresh.
+    val employees = remember {
+        mutableStateListOf<Employee>().apply { addAll(AdminDemoData.employees) }
+    }
     var searchText by remember { mutableStateOf("") }
-    var selectedEmployeeId by remember { mutableStateOf<String?>(null) }
-    val allEmployees = AdminDemoData.employees
-    val employees = if (searchText.isBlank()) allEmployees else allEmployees.filter { it.name.contains(searchText, ignoreCase = true) }
+    var selectedEmployeeId by remember { mutableStateOf<String?>(employees.firstOrNull()?.id) }
+    var showEditor by remember { mutableStateOf(false) }
+    var editingId by remember { mutableStateOf<String?>(null) }
+    var draftName by remember { mutableStateOf("") }
+    var draftRole by remember { mutableStateOf("") }
+    var draftDepartment by remember { mutableStateOf("") }
+    var draftEmail by remember { mutableStateOf("") }
+
+    val openEditor: (Employee?) -> Unit = { employee ->
+        editingId = employee?.id
+        draftName = employee?.name.orEmpty()
+        draftRole = employee?.role.orEmpty()
+        draftDepartment = employee?.department.orEmpty()
+        draftEmail = employee?.email.orEmpty()
+        showEditor = true
+    }
+
+    val visibleEmployees = if (searchText.isBlank()) employees.toList() else employees.filter {
+        it.name.contains(searchText, ignoreCase = true) ||
+            it.email.contains(searchText, ignoreCase = true) ||
+            it.department.contains(searchText, ignoreCase = true) ||
+            it.role.contains(searchText, ignoreCase = true)
+    }
     val employeeActions = listOf(
         AdaptiveDataAction<Employee>(
             id = "view",
@@ -149,23 +175,33 @@ internal fun EmployeesScreen() {
             id = "edit",
             label = "Edit",
             priority = AdaptiveActionPriority.Secondary,
-            onClick = { selectedEmployeeId = it.id },
+            onClick = { openEditor(it) },
         ),
         AdaptiveDataAction<Employee>(
             id = "archive",
             label = "Archive",
             priority = AdaptiveActionPriority.Overflow,
             destructive = true,
-            onClick = { selectedEmployeeId = it.id },
+            onClick = { employee ->
+                val index = employees.indexOfFirst { it.id == employee.id }
+                if (index >= 0) employees[index] = employee.copy(status = "Archived")
+                selectedEmployeeId = employee.id
+            },
         ),
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         AdaptiveSectionHeader(title = "Employees")
-        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+        DemoText(
+            text = "${employees.size} team members · ${employees.count { it.status == "Active" }} active · Local demo data",
+            emphasis = Emphasis.Subtle,
+            maxLines = 2,
+        )
+        Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
 
         io.github.adaptivekt.data.AdaptiveDataView(
-            state = AdaptiveDataContent(employees),
+            state = AdaptiveDataContent(visibleEmployees),
             columns = listOf(
                 AdaptiveDataColumn(
                     id = "avatar",
@@ -208,7 +244,7 @@ internal fun EmployeesScreen() {
                 AdaptiveSearchField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = "Search employees",
+                    placeholder = "Search by name, role, department or email",
                     onClear = { searchText = "" },
                 )
             },
@@ -216,7 +252,7 @@ internal fun EmployeesScreen() {
                 AdaptiveButton(
                     text = "New Employee",
                     leadingIcon = { AdaptiveIcons.Plus(size = 16.dp, tint = Color.White) },
-                    onClick = { /* no-op demo action */ },
+                    onClick = { openEditor(null) },
                 )
             },
             rowActions = employeeActions,
@@ -224,15 +260,127 @@ internal fun EmployeesScreen() {
         )
 
         selectedEmployeeId?.let { employeeId ->
-            val employee = allEmployees.firstOrNull { it.id == employeeId }
+            val employee = employees.firstOrNull { it.id == employeeId }
             if (employee != null) {
-                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
-                DemoCard(title = "Selected employee", value = employee.name, subtitle = employee.role)
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+                DemoPanel(title = "Employee profile", subtitle = "Selected record · Changes stay in this browser session") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        DemoRemoteAvatar(name = employee.name, avatarUrl = employee.avatarUrl, size = 48.dp)
+                        Column {
+                            DemoText(text = employee.name, emphasis = Emphasis.Strong)
+                            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.XSmall))
+                            DemoStatusText(text = employee.status)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+                    val compact = rememberAdaptiveInfo().isCompact
+                    AdaptiveGrid(
+                        columns = 12,
+                        horizontalGap = AdaptiveTokens.Spacing.Medium,
+                        verticalGap = AdaptiveTokens.Spacing.Medium,
+                    ) {
+                        item(span = if (compact) 12 else 4) {
+                            Column {
+                                DemoText(text = "ROLE", emphasis = Emphasis.Subtle)
+                                DemoText(text = employee.role)
+                            }
+                        }
+                        item(span = if (compact) 12 else 4) {
+                            Column {
+                                DemoText(text = "DEPARTMENT", emphasis = Emphasis.Subtle)
+                                DemoText(text = employee.department)
+                            }
+                        }
+                        item(span = if (compact) 12 else 4) {
+                            Column {
+                                DemoText(text = "EMAIL", emphasis = Emphasis.Subtle)
+                                DemoText(text = employee.email)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Large))
+                    AdaptiveButton(
+                        text = "Edit profile",
+                        variant = AdaptiveButtonVariant.Secondary,
+                        onClick = { openEditor(employee) },
+                    )
+                }
+            }
+        }
+    }
+
+    if (showEditor) {
+        val valid = draftName.isNotBlank() && draftRole.isNotBlank() &&
+            draftDepartment.isNotBlank() && draftEmail.contains("@") &&
+            draftEmail.substringAfter("@").contains(".")
+        AdaptiveDialog(
+            title = if (editingId == null) "Add employee" else "Edit employee",
+            onDismissRequest = { showEditor = false },
+            dismissButton = {
+                AdaptiveButton(
+                    text = "Cancel",
+                    variant = AdaptiveButtonVariant.Secondary,
+                    onClick = { showEditor = false },
+                )
+            },
+            confirmButton = {
+                AdaptiveButton(
+                    text = if (editingId == null) "Add employee" else "Save changes",
+                    enabled = valid,
+                    onClick = {
+                        if (valid) {
+                            val id = editingId
+                            val original = employees.firstOrNull { it.id == id }
+                            val updated = Employee(
+                                id = id ?: "demo-${employees.size + 1}",
+                                avatarColor = original?.avatarColor ?: Color(0xFFE8F1FF),
+                                name = draftName.trim(),
+                                role = draftRole.trim(),
+                                department = draftDepartment.trim(),
+                                status = original?.status ?: "Active",
+                                email = draftEmail.trim(),
+                                avatarUrl = original?.avatarUrl,
+                            )
+                            if (original == null) {
+                                employees.add(updated)
+                            } else {
+                                val index = employees.indexOfFirst { it.id == original.id }
+                                if (index >= 0) employees[index] = updated
+                            }
+                            selectedEmployeeId = updated.id
+                            searchText = ""
+                            showEditor = false
+                        }
+                    },
+                )
+            },
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium)) {
+                DemoText(text = "Try creating or updating a record. No changes are sent to a server.", emphasis = Emphasis.Subtle, maxLines = 2)
+                AdaptiveTextField(
+                    value = draftName, onValueChange = { draftName = it },
+                    label = "Full name", placeholder = "e.g. Alex Morgan",
+                )
+                AdaptiveTextField(
+                    value = draftRole, onValueChange = { draftRole = it },
+                    label = "Role", placeholder = "e.g. Product Designer",
+                )
+                AdaptiveTextField(
+                    value = draftDepartment, onValueChange = { draftDepartment = it },
+                    label = "Department", placeholder = "e.g. Design",
+                )
+                AdaptiveTextField(
+                    value = draftEmail, onValueChange = { draftEmail = it },
+                    label = "Email", placeholder = "name@example.com",
+                )
             }
         }
     }
 }
-
 @Composable
 internal fun ProductsScreen() {
     val productActions = listOf(

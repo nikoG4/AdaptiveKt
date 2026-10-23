@@ -1,5 +1,6 @@
 package io.github.adaptivekt.data
 
+import androidx.compose.ui.unit.dp
 import io.github.adaptivekt.core.AdaptiveBreakpoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -7,6 +8,33 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AdaptiveDataHelpersTest {
+    @Test
+    fun `desktop action column keeps all controls visible`() {
+        fun action(label: String, priority: AdaptiveActionPriority = AdaptiveActionPriority.Secondary) =
+            AdaptiveDataAction<String>(id = label, label = label, priority = priority, onClick = {})
+
+        val one = resolveDesktopActionColumnWidth(listOf(action("View", AdaptiveActionPriority.Primary)))
+        val two = resolveDesktopActionColumnWidth(listOf(
+            action("View", AdaptiveActionPriority.Primary), action("Edit"),
+        ))
+        val three = resolveDesktopActionColumnWidth(listOf(
+            action("View", AdaptiveActionPriority.Primary),
+            action("Edit"),
+            action("Archive", AdaptiveActionPriority.Overflow),
+        ))
+        val overflowOnly = resolveDesktopActionColumnWidth(listOf(
+            action("Actions", AdaptiveActionPriority.Overflow),
+        ))
+        val longLabel = resolveDesktopActionColumnWidth(listOf(action("Download invoice")))
+        assertEquals(0.dp, resolveDesktopActionColumnWidth(emptyList<AdaptiveDataAction<String>>()))
+        assertTrue(one >= 76.dp)
+        assertTrue(two > one)
+        assertTrue(three >= 180.dp, "View + Edit + overflow must not clip on desktop")
+        assertTrue(overflowOnly >= 60.dp, "Overflow menu needs a proper click target")
+        assertTrue(longLabel > one, "Longer action labels need more width")
+    }
+
+
     @Test
     fun `should use table layout for expanded and large breakpoints`() {
         assertFalse(shouldUseTableLayout(AdaptiveBreakpoint.Compact))
