@@ -38,6 +38,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: site-dist
 
+      - name: Download latest fixed docs and admin demo binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-distribution
+          repository: nikoG4/AdaptiveKt
+          run-id: 39975511692
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: wasm-fixed
+
       - name: Adapt routing for GitHub Pages project base path
         shell: bash
         run: |
@@ -45,8 +54,20 @@ jobs:
           from pathlib import Path
           import json
           import re
+          import shutil
 
           root = Path("site-dist")
+          # Replace ONLY docs/admin binaries with the fixes validated in CI.
+          # Other showcase apps remain from the previously validated site bundle.
+          for source, destination in [
+              ("docs-site", root),
+              ("admin-demo", root / "demo/app"),
+          ]:
+              compiled = Path("wasm-fixed") / source / "build/dist/wasmJs/productionExecutable"
+              if not (compiled / "index.html").is_file():
+                  raise SystemExit(f"Fixed build missing {source} binaries: {compiled}")
+              shutil.copytree(compiled, destination, dirs_exist_ok=True)
+              print(f"Overlay fixed {source} from CI 39975511692")
           expected = [
               "index.html",
               "components/index.html",
@@ -63,7 +84,7 @@ jobs:
           # All assets live under a versioned prefix, not the old main URLs.
           # It prevents WebAssembly/JS cached by the browser from silently
           # displaying an outdated demo after a successful Pages deployment.
-          version = "beta-1b12b9d"
+          version = "beta-ee1b6c4"
           prefix = "/AdaptiveKt/" + version + "/"
           for path in root.rglob("index.html"):
               relative = path.parent.relative_to(root).as_posix()
@@ -80,7 +101,6 @@ jobs:
           if len(wasm) < 5:
               raise SystemExit(f"Expected >=5 WebAssembly binaries, found {len(wasm)}")
           # Move files instead of copying 20+ MB of binary data twice.
-          import shutil
           temp = Path("site-dist-versioned-staging")
           root.rename(temp)
           root.mkdir()
@@ -108,8 +128,8 @@ jobs:
 
           (root / ".nojekyll").touch()
           marker = json.dumps({
-              "source_commit": "1b12b9d695296c3b672bdc5ad29e0e22b28d5e4c",
-              "source_ci_run": 39783655205,
+              "source_commit": "ee1b6c49acfee3fe2e336af6c10594523c57cb27",
+              "source_ci_run": 39975511692,
               "preview": True,
               "versioned_path": prefix,
               "wasm_count": len(wasm),
