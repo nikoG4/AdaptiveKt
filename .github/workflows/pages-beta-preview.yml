@@ -6,7 +6,7 @@ name: Deploy AdaptiveKt beta preview to Pages
 on:
   push:
     branches:
-      - feat/beta01-visual-foundations
+      - preview/adaptivekt-beta-pages
     paths:
       - .github/workflows/pages-beta-preview.yml
   workflow_dispatch:
@@ -37,6 +37,29 @@ jobs:
           run-id: 39783655205
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: site-dist
+
+      - name: Download fresh library and admin-demo WebAssembly
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-distribution
+          repository: nikoG4/AdaptiveKt
+          run-id: 39975511692
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: fresh-wasm
+
+      - name: Replace preview admin and docs with corrected beta build
+        shell: bash
+        run: |
+          set -euo pipefail
+          admin="fresh-wasm/admin-demo/build/dist/wasmJs/productionExecutable"
+          docs="fresh-wasm/docs-site/build/dist/wasmJs/productionExecutable"
+          test -s "$admin/admin-demo.js"
+          test -s "$docs/docs-site.js"
+          find site-dist/demo/app -maxdepth 1 -type f -name '*.wasm' -delete
+          find site-dist -maxdepth 1 -type f -name '*.wasm' -delete
+          cp -a "$admin/." site-dist/demo/app/
+          cp -a "$docs/." site-dist/
+          echo "Updated demo and docs from CI run 39975511692"
 
       - name: Adapt routing for GitHub Pages project base path
         shell: bash
@@ -76,8 +99,9 @@ jobs:
               raise SystemExit(f"Expected >=5 WebAssembly binaries, found {len(wasm)}")
           (root / ".nojekyll").touch()
           (root / "beta-build.json").write_text(json.dumps({
-              "source_commit": "1b12b9d695296c3b672bdc5ad29e0e22b28d5e4c",
-              "source_ci_run": 39783655205,
+              "source_commit": "ee1b6c49acfee3fe2e336af6c10594523c57cb27",
+              "source_ci_run": 39975511692,
+              "base_site_ci_run": 39783655205,
               "preview": True,
               "wasm_count": len(wasm),
           }, indent=2) + "\n", encoding="utf-8")
