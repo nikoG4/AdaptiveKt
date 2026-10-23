@@ -9,7 +9,9 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,14 +266,23 @@ private fun DataToolbar(
     filterSlot: AdaptiveFilterSlot?,
     actions: (@Composable () -> Unit)?,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        filterSlot?.invoke()
-
-        if (filterSlot != null && actions != null) {
-            Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+    if (rememberAdaptiveInfo().isCompact || filterSlot == null || actions == null) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            filterSlot?.invoke()
+            if (filterSlot != null && actions != null) {
+                Spacer(modifier = Modifier.height(AdaptiveTokens.Spacing.Medium))
+            }
+            actions?.invoke()
         }
-
-        actions?.invoke()
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AdaptiveTokens.Spacing.Medium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(modifier = Modifier.weight(1f)) { filterSlot() }
+            actions()
+        }
     }
 }
 
@@ -394,8 +405,13 @@ private fun <T> AdaptiveDataTableRow(
     rowActions: List<AdaptiveDataAction<T>> = emptyList(),
 ) {
     val baseBackground = if (isHeader) AdaptiveTheme.colors.surfaceMuted else AdaptiveTheme.colors.surface
-    val rowBackground = if (!isHeader && isSelected) AdaptiveTheme.colors.primarySubtle else baseBackground
     val rowInteractionSource = remember { MutableInteractionSource() }
+    val isHovered by rowInteractionSource.collectIsHoveredAsState()
+    val rowBackground = when {
+        !isHeader && isSelected -> AdaptiveTheme.colors.primarySubtle
+        !isHeader && isEnabled && isHovered -> AdaptiveTheme.colors.surfaceMuted
+        else -> baseBackground
+    }
 
     val canClickRow = !isHeader && isEnabled && (onItemClick != null || onRowSelectionClick != null)
 
@@ -403,6 +419,7 @@ private fun <T> AdaptiveDataTableRow(
         .fillMaxWidth()
         .heightIn(min = AdaptiveTokens.Sizes.TableRowMinHeight)
         .background(rowBackground)
+        .hoverable(interactionSource = rowInteractionSource, enabled = canClickRow)
         .then(
             if (canClickRow) {
                 Modifier
@@ -424,7 +441,7 @@ private fun <T> AdaptiveDataTableRow(
         )
 
     val weights = columns.map { normalizeColumnWeight(it.weight) }
-    val actionColumnWidth = 136.dp
+    val actionColumnWidth = resolveDesktopActionColumnWidth(rowActions)
 
     WeightedDataRow(
         weights = weights,
@@ -788,6 +805,21 @@ private fun <T> MetadataRow(column: AdaptiveDataColumn<T>, item: T) {
     }
 }
 
+/**
+ * Reserve enough trailing width for inline actions and overflow.
+ * A fixed 136.dp table column used to collapse the final control to ~4px.
+ */
+internal fun <T> resolveDesktopActionColumnWidth(actions: List<AdaptiveDataAction<T>>): androidx.compose.ui.unit.Dp {
+    if (actions.isEmpty()) return 0.dp
+    val inlineActions = actions.filter { it.priority != AdaptiveActionPriority.Overflow }
+    val overflowCount = if (actions.any { it.priority == AdaptiveActionPriority.Overflow }) 1 else 0
+    val slots = inlineActions.size + overflowCount
+    val inlineWidthDp = inlineActions.sumOf { maxOf(56, it.label.length * 8 + 24) }
+    val overflowWidthDp = overflowCount * 40
+    val gapsDp = (slots - 1).coerceAtLeast(0) * 8
+    return (inlineWidthDp + overflowWidthDp + gapsDp + 20).dp
+}
+
 @Composable
 private fun <T> DesktopActions(
     rowActions: List<AdaptiveDataAction<T>>,
@@ -895,7 +927,7 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
     val density = LocalDensity.current
     val menuWidth = 148.dp
-    val triggerSize = 32.dp
+    val triggerSize = 36.dp
     val popupOffset = IntOffset(
         x = 0,
         y = with(density) { (triggerSize + AdaptiveTokens.Spacing.Small).roundToPx() },
@@ -905,6 +937,7 @@ private fun <T> DefaultOverflowMenu(actions: List<AdaptiveDataAction<T>>, item: 
         AdaptiveIconButton(
             onClick = { setExpanded(!expanded) },
             size = triggerSize,
+            contentDescription = "More actions",
         ) {
             AdaptiveIcons.MoreVertical(size = 16.dp, tint = AdaptiveTheme.colors.textSecondary)
         }
