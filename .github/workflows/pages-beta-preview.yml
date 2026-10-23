@@ -93,7 +93,7 @@ jobs:
               html, count = re.subn(r'<base\s+href="[^"]*"\s*/?>',
                                     f'<base href="{base}">', html, count=1, flags=re.I)
               if count == 0:
-                  html, head_count = re.subn(r'(<head[^>]*>)', r'\\1' + '\\n' + f'<base href="{base}">', html, count=1, flags=re.I)
+                  html, head_count = re.subn(r'(<head[^>]*>)', lambda m: m.group(1) + chr(10) + f'<base href="{base}">', html, count=1, flags=re.I)
                   if head_count != 1:
                       raise SystemExit(f"Missing HTML head: {path}")
               path.write_text(html, encoding="utf-8")
