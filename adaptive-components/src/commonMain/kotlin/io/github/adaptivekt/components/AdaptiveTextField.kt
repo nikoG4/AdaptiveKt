@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.adaptivekt.core.AdaptiveTokens
@@ -59,6 +61,12 @@ public fun AdaptiveTextField(
     validationMessage: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    maxLength: Int? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -107,7 +115,14 @@ public fun AdaptiveTextField(
 
             BasicTextField(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = { proposed ->
+                    if (maxLength == null || proposed.length <= maxLength) onValueChange(proposed)
+                },
+                singleLine = singleLine,
+                minLines = minLines,
+                maxLines = maxLines,
+                keyboardOptions = keyboardOptions,
+                visualTransformation = visualTransformation,
                 modifier = Modifier
                     .weight(1f)
                     .semantics {
