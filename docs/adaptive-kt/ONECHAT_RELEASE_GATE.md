@@ -51,3 +51,54 @@ This is a library compatibility checklist. Do not copy consumer business logic, 
 ## Current release workflow caveat
 
 `.github/workflows/publish-release.yml` uses `publishingType=USER_MANAGED`: its successful upload step **does not** make the version available on Maven Central. Publishing in Central Portal and external resolution are separate mandatory gates.
+
+## Minimal consumer-facing Compose example (after the new version is published)
+
+```kotlin
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import io.github.adaptivekt.components.AdaptiveAvatar
+import io.github.adaptivekt.components.AdaptivePasswordField
+import io.github.adaptivekt.feedback.AdaptiveSnackbar
+import io.github.adaptivekt.layout.AdaptiveListDetailScaffold
+
+@Composable
+fun AdaptiveKtConsumerExample() {
+    var password by remember { mutableStateOf("") }
+    var selected by remember { mutableStateOf<String?>(null) }
+    var showNotice by remember { mutableStateOf(false) }
+
+    Column {
+        AdaptivePasswordField(
+            value = password,
+            onValueChange = { password = it },
+            label = "Password",
+        )
+        AdaptiveListDetailScaffold(
+            selectedItem = selected,
+            onBackToList = { selected = null },
+            listPane = {
+                Row {
+                    AdaptiveAvatar(name = "Sample Contact")
+                    // Supply selectable rows in the consuming application.
+                }
+            },
+            detailPane = { selectedName ->
+                AdaptiveAvatar(name = selectedName)
+            },
+        )
+        if (showNotice) {
+            AdaptiveSnackbar(
+                message = "Action completed",
+                actionLabel = "Undo",
+                onAction = { showNotice = false },
+                onDismiss = { showNotice = false },
+            )
+        }
+    }
+}
+```
+
+This is a source example only, **not** an independently compiled external consumer. Do not treat it as a release gate pass.
