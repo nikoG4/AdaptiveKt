@@ -1,7 +1,6 @@
 package io.github.adaptivekt.admin.demo
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -126,7 +125,16 @@ internal fun DashboardScreen() {
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             DemoText(text = label)
-      @Composable
+                            DemoStatusText(text = status)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun EmployeesScreen() {
     // This is a fully interactive local demo; changes reset on refresh.
     val employees = remember {
@@ -373,13 +381,6 @@ internal fun EmployeesScreen() {
         }
     }
 }
-pacing.Medium))
-                DemoCard(title = "Selected employee", value = employee.name, subtitle = employee.role)
-            }
-        }
-    }
-}
-
 @Composable
 internal fun ProductsScreen() {
     val productActions = listOf(
