@@ -89,8 +89,13 @@ jobs:
               html = path.read_text(encoding="utf-8-sig")
               html, count = re.subn(r'<base\s+href="[^"]*"\s*/?>',
                                     f'<base href="{base}">', html, count=1, flags=re.I)
+              if count == 0:
+                  # Fresh Gradle Wasm indexes have no <base>; inject one on publish.
+                  html, count = re.subn(r'(<head[^>]*>)',
+                                        lambda match: match.group(1) + '\n  <base href="' + base + '">',
+                                        html, count=1, flags=re.I)
               if count != 1:
-                  raise SystemExit(f"Missing base href: {path}")
+                  raise SystemExit(f"Missing head/base element: {path}")
               path.write_text(html, encoding="utf-8")
               print(f"Route {path}: {base}")
 
